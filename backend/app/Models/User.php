@@ -23,6 +23,7 @@ class User extends Authenticatable
         'email',
         'password',
         'google_id',
+        'role', 
     ];
 
     /**
@@ -46,5 +47,11 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+
+    public function farmer()
+    {
+        return $this->hasOne(Farmer::class);
     }
 }

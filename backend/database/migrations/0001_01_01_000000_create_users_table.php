@@ -19,7 +19,7 @@ return new class extends Migration
 
             $table->string('password')->nullable();
             $table->string('google_id')->nullable();
-            $table->string('role')->default('comprador');
+            $table->string('role')->default('buyer');
             $table->string('phone')->nullable();
             $table->text('address')->nullable();
 

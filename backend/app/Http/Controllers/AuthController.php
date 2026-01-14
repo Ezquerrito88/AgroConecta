@@ -2,102 +2,76 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\User;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Auth;
+use App\Models\Farmer;
+use Illuminate\Http\Request;
 use Laravel\Socialite\Facades\Socialite;
+use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
 {
-    // --- LOGIN CON GOOGLE ---
-
-    // 1. Cuando le damos al botón de Google
+    // 1. Enviamos a Google
     public function redirectToGoogle(Request $request)
     {
-        // Miramos si en la URL nos envían el rol (ej: ?role=agricultor)
-        // Si no envían nada, por defecto será 'comprador'
-        $rolElegido = $request->query('role', 'comprador');
-
-        // Guardamos esa elección en la MEMORIA (Session)
-        session(['google_role_intent' => $rolElegido]);
+        // El frontend nos envía ?role=agricultor o ?role=comprador
+        $rol = $request->query('role', 'buyer');
+        
+        // Lo guardamos en memoria para recordarlo cuando vuelva de Google
+        session(['google_role_intent' => $rol]);
 
         return Socialite::driver('google')->redirect();
     }
 
-    // 2. Cuando volvemos de Google
+    // 2. Volvemos de Google
     public function handleGoogleCallback()
     {
         try {
             $googleUser = Socialite::driver('google')->user();
 
-            // Recuperamos la elección de la MEMORIA
-            // Si por lo que sea se ha borrado, ponemos 'comprador' por seguridad
-            $role = session('google_role_intent', 'comprador');
+            // --- FASE 1: TRADUCCIÓN (Frontend Español -> Backend Inglés) ---
+            // Recuperamos la intención: ¿Qué botón pulsó?
+           $intent = session('google_role_intent', 'buyer');
 
-            // Buscamos al usuario o lo creamos con ese ROL
+            // Si pulsó 'agricultor', guardamos 'farmer'. Si no, 'buyer'.
+            $dbRole = ($intent === 'agricultor') ? 'farmer' : 'buyer';
+
+            // --- FASE 2: CREAR O ACTUALIZAR USUARIO (Tabla users) ---
             $user = User::updateOrCreate(
                 ['email' => $googleUser->getEmail()],
                 [
                     'name' => $googleUser->getName(),
                     'google_id' => $googleUser->getId(),
-                    'role' => $role, // <--- AQUÍ APLICAMOS EL ROL ELEGIDO
-                    // La contraseña se queda null o lo que tuvieras
+                    'role' => $dbRole, // Guardamos 'farmer' o 'buyer'
+                    // password, phone y address se quedan null
                 ]
             );
 
-            // Creamos el token
+            // --- FASE 3: SI ES AGRICULTOR, CREAR PERFIL (Tabla farmer_profiles) ---
+            if ($dbRole === 'farmer') {
+                // Buscamos si ya tiene ficha. Si no, la creamos vacía.
+                Farmer::firstOrCreate(
+                    ['user_id' => $user->id], 
+                    [
+                        // Datos iniciales vacíos o por defecto
+                        'is_verified' => 0,
+                        'bio' => 'Bienvenido a mi perfil de agricultor.',
+                        // farm_name se queda null hasta que lo edite
+                    ]
+                );
+            }
+
+            // --- FASE 4: TOKEN ---
             $token = $user->createToken('Google Token')->plainTextToken;
 
             return response()->json([
                 'message' => 'Login exitoso',
                 'user' => $user,
+                'role' => $dbRole, // Para que veas que se guardó en inglés
                 'token' => $token
             ]);
 
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Error en el login: ' . $e->getMessage()], 500);
+            return response()->json(['error' => 'Error en login: ' . $e->getMessage()], 500);
         }
-    }
-
-    // --- LOGIN NORMAL (Email y Contraseña) ---
-
-    public function register(Request $request) {
-        $request->validate([
-            'name' => 'required',
-            'email' => 'required|email|unique:users',
-            'password' => 'required|min:6',
-        ]);
-
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'role' => 'comprador'
-        ]);
-
-        return response()->json([
-            'message' => 'Usuario registrado',
-            'token' => $user->createToken('API Token')->plainTextToken
-        ], 201);
-    }
-
-    public function login(Request $request) {
-        $request->validate([
-            'email' => 'required|email',
-            'password' => 'required',
-        ]);
-
-        if (!Auth::attempt($request->only('email', 'password'))) {
-            return response()->json(['message' => 'Credenciales incorrectas'], 401);
-        }
-
-        $user = User::where('email', $request->email)->first();
-        
-        return response()->json([
-            'message' => 'Login correcto',
-            'user' => $user,
-            'token' => $user->createToken('API Token')->plainTextToken
-        ]);
     }
 }

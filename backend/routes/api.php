@@ -3,9 +3,6 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController; // <--- Importante invitar al controlador
 
-// --- RUTAS DE GOOGLE ---
-Route::get('/auth/google', [AuthController::class, 'redirectToGoogle']);
-Route::get('/auth/google/callback', [AuthController::class, 'handleGoogleCallback']);
 
 // --- RUTAS DE USUARIO NORMAL ---
 Route::post('/register', [AuthController::class, 'register']);
