@@ -54,4 +54,9 @@ class User extends Authenticatable
     {
         return $this->hasOne(Farmer::class);
     }
+
+    public function products()
+    {
+        return $this->hasMany(Product::class, 'farmer_id');
+    }
 }
