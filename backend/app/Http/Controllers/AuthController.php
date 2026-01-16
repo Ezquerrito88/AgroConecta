@@ -7,70 +7,112 @@ use App\Models\Farmer;
 use Illuminate\Http\Request;
 use Laravel\Socialite\Facades\Socialite;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rule;
 
 class AuthController extends Controller
 {
-    // 1. Enviamos a Google
+    //Registro manual
+    public function register(Request $request)
+    {
+        //A. Validar datos
+        $fields = $request->validate([
+            'name' => 'required|string',
+            'email' => 'required|string|unique:users,email',
+            'password' => 'required|string|confirmed',
+            'role' => ['required', Rule::in(['buyer', 'farmer', 'admin'])],
+        ]);
+
+        //B. Crear Usuario
+        $user = User::create([
+            'name' => $fields['name'],
+            'email' => $fields['email'],
+            'password' => Hash::make($fields['password']),
+            'role' => $fields['role'],
+        ]);
+
+        //C. Si es Agricultor, crear perfil vacío
+        if ($fields['role'] === 'farmer') {
+            Farmer::create([
+                'user_id' => $user->id,
+                'is_verified' => 0,
+                'bio' => 'Nuevo agricultor registrado manualmente.',
+            ]);
+        }
+
+        //D. Crear Token
+        $token = $user->createToken('myapptoken')->plainTextToken;
+
+        //E. Respuesta
+        return response()->json([
+            'user' => $user,
+            'token' => $token,
+            'message' => 'Usuario registrado correctamente'
+        ], 201);
+    }
+
+    //Login con Google
     public function redirectToGoogle(Request $request)
     {
-        // El frontend nos envía ?role=agricultor o ?role=comprador
         $rol = $request->query('role', 'buyer');
-        
-        // Lo guardamos en memoria para recordarlo cuando vuelva de Google
         session(['google_role_intent' => $rol]);
-
         return Socialite::driver('google')->redirect();
     }
 
-    // 2. Volvemos de Google
     public function handleGoogleCallback()
     {
         try {
             $googleUser = Socialite::driver('google')->user();
 
-            // --- FASE 1: TRADUCCIÓN (Frontend Español -> Backend Inglés) ---
-            // Recuperamos la intención: ¿Qué botón pulsó?
-           $intent = session('google_role_intent', 'buyer');
+            //1. Buscamos si el usuario YA existe
+            $existingUser = User::where('email', $googleUser->getEmail())->first();
 
-            // Si pulsó 'agricultor', guardamos 'farmer'. Si no, 'buyer'.
-            $dbRole = ($intent === 'agricultor') ? 'farmer' : 'buyer';
-
-            // --- FASE 2: CREAR O ACTUALIZAR USUARIO (Tabla users) ---
-            $user = User::updateOrCreate(
-                ['email' => $googleUser->getEmail()],
-                [
+            //Si existe no actualizamos el rol
+            if ($existingUser) {
+                $user = $existingUser;
+                $user->update([
                     'name' => $googleUser->getName(),
                     'google_id' => $googleUser->getId(),
-                    'role' => $dbRole, // Guardamos 'farmer' o 'buyer'
-                    // password, phone y address se quedan null
-                ]
-            );
+                ]);
 
-            // --- FASE 3: SI ES AGRICULTOR, CREAR PERFIL (Tabla farmer_profiles) ---
-            if ($dbRole === 'farmer') {
-                // Buscamos si ya tiene ficha. Si no, la creamos vacía.
-                Farmer::firstOrCreate(
-                    ['user_id' => $user->id], 
-                    [
-                        // Datos iniciales vacíos o por defecto
+            } else {
+                //Si no existe creamos el usuario
+                $intent = session('google_role_intent', 'buyer');
+                
+                //Convertimos el boton a rol
+                $newRole = ($intent === 'agricultor' || $intent === 'farmer') ? 'farmer' : 'buyer';
+
+                $user = User::create([
+                    'name' => $googleUser->getName(),
+                    'email' => $googleUser->getEmail(),
+                    'google_id' => $googleUser->getId(),
+                    'role' => $newRole,
+                    'password' => null, //Es null porque entra con Google
+                ]);
+
+                //Si es nuevo y es agricultor le creamos la ficha
+                if ($newRole === 'farmer') {
+                    Farmer::create([
+                        'user_id' => $user->id,
                         'is_verified' => 0,
-                        'bio' => 'Bienvenido a mi perfil de agricultor.',
-                        // farm_name se queda null hasta que lo edite
-                    ]
-                );
+                        'bio' => 'Nuevo agricultor (Google).',
+                    ]);
+                }
             }
 
-            // --- FASE 4: TOKEN ---
+            //Borramos tokens viejos por seguridad
+            $user->tokens()->delete();
+            
             $token = $user->createToken('Google Token')->plainTextToken;
 
             return response()->json([
                 'message' => 'Login exitoso',
                 'user' => $user,
-                'role' => $dbRole, // Para que veas que se guardó en inglés
+                'role' => $user->role,
                 'token' => $token
             ]);
 
-        } catch (\Exception $e) {
+        } catch (\Exception $e) { //Si hay algún error, devolvemos el mensaje
             return response()->json(['error' => 'Error en login: ' . $e->getMessage()], 500);
         }
     }
