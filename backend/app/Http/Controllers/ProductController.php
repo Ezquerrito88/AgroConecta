@@ -33,10 +33,8 @@ class ProductController extends Controller
             'price'              => 'required|numeric|min:0',
             'unit'               => 'required|in:kg,g,l,ml,ud,docena,manojo,caja,bandeja,saco,pack',
             'stock_quantity'     => 'required|integer|min:0',
-            'stock_quantity'     => 'required|numeric',
             'season_end'         => 'nullable|date',
             'images'             => 'nullable|array',
-            'moderation_status'  => 'required|string|max:255',
             'images.*'           => 'image|mimes:jpeg,png,jpg,webp|max:2048'
         ]);
 
@@ -49,7 +47,7 @@ class ProductController extends Controller
             'unit'               => $validated['unit'],
             'stock_quantity'     => $validated['stock_quantity'],
             'season_end'         => $validated['season_end'] ?? null,
-            'moderation_status' => 'accepted'
+            'moderation_status' => 'approved'
         ]);
 
         if ($request->hasFile('images')) {
@@ -87,19 +85,19 @@ class ProductController extends Controller
             return response()->json(['message' => 'Producto no encontrado'], 404);
         }
 
-        if ($request->farmer_id != $product->farmer_id) {
+        if ($request->user()->id !== $product->farmer_id) {
             return response()->json(['message' => 'No tienes permisos para editar este producto'], 403);
         }
 
         $validated = $request->validate([
-            'category_id'        => 'required|exists:categories,id',
-            'name'               => 'required|string|max:255',
-            'description'        => 'required|string|max:255',
-            'price'              => 'required|numeric|min:0',
-            'unit'               => 'required|in:kg,g,l,ml,ud,docena,manojo,caja,bandeja,saco,pack',
-            'stock_quantity'     => 'required|integer|min:0',
-            'season_end'         => 'nullable|date',
-            'images'             => 'nullable|array',
+            'category_id'        => 'sometimes|exists:categories,id',
+            'name'               => 'sometimes|string|max:255',
+            'description'        => 'sometimes|string|max:255',
+            'price'              => 'sometimes|numeric|min:0',
+            'unit'               => 'sometimes|in:kg,g,l,ml,ud,docena,manojo,caja,bandeja,saco,pack',
+            'stock_quantity'     => 'sometimes|integer|min:0',
+            'season_end'         => 'sometimes|date',
+            'images'             => 'sometimes|array',
             'images.*'           => 'image|mimes:jpeg,png,jpg,webp|max:2048'
         ]);
 
@@ -134,13 +132,13 @@ class ProductController extends Controller
             return response()->json(['message' => 'Producto no encontrado'], 404);
         }
 
-        if ($request->farmer_id != $product->farmer_id) {
+       if ($request->user()->id != $product->farmer_id) {
             return response()->json(['message' => 'No tienes permisos para eliminar este producto'], 403);
         }
 
         foreach ($product->images as $image) {
             if (Storage::disk('public')->exists($image->image_path)) {
-                Storage::disk('public')->delete($image->image_path);
+                Storage::disk('public')->delete($image->image_path); 
             }
         }
 

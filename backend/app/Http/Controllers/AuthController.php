@@ -51,6 +51,41 @@ class AuthController extends Controller
         ], 201);
     }
 
+    //Login manual
+    public function login(Request $request)
+    {
+        //Validamos que envie email y password
+        $request->validate([
+            'email' => 'required|email',
+            'password' => 'required',
+        ]);
+
+        //Intentamos loguear
+        if (!Auth::attempt($request->only('email', 'password'))) {
+            return response()->json(['message' => 'Credenciales incorrectas'], 401);
+        }
+
+        // Si pasa, buscamos al usuario
+        $user = User::where('email', $request->email)->firstOrFail();
+
+        // Creamos token nuevo
+        $token = $user->createToken('auth_token')->plainTextToken;
+
+        return response()->json([
+            'message' => 'Login correcto',
+            'access_token' => $token,
+            'token_type' => 'Bearer',
+            'user' => $user
+        ]);
+    }
+
+    public function logout(Request $request)
+    {
+        $request->user()->currentAccessToken()->delete();
+
+        return response()->json(['message' => 'Sesión cerrada correctamente']);
+    }
+
     //Login con Google
     public function redirectToGoogle(Request $request)
     {
