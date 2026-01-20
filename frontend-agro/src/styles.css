@@ -1,1 +1,15 @@
-/* You can add global styles to this file, and also import other style files */
+@import url('https://fonts.googleapis.com/css2?family=Geist:wght@100..900&display=swap');
+
+
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  overflow-x: hidden; /* Esto elimina la barra lateral por completo */
+  box-sizing: border-box;
+   font-family: "Geist", sans-serif;
+}
+
+*, *:before, *:after {
+  box-sizing: inherit; /* Evita que los bordes sumen ancho extra */
+}

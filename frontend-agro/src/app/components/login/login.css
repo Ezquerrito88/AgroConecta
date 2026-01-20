@@ -1,0 +1,393 @@
+/* Estilo del Header Superior */
+.login-nav {
+  width: 100%;
+  background: white;
+  padding: 15px 40px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.nav-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.logo-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logo-img {
+  height: 40px; /* Ajusta según tu logo */
+}
+
+.brand-name {
+  display: block;
+  font-weight: bold;
+  font-size: 1.1rem;
+  color: #333;
+}
+
+.brand-slogan {
+  display: block;
+  font-size: 0.75rem;
+  color: #f97316; /* Color naranja de tu diseño */
+  margin-top: -4px;
+}
+
+.btn-back {
+  text-decoration: none;
+  color: #666;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  transition: 0.3s;
+}
+
+.btn-back:hover {
+  color: #333;
+}
+
+/* Contenedor principal para centrar todo */
+.login-wrapper {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #f8f9fa; /* Fondo gris claro de tu imagen */
+  padding: 20px;
+  padding-top: 50px;
+}
+
+/* Tarjeta blanca */
+.login-card {
+  background: white;
+  width: 100%;
+  max-width: 480px;
+  padding: 40px;
+  border-radius: 15px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+  text-align: center;
+}
+
+.main-avatar-square {
+  width: 70px;
+  height: 70px;
+  margin: 0 auto 15px auto; /* Centrado horizontal */
+  background: linear-gradient(135deg, #a5b4fc 0%, #818cf8 100%);
+  border-radius: 20px; /* Esquinas estilo iOS */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 8px 15px rgba(129, 140, 248, 0.3);
+  position: relative;
+}
+
+/* Fabricamos la silueta blanca del usuario dentro del cuadrado */
+.main-avatar-square::before {
+  content: '';
+  width: 18px;
+  height: 18px;
+  border: 2.5px solid white;
+  border-radius: 50%;
+  position: absolute;
+  top: 18px;
+}
+
+.main-avatar-square::after {
+  content: '';
+  width: 32px;
+  height: 15px;
+  border: 2.5px solid white;
+  border-bottom: none;
+  border-radius: 16px 16px 0 0;
+  position: absolute;
+  bottom: 18px;
+}
+
+.login-header {
+  text-align: center;
+  margin-bottom: 20px; /* Espacio con lo que viene debajo (los botones de perfil) */
+}
+
+/* Estilo del Header y Logo */
+.login-header h2 {
+  margin-top: 15px;
+  margin-bottom: 0px;
+  font-size: 1.5rem;
+  color: #333;
+}
+
+.login-header p {
+    margin-top: 4px;
+  color: #888;
+  font-size: 0.9rem;
+}
+
+/* Tabs de Comprador/Agricultor */
+.profile-tabs {
+  display: flex;
+  background: #F2F3F5;
+  border-radius: 14px;
+  margin: 20px 0;
+  padding: 5px;
+  position: relative;
+}
+
+/* El nuevo bloque blanco que se desliza */
+.slider {
+  position: absolute;
+  top: 5px; /* Debe coincidir con el padding de .profile-tabs */
+  left: 5px;
+  width: calc(50% - 5px); /* Ocupa la mitad menos el espacio del padding */
+  height: calc(100% - 10px);
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  transition: transform 0.4s cubic-bezier(0.65, 0, 0.35, 1);
+  z-index: 1; /* Se queda detrás del texto */
+}
+
+/* Posición cuando seleccionas agricultor */
+.slider.slide-right {
+  transform: translateX(100%);
+}
+
+.tab {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-weight: 500;
+  color: #000000;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+  z-index: 2; /* OBLIGATORIO para quedar por encima del slider y poder clicar */
+}
+
+/* Quitamos el background de aquí porque ahora lo hace el slider */
+.tab.active {
+  color: #000000;
+  /* background y box-shadow eliminados de aquí */
+}
+
+.emoji-icon {
+    font-size: 1.4rem; /* Ajusta el tamaño del emoji */
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.tab-text {
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+/* Inputs */
+.input-group {
+  text-align: left;
+  margin-bottom: 15px;
+}
+
+.input-group label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: 5px;
+}
+
+.input-group input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  box-sizing: border-box;
+}
+
+.password-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.password-toggle-icon {
+    position: absolute;
+    right: 15px; /* Lo ajusta a la derecha dentro del input */
+    cursor: pointer;
+    color: #666;
+    font-size: 1.1rem;
+    z-index: 10;
+    padding: 5px; /* Aumenta el área de clic */
+}
+
+.password-toggle-icon:hover {
+    color: #497EF2; /* Cambia al azul de tu botón al pasar el ratón */
+}
+
+/* Evita que el texto de la contraseña se escriba debajo del icono */
+.password-wrapper input {
+    padding-right: 40px !important;
+}
+
+/* Botón con degradado */
+.btn-login {
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: 10px;
+  background: linear-gradient(to right, #497EF2, #A65AF2); /* El morado de tu imagen */
+  color: white;
+  font-weight: bold;
+  font-size: 1rem;
+  cursor: pointer;
+  margin-top: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 48px; /* Altura fija para que no salte al cargar */
+  transition: all 0.3s ease
+}
+
+.btn-login:active {
+  transform: scale(0.98);
+}
+
+/* Estado cuando está cargando o deshabilitado */
+.btn-login:disabled {
+  opacity: 0.8;
+  cursor: not-allowed;
+}
+
+/* --- El Spinner (Círculo de carga) --- */
+.spinner {
+  width: 20px;
+  height: 20px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: white;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Opciones extra */
+.form-options {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  margin-bottom: 20px;
+}
+
+.forgot-password {
+  color: #f97316; /* Naranja */
+  text-decoration: none;
+}
+
+/* Estilo para el divisor "o continúa con" */
+.divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin: 20px 0;
+  color: #888;
+  font-size: 0.85rem;
+}
+
+.divider::before, .divider::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid #eee;
+}
+
+.divider span {
+  padding: 0 10px;
+}
+
+/* Contenedor de botones sociales */
+.social-login {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.btn-social {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 12px;
+  background: white;
+  cursor: pointer;
+  font-weight: 500;
+  transition: 0.3s;
+}
+
+.btn-social img {
+  width: 20px;
+}
+
+.btn-social.google:hover {
+  border-color: #f4b400; /* Naranja/Amarillo oficial de Google */
+  background-color: #fffaf0; /* Un toque crema muy suave */
+  transform: translateY(-2px);
+}
+
+/* Borde azul específico para el botón de Facebook en tu imagen */
+.btn-social.apple:hover {
+  border-color: #000000; /* Negro puro */
+  background-color: #f3f4f6; /* Gris claro */
+  color: #000000;
+  transform: translateY(-2px);
+}
+
+/* Botones de registro inferiores */
+.registration-links {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.btn-link {
+  width: 100%;
+  padding: 12px;
+  background: white;
+  border: 1px solid;
+  border-radius: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+/* Colores específicos de los enlaces */
+.btn-blue {
+  border-color: #bfdbfe;
+  color: #2563eb;
+}
+
+.btn-orange {
+  border-color: #fed7aa;
+  color: #ea580c;
+}
+
+/* Efecto hover */
+.btn-link:hover {
+  background-color: #f9fafb;
+}
