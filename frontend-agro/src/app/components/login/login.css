@@ -1,4 +1,19 @@
 /* Estilo del Header Superior */
+.login-wrapper {
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-image: linear-gradient(rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.6)), 
+                      url('/img/login/fondo.png');
+  
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+}
+
 .login-nav {
   width: 100%;
   background: white;
@@ -30,20 +45,20 @@
 .brand-name {
   display: block;
   font-weight: bold;
-  font-size: 1.1rem;
-  color: #333;
+  font-size: 1.4rem;
+  color: #313131;
 }
 
 .brand-slogan {
   display: block;
-  font-size: 0.75rem;
-  color: #f97316; /* Color naranja de tu diseño */
+  font-size: 0.9rem;
+  color: #ED5924; /* Color naranja de tu diseño */
   margin-top: -4px;
 }
 
 .btn-back {
   text-decoration: none;
-  color: #666;
+  color: #878E96;
   font-size: 0.9rem;
   display: flex;
   align-items: center;
@@ -63,7 +78,7 @@
   align-items: center;
   background-color: #f8f9fa; /* Fondo gris claro de tu imagen */
   padding: 20px;
-  padding-top: 50px;
+  padding-top: 80px;
 }
 
 /* Tarjeta blanca */
@@ -215,6 +230,13 @@
   border: 1px solid #ddd;
   border-radius: 8px;
   box-sizing: border-box;
+  transition: all 0.3s ease;
+  outline: none;
+}
+
+.input-group input:focus {
+    border-color: #497EF2;
+    box-shadow: 0 0 0 3px rgba(73, 126, 242, 0.2);
 }
 
 .password-wrapper {
@@ -296,6 +318,58 @@
 .forgot-password {
   color: #f97316; /* Naranja */
   text-decoration: none;
+}
+
+/* Contenedor del checkbox */
+.remember-me {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    gap: 10px;
+    font-size: 0.9rem;
+    color: #4b5563;
+}
+
+/* Ocultar el original */
+.remember-me input {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 20px;
+    height: 20px;
+    border: 2px solid #d1d5db;
+    border-radius: 6px;
+    background-color: #fff;
+    cursor: pointer;
+    display: grid;
+    place-content: center; /* Centra el tick perfectamente */
+    transition: all 0.2s ease;
+}
+
+/* Cuando está marcado: Degradado en DIAGONAL */
+.remember-me input:checked {
+    background: linear-gradient(135deg, #497EF2 0%, #A65AF2 100%);
+    border-color: transparent;
+}
+
+/* El Tick (la marca blanca) */
+.remember-me input::before {
+    content: "";
+    width: 10px;
+    height: 10px;
+    transform: scale(0);
+    transition: 120ms transform ease-in-out;
+    background-color: white;
+    /* Esto dibuja la forma del check */
+    clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
+}
+
+.remember-me input:checked::before {
+    transform: scale(1);
+}
+
+/* Efecto hover para que se vea interactivo */
+.remember-me:hover input {
+    border-color: #497EF2;
 }
 
 /* Estilo para el divisor "o continúa con" */
