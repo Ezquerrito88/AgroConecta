@@ -1,19 +1,20 @@
-/* Estilo del Header Superior */
+/* Fondo */
 .login-wrapper {
-    margin: 0;
-    padding: 0;
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background-image: linear-gradient(rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.6)), 
-                      url('/img/login/fondo.png');
-  
-    background-size: cover;
-    background-position: center;
-    background-attachment: fixed;
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-image: linear-gradient(rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.6)), 
+                    url('/img/login/fondo.png');
+
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
 }
 
+/* Header */
 .login-nav {
   width: 100%;
   background: white;
@@ -39,20 +40,20 @@
 }
 
 .logo-img {
-  height: 40px; /* Ajusta según tu logo */
+  height: 50px;
 }
 
 .brand-name {
   display: block;
   font-weight: bold;
-  font-size: 1.4rem;
+  font-size: 1.5rem;
   color: #313131;
 }
 
 .brand-slogan {
   display: block;
-  font-size: 0.9rem;
-  color: #ED5924; /* Color naranja de tu diseño */
+  font-size: 1rem;
+  color: #ED5924;
   margin-top: -4px;
 }
 
@@ -70,18 +71,17 @@
   color: #333;
 }
 
-/* Contenedor principal para centrar todo */
+/* Contenedor principal */
 .login-wrapper {
   min-height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: #f8f9fa; /* Fondo gris claro de tu imagen */
+  background-color: #f8f9fa;
   padding: 20px;
   padding-top: 80px;
 }
 
-/* Tarjeta blanca */
 .login-card {
   background: white;
   width: 100%;
@@ -95,9 +95,9 @@
 .main-avatar-square {
   width: 70px;
   height: 70px;
-  margin: 0 auto 15px auto; /* Centrado horizontal */
+  margin: 0 auto 15px auto;
   background: linear-gradient(135deg, #a5b4fc 0%, #818cf8 100%);
-  border-radius: 20px; /* Esquinas estilo iOS */
+  border-radius: 20px;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -105,7 +105,6 @@
   position: relative;
 }
 
-/* Fabricamos la silueta blanca del usuario dentro del cuadrado */
 .main-avatar-square::before {
   content: '';
   width: 18px;
@@ -129,10 +128,9 @@
 
 .login-header {
   text-align: center;
-  margin-bottom: 20px; /* Espacio con lo que viene debajo (los botones de perfil) */
+  margin-bottom: 20px;
 }
 
-/* Estilo del Header y Logo */
 .login-header h2 {
   margin-top: 15px;
   margin-bottom: 0px;
@@ -146,7 +144,6 @@
   font-size: 0.9rem;
 }
 
-/* Tabs de Comprador/Agricultor */
 .profile-tabs {
   display: flex;
   background: #F2F3F5;
@@ -156,21 +153,19 @@
   position: relative;
 }
 
-/* El nuevo bloque blanco que se desliza */
 .slider {
   position: absolute;
-  top: 5px; /* Debe coincidir con el padding de .profile-tabs */
+  top: 5px; 
   left: 5px;
-  width: calc(50% - 5px); /* Ocupa la mitad menos el espacio del padding */
+  width: calc(50% - 5px);
   height: calc(100% - 10px);
   background: white;
   border-radius: 10px;
   box-shadow: 0 2px 5px rgba(0,0,0,0.1);
   transition: transform 0.4s cubic-bezier(0.65, 0, 0.35, 1);
-  z-index: 1; /* Se queda detrás del texto */
+  z-index: 1;
 }
 
-/* Posición cuando seleccionas agricultor */
 .slider.slide-right {
   transform: translateX(100%);
 }
@@ -189,17 +184,15 @@
   justify-content: center;
   gap: 8px;
   transition: all 0.3s ease;
-  z-index: 2; /* OBLIGATORIO para quedar por encima del slider y poder clicar */
+  z-index: 2;
 }
 
-/* Quitamos el background de aquí porque ahora lo hace el slider */
 .tab.active {
   color: #000000;
-  /* background y box-shadow eliminados de aquí */
 }
 
 .emoji-icon {
-    font-size: 1.4rem; /* Ajusta el tamaño del emoji */
+    font-size: 1.4rem;
     line-height: 1;
     display: flex;
     align-items: center;
@@ -235,42 +228,40 @@
 }
 
 .input-group input:focus {
-    border-color: #497EF2;
-    box-shadow: 0 0 0 3px rgba(73, 126, 242, 0.2);
+  border-color: #497EF2;
+  box-shadow: 0 0 0 3px rgba(73, 126, 242, 0.2);
 }
 
 .password-wrapper {
-    position: relative;
-    display: flex;
-    align-items: center;
+  position: relative;
+  display: flex;
+  align-items: center;
 }
 
 .password-toggle-icon {
-    position: absolute;
-    right: 15px; /* Lo ajusta a la derecha dentro del input */
-    cursor: pointer;
-    color: #666;
-    font-size: 1.1rem;
-    z-index: 10;
-    padding: 5px; /* Aumenta el área de clic */
+  position: absolute;
+  right: 15px;
+  cursor: pointer;
+  color: #666;
+  font-size: 1.1rem;
+  z-index: 10;
+  padding: 5px;
 }
 
 .password-toggle-icon:hover {
-    color: #497EF2; /* Cambia al azul de tu botón al pasar el ratón */
+  color: #497EF2;
 }
 
-/* Evita que el texto de la contraseña se escriba debajo del icono */
 .password-wrapper input {
-    padding-right: 40px !important;
+  padding-right: 40px !important;
 }
 
-/* Botón con degradado */
 .btn-login {
   width: 100%;
   padding: 14px;
   border: none;
   border-radius: 10px;
-  background: linear-gradient(to right, #497EF2, #A65AF2); /* El morado de tu imagen */
+  background: linear-gradient(to right, #497EF2, #A65AF2);
   color: white;
   font-weight: bold;
   font-size: 1rem;
@@ -279,7 +270,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 48px; /* Altura fija para que no salte al cargar */
+  min-height: 48px;
   transition: all 0.3s ease
 }
 
@@ -287,13 +278,12 @@
   transform: scale(0.98);
 }
 
-/* Estado cuando está cargando o deshabilitado */
 .btn-login:disabled {
   opacity: 0.8;
   cursor: not-allowed;
 }
 
-/* --- El Spinner (Círculo de carga) --- */
+/*Circulo de carga*/
 .spinner {
   width: 20px;
   height: 20px;
@@ -307,7 +297,6 @@
   to { transform: rotate(360deg); }
 }
 
-/* Opciones extra */
 .form-options {
   display: flex;
   justify-content: space-between;
@@ -316,63 +305,56 @@
 }
 
 .forgot-password {
-  color: #f97316; /* Naranja */
+  color: #f97316;
   text-decoration: none;
 }
 
-/* Contenedor del checkbox */
 .remember-me {
-    display: flex;
-    align-items: center;
-    cursor: pointer;
-    gap: 10px;
-    font-size: 0.9rem;
-    color: #4b5563;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  gap: 10px;
+  font-size: 0.9rem;
+  color: #4b5563;
 }
 
-/* Ocultar el original */
 .remember-me input {
-    appearance: none;
-    -webkit-appearance: none;
-    width: 20px;
-    height: 20px;
-    border: 2px solid #d1d5db;
-    border-radius: 6px;
-    background-color: #fff;
-    cursor: pointer;
-    display: grid;
-    place-content: center; /* Centra el tick perfectamente */
-    transition: all 0.2s ease;
+  appearance: none;
+  -webkit-appearance: none;
+  width: 20px;
+  height: 20px;
+  border: 2px solid #d1d5db;
+  border-radius: 6px;
+  background-color: #fff;
+  cursor: pointer;
+  display: grid;
+  place-content: center;
+  transition: all 0.2s ease;
 }
 
-/* Cuando está marcado: Degradado en DIAGONAL */
 .remember-me input:checked {
-    background: linear-gradient(135deg, #497EF2 0%, #A65AF2 100%);
-    border-color: transparent;
+  background: linear-gradient(135deg, #497EF2 0%, #A65AF2 100%);
+  border-color: transparent;
 }
 
-/* El Tick (la marca blanca) */
 .remember-me input::before {
-    content: "";
-    width: 10px;
-    height: 10px;
-    transform: scale(0);
-    transition: 120ms transform ease-in-out;
-    background-color: white;
-    /* Esto dibuja la forma del check */
-    clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
+  content: "";
+  width: 10px;
+  height: 10px;
+  transform: scale(0);
+  transition: 120ms transform ease-in-out;
+  background-color: white;
+  clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
 }
 
 .remember-me input:checked::before {
-    transform: scale(1);
+  transform: scale(1);
 }
 
-/* Efecto hover para que se vea interactivo */
 .remember-me:hover input {
-    border-color: #497EF2;
+  border-color: #497EF2;
 }
 
-/* Estilo para el divisor "o continúa con" */
 .divider {
   display: flex;
   align-items: center;
@@ -392,7 +374,6 @@
   padding: 0 10px;
 }
 
-/* Contenedor de botones sociales */
 .social-login {
   display: flex;
   gap: 15px;
@@ -419,20 +400,18 @@
 }
 
 .btn-social.google:hover {
-  border-color: #f4b400; /* Naranja/Amarillo oficial de Google */
-  background-color: #fffaf0; /* Un toque crema muy suave */
+  border-color: #f4b400;
+  background-color: #fffaf0;
   transform: translateY(-2px);
 }
 
-/* Borde azul específico para el botón de Facebook en tu imagen */
 .btn-social.apple:hover {
-  border-color: #000000; /* Negro puro */
-  background-color: #f3f4f6; /* Gris claro */
+  border-color: #000000;
+  background-color: #f3f4f6;
   color: #000000;
   transform: translateY(-2px);
 }
 
-/* Botones de registro inferiores */
 .registration-links {
   display: flex;
   flex-direction: column;
@@ -450,7 +429,6 @@
   transition: 0.3s;
 }
 
-/* Colores específicos de los enlaces */
 .btn-blue {
   border-color: #bfdbfe;
   color: #2563eb;
@@ -461,7 +439,6 @@
   color: #ea580c;
 }
 
-/* Efecto hover */
 .btn-link:hover {
   background-color: #f9fafb;
 }

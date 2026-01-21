@@ -1,7 +1,12 @@
 import { Routes } from '@angular/router';
-import { Login } from './components/login/login'; // Asegúrate de que la ruta es correcta
+import { Login } from './components/login/login';
+import { LoginSuccess } from './components/login-success/login-success';
+import { Dashboard } from './components/dashboard/dashboard';
+
 
 export const routes: Routes = [
   { path: 'login', component: Login },
+  { path: 'login-success', component: LoginSuccess },
+  { path: 'dashboard', component: Dashboard },
   { path: '', redirectTo: '/login', pathMatch: 'full' }
 ];
