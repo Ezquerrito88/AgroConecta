@@ -140,12 +140,7 @@ class AuthController extends Controller
             
             $token = $user->createToken('Google Token')->plainTextToken;
 
-            return response()->json([
-                'message' => 'Login exitoso',
-                'user' => $user,
-                'role' => $user->role,
-                'token' => $token
-            ]);
+            return redirect("http://localhost:4200/login?token={$token}&role={$user->role}");
 
         } catch (\Exception $e) { //Si hay algún error, devolvemos el mensaje
             return response()->json(['error' => 'Error en login: ' . $e->getMessage()], 500);
