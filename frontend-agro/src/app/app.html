@@ -1,1 +1,65 @@
-<router-outlet></router-outlet>
+<header class="agro-header" *ngIf="mostrarLayout">
+  <div class="header-container">
+    
+    <div class="logo-box" routerLink="/">
+      <img src="img/logo/logo.png" alt="AgroConecta" class="logo-img">
+      <div class="logo-text">
+        <span class="brand-title">AgroConecta</span>
+        <span class="brand-subtitle">Sabores del Campo</span>
+      </div>
+    </div>
+
+    <div class="search-section">
+      <div class="search-pill">
+        <i class="fas fa-search"></i>
+        <input type="text" placeholder="¿Qué cosecha buscas hoy?">
+      </div>
+    </div>
+
+    <div class="header-actions">
+        <button class="action-btn fav-btn">
+            <i class="far fa-heart"></i>
+        </button>
+
+        <button class="action-btn bag-btn">
+            <span class="material-symbols-outlined">shopping_bag</span>
+        </button>
+
+        <button class="action-btn user-btn" routerLink="/login">
+            <i class="far fa-user"></i>
+        </button>
+    </div>
+
+  </div>
+</header>
+
+<main [class.main-content]="mostrarLayout">
+  <router-outlet></router-outlet>
+</main>
+
+<footer class="agro-footer" *ngIf="mostrarLayout">
+  <div class="footer-container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <h3>AgroConecta</h3>
+        <p>Conectamos el campo con tu mesa, llevando productos frescos directamente a tu hogar.</p>
+      </div>
+      <div class="footer-links">
+        <h4>Enlaces Rápidos</h4>
+        <ul>
+          <li><a routerLink="/">Explorar</a></li>
+          <li><a routerLink="/login">Vender</a></li>
+          <li><a>Ayuda</a></li>
+        </ul>
+      </div>
+      <div class="footer-contact">
+        <h4>Contacto</h4>
+        <p><i class="far fa-envelope"></i> hola@agroconecta.com</p>
+        <p><i class="fas fa-map-marker-alt"></i> Logroño, España</p>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2026 AgroConecta. Todos los derechos reservados.</p>
+    </div>
+  </div>
+</footer>

@@ -1,12 +1,10 @@
 import { Routes } from '@angular/router';
 import { Login } from './components/login/login';
-import { LoginSuccess } from './components/login-success/login-success';
 import { Dashboard } from './components/dashboard/dashboard';
 
 
 export const routes: Routes = [
+  { path: '', component: Dashboard }, // Esta es tu landing page
   { path: 'login', component: Login },
-  { path: 'login-success', component: LoginSuccess },
-  { path: 'dashboard', component: Dashboard },
-  { path: '', redirectTo: '/login', pathMatch: 'full' }
+  { path: '**', redirectTo: '' }
 ];

@@ -1,15 +1,27 @@
-@import url('https://fonts.googleapis.com/css2?family=Geist:wght@100..900&display=swap');
+/* styles.css */
+@import url('https://fonts.googleapis.com/css2?family=Poetsen+One&family=Geist:wght@100..900&display=swap');
 
+:root {
+  /* Tipografías */
+  --fuente-logo: "Poetsen One", sans-serif;
+  --fuente-principal: "Geist", sans-serif;
+
+  /* Colores */
+  --color-negro-login: #313131;
+  --color-naranja-login: #ED5924;
+  --color-verde-agro: #22c55e;
+  --color-bg-light: #f8fafc;
+}
 
 html, body {
   margin: 0;
   padding: 0;
   width: 100%;
-  overflow-x: hidden; /* Esto elimina la barra lateral por completo */
+  overflow-x: hidden;
+  font-family: var(--fuente-principal);
   box-sizing: border-box;
-   font-family: "Geist", sans-serif;
 }
 
 *, *:before, *:after {
-  box-sizing: inherit; /* Evita que los bordes sumen ancho extra */
+  box-sizing: inherit;
 }
