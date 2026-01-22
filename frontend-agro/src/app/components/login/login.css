@@ -440,6 +440,142 @@
   color: #ea580c;
 }
 
-.btn-link:hover {
-  background-color: #f9fafb;
+.btn-blue:hover {
+  border-color: #2563eb;
+  background-color: #eaf3fa;
+}
+
+.btn-orange:hover {
+  border-color: #ea580c;
+  background-color: #fff7ee;
+}
+
+
+/* Media Query para pc */
+@media screen and (max-height: 900px) and (min-width: 1024px) {
+
+  .login-card {
+    padding: 20px 30px;
+    gap: 8px;
+  }
+
+  .main-avatar-square {
+    width: 45px; 
+    height: 45px;
+    margin-bottom: 5px;
+  }
+
+  .login-header h2 { 
+    font-size: 1.2rem; 
+    margin: 0; 
+  }
+  .login-header p { 
+    font-size: 0.8rem; 
+    margin-bottom: 5px; 
+  }
+
+  .profile-tabs { 
+    margin-bottom: 10px; 
+  }
+  
+  .input-group { 
+    margin-bottom: 8px; 
+  }
+
+  .input-group label { 
+    font-size: 0.75rem; 
+    margin-bottom: 2px; 
+  }
+
+  .input-group input { 
+    padding: 8px 12px; 
+    font-size: 0.85rem; 
+  }
+
+  .form-options { 
+    margin: 5px 0 10px 0; 
+  }
+  
+  .btn-login { 
+    padding: 10px; 
+  }
+
+  .divider { 
+    margin: 8px 0; 
+  }
+  
+  .social-login { 
+    margin-bottom: 10px; 
+  }
+
+  .btn-social { 
+    padding: 6px; 
+    font-size: 0.8rem; 
+  }
+
+  .registration-links { 
+    flex-direction: row;
+    gap: 10px; 
+  }
+  
+  .btn-link { 
+    padding: 6px; 
+    font-size: 0.75rem; 
+  }
+
+  .main-avatar-square {
+    width: 70px;
+    height: 70px;
+    margin: 0 auto 15px auto;
+    background: linear-gradient(135deg, #a5b4fc 0%, #818cf8 100%);
+    border-radius: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 8px 15px rgba(129, 140, 248, 0.3);
+    position: relative;
+  }
+
+  .main-avatar-square::before {
+    content: '';
+    width: 18px;
+    height: 18px;
+    border: 2.5px solid white;
+    border-radius: 50%;
+    position: absolute;
+    top: 18px;
+  }
+
+  .main-avatar-square::after {
+    content: '';
+    width: 32px;
+    height: 15px;
+    border: 2.5px solid white;
+    border-bottom: none;
+    border-radius: 16px 16px 0 0;
+    position: absolute;
+    bottom: 18px;
+  }
+
+  .btn-link {
+    width: 100%;
+    padding: 12px;
+    background: white;
+    border: 1px solid;
+    border-radius: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: 0.3s;
+  }
+
+  .btn-blue {
+    border-color: #bfdbfe;
+    color: #2563eb;
+  }
+
+  .btn-orange {
+    border-color: #fed7aa;
+    color: #ea580c;
+  }
+
 }
