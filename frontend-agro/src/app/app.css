@@ -9,6 +9,7 @@
   top: 0;
   z-index: 1000;
   border-bottom: 3px solid #FFD8AB;
+  margin-bottom: 0 !important;
 }
 
 .header-container {
@@ -170,3 +171,30 @@
 .fav-btn:hover { background-color: #fee2e2; }
 .bag-btn:hover { background-color: #dcfce7; }
 .user-btn:hover { background-color: #f1f5f9; }
+
+.btn-login-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 18px;
+  border: none;
+  border-radius: 8px; /* Un radio de 8px suele verse más profesional que 5px o 50px */
+  background: linear-gradient(to right, #11C267, #02BA7A);
+  color: white;
+  font-family: var(--fuente-principal);
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.btn-login-header:hover {
+  transform: translateY(-2px);
+  /* Sombra en tono verde suave */
+  box-shadow: 0 4px 12px rgba(17, 194, 103, 0.3);
+}
+
+.btn-login-header span {
+  font-size: 18px;
+}

@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { Router, NavigationEnd, RouterModule } from '@angular/router';
 import { filter } from 'rxjs/operators';
 
-// app.ts
 @Component({
   selector: 'app-root',
   standalone: true,
@@ -11,7 +10,9 @@ import { filter } from 'rxjs/operators';
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
-export class App implements OnInit { // <-- Se llama App
+
+export class App implements OnInit {
+  isLoggedIn: boolean = false; 
   mostrarLayout: boolean = true;
 
   constructor(private router: Router) {}
@@ -20,8 +21,13 @@ export class App implements OnInit { // <-- Se llama App
     this.router.events.pipe(
       filter(event => event instanceof NavigationEnd)
     ).subscribe((event: any) => {
-      // Si la URL contiene /login, ocultamos el header
+      // 1. Control de visibilidad del Layout
       this.mostrarLayout = !event.urlAfterRedirects.includes('/login');
+
+      // 2. Control de sesión: Si hay token, estamos logueados
+      // Verificamos 'auth_token' que es lo que guardas en tu login.ts
+      const token = localStorage.getItem('auth_token');
+      this.isLoggedIn = !!token; 
     });
   }
 }

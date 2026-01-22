@@ -36,4 +36,11 @@ export class Dashboard implements OnInit {
       window.location.reload(); 
     });
   }
+
+  // Si es un solo producto de prueba:
+  isFavorite: boolean = false;
+
+  toggleFavorite() {
+    this.isFavorite = !this.isFavorite;
+  }
 }

@@ -1,93 +1,403 @@
-.agro-header {
-  background: white;
-  padding: 10px 5%;
-  border-bottom: 3px solid #FFD8AB;
-  position: sticky;
-  top: 0;
-  z-index: 1000;
+.hero-banner {
+  position: relative;
+  width: 100%;
+  background-image: url('/img/header/header.png');
+  background-size: 100% auto;
+  background-repeat: no-repeat;
+  background-position: top center;
+  padding: 0; 
+  min-height: auto;
+  padding: 290px 0 60px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0 !important; 
+  overflow: hidden;
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
 }
 
-.header-container {
+
+.banner-content {
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  width: 100%;
+  max-width: 1200px;
+  margin-top: -200px; 
+}
+
+.badge-fresco {
+  margin-bottom: 20px !important; 
+  padding: 6px 18px;
+  font-size: 1rem;
+  background: #f97316;
+  border-radius: 50px;
+  color: white;
+  font-weight: 700;
+  box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3);
+}
+
+.main-title {
+  font-family: 'Geist', sans-serif;
+  font-size: clamp(3.5rem, 7.5vw, 5.2rem); 
+  font-weight: 900; 
+  color: #1F2936;
+  line-height: 0.95; 
+  margin: 5px 0 !important;
+  letter-spacing: -2px;
+}
+
+.text-green {
+  background: linear-gradient(135deg, #11C267 0%, #02BA7A 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  display: inline-block;
+}
+
+.main-subtitle {
+  font-size: 1.5rem;
+  color: #4B5563;
+  max-width: 800px;
+  margin: 15px 0 25px 0 !important; 
+  line-height: 1.4;
+}
+
+.benefits-row {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+}
+
+.pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: white;
+  padding: 10px 22px; /* Pills más grandes para equilibrar el título */
+  border-radius: 50px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #374151;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(0, 0, 0, 0.02);
+}
+
+.dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+}
+
+.dot-green   { background-color: #11C267; }
+.dot-orange  { background-color: #F97316; }
+.dot-blue    { background-color: #3B82F6; }
+
+
+/* --- Contenedor Principal --- */
+.products-section {
+  background-color: #f1f8f4;
+  padding: 40px 5%;
+  width: 100%;
+}
+
+/* --- Píldoras de Categoría --- */
+.category-pills {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 40px;
+}
+
+.cat-btn {
+  padding: 10px 24px;
+  border-radius: 12px;
+  border: none;
+  background: white;
+  color: #4b5563;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+  transition: all 0.3s ease;
+}
+
+.cat-btn.active {
+  background: #11C267;
+  color: white;
+  box-shadow: 0 4px 12px rgba(17, 194, 103, 0.3);
+}
+
+/* --- Layout: Sidebar + Grid --- */
+.main-layout {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 35px;
   max-width: 1400px;
   margin: 0 auto;
+}
+
+/* --- Sidebar de Filtros (Estilo exacto de la imagen) --- */
+.filter-card {
+  background: white;
+  padding: 25px;
+  border-radius: 24px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.04);
+  position: sticky;
+  top: 20px;
+}
+
+.filter-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+}
+
+.filter-header h3 { font-size: 1.3rem; font-weight: 800; color: #1f2937; }
+
+.filter-group {
+  margin-bottom: 20px;
+  padding: 15px;
+  border-radius: 18px;
+}
+
+/* Colores de fondo de los grupos de filtro */
+.filter-group:nth-child(2) { background-color: #eff6ff; } /* Azul */
+.filter-group:nth-child(3) { background-color: #f0fdf4; } /* Verde */
+.filter-group:nth-child(4) { background-color: #fff7ed; } /* Naranja */
+
+.filter-group label {
+  display: block;
+  font-weight: 700;
+  font-size: 0.9rem;
+  margin-bottom: 10px;
+  color: #374151;
+}
+
+.custom-select {
+  width: 100%;
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+  background: white;
+  font-weight: 600;
+}
+
+/* --- Grid de Productos --- */
+.grid-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 25px;
+}
+
+.grid-header h2 { font-weight: 800; color: #1f2937; }
+.results-count { color: #6b7280; font-size: 0.9rem; }
+
+.products-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 25px;
+}
+
+/* --- Contenedor de la Tarjeta --- */
+.product-card {
+  background: white;
+  border-radius: 28px;
+  overflow: hidden;
+  /* Borde inicial transparente para que no "salte" al hacer hover */
+  border: 2px solid transparent; 
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+}
+
+/* --- EFECTO HOVER: Borde verde y elevación --- */
+.product-card:hover {
+  transform: translateY(-10px);
+  border-color: #11C267; /* El verde de tu logo */
+  box-shadow: 0 20px 40px rgba(17, 194, 103, 0.15);
+}
+
+/* --- Imagen y Favoritos --- */
+.card-image {
+  height: 200px;
+  background: #f3f4f6;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.placeholder-icon {
+  font-size: 3rem;
+  color: #d1d5db;
+}
+
+.wishlist-btn {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: white;
+  border: none;
+  color: #9ca3af;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* --- Contenido de Texto --- */
+.card-content {
+  padding: 20px;
+}
+
+.product-title {
+  color: #11C267;
+  font-size: 1.4rem;
+  font-weight: 800;
+  margin: 0 0 5px 0;
+}
+
+.product-desc {
+  color: #6b7280;
+  font-size: 0.95rem;
+  margin-bottom: 20px;
+}
+
+/* --- Caja del Vendedor (Fondo naranja suave) --- */
+.seller-box {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #FFF7ED; /* Color crema/naranja muy suave */
+  padding: 10px 15px;
+  border-radius: 16px;
+  margin-bottom: 15px;
+}
+
+.seller-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.seller-name {
+  display: block;
+  font-weight: 700;
+  color: #1f2937;
+  font-size: 0.9rem;
+}
+
+.seller-location {
+  font-size: 0.8rem;
+  color: #6b7280;
+}
+
+/* --- Rating y Estrellas --- */
+.rating-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.stars {
+  color: #FBBF24; /* Color oro/amarillo */
+  font-size: 0.85rem;
+}
+
+.rating-val {
+  font-weight: 800;
+  color: #1f2937;
+  font-size: 0.9rem;
+}
+
+/* --- Footer: Precio y Botón Añadir --- */
+.card-footer {
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
-/* LOGO */
-.logo-box { 
-    display: flex; 
-    align-items: center; 
-    gap: 12px; 
+.price-box .price-main {
+  font-size: 1.6rem;
+  font-weight: 900;
+  color: #11C267; /* Precio en verde como en la imagen */
 }
 
-.logo-img { 
-    height: 50px;
+.price-box .price-unit {
+  color: #6b7280;
+  font-size: 0.9rem;
+  margin-left: 2px;
 }
 
-.brand-title { 
-    font-size: 1.6rem; 
-    font-weight: 800; 
-    color: #1e293b;
-    margin: 0; 
-    line-height: 1; 
-}
-
-.brand-subtitle { 
-    font-size: 0.85rem; 
-    color: #f97316; 
-    font-weight: 600; 
-    margin: 0; 
-}
-
-/* BARRA DE BÚSQUEDA */
-.search-section { flex-grow: 1; display: flex; justify-content: center; padding: 0 40px; }
-.search-pill {
-  background: #f8fafc;
-  border: 1px solid #22c55e; /* Borde verde característico */
-  border-radius: 30px;
-  padding: 10px 25px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  width: 100%;
-  max-width: 550px;
-}
-.search-pill i { color: #22c55e; font-size: 1.1rem; }
-.search-pill input {
+.add-button {
+  background: #11C267;
+  color: white;
   border: none;
-  background: transparent;
-  outline: none;
-  width: 100%;
-  font-size: 0.95rem;
-  color: #1e293b;
+  padding: 10px 22px;
+  border-radius: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s;
 }
 
-/* BOTONES DE ACCIÓN */
-.header-actions { display: flex; gap: 12px; }
-.action-btn {
-  width: 45px;
-  height: 45px;
-  border-radius: 12px; /* Bordes redondeados suaves */
-  border: 1px solid;
+.add-button:hover {
+  background: #0ea858;
+}
+
+.wishlist-btn {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: white;
+  border: none;
+  color: #9ca3af; /* Color gris inicial */
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.2rem;
-  cursor: pointer;
-  transition: all 0.2s;
-  background: white;
+  transition: all 0.3s ease;
+  z-index: 10;
 }
 
-/* Botón Favoritos (Rojo suave) */
-.fav-btn { color: #ef4444; border-color: #fee2e2; background-color: #fef2f2; }
-.fav-btn:hover { background-color: #fee2e2; }
+/* Estado cuando le gusta (activo) */
+.wishlist-btn.active {
+  color: #ef4444; /* Rojo intenso */
+  transform: scale(1.1);
+}
 
-/* Botón Cesta (Verde suave) */
-.bag-btn { color: #22c55e; border-color: #dcfce7; background-color: #f0fdf4; }
-.bag-btn:hover { background-color: #dcfce7; }
+/* Animación de latido al hacer click */
+.wishlist-btn:active {
+  transform: scale(0.9);
+}
 
-/* Botón Usuario (Gris) */
-.user-btn { color: #64748b; border-color: #e2e8f0; background-color: #f8fafc; }
-.user-btn:hover { background-color: #f1f5f9; }
+.wishlist-btn i {
+  font-size: 1.2rem;
+  transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.wishlist-btn.active i {
+  animation: heartPop 0.3s ease-out;
+}
+
+@keyframes heartPop {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.4); }
+  100% { transform: scale(1); }
+}

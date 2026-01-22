@@ -20,6 +20,7 @@ html, body {
   overflow-x: hidden;
   font-family: var(--fuente-principal);
   box-sizing: border-box;
+  background-color: #f1f8f4;
 }
 
 *, *:before, *:after {

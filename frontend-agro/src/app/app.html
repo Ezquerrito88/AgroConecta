@@ -17,17 +17,26 @@
     </div>
 
     <div class="header-actions">
+      <ng-container *ngIf="!isLoggedIn">
+        <button class="btn-login-header" routerLink="/login">
+          <span class="material-symbols-rounded">login</span>
+          Iniciar Sesión
+        </button>
+      </ng-container>
+
+      <ng-container *ngIf="isLoggedIn">
         <button class="action-btn fav-btn">
-            <i class="far fa-heart"></i>
+          <i class="far fa-heart"></i>
         </button>
 
         <button class="action-btn bag-btn">
-            <span class="material-symbols-outlined">shopping_bag</span>
+          <span class="material-symbols-rounded">shopping_bag</span>
         </button>
 
-        <button class="action-btn user-btn" routerLink="/login">
-            <i class="far fa-user"></i>
+        <button class="action-btn user-btn" routerLink="/perfil">
+          <span class="material-symbols-rounded">person</span>
         </button>
+      </ng-container>
     </div>
 
   </div>

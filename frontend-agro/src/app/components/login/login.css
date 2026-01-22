@@ -97,7 +97,7 @@
   width: 70px;
   height: 70px;
   margin: 0 auto 15px auto;
-  background: linear-gradient(135deg, #a5b4fc 0%, #818cf8 100%);
+  background: linear-gradient(135deg, #11C267 0%, #059669 100%);
   border-radius: 20px;
   display: flex;
   justify-content: center;
@@ -229,8 +229,9 @@
 }
 
 .input-group input:focus {
-  border-color: #497EF2;
-  box-shadow: 0 0 0 3px rgba(73, 126, 242, 0.2);
+  border-color: #11C267;
+  box-shadow: 0 0 0 3px rgba(17, 194, 103, 0.2);
+  background-color: #f0fdf4; 
 }
 
 .password-wrapper {
@@ -250,7 +251,7 @@
 }
 
 .password-toggle-icon:hover {
-  color: #497EF2;
+  color: #11C267; 
 }
 
 .password-wrapper input {
@@ -262,7 +263,7 @@
   padding: 14px;
   border: none;
   border-radius: 10px;
-  background: linear-gradient(to right, #497EF2, #A65AF2);
+  background: linear-gradient(to right, #11C267, #02BA7A);
   color: white;
   font-weight: bold;
   font-size: 1rem;
@@ -298,16 +299,34 @@
   to { transform: rotate(360deg); }
 }
 
+.forgot-password {
+  color: #11C267;
+  text-decoration: none;
+  font-size: 0.85rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.forgot-password:hover {
+  color: #059669;
+  text-decoration: underline;
+  filter: brightness(0.9);
+}
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover, 
+input:-webkit-autofill:focus {
+  -webkit-text-fill-color: #333;
+  -webkit-box-shadow: 0 0 0px 1000px white inset;
+  transition: background-color 5000s ease-in-out 0s;
+  border: 1px solid #ddd;
+}
+
 .form-options {
   display: flex;
   justify-content: space-between;
-  font-size: 0.8rem;
-  margin-bottom: 20px;
-}
-
-.forgot-password {
-  color: #f97316;
-  text-decoration: none;
+  align-items: center;
+  margin: 15px 0 20px 0;
 }
 
 .remember-me {
@@ -334,8 +353,12 @@
 }
 
 .remember-me input:checked {
-  background: linear-gradient(135deg, #497EF2 0%, #A65AF2 100%);
+  background: linear-gradient(135deg, #11C267 0%, #02BA7A 100%);
   border-color: transparent;
+}
+
+.remember-me:hover input {
+  border-color: #11C267;
 }
 
 .remember-me input::before {
@@ -352,9 +375,6 @@
   transform: scale(1);
 }
 
-.remember-me:hover input {
-  border-color: #497EF2;
-}
 
 .divider {
   display: flex;
@@ -431,18 +451,19 @@
 }
 
 .btn-blue {
-  border-color: #bfdbfe;
-  color: #2563eb;
+  border-color: #bbf7d0; 
+  color: #11C267;
+}
+
+.btn-blue:hover {
+  border-color: #11C267;
+  background-color: #f0fdf4;
+  color: #059669;
 }
 
 .btn-orange {
   border-color: #fed7aa;
   color: #ea580c;
-}
-
-.btn-blue:hover {
-  border-color: #2563eb;
-  background-color: #eaf3fa;
 }
 
 .btn-orange:hover {
@@ -527,7 +548,7 @@
     width: 70px;
     height: 70px;
     margin: 0 auto 15px auto;
-    background: linear-gradient(135deg, #a5b4fc 0%, #818cf8 100%);
+    background: linear-gradient(135deg, #11C267 0%, #059669 100%);
     border-radius: 20px;
     display: flex;
     justify-content: center;
@@ -569,8 +590,14 @@
   }
 
   .btn-blue {
-    border-color: #bfdbfe;
-    color: #2563eb;
+    border-color: #bbf7d0; 
+    color: #11C267;
+  }
+
+.btn-blue:hover {
+    border-color: #11C267;
+    background-color: #f0fdf4;
+    color: #059669;
   }
 
   .btn-orange {
