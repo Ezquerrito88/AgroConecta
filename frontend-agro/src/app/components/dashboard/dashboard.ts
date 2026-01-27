@@ -1,8 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core'; // Añadido ChangeDetectorRef
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
-import { ProductoService } from '../../services/producto.service'; // Asegúrate de que la ruta sea correcta
-import { Producto } from '../../models/producto'; // Importamos la interface
+import { ProductoService } from '../../services/producto.service';
+import { Producto } from '../../models/producto';
 
 @Component({
   selector: 'app-dashboard',
@@ -12,76 +12,66 @@ import { Producto } from '../../models/producto'; // Importamos la interface
   styleUrl: './dashboard.css'
 })
 export class Dashboard implements OnInit {
-  userRole: string | null = '';
-  isLoggedIn: boolean = false;
-
   productos: Producto[] = [];
-
-  // Variables para la paginación
   paginaActual: number = 1;
   totalPaginas: number = 1;
 
   constructor(
     private router: Router,
-    private productoService: ProductoService
+    private productoService: ProductoService,
+    private cdr: ChangeDetectorRef // Inyectamos el detector de cambios
   ) { }
 
   ngOnInit() {
-    const token = localStorage.getItem('auth_token');
-    this.isLoggedIn = !!token;
-    this.userRole = localStorage.getItem('user_role');
-
-    this.cargarProductos(1); // Iniciamos en la página 1
+    this.cargarProductos(1);
   }
 
-cargarProductos(page: number) {
-  this.productoService.getDestacados(page).subscribe({
-    next: (res: any) => {
-      // 1. Guardamos SOLO el array de productos para el *ngFor
-      this.productos = res.data; 
-      
-      // 2. Guardamos los números de página para los botones
-      this.paginaActual = res.current_page;
-      this.totalPaginas = res.last_page;
-      
-      console.log('¡Éxito! Productos listos para mostrar:', this.productos.length);
-    },
-    error: (err) => console.error('Error al cargar:', err)
-  });
-}
+  cargarProductos(page: number) {
+    this.productoService.getDestacados(page).subscribe({
+      next: (res: any) => {
+        this.productos = res.data;
+        this.paginaActual = res.current_page;
+        this.totalPaginas = res.last_page;
 
+        // ¡ESTO ELIMINA EL DOBLE CLIC! 
+        // Obliga a la pantalla a refrescarse con los nuevos datos inmediatamente
+        this.cdr.detectChanges();
+
+        console.log('Productos cargados:', this.productos.length);
+      },
+      error: (err: any) => console.error('Error:', err)
+    });
+  }
+
+  // Asegúrate de tener solo UNA implementación de esta función
   cambiarPagina(nuevaPagina: number) {
-    if (nuevaPagina >= 1 && nuevaPagina <= this.totalPaginas) {
-      this.cargarProductos(nuevaPagina);
-      window.scrollTo(0, 500); // Efecto visual para volver arriba
+    if (nuevaPagina === this.paginaActual || nuevaPagina < 1 || nuevaPagina > this.totalPaginas) {
+      return;
     }
+
+    this.productoService.getDestacados(nuevaPagina).subscribe({
+      next: (res: any) => {
+        // Usamos el spread operator para asegurar que Angular detecte el cambio
+        this.productos = [...res.data];
+        this.paginaActual = res.current_page;
+        this.totalPaginas = res.last_page;
+
+        // Forzamos la detección de cambios para que funcione al primer clic
+        this.cdr.detectChanges();
+
+        window.scrollTo({ top: 450, behavior: 'smooth' });
+        console.log('Página actualizada con éxito:', this.paginaActual);
+      },
+      error: (err: any) => console.error('Error al cambiar página:', err)
+    });
   }
 
   toggleFavorite(prod: Producto) {
     prod.fav = !prod.fav;
-    // Opcional: Si usas OnPush o tienes problemas de refresco
-    // this.cdr.detectChanges(); 
-    console.log(`Estado de favorito para ${prod.name}: ${prod.fav}`);
+    this.cdr.detectChanges(); // Refresca el corazón al instante
   }
 
-  // Añade esto en tu archivo dashboard.ts
-
-  // Método que faltaba y causaba el error TS2339
   irAlCatalogoCompleto() {
-    // Por ahora podemos redirigir a la misma página o a una de productos general
-    // Esto cumple con el RF08 de búsqueda y filtrado global
     this.router.navigate(['/productos']);
-    console.log('Navegando al catálogo completo...');
   }
-
-  // Método para filtrar por categorías (RF08)
-  filtrarPorCategoria(id: number | null) {
-    this.paginaActual = 1; // Siempre resetear a la página 1 al filtrar
-    // Aquí llamarías a tu servicio pasando el category_id
-    // Tu backend en el método index() ya está preparado para recibir category_id
-    console.log('Filtrando por categoría:', id);
-    // Lógica para recargar productos con filtro...
-  }
-
-  // ... resto de tus métodos (logout, toggleFavorite)
 }

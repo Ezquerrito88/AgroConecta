@@ -33,7 +33,6 @@
         <h3>Filtros</h3>
         <i class="fa-solid fa-sliders"></i>
       </div>
-      
       <div class="filter-group filter-blue">
         <label>● Ordenar por</label>
         <select class="custom-select">
@@ -41,14 +40,6 @@
           <option>Precio: Menor a Mayor</option>
         </select>
       </div>
-
-      <div class="filter-group filter-green">
-        <label>● Categoría</label>
-        <select class="custom-select">
-          <option>Todas</option>
-        </select>
-      </div>
-
       <div class="filter-group filter-orange">
         <label>● Precio Máximo</label>
         <input type="range" class="price-range" min="0" max="100">
@@ -58,13 +49,14 @@
     <main class="products-grid-container">
       <div class="grid-header">
         <h2>Selección Fresca del Día</h2>
-        <span class="results-count">Página {{ paginaActual }} de 2 (Máx. 12 destacados)</span>
+        <span class="results-count">Página {{ paginaActual }} de {{ totalPaginas }}</span>
       </div>
 
       <div class="products-grid">
         <div class="product-card" *ngFor="let prod of productos">
+          
           <div class="card-image">
-            <div class="stock-badge" *ngIf="(prod.stock_quantity ?? 0) <= 5" [class.no-stock]="prod.stock_quantity === 0">
+            <div class="stock-badge" *ngIf="prod.stock_quantity <= 5" [class.no-stock]="prod.stock_quantity === 0">
                {{ prod.stock_quantity === 0 ? 'Agotado' : '¡Casi agotado!' }}
             </div>
 
@@ -72,21 +64,22 @@
               <i [class]="prod.fav ? 'fa-solid fa-heart' : 'fa-regular fa-heart'"></i>
             </button>
 
-            <img *ngIf="(prod.images?.length ?? 0) > 0"
+            <img *ngIf="prod.images && prod.images.length > 0"
                  [src]="'http://127.0.0.1:8000/storage/' + prod.images[0].image_path" 
                  alt="{{ prod.name }}">
             
-            <div *ngIf="(prod.images?.length ?? 0) === 0" class="placeholder-img">
+            <div *ngIf="!prod.images || prod.images.length === 0" class="placeholder-img">
               <i class="fa-solid fa-image"></i>
             </div>
           </div>
 
           <div class="card-content">
             <h4 class="product-title">{{ prod.name }}</h4>
+            
             <p class="product-desc">{{ prod.description }}</p>
 
             <div class="seller-box" *ngIf="prod.farmer">
-              <span class="seller-name">{{ prod.farmer?.full_name || 'Agricultor Local' }}</span>
+              <span class="seller-name">{{ prod.farmer.full_name || 'Agricultor Local' }}</span>
               <span class="seller-location"><i class="fa-solid fa-location-dot"></i> Logroño</span>
             </div>
 
@@ -95,7 +88,9 @@
                 <span class="price-main">{{ prod.price }}€</span>
                 <span class="price-unit">/{{ prod.unit }}</span>
               </div>
-              <button class="add-button" [disabled]="prod.stock_quantity === 0">+ Añadir</button>
+              <button class="add-button" [disabled]="prod.stock_quantity === 0">
+                <i class="fa-solid fa-plus"></i> Añadir
+              </button>
             </div>
           </div>
         </div>
@@ -103,19 +98,21 @@
 
       <div class="pagination-container" *ngIf="totalPaginas > 1">
         <div class="pagination-controls">
-          <button class="pag-btn nav-btn" [disabled]="paginaActual === 1" (click)="cambiarPagina(paginaActual - 1)">
+          <button type="button" class="pag-btn nav-btn" [disabled]="paginaActual === 1" (click)="cambiarPagina(paginaActual - 1)">
             <i class="fa-solid fa-chevron-left"></i>
           </button>
 
-          <button class="pag-btn num-btn" [class.active]="paginaActual === 1" (click)="cambiarPagina(1)">1</button>
-          <button class="pag-btn num-btn" [class.active]="paginaActual === 2" (click)="cambiarPagina(2)">2</button>
+          <button type="button" class="pag-btn num-btn" [class.active]="paginaActual === 1" (click)="cambiarPagina(1)">1</button>
+          <button type="button" class="pag-btn num-btn" *ngIf="totalPaginas >= 2" [class.active]="paginaActual === 2" (click)="cambiarPagina(2)">2</button>
 
-          <button class="pag-btn nav-btn" [disabled]="paginaActual === totalPaginas" (click)="cambiarPagina(paginaActual + 1)">
+          <button type="button" class="pag-btn nav-btn" [disabled]="paginaActual === totalPaginas" (click)="cambiarPagina(paginaActual + 1)">
             <i class="fa-solid fa-chevron-right"></i>
           </button>
         </div>
-        
-        <button class="btn-full-catalog" (click)="irAlCatalogoCompleto()">
+      </div>
+
+      <div style="text-align: center; margin-top: 30px;">
+        <button type="button" class="btn-full-catalog" (click)="irAlCatalogoCompleto()">
           Ver Catálogo Completo
         </button>
       </div>
