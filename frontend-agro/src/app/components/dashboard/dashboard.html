@@ -3,29 +3,18 @@
     <div class="badge-fresco">
       <span class="emoji">🌱</span> Cosecha Fresca Diaria
     </div>
-
     <h1 class="main-title">
       Sabores que <span class="text-green">Conectan</span>
     </h1>
-
     <p class="main-subtitle">
       Descubre productos únicos directamente de la mano de quienes los cultivan con amor.
     </p>
-
     <div class="benefits-row">
-      <div class="pill">
-        <span class="dot dot-green"></span> Entrega en 48h
-      </div>
-      <div class="pill">
-        <span class="dot dot-orange"></span> Directo del campo
-      </div>
-      <div class="pill">
-        <span class="dot dot-blue"></span> Precios justos
-      </div>
+      <div class="pill"><span class="dot dot-green"></span> Entrega en 48h</div>
+      <div class="pill"><span class="dot dot-orange"></span> Directo del campo</div>
+      <div class="pill"><span class="dot dot-blue"></span> Precios justos</div>
     </div>
   </div>
-
-  <div class="decoration-sun"></div>
 </section>
 
 <section class="products-section">
@@ -39,305 +28,96 @@
   </div>
 
   <div class="main-layout">
-    <aside class="filters-sidebar">
-      <div class="filter-card">
-        <div class="filter-header">
-          <h3>Filtros</h3>
-          <span class="icon-filter"></span>
-        </div>
+    <aside class="filter-card">
+      <div class="filter-header">
+        <h3>Filtros</h3>
+        <i class="fa-solid fa-sliders"></i>
+      </div>
+      
+      <div class="filter-group filter-blue">
+        <label>● Ordenar por</label>
+        <select class="custom-select">
+          <option>Destacados</option>
+          <option>Precio: Menor a Mayor</option>
+        </select>
+      </div>
 
-        <div class="filter-group">
-          <label>Ordenar por</label>
-          <select class="custom-select">
-            <option>Destacados</option>
-          </select>
-        </div>
+      <div class="filter-group filter-green">
+        <label>● Categoría</label>
+        <select class="custom-select">
+          <option>Todas</option>
+        </select>
+      </div>
 
-        <div class="filter-group">
-          <label>Categoría</label>
-          <select class="custom-select">
-            <option>Todas</option>
-          </select>
-        </div>
-
-        <div class="filter-group">
-          <label>Precio</label>
-          <input type="range" class="price-range">
-        </div>
+      <div class="filter-group filter-orange">
+        <label>● Precio Máximo</label>
+        <input type="range" class="price-range" min="0" max="100">
       </div>
     </aside>
 
     <main class="products-grid-container">
       <div class="grid-header">
         <h2>Selección Fresca del Día</h2>
-        <span class="results-count">12 productos • Página 1 de 2</span>
+        <span class="results-count">Página {{ paginaActual }} de 2 (Máx. 12 destacados)</span>
       </div>
 
       <div class="products-grid">
-        <div class="product-card">
+        <div class="product-card" *ngFor="let prod of productos">
           <div class="card-image">
-            <button class="wishlist-btn" [class.active]="isFavorite" (click)="toggleFavorite()">
-              <i [class]="isFavorite ? 'fa-solid fa-heart' : 'fa-regular fa-heart'"></i>
+            <div class="stock-badge" *ngIf="(prod.stock_quantity ?? 0) <= 5" [class.no-stock]="prod.stock_quantity === 0">
+               {{ prod.stock_quantity === 0 ? 'Agotado' : '¡Casi agotado!' }}
+            </div>
+
+            <button class="wishlist-btn" [class.active]="prod.fav" (click)="toggleFavorite(prod)">
+              <i [class]="prod.fav ? 'fa-solid fa-heart' : 'fa-regular fa-heart'"></i>
             </button>
-            <div class="placeholder-icon">
-              <i class="fas fa-image"></i>
+
+            <img *ngIf="(prod.images?.length ?? 0) > 0"
+                 [src]="'http://127.0.0.1:8000/storage/' + prod.images[0].image_path" 
+                 alt="{{ prod.name }}">
+            
+            <div *ngIf="(prod.images?.length ?? 0) === 0" class="placeholder-img">
+              <i class="fa-solid fa-image"></i>
             </div>
           </div>
 
           <div class="card-content">
-            <h4 class="product-title">Lechuga Fresca</h4>
-            <p class="product-desc">Textura perfecta, sabor ideal.</p>
+            <h4 class="product-title">{{ prod.name }}</h4>
+            <p class="product-desc">{{ prod.description }}</p>
 
-            <div class="seller-box">
-              <img src="assets/img/avatar-seller.jpg" alt="Jose Javier" class="seller-avatar">
-              <div class="seller-details">
-                <span class="seller-name">Jose Javier</span>
-                <span class="seller-location">
-                  <i class="fa-solid fa-location-dot"></i> Logroño
-                </span>
-              </div>
-            </div>
-
-            <div class="rating-container">
-              <div class="stars">
-                <i class="fas fa-star"></i>
-                <i class="fas fa-star"></i>
-                <i class="fas fa-star"></i>
-                <i class="fas fa-star"></i>
-                <i class="fas fa-star-half-alt"></i>
-              </div>
-              <span class="rating-val">4.9</span>
+            <div class="seller-box" *ngIf="prod.farmer">
+              <span class="seller-name">{{ prod.farmer?.full_name || 'Agricultor Local' }}</span>
+              <span class="seller-location"><i class="fa-solid fa-location-dot"></i> Logroño</span>
             </div>
 
             <div class="card-footer">
               <div class="price-box">
-                <span class="price-main">12.99€</span>
-                <span class="price-unit">/kg</span>
+                <span class="price-main">{{ prod.price }}€</span>
+                <span class="price-unit">/{{ prod.unit }}</span>
               </div>
-              <button class="add-button">+ Añadir</button>
+              <button class="add-button" [disabled]="prod.stock_quantity === 0">+ Añadir</button>
             </div>
           </div>
         </div>
-        <div class="product-card">
-          <div class="card-image">
-            <button class="wishlist-btn" [class.active]="isFavorite" (click)="toggleFavorite()">
-              <i [class]="isFavorite ? 'fa-solid fa-heart' : 'fa-regular fa-heart'"></i>
-            </button>
-            <div class="placeholder-icon">
-              <i class="fas fa-image"></i>
-            </div>
-          </div>
+      </div>
 
-          <div class="card-content">
-            <h4 class="product-title">Lechuga Fresca</h4>
-            <p class="product-desc">Textura perfecta, sabor ideal.</p>
+      <div class="pagination-container" *ngIf="totalPaginas > 1">
+        <div class="pagination-controls">
+          <button class="pag-btn nav-btn" [disabled]="paginaActual === 1" (click)="cambiarPagina(paginaActual - 1)">
+            <i class="fa-solid fa-chevron-left"></i>
+          </button>
 
-            <div class="seller-box">
-              <img src="assets/img/avatar-seller.jpg" alt="Jose Javier" class="seller-avatar">
-              <div class="seller-details">
-                <span class="seller-name">Jose Javier</span>
-                <span class="seller-location">
-                  <i class="fa-solid fa-location-dot"></i> Logroño
-                </span>
-              </div>
-            </div>
+          <button class="pag-btn num-btn" [class.active]="paginaActual === 1" (click)="cambiarPagina(1)">1</button>
+          <button class="pag-btn num-btn" [class.active]="paginaActual === 2" (click)="cambiarPagina(2)">2</button>
 
-            <div class="rating-container">
-              <div class="stars">
-                <i class="fas fa-star"></i>
-                <i class="fas fa-star"></i>
-                <i class="fas fa-star"></i>
-                <i class="fas fa-star"></i>
-                <i class="fas fa-star-half-alt"></i>
-              </div>
-              <span class="rating-val">4.9</span>
-            </div>
-
-            <div class="card-footer">
-              <div class="price-box">
-                <span class="price-main">12.99€</span>
-                <span class="price-unit">/kg</span>
-              </div>
-              <button class="add-button">+ Añadir</button>
-            </div>
-          </div>
+          <button class="pag-btn nav-btn" [disabled]="paginaActual === totalPaginas" (click)="cambiarPagina(paginaActual + 1)">
+            <i class="fa-solid fa-chevron-right"></i>
+          </button>
         </div>
-        <div class="product-card">
-          <div class="card-image">
-            <button class="wishlist-btn" [class.active]="isFavorite" (click)="toggleFavorite()">
-              <i [class]="isFavorite ? 'fa-solid fa-heart' : 'fa-regular fa-heart'"></i>
-            </button>
-            <div class="placeholder-icon">
-              <i class="fas fa-image"></i>
-            </div>
-          </div>
-
-          <div class="card-content">
-            <h4 class="product-title">Lechuga Fresca</h4>
-            <p class="product-desc">Textura perfecta, sabor ideal.</p>
-
-            <div class="seller-box">
-              <img src="assets/img/avatar-seller.jpg" alt="Jose Javier" class="seller-avatar">
-              <div class="seller-details">
-                <span class="seller-name">Jose Javier</span>
-                <span class="seller-location">
-                  <i class="fa-solid fa-location-dot"></i> Logroño
-                </span>
-              </div>
-            </div>
-
-            <div class="rating-container">
-              <div class="stars">
-                <i class="fas fa-star"></i>
-                <i class="fas fa-star"></i>
-                <i class="fas fa-star"></i>
-                <i class="fas fa-star"></i>
-                <i class="fas fa-star-half-alt"></i>
-              </div>
-              <span class="rating-val">4.9</span>
-            </div>
-
-            <div class="card-footer">
-              <div class="price-box">
-                <span class="price-main">12.99€</span>
-                <span class="price-unit">/kg</span>
-              </div>
-              <button class="add-button">+ Añadir</button>
-            </div>
-          </div>
-        </div>
-        <div class="product-card">
-          <div class="card-image">
-            <button class="wishlist-btn" [class.active]="isFavorite" (click)="toggleFavorite()">
-              <i [class]="isFavorite ? 'fa-solid fa-heart' : 'fa-regular fa-heart'"></i>
-            </button>
-            <div class="placeholder-icon">
-              <i class="fas fa-image"></i>
-            </div>
-          </div>
-
-          <div class="card-content">
-            <h4 class="product-title">Lechuga Fresca</h4>
-            <p class="product-desc">Textura perfecta, sabor ideal.</p>
-
-            <div class="seller-box">
-              <img src="assets/img/avatar-seller.jpg" alt="Jose Javier" class="seller-avatar">
-              <div class="seller-details">
-                <span class="seller-name">Jose Javier</span>
-                <span class="seller-location">
-                  <i class="fa-solid fa-location-dot"></i> Logroño
-                </span>
-              </div>
-            </div>
-
-            <div class="rating-container">
-              <div class="stars">
-                <i class="fas fa-star"></i>
-                <i class="fas fa-star"></i>
-                <i class="fas fa-star"></i>
-                <i class="fas fa-star"></i>
-                <i class="fas fa-star-half-alt"></i>
-              </div>
-              <span class="rating-val">4.9</span>
-            </div>
-
-            <div class="card-footer">
-              <div class="price-box">
-                <span class="price-main">12.99€</span>
-                <span class="price-unit">/kg</span>
-              </div>
-              <button class="add-button">+ Añadir</button>
-            </div>
-          </div>
-        </div>
-        <div class="product-card">
-          <div class="card-image">
-            <button class="wishlist-btn" [class.active]="isFavorite" (click)="toggleFavorite()">
-              <i [class]="isFavorite ? 'fa-solid fa-heart' : 'fa-regular fa-heart'"></i>
-            </button>
-            <div class="placeholder-icon">
-              <i class="fas fa-image"></i>
-            </div>
-          </div>
-
-          <div class="card-content">
-            <h4 class="product-title">Lechuga Fresca</h4>
-            <p class="product-desc">Textura perfecta, sabor ideal.</p>
-
-            <div class="seller-box">
-              <img src="assets/img/avatar-seller.jpg" alt="Jose Javier" class="seller-avatar">
-              <div class="seller-details">
-                <span class="seller-name">Jose Javier</span>
-                <span class="seller-location">
-                  <i class="fa-solid fa-location-dot"></i> Logroño
-                </span>
-              </div>
-            </div>
-
-            <div class="rating-container">
-              <div class="stars">
-                <i class="fas fa-star"></i>
-                <i class="fas fa-star"></i>
-                <i class="fas fa-star"></i>
-                <i class="fas fa-star"></i>
-                <i class="fas fa-star-half-alt"></i>
-              </div>
-              <span class="rating-val">4.9</span>
-            </div>
-
-            <div class="card-footer">
-              <div class="price-box">
-                <span class="price-main">12.99€</span>
-                <span class="price-unit">/kg</span>
-              </div>
-              <button class="add-button">+ Añadir</button>
-            </div>
-          </div>
-        </div>
-        <div class="product-card">
-          <div class="card-image">
-            <button class="wishlist-btn" [class.active]="isFavorite" (click)="toggleFavorite()">
-              <i [class]="isFavorite ? 'fa-solid fa-heart' : 'fa-regular fa-heart'"></i>
-            </button>
-            <div class="placeholder-icon">
-              <i class="fas fa-image"></i>
-            </div>
-          </div>
-
-          <div class="card-content">
-            <h4 class="product-title">Lechuga Fresca</h4>
-            <p class="product-desc">Textura perfecta, sabor ideal.</p>
-
-            <div class="seller-box">
-              <img src="assets/img/avatar-seller.jpg" alt="Jose Javier" class="seller-avatar">
-              <div class="seller-details">
-                <span class="seller-name">Jose Javier</span>
-                <span class="seller-location">
-                  <i class="fa-solid fa-location-dot"></i> Logroño
-                </span>
-              </div>
-            </div>
-
-            <div class="rating-container">
-              <div class="stars">
-                <i class="fas fa-star"></i>
-                <i class="fas fa-star"></i>
-                <i class="fas fa-star"></i>
-                <i class="fas fa-star"></i>
-                <i class="fas fa-star-half-alt"></i>
-              </div>
-              <span class="rating-val">4.9</span>
-            </div>
-
-            <div class="card-footer">
-              <div class="price-box">
-                <span class="price-main">12.99€</span>
-                <span class="price-unit">/kg</span>
-              </div>
-              <button class="add-button">+ Añadir</button>
-            </div>
-          </div>
-        </div>
+        
+        <button class="btn-full-catalog" (click)="irAlCatalogoCompleto()">
+          Ver Catálogo Completo
+        </button>
       </div>
     </main>
   </div>

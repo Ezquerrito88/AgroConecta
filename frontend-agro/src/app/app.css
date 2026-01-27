@@ -198,3 +198,157 @@
 .btn-login-header span {
   font-size: 18px;
 }
+.agro-footer {
+  position: relative;
+  width: 100%;
+  background-image: url('/img/footer/footer.png'); 
+  background-size: cover;
+  background-position: center;
+  padding: 40px 0 20px 0; 
+  color: white;
+  font-family: 'Geist', sans-serif;
+}
+
+.footer-container {
+  max-width: 1200px; 
+  margin: 0 auto;
+  padding: 0 40px; 
+}
+
+.footer-grid {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr 1fr;
+  gap: 200px;
+  margin-bottom: 30px;
+  justify-items: start;
+}
+
+/* --- Branding --- */
+.footer-brand h3 {
+  font-size: 1.5rem;
+  font-weight: 800;
+  margin-bottom: 5px;
+  color: #FFFFFF;
+}
+
+.brand-slogan {
+  color: #20EBA7;
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.brand-desc {
+  font-size: 0.85rem;
+  line-height: 1.5;
+  opacity: 0.8;
+  max-width: 320px;
+  color: #B9EDA6;
+}
+
+/* --- Títulos de Columnas --- */
+.footer-links h4, 
+.footer-contact h4 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-bottom: 20px;
+  color: #FFFFFF;
+}
+
+/* --- Enlaces (Limpieza de puntos y color) --- */
+.footer-links ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.footer-links ul li {
+  margin-bottom: 10px;
+  list-style: none;
+}
+
+.footer-links ul li a {
+  font-size: 0.9rem;
+  text-decoration: none;
+  color: #B9EDA6;
+  transition: 0.3s;
+}
+
+.footer-links ul li a:visited {
+  color: #B9EDA6;
+}
+
+/* --- Contacto --- */
+.footer-contact p {
+  font-size: 0.85rem;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #B9EDA6;
+}
+
+.footer-contact i {
+  color: #90F5C8;
+  width: 16px;
+  text-align: center;
+}
+
+/* --- Redes Sociales --- */
+.footer-social {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.social-btn {
+  width: 34px;
+  height: 34px;
+  background: #1F6E56;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #EBEBEB;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  text-decoration: none;
+}
+
+.social-btn i {
+  color: white;     /* Iconos siempre blancos */
+  font-size: 1.2rem; /* Tamaño del icono */
+  opacity: 0.9;
+}
+
+
+
+/* --- Barra Inferior --- */
+.footer-bottom {
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  margin-top: 20px;
+  padding-top: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.8rem;
+  opacity: 0.7;
+}
+
+.copy-text {
+  color: #90F5C8;
+}
+
+.legal-links {
+  display: flex;
+  gap: 20px;
+}
+
+.legal-links a {
+  color: #90F5C8;
+  text-decoration: none;
+}
+
+.legal-links a:hover {
+  color: white;
+}

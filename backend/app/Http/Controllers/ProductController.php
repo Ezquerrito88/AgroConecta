@@ -12,15 +12,42 @@ class ProductController extends Controller
     //Listar todos los productos
     public function index(Request $request)
     {
-        $query =Product::with(['category','images', 'farmer']);
+        $query = Product::with(['category', 'images', 'farmer'])
+            ->where('moderation_status', 'approved'); // Solo lo aprobado (RF14) [cite: 20, 45]
 
         if ($request->has('category_id')) {
             $query->where('category_id', $request->input('category_id'));
         }
 
-        $products = $query->orderBy('created_at', 'desc')->get();
+        // Usamos paginate(12) para que salgan 12 productos por página en el catálogo
+        $products = $query->orderBy('created_at', 'desc')->paginate(12);
 
         return response()->json($products);
+    }
+
+    // Crear una función específica para destacados
+    public function getFeatured()
+    {
+        // 1. Obtenemos los productos aprobados (RF14)
+        // 2. Limitamos el total absoluto a 12 (take)
+        // 3. De esos 12, hacemos páginas de 6 (paginate)
+
+        $products = Product::with(['category', 'images', 'farmer'])
+            ->where('moderation_status', 'approved')
+            ->orderBy('created_at', 'desc')
+            ->take(12)
+            ->get(); // Obtenemos el "pedazo" de 12 productos
+
+        // Ahora convertimos manualmente esos 12 en una paginación de 6
+        $currentPage = request()->get('page', 1);
+        $pagedData = $products->forPage($currentPage, 6)->values();
+
+        return response()->json([
+            'data' => $pagedData,
+            'current_page' => (int)$currentPage,
+            'last_page' => 2, // Forzamos a que siempre sean 2 páginas máximo
+            'total' => 12
+        ]);
     }
 
     //Crear productos
@@ -52,22 +79,22 @@ class ProductController extends Controller
 
         if ($request->hasFile('images')) {
             foreach ($request->file('images') as $file) {
-               $path = $file->store('public', 'public');
+                $path = $file->store('public', 'public');
 
-               ProductImage::create([
-                   'product_id'   => $product->id,
-                   'image_path'   => $path
-               ]);
+                ProductImage::create([
+                    'product_id'   => $product->id,
+                    'image_path'   => $path
+                ]);
             }
         }
 
         return response()->json($product->load('images'), 201);
     }
 
-   //Mostrar producto
+    //Mostrar producto
     public function show($id)
     {
-        $product = Product::with(['category','images', 'farmer'])->find($id);
+        $product = Product::with(['category', 'images', 'farmer'])->find($id);
 
         if (!$product) {
             return response()->json(['message' => 'Producto no encontrado'], 404);
@@ -101,10 +128,10 @@ class ProductController extends Controller
             'images.*'           => 'image|mimes:jpeg,png,jpg,webp|max:2048'
         ]);
 
-       $dataToUpdate = collect($validated)->except('images')->toArray();
-       $product->update($dataToUpdate);
+        $dataToUpdate = collect($validated)->except('images')->toArray();
+        $product->update($dataToUpdate);
 
-       if ($request->hasFile('images')) {
+        if ($request->hasFile('images')) {
             foreach ($request->file('images') as $image) {
                 // 1. Guardar archivo en disco
                 $path = $image->store('products', 'public');
@@ -119,7 +146,7 @@ class ProductController extends Controller
 
         return response()->json([
             'message' => 'Producto actualizado correctamente',
-            'product' => $product->load('images') 
+            'product' => $product->load('images')
         ]);
     }
 
@@ -132,13 +159,13 @@ class ProductController extends Controller
             return response()->json(['message' => 'Producto no encontrado'], 404);
         }
 
-       if ($request->user()->id != $product->farmer_id) {
+        if ($request->user()->id != $product->farmer_id) {
             return response()->json(['message' => 'No tienes permisos para eliminar este producto'], 403);
         }
 
         foreach ($product->images as $image) {
             if (Storage::disk('public')->exists($image->image_path)) {
-                Storage::disk('public')->delete($image->image_path); 
+                Storage::disk('public')->delete($image->image_path);
             }
         }
 
