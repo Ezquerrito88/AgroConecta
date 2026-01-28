@@ -1,59 +1,75 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ProductoService } from '../../services/producto.service';
 import { RouterModule } from '@angular/router';
+
+// Definimos la interfaz para que sea más fácil trabajar con los datos
+interface Producto {
+  id: number;
+  nombre: string;
+  imagen: string;
+  precio: number;
+  unidad: string;
+  valoracion: number;
+  esFavorito: boolean;
+  vendedor: {
+    nombre: string;
+    avatar: string;
+    ubicacion: string;
+  };
+}
 
 @Component({
   selector: 'app-catalogo',
   standalone: true,
   imports: [CommonModule, FormsModule, RouterModule],
   templateUrl: './catalogo.html',
-  styleUrl: './catalogo.css' // <--- Usaremos el CSS del dashboard
+  styleUrl: './catalogo.css'
 })
-export class Catalogo implements OnInit {
+export class Catalogo {
   
-  productos: any[] = [];
-  paginaActual: number = 1;
-  totalPaginas: number = 1;
-
-  // Objeto para guardar los filtros
+  // Estado de los filtros
   filtros = {
-    search: '',
-    categoria: '',
-    minPrice: null,
-    maxPrice: null,
-    sort: ''
+    categoria: 'todas',
+    precioMax: 50,
+    ubicacion: 'todas',
+    valoracion: 'todas',
+    orden: 'novedad'
   };
 
-  constructor(private productoService: ProductoService) {}
-
-  ngOnInit() {
-    this.cargarProductos();
-  }
-
-  cargarProductos() {
-    this.productoService.getAllProducts(this.paginaActual, this.filtros).subscribe({
-      next: (res: any) => {
-        this.productos = res.data;
-        this.paginaActual = res.current_page;
-        this.totalPaginas = res.last_page;
-        window.scrollTo(0, 0); // Subir arriba al cargar
-      },
-      error: (err) => console.error(err)
-    });
-  }
-
-  filtrarCategoria(cat: string) {
-    this.filtros.categoria = cat;
-    this.paginaActual = 1; // Resetear a pág 1 al filtrar
-    this.cargarProductos();
-  }
-
-  cambiarPagina(nuevaPagina: number) {
-    if (nuevaPagina >= 1 && nuevaPagina <= this.totalPaginas) {
-      this.paginaActual = nuevaPagina;
-      this.cargarProductos();
+  // DATOS DE PRUEBA (Para que se vea como en la imagen)
+  // En el futuro, esto vendrá de tu ProductoService
+  productos: Producto[] = Array(12).fill(null).map((_, index) => ({
+    id: index + 1,
+    nombre: 'Lechuga Fresca',
+    // Usamos una imagen de placeholder, reemplázala por la ruta real cuando tengas backend
+    imagen: 'https://via.placeholder.com/150?text=Lechuga', 
+    precio: 12.99,
+    unidad: 'kg',
+    valoracion: 4.9,
+    esFavorito: false,
+    vendedor: {
+      nombre: 'José Javier',
+      avatar: 'https://i.pravatar.cc/150?u=josejavier', // Avatar de ejemplo
+      ubicacion: 'Logroño'
     }
+  }));
+
+  constructor() {}
+
+  // Método para limpiar los filtros
+  limpiarFiltros() {
+    this.filtros = {
+      categoria: 'todas',
+      precioMax: 50,
+      ubicacion: 'todas',
+      valoracion: 'todas',
+      orden: 'novedad'
+    };
+  }
+
+  // Método para marcar/desmarcar favorito
+  toggleFavorito(prod: Producto) {
+    prod.esFavorito = !prod.esFavorito;
   }
 }

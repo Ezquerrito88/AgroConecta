@@ -156,6 +156,19 @@
   border: 3px solid #fff5eb;
 }
 
+.clear-filters-btn {
+  background: none;
+  border: none;
+  color: #9ca3af;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: color 0.2s;
+}
+
+.clear-filters-btn:hover {
+  color: #ef4444; /* Rojo al pasar el ratón */
+}
+
 .filter-header {
   display: flex;
   justify-content: space-between;

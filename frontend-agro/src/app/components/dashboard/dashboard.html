@@ -19,19 +19,19 @@
 
 <section class="products-section">
   <div class="category-pills">
-    <button class="cat-btn active">Todo</button>
-    <button class="cat-btn">Frutas</button>
-    <button class="cat-btn">Verduras</button>
-    <button class="cat-btn">Granos</button>
-    <button class="cat-btn">Lácteos</button>
-    <button class="cat-btn">Especias</button>
+    <button *ngFor="let cat of categoriasRapidas" class="cat-btn"
+      [class.active]="filtros.categoria === cat.toLowerCase()" (click)="seleccionarCategoriaRapida(cat)">
+      {{ cat }}
+    </button>
   </div>
 
   <div class="main-layout">
     <aside class="filter-card">
       <div class="filter-header">
         <h3>Filtros</h3>
-        <i class="fa-solid fa-filter"></i>
+        <button class="clear-filters-btn" (click)="limpiarFiltros()">
+          <i class="fa-solid fa-filter-circle-xmark"></i>
+        </button>
       </div>
 
       <div class="filter-group filter-blue">
@@ -75,7 +75,7 @@
 
     <main class="products-grid-container">
       <div class="grid-header">
-        <h2>Selección Fresca del Día</h2>
+        <h2>Selección fresca del día</h2>
         <span class="results-count">Página {{ paginaActual }} de {{ totalPaginas }}</span>
       </div>
 

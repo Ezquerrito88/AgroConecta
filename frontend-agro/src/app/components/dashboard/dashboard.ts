@@ -8,12 +8,10 @@ import { MatSliderModule } from '@angular/material/slider';
 import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
 
-
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: 
-  [
+  imports: [
     CommonModule, 
     RouterModule, 
     FormsModule, 
@@ -25,32 +23,67 @@ import { MatFormFieldModule } from '@angular/material/form-field';
   styleUrl: './dashboard.css'
 })
 export class Dashboard implements OnInit {
+  
+  // DATOS DE PRODUCTOS
   productos: Producto[] = [];
   paginaActual: number = 1;
   totalPaginas: number = 1;
   itemsPorPagina: number = 6; 
   totalProductos: number = 0;
+  
+  // FILTROS
   minPrice: number = 0;
   maxPrice: number = 100;
+  
+  // DATOS DE USUARIO (NUEVO)
+  isFarmer: boolean = false; 
+  currentUser: any = null;
+
+  // CATEGORÍAS RÁPIDAS (Para los botones tipo píldora)
+  categoriasRapidas: string[] = ['Todas', 'Frutas', 'Verduras', 'Granos', 'Lácteos', 'Especias'];
+
+  filtros = {
+    categoria: 'todas',
+    precioMax: 50,
+    ubicacion: 'todas',
+    valoracion: 'todas',
+    orden: 'novedad'
+  };
 
   constructor(
     private router: Router,
     private productoService: ProductoService,
-    private cdr: ChangeDetectorRef // Inyectamos el detector de cambios
+    private cdr: ChangeDetectorRef 
   ) { }
 
   ngOnInit() {
+    // 1. Verificamos quién es el usuario antes de cargar nada
+    this.verificarUsuario();
+
+    // 2. Cargamos los productos
     this.cargarProductos(1);
   }
 
+  // --- LÓGICA DE USUARIO (NUEVO) ---
+  verificarUsuario() {
+    const userStr = localStorage.getItem('user');
+    if (userStr) {
+      this.currentUser = JSON.parse(userStr);
+      
+      // Comprobamos si es agricultor (ajusta 'agricultor' según tu BD)
+      if (this.currentUser.role === 'agricultor' || this.currentUser.role_id === 2) {
+        this.isFarmer = true;
+      }
+    }
+  }
+
+  // --- LÓGICA DE PRODUCTOS ---
   cargarProductos(page: number) {
     this.productoService.getDestacados(page).subscribe({
       next: (res: any) => {
         this.productos = res.data;
         this.paginaActual = res.current_page;
         this.totalPaginas = res.last_page;
-        
-        // Guardamos el total real para el texto "de 12 productos"
         this.totalProductos = res.total; 
 
         this.cdr.detectChanges();
@@ -60,7 +93,6 @@ export class Dashboard implements OnInit {
     });
   }
 
-  // Asegúrate de tener solo UNA implementación de esta función
   cambiarPagina(nuevaPagina: number) {
     if (nuevaPagina === this.paginaActual || nuevaPagina < 1 || nuevaPagina > this.totalPaginas) {
       return;
@@ -71,25 +103,33 @@ export class Dashboard implements OnInit {
         this.productos = [...res.data];
         this.paginaActual = res.current_page;
         this.totalPaginas = res.last_page;
-        
-        // Actualizamos el total también al cambiar de página
         this.totalProductos = res.total; 
 
         this.cdr.detectChanges();
-        window.scrollTo({ top: 450, behavior: 'smooth' });
-        console.log('Página actualizada:', this.paginaActual);
+        
+        // Scroll suave hacia arriba al cambiar de página
+        window.scrollTo({ top: 0, behavior: 'smooth' }); 
       },
       error: (err: any) => console.error('Error al cambiar página:', err)
     });
   }
 
+  // --- INTERACCIÓN ---
   toggleFavorite(prod: Producto) {
     prod.fav = !prod.fav;
-    this.cdr.detectChanges(); // Refresca el corazón al instante
+    // Aquí podrías llamar al servicio para guardar el favorito en BD
+    this.cdr.detectChanges(); 
   }
 
   irAlCatalogoCompleto() {
     this.router.navigate(['/productos']);
+  }
+
+  // --- LÓGICA DE FILTROS ---
+  seleccionarCategoriaRapida(categoria: string) {
+    this.filtros.categoria = categoria.toLowerCase();
+    // Aquí podrías recargar productos filtrados si tu backend lo soporta
+    console.log('Categoría seleccionada:', this.filtros.categoria);
   }
 
   formatLabel(value: number): string {
@@ -98,7 +138,18 @@ export class Dashboard implements OnInit {
 
   filtrarPorPrecio() {
     console.log(`Filtrando precios: ${this.minPrice}€ - ${this.maxPrice}€`);
-    // Aquí podrías llamar a this.cargarProductos(1) si el backend soportara filtros
     this.cdr.detectChanges();
+  }
+
+  limpiarFiltros() {
+    this.filtros = {
+      categoria: 'todas',
+      precioMax: 50,
+      ubicacion: 'todas',
+      valoracion: 'todas',
+      orden: 'novedad'
+    };
+    this.minPrice = 0;
+    this.maxPrice = 100;
   }
 }
