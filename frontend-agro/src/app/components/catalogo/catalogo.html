@@ -1,0 +1,91 @@
+<div class="main-container">
+  
+  <aside class="sidebar">
+    <div class="filter-card">
+      <h3><i class="fa-solid fa-filter"></i> Filtros</h3>
+      
+      <div class="filter-group">
+        <label>Precio (€/kg)</label>
+        <div class="price-inputs">
+           <input type="number" [(ngModel)]="filtros.minPrice" placeholder="Min">
+           <span>-</span>
+           <input type="number" [(ngModel)]="filtros.maxPrice" placeholder="Max">
+        </div>
+      </div>
+
+      <div class="filter-group">
+        <label>Categoría</label>
+        <ul class="category-list">
+          <li (click)="filtrarCategoria('')" [class.active]="filtros.categoria === ''">Todas</li>
+          <li (click)="filtrarCategoria('1')" [class.active]="filtros.categoria === '1'">Frutas</li>
+          <li (click)="filtrarCategoria('2')" [class.active]="filtros.categoria === '2'">Verduras</li>
+        </ul>
+      </div>
+
+      <button class="apply-btn" (click)="cargarProductos()">Aplicar Filtros</button>
+    </div>
+  </aside>
+
+  <main class="content">
+    
+    <div class="catalog-header">
+      <h2>Catálogo Completo</h2>
+      
+      <div class="header-controls">
+        <div class="search-box">
+          <i class="fa-solid fa-search"></i>
+          <input type="text" [(ngModel)]="filtros.search" (keyup.enter)="cargarProductos()" placeholder="Buscar producto...">
+        </div>
+      </div>
+    </div>
+
+    <div class="products-grid">
+      
+      <div class="product-card" *ngFor="let prod of productos">
+        
+        <div class="card-image">
+          <div class="stock-badge" *ngIf="prod.stock_quantity <= 5" [class.no-stock]="prod.stock_quantity === 0">
+             {{ prod.stock_quantity === 0 ? 'Agotado' : '¡Casi agotado!' }}
+          </div>
+          
+          <button class="wishlist-btn" [class.active]="prod.fav">
+             <i [class]="prod.fav ? 'fa-solid fa-heart' : 'fa-regular fa-heart'"></i>
+          </button>
+
+          <img *ngIf="prod.images && prod.images.length > 0"
+               [src]="'http://127.0.0.1:8000/storage/' + prod.images[0].image_path" 
+               alt="{{ prod.name }}">
+          
+          <div *ngIf="!prod.images || prod.images.length === 0" class="placeholder-img">
+             <i class="fa-solid fa-image"></i>
+          </div>
+        </div>
+
+        <div class="card-content">
+          <h4 class="product-title">{{ prod.name }}</h4>
+          
+          <div class="seller-box" *ngIf="prod.farmer">
+             <span class="seller-name">{{ prod.farmer.full_name }}</span>
+          </div>
+
+          <div class="card-footer">
+             <div class="price-box">
+                <span class="price-main">{{ prod.price }}€</span>
+                <span class="price-unit">/{{ prod.unit }}</span>
+             </div>
+             <button class="add-button" [disabled]="prod.stock_quantity === 0">
+                <i class="fa-solid fa-plus"></i> Añadir
+             </button>
+          </div>
+        </div>
+
+      </div> </div>
+
+    <div class="pagination">
+      <button (click)="cambiarPagina(paginaActual - 1)" [disabled]="paginaActual === 1">Anterior</button>
+      <span>Página {{ paginaActual }} de {{ totalPaginas }}</span>
+      <button (click)="cambiarPagina(paginaActual + 1)" [disabled]="paginaActual === totalPaginas">Siguiente</button>
+    </div>
+
+  </main>
+</div>

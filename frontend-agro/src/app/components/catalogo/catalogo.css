@@ -1,0 +1,55 @@
+/* ESTRUCTURA DEL CATÁLOGO */
+.main-container {
+  display: flex;
+  max-width: 1200px;
+  margin: 30px auto;
+  gap: 30px;
+  padding: 0 20px;
+}
+
+.sidebar {
+  width: 250px;
+  flex-shrink: 0;
+}
+
+.content {
+  flex-grow: 1;
+}
+
+.products-grid {
+  display: grid;
+  /* 3 columnas automáticas */
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); 
+  gap: 25px;
+  margin-top: 20px;
+}
+
+.catalog-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+/* Estilo simple para la lista de categorías del sidebar */
+.category-list {
+  list-style: none;
+  padding: 0;
+}
+
+.category-list li {
+  padding: 10px;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: background 0.2s;
+}
+
+.category-list li:hover {
+  background-color: #f3f4f6;
+}
+
+.category-list li.active {
+  background-color: #dcfce7;
+  color: #15803d;
+  font-weight: bold;
+}
