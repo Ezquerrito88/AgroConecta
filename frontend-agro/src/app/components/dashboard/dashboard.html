@@ -36,19 +36,24 @@
 
       <div class="filter-group filter-blue">
         <label><span class="dot-blue"></span> Ordenar por</label>
-        <select class="custom-select">
-          <option>Destacados</option>
-          <option>Precio: Menor a Mayor</option>
-        </select>
+        <mat-form-field appearance="outline" class="full-width theme-blue" subscriptSizing="dynamic">
+          <mat-select panelClass="panel-blue" value="Destacados">
+            <mat-option value="Destacados">Destacados</mat-option>
+            <mat-option value="asc">Precio: Menor a Mayor</mat-option>
+            <mat-option value="desc">Precio: Mayor a Menor</mat-option>
+          </mat-select>
+        </mat-form-field>
       </div>
 
       <div class="filter-group filter-green">
         <label><span class="dot-green"></span> Categoría</label>
-        <select class="custom-select">
-          <option>Todas</option>
-          <option>Frutas</option>
-          <option>Verduras</option>
-        </select>
+        <mat-form-field appearance="outline" class="full-width theme-green" subscriptSizing="dynamic">
+          <mat-select panelClass="panel-green" value="Todas">
+            <mat-option value="Todas">Todas</mat-option>
+            <mat-option value="Frutas">Frutas</mat-option>
+            <mat-option value="Verduras">Verduras</mat-option>
+          </mat-select>
+        </mat-form-field>
       </div>
 
       <div class="filter-group filter-orange">

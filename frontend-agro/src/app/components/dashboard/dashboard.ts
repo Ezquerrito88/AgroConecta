@@ -5,11 +5,14 @@ import { ProductoService } from '../../services/producto.service';
 import { Producto } from '../../models/producto';
 import { FormsModule } from '@angular/forms'; // <--- Necesario
 import { MatSliderModule } from '@angular/material/slider'; // <--- Necesario
+import { MatSelectModule } from '@angular/material/select'; // <--- NUEVO
+import { MatFormFieldModule } from '@angular/material/form-field';
+
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, MatSliderModule],
+  imports: [CommonModule, RouterModule, FormsModule, MatSliderModule, MatSelectModule, MatFormFieldModule],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css'
 })

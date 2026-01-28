@@ -79,7 +79,6 @@
   gap: 8px;
   background: white;
   padding: 10px 22px;
-  /* Pills más grandes para equilibrar el título */
   border-radius: 50px;
   font-size: 0.95rem;
   font-weight: 600;
@@ -114,7 +113,7 @@
   width: 100%;
 }
 
-/* --- Píldoras de Categoría --- */
+/* --- Filtros de Categoría --- */
 .category-pills {
   display: flex;
   justify-content: center;
@@ -140,23 +139,21 @@
   box-shadow: 0 4px 12px rgba(17, 194, 103, 0.3);
 }
 
-/* --- Layout: Sidebar + Grid --- */
 .main-layout {
   display: grid;
-  grid-template-columns: 300px 1fr; 
+  grid-template-columns: 315px 1fr; 
   gap: 40px;
   max-width: 1400px;
   margin: 0 auto;
   align-items: start;
 }
 
-/* Contenedor principal del sidebar */
 .filter-card {
   background: white;
   padding: 24px;
   border-radius: 24px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
-  border: 3px solid #fff5eb; /* Borde naranja sutil del diseño */
+  border: 3px solid #fff5eb;
 }
 
 .filter-header {
@@ -172,14 +169,12 @@
   color: #1f2937;
 }
 
-/* Estilos de los grupos (Cajas de colores) */
 .filter-group {
   margin-bottom: 16px;
   padding: 16px;
-  border-radius: 20px; /* Bordes muy redondeados como el diseño */
+  border-radius: 20px;
 }
 
-/* Colores de fondo por sección */
 .filter-blue { background-color: #f0f7ff; }
 .filter-green { background-color: #f0fdf4; }
 .filter-orange { background-color: #fff7ed; }
@@ -214,13 +209,168 @@
   font-weight: 600;
   color: #4b5563;
 }
-/* --- CONFIGURACIÓN DEL SLIDER (ESTILO GRUESO Y NARANJA) --- */
 
-/* Ajuste de márgenes del contenedor */
+/* Estilos de los selects (Angular Material) */
+.full-width {
+  width: 100%;
+}
+
+::ng-deep .mat-mdc-text-field-wrapper {
+  border-radius: 24px !important; 
+  padding-left: 12px !important;
+}
+
+::ng-deep .mdc-notched-outline__leading {
+  border-top-left-radius: 24px !important;
+  border-bottom-left-radius: 24px !important;
+  width: 24px !important; 
+  flex: 0 0 24px !important;
+}
+
+::ng-deep .mdc-notched-outline__trailing {
+  border-top-right-radius: 24px !important;
+  border-bottom-right-radius: 24px !important;
+}
+
+::ng-deep .mdc-notched-outline__notch {
+  border-top-width: 1px !important;
+}
+
+::ng-deep .mat-mdc-form-field-infix {
+  padding-top: 12px !important;
+  padding-bottom: 12px !important;
+  min-height: auto !important;
+}
+
+::ng-deep .mat-mdc-autocomplete-panel,
+::ng-deep .mat-mdc-select-panel {
+  border-radius: 20px !important;
+  margin-top: 5px !important;
+  overflow: hidden;
+}
+
+
+::ng-deep .mat-mdc-select-value {
+  color: #374151 !important;
+  font-weight: 700 !important;
+}
+
+::ng-deep .mat-mdc-select-arrow-wrapper {
+  margin-right: 10px !important;
+}
+
+::ng-deep .theme-blue .mat-mdc-select-arrow {
+  color: #2563eb !important;
+}
+
+::ng-deep .theme-blue .mat-mdc-select-arrow svg {
+  fill: #2563eb !important;
+  stroke: #2563eb !important;
+}
+
+::ng-deep .theme-green .mat-mdc-select-arrow {
+  color: #16a34a !important;
+}
+
+::ng-deep .theme-green .mat-mdc-select-arrow svg {
+  fill: #16a34a !important;
+  stroke: #16a34a !important;
+}
+
+::ng-deep .theme-blue .mat-mdc-text-field-wrapper {
+  background-color: #ffffff !important; 
+}
+
+::ng-deep .theme-blue .mdc-notched-outline__leading,
+::ng-deep .theme-blue .mdc-notched-outline__notch,
+::ng-deep .theme-blue .mdc-notched-outline__trailing {
+  border-color: #bfdbfe !important; 
+  border-width: 1px !important;
+}
+
+::ng-deep .theme-blue.mat-focused .mdc-notched-outline__leading,
+::ng-deep .theme-blue.mat-focused .mdc-notched-outline__notch,
+::ng-deep .theme-blue.mat-focused .mdc-notched-outline__trailing {
+  border-color: #3b82f6 !important;
+  border-width: 2px !important;
+}
+
+/* Texto seleccionado en azul */
+::ng-deep .theme-blue .mat-mdc-select-value {
+  color: #1e40af !important;
+}
+
+::ng-deep .theme-green .mat-mdc-text-field-wrapper {
+  background-color: #ffffff !important; 
+}
+
+::ng-deep .theme-green .mdc-notched-outline__leading,
+::ng-deep .theme-green .mdc-notched-outline__notch,
+::ng-deep .theme-green .mdc-notched-outline__trailing {
+  border-color: #bbf7d0 !important;
+  border-width: 1px !important;
+}
+
+::ng-deep .theme-green.mat-focused .mdc-notched-outline__leading,
+::ng-deep .theme-green.mat-focused .mdc-notched-outline__notch,
+::ng-deep .theme-green.mat-focused .mdc-notched-outline__trailing {
+  border-color: #22c55e !important;
+  border-width: 2px !important;
+}
+
+::ng-deep .theme-green .mat-mdc-select-value {
+  color: #15803d !important;
+}
+
+::ng-deep .mat-mdc-select-panel {
+  background-color: white !important;
+  border-radius: 12px !important;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.15) !important;
+  border: 1px solid #f3f4f6;
+  padding: 4px 0 !important;
+}
+
+::ng-deep .mat-mdc-option {
+  margin-bottom: 2px;
+  border-radius: 6px;
+  margin: 0 6px;
+  background-color: white !important;
+  color: #374151 !important;
+}
+
+::ng-deep .panel-blue .mat-mdc-option:hover,
+::ng-deep .panel-blue .mat-mdc-option.mdc-list-item--selected:hover {
+  background-color: #eff6ff !important; 
+}
+
+::ng-deep .panel-blue .mat-mdc-option.mdc-list-item--selected {
+  background-color: #dbeafe !important;
+}
+
+::ng-deep .panel-blue .mat-mdc-option.mdc-list-item--selected .mdc-list-item__primary-text {
+  color: #1e40af !important;
+  font-weight: 800;
+}
+
+::ng-deep .panel-green .mat-mdc-option:hover,
+::ng-deep .panel-green .mat-mdc-option.mdc-list-item--selected:hover {
+  background-color: #f0fdf4 !important;
+}
+
+::ng-deep .panel-green .mat-mdc-option.mdc-list-item--selected {
+  background-color: #dcfce7 !important;
+}
+
+::ng-deep .panel-green .mat-mdc-option.mdc-list-item--selected .mdc-list-item__primary-text {
+  color: #15803d !important;
+  font-weight: 800;
+}
+
 .slider-container {
-  width: 100%;       /* Ocupar todo el ancho disponible */
-  padding: 0;        /* Quitamos el relleno lateral para que llegue hasta los bordes */
-  margin-bottom: 10px; 
+  padding: 0 12px !important; 
+  width: 100% !important;
+  box-sizing: border-box;
+  margin-bottom: 5px;
 }
 
 mat-slider {
