@@ -112,6 +112,10 @@
   align-items: center;
 }
 
+/* ========================================================= */
+/* ESTILOS BASE DE LOS BOTONES DE ACCIÓN (CUADRADOS)         */
+/* ========================================================= */
+
 .action-btn {
   width: 48px;
   height: 48px;
@@ -122,44 +126,103 @@
   cursor: pointer;
   transition: all 0.2s ease;
   border: 1.5px solid;
-  /* Eliminamos el padding para que el icono mande en el centrado */
   padding: 0; 
   background: white;
+  margin-left: 8px; /* Un poco de separación entre botones */
 }
 
-/* Tamaño para los iconos de FontAwesome (Corazón y Usuario) */
+/* Efecto Hover Genérico (rebote suave) */
+.action-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+/* Tamaño para los iconos de FontAwesome */
 .action-btn i {
   font-size: 1.4rem;
 }
 
-/* Estilo específico para el icono de la Bolsa (Material Symbols) */
+/* Estilo específico para iconos Material Symbols (Bolsa) */
+.action-btn .material-symbols-rounded,
 .action-btn .material-symbols-outlined {
-  font-size: 28px; /* Un poco más grande para compensar el diseño */
-  font-variation-settings: 'wght' 400, 'opsz' 24;
+  font-size: 26px; 
+  font-variation-settings: 'wght' 500, 'opsz' 24;
   display: block;
 }
 
-/* --- COLORES --- */
+/* ========================================================= */
+/* COLORES ESPECÍFICOS POR TIPO DE BOTÓN                     */
+/* ========================================================= */
 
-/* Favoritos (Rojo) */
+/* 1. Favoritos (Rojo suave) */
 .fav-btn {
   background-color: #fff1f2;
   border-color: #fecaca;
   color: #ef4444;
 }
 
-/* Carrito (Verde - Icono de la bolsa) */
+/* 2. Carrito (Verde menta) */
 .bag-btn {
   background-color: #f0fdf4;
   border-color: #bbf7d0;
   color: #22c55e;
 }
 
-/* Usuario (Gris) */
+/* 3. Usuario Normal (Gris azulado) */
 .user-btn {
   background-color: #f8fafc;
   border-color: #e2e8f0;
-  color: #94a3b8;
+  color: #64748b;
+}
+
+/* 4. AGRICULTOR - PERFIL (Amarillo Tractor) */
+.farmer-style {
+  background-color: #fffbeb !important; 
+  border: 1px solid #fcd34d !important; 
+}
+.farmer-style i {
+  color: #d97706 !important; /* Amarillo oscuro */
+}
+.farmer-style:hover {
+  background-color: #fef3c7 !important;
+}
+
+/* 5. AGRICULTOR - MIS VENTAS (Verde Hoja) */
+.farmer-btn {
+  background-color: #ecfccb; /* Verde lima muy suave */
+  border-color: #d9f99d;
+  color: #65a30d;
+}
+
+/* OPCIÓN 2: MARRÓN/BEIGE (Estilo Caja de Cartón) */
+.orders-btn {
+  background-color: #f5f5f4; /* Beige grisáceo muy claro */
+  border-color: #d6d3d1;     /* Gris piedra */
+  color: #78716c;            /* Marrón tierra oscuro */
+}
+
+.orders-btn:hover {
+  background-color: #e7e5e4;
+  color: #57534e;
+}
+
+/* 2. Botón de AÑADIR (El símbolo +) */
+.add-btn {
+  background-color: #f0fdf4; /* Verde muy clarito */
+  border-color: #22c55e;     /* Borde verde fuerte */
+  color: #16a34a;            /* Icono verde */
+}
+
+/* Hacemos que el + sea un poco más grande y gordito para que destaque */
+.add-btn i {
+  font-size: 1.6rem; 
+  font-weight: 900; /* Extra negrita */
+}
+
+.add-btn:hover {
+  background-color: #dcfce7;
+  border-color: #16a34a; /* Borde más oscuro al pasar el ratón */
+  transform: translateY(-3px); /* Efecto rebote */
 }
 
 /* --- HOVERS --- */

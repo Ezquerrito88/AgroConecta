@@ -471,6 +471,19 @@ input:-webkit-autofill:focus {
   background-color: #fff7ee;
 }
 
+.error-message {
+    background-color: #fef2f2;
+    color: #ef4444; /* Rojo alerta */
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #fca5a5;
+    margin-bottom: 15px;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
 
 /* Media Query para pc */
 @media screen and (max-height: 900px) and (min-width: 1024px) {

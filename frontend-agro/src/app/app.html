@@ -1,6 +1,6 @@
 <header class="agro-header" *ngIf="mostrarLayout">
   <div class="header-container">
-    
+
     <div class="logo-box" routerLink="/">
       <img src="img/logo/logo.png" alt="AgroConecta" class="logo-img">
       <div class="logo-text">
@@ -17,6 +17,7 @@
     </div>
 
     <div class="header-actions">
+
       <ng-container *ngIf="!isLoggedIn">
         <button class="btn-login-header" routerLink="/login">
           <span class="material-symbols-rounded">login</span>
@@ -25,17 +26,33 @@
       </ng-container>
 
       <ng-container *ngIf="isLoggedIn">
-        <button class="action-btn fav-btn">
-          <i class="far fa-heart"></i>
+
+        <ng-container *ngIf="!isFarmer">
+          <button class="action-btn fav-btn" title="Favoritos">
+            <i class="far fa-heart"></i>
+          </button>
+
+          <button class="action-btn bag-btn" title="Mi Cesta">
+            <span class="material-symbols-rounded">shopping_bag</span>
+          </button>
+        </ng-container>
+
+        <ng-container *ngIf="isFarmer">
+
+          <button class="action-btn orders-btn" title="Mis Pedidos">
+            <i class="fa-solid fa-box-open"></i>
+          </button>
+
+          <button class="action-btn add-btn" routerLink="/nuevo-producto" title="Subir Producto">
+            <i class="fa-solid fa-plus"></i>
+          </button>
+
+        </ng-container>
+
+        <button class="action-btn user-btn" [class.farmer-style]="isFarmer"  title="Mi Perfil">
+          <i [class]="isFarmer ? 'fa-solid fa-tractor' : 'fa-regular fa-user'"></i>
         </button>
 
-        <button class="action-btn bag-btn">
-          <span class="material-symbols-rounded">shopping_bag</span>
-        </button>
-
-        <button class="action-btn user-btn" routerLink="/perfil">
-          <span class="material-symbols-rounded">person</span>
-        </button>
       </ng-container>
     </div>
 
@@ -49,7 +66,7 @@
 <footer class="agro-footer" *ngIf="mostrarLayout">
   <div class="footer-container">
     <div class="footer-grid">
-      
+
       <div class="footer-brand">
         <h3 class="brand-logo">AgroConecta</h3>
         <p class="brand-slogan">Sabores que Conectan</p>
@@ -71,7 +88,7 @@
         <p><i class="fa-solid fa-envelope"></i> hola@agroconecta.com</p>
         <p><i class="fa-solid fa-phone"></i> +34 111 222 333</p>
         <p><i class="fa-solid fa-location-dot"></i> Logroño, España</p>
-        
+
         <div class="footer-social">
           <a href="#" class="social-btn"><i class="fa-brands fa-instagram"></i></a>
           <a href="#" class="social-btn"><i class="fa-brands fa-facebook-f"></i></a>

@@ -44,22 +44,24 @@
         </div>
 
         <form (submit)="onLogin($event)" class="login-form">
+
+            <div *ngIf="errorMessage" class="error-message">
+                <i class="fa-solid fa-circle-exclamation"></i> {{ errorMessage }}
+            </div>
+
             <div class="input-group">
                 <label>Email</label>
-                <input type="email" name="email" placeholder="pepe@gmail.com" required>
+                <input type="email" name="email" placeholder="pepe@gmail.com" [(ngModel)]="loginData.email" required>
             </div>
 
             <div class="input-group">
                 <label>Contraseña</label>
                 <div class="password-wrapper">
-                    <input [type]="showPassword ? 'text' : 'password'" 
-                        name="password" 
-                        placeholder="••••••••" 
-                        required>
-                    
-                    <i class="fa-regular password-toggle-icon" 
-                    [ngClass]="showPassword ? 'fa-eye-slash' : 'fa-eye'"
-                    (click)="showPassword = !showPassword">
+                    <input [type]="showPassword ? 'text' : 'password'" name="password" placeholder="••••••••"
+                        [(ngModel)]="loginData.password" required>
+
+                    <i class="fa-regular password-toggle-icon" [ngClass]="showPassword ? 'fa-eye-slash' : 'fa-eye'"
+                        (click)="showPassword = !showPassword">
                     </i>
                 </div>
             </div>
@@ -82,10 +84,10 @@
         </div>
 
         <div class="social-login">
-                <button type="button" class="btn-social google" (click)="loginWithGoogle()">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="G">
-                    <span>Google</span>
-                </button>
+            <button type="button" class="btn-social google" (click)="loginWithGoogle()">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="G">
+                <span>Google</span>
+            </button>
 
             <button type="button" class="btn-social apple">
                 <img src="https://upload.wikimedia.org/wikipedia/commons/f/fa/Apple_logo_black.svg" alt="Apple">
