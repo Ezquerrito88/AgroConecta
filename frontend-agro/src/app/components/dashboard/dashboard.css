@@ -462,7 +462,6 @@ mat-slider {
   background: white;
   border-radius: 28px;
   overflow: hidden;
-  /* Borde inicial transparente para que no "salte" al hacer hover */
   border: 2px solid transparent;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -480,12 +479,35 @@ mat-slider {
 
 /* --- Imagen y Favoritos --- */
 .card-image {
-  height: 200px;
-  background: #f3f4f6;
-  position: relative;
+  position: relative; /* Para poder posicionar el corazón y el stock encima */
+  width: 100%;
+  height: 200px; /* ALTURA FIJA: Cambia esto si quieres la imagen más alta o baja */
+  background-color: #f3f4f6; /* Color de fondo mientras carga */
+  overflow: hidden;
+}
+
+/* --- 3. LA IMAGEN REAL --- */
+.card-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* MAGIA: Recorta la imagen para llenar el hueco sin deformarla */
+  display: block;
+  transition: transform 0.5s ease;
+}
+
+.placeholder-img {
+  width: 100%;
+  height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
+  background-color: #e5e7eb;
+  color: #9ca3af;
+  font-size: 2.5rem; /* Icono grande */
+}
+
+.product-card:hover .card-image img {
+  transform: scale(1.1);
 }
 
 .placeholder-icon {
@@ -674,7 +696,7 @@ mat-slider {
   flex-direction: column;
   align-items: center;
   margin-top: 50px;
-  margin-bottom: 60px;
+  margin-bottom: 15px;
   gap: 15px;
 }
 
@@ -738,11 +760,18 @@ mat-slider {
   cursor: pointer;
   box-shadow: 0 10px 20px rgba(17, 194, 103, 0.15);
   transition: all 0.3s ease;
-  margin-top: 10px;
 }
 
 .btn-full-catalog:hover {
   background-color: #0ea858;
   transform: translateY(-3px);
   box-shadow: 0 15px 25px rgba(17, 194, 103, 0.25);
+}
+
+/* Contenedor del texto */
+.pagination-info {
+  text-align: center;
+  color: #10b981; 
+  font-size: 0.9rem;
+  font-family: sans-serif;
 }

@@ -141,7 +141,26 @@
         </div>
       </div>
 
-      <div style="text-align: center; margin-top: 30px;">
+      <div class="pagination-info" *ngIf="productos.length > 0">
+        Mostrando
+
+        <span class="numbers">
+          {{ ((paginaActual - 1) * itemsPorPagina) + 1 }}
+        </span>
+
+        -
+
+        <span class="numbers">
+          {{ ((paginaActual - 1) * itemsPorPagina) + productos.length }}
+        </span>
+
+        de
+
+        <span class="numbers">{{ totalProductos }}</span>
+        productos.
+      </div>
+
+      <div style="text-align: center; margin-top: 20px;">
         <button type="button" class="btn-full-catalog" (click)="irAlCatalogoCompleto()">
           Ver Catálogo Completo
         </button>

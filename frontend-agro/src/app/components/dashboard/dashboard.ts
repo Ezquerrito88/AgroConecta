@@ -1,18 +1,26 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core'; // Añadido ChangeDetectorRef
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { ProductoService } from '../../services/producto.service';
 import { Producto } from '../../models/producto';
-import { FormsModule } from '@angular/forms'; // <--- Necesario
-import { MatSliderModule } from '@angular/material/slider'; // <--- Necesario
-import { MatSelectModule } from '@angular/material/select'; // <--- NUEVO
+import { FormsModule } from '@angular/forms';
+import { MatSliderModule } from '@angular/material/slider';
+import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
 
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, MatSliderModule, MatSelectModule, MatFormFieldModule],
+  imports: 
+  [
+    CommonModule, 
+    RouterModule, 
+    FormsModule, 
+    MatSliderModule, 
+    MatSelectModule, 
+    MatFormFieldModule
+  ],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css'
 })
@@ -20,6 +28,8 @@ export class Dashboard implements OnInit {
   productos: Producto[] = [];
   paginaActual: number = 1;
   totalPaginas: number = 1;
+  itemsPorPagina: number = 6; 
+  totalProductos: number = 0;
   minPrice: number = 0;
   maxPrice: number = 100;
 
@@ -39,11 +49,11 @@ export class Dashboard implements OnInit {
         this.productos = res.data;
         this.paginaActual = res.current_page;
         this.totalPaginas = res.last_page;
+        
+        // Guardamos el total real para el texto "de 12 productos"
+        this.totalProductos = res.total; 
 
-        // ¡ESTO ELIMINA EL DOBLE CLIC! 
-        // Obliga a la pantalla a refrescarse con los nuevos datos inmediatamente
         this.cdr.detectChanges();
-
         console.log('Productos cargados:', this.productos.length);
       },
       error: (err: any) => console.error('Error:', err)
@@ -58,16 +68,16 @@ export class Dashboard implements OnInit {
 
     this.productoService.getDestacados(nuevaPagina).subscribe({
       next: (res: any) => {
-        // Usamos el spread operator para asegurar que Angular detecte el cambio
         this.productos = [...res.data];
         this.paginaActual = res.current_page;
         this.totalPaginas = res.last_page;
+        
+        // Actualizamos el total también al cambiar de página
+        this.totalProductos = res.total; 
 
-        // Forzamos la detección de cambios para que funcione al primer clic
         this.cdr.detectChanges();
-
         window.scrollTo({ top: 450, behavior: 'smooth' });
-        console.log('Página actualizada con éxito:', this.paginaActual);
+        console.log('Página actualizada:', this.paginaActual);
       },
       error: (err: any) => console.error('Error al cambiar página:', err)
     });
