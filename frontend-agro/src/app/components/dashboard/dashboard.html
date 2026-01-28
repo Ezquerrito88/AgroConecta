@@ -31,18 +31,40 @@
     <aside class="filter-card">
       <div class="filter-header">
         <h3>Filtros</h3>
-        <i class="fa-solid fa-sliders"></i>
+        <i class="fa-solid fa-filter"></i>
       </div>
+
       <div class="filter-group filter-blue">
-        <label>● Ordenar por</label>
+        <label><span class="dot-blue"></span> Ordenar por</label>
         <select class="custom-select">
           <option>Destacados</option>
           <option>Precio: Menor a Mayor</option>
         </select>
       </div>
+
+      <div class="filter-group filter-green">
+        <label><span class="dot-green"></span> Categoría</label>
+        <select class="custom-select">
+          <option>Todas</option>
+          <option>Frutas</option>
+          <option>Verduras</option>
+        </select>
+      </div>
+
       <div class="filter-group filter-orange">
-        <label>● Precio Máximo</label>
-        <input type="range" class="price-range" min="0" max="100">
+        <label><span class="dot-orange"></span> Rango de Precio</label>
+
+        <div class="slider-container">
+          <mat-slider min="0" max="100" step="1">
+            <input matSliderStartThumb [(ngModel)]="minPrice" (dragEnd)="filtrarPorPrecio()">
+            <input matSliderEndThumb [(ngModel)]="maxPrice" (dragEnd)="filtrarPorPrecio()">
+          </mat-slider>
+        </div>
+
+        <div class="range-labels">
+          <span class="price-tag min">{{ minPrice }}€</span>
+          <span class="price-tag max">{{ maxPrice }}€</span>
+        </div>
       </div>
     </aside>
 
@@ -54,10 +76,10 @@
 
       <div class="products-grid">
         <div class="product-card" *ngFor="let prod of productos">
-          
+
           <div class="card-image">
             <div class="stock-badge" *ngIf="prod.stock_quantity <= 5" [class.no-stock]="prod.stock_quantity === 0">
-               {{ prod.stock_quantity === 0 ? 'Agotado' : '¡Casi agotado!' }}
+              {{ prod.stock_quantity === 0 ? 'Agotado' : '¡Casi agotado!' }}
             </div>
 
             <button class="wishlist-btn" [class.active]="prod.fav" (click)="toggleFavorite(prod)">
@@ -65,9 +87,8 @@
             </button>
 
             <img *ngIf="prod.images && prod.images.length > 0"
-                 [src]="'http://127.0.0.1:8000/storage/' + prod.images[0].image_path" 
-                 alt="{{ prod.name }}">
-            
+              [src]="'http://127.0.0.1:8000/storage/' + prod.images[0].image_path" alt="{{ prod.name }}">
+
             <div *ngIf="!prod.images || prod.images.length === 0" class="placeholder-img">
               <i class="fa-solid fa-image"></i>
             </div>
@@ -75,7 +96,7 @@
 
           <div class="card-content">
             <h4 class="product-title">{{ prod.name }}</h4>
-            
+
             <p class="product-desc">{{ prod.description }}</p>
 
             <div class="seller-box" *ngIf="prod.farmer">
@@ -98,14 +119,18 @@
 
       <div class="pagination-container" *ngIf="totalPaginas > 1">
         <div class="pagination-controls">
-          <button type="button" class="pag-btn nav-btn" [disabled]="paginaActual === 1" (click)="cambiarPagina(paginaActual - 1)">
+          <button type="button" class="pag-btn nav-btn" [disabled]="paginaActual === 1"
+            (click)="cambiarPagina(paginaActual - 1)">
             <i class="fa-solid fa-chevron-left"></i>
           </button>
 
-          <button type="button" class="pag-btn num-btn" [class.active]="paginaActual === 1" (click)="cambiarPagina(1)">1</button>
-          <button type="button" class="pag-btn num-btn" *ngIf="totalPaginas >= 2" [class.active]="paginaActual === 2" (click)="cambiarPagina(2)">2</button>
+          <button type="button" class="pag-btn num-btn" [class.active]="paginaActual === 1"
+            (click)="cambiarPagina(1)">1</button>
+          <button type="button" class="pag-btn num-btn" *ngIf="totalPaginas >= 2" [class.active]="paginaActual === 2"
+            (click)="cambiarPagina(2)">2</button>
 
-          <button type="button" class="pag-btn nav-btn" [disabled]="paginaActual === totalPaginas" (click)="cambiarPagina(paginaActual + 1)">
+          <button type="button" class="pag-btn nav-btn" [disabled]="paginaActual === totalPaginas"
+            (click)="cambiarPagina(paginaActual + 1)">
             <i class="fa-solid fa-chevron-right"></i>
           </button>
         </div>

@@ -143,62 +143,144 @@
 /* --- Layout: Sidebar + Grid --- */
 .main-layout {
   display: grid;
-  grid-template-columns: 240px 1fr; /* Cambiado de 280px a 240px para dar más aire al grid */
-  gap: 30px; /* Reducido ligeramente para unificar el diseño */
+  grid-template-columns: 300px 1fr; 
+  gap: 40px;
   max-width: 1400px;
   margin: 0 auto;
-  align-items: start; /* Importante: el filtro no se estira hacia abajo */
+  align-items: start;
 }
 
-/* --- Solo modificado el Sidebar (Filtros) --- */
+/* Contenedor principal del sidebar */
 .filter-card {
   background: white;
   padding: 24px;
-  border-radius: 20px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.05);
-  border: 2px solid #fff5eb; /* Borde sutil naranja */
+  border-radius: 24px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+  border: 3px solid #fff5eb; /* Borde naranja sutil del diseño */
 }
 
 .filter-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px; /* Reducido para compactar */
+  margin-bottom: 20px;
 }
 
 .filter-header h3 {
-  font-size: 1.2rem; /* Un poco más pequeño para encajar en 240px */
+  font-size: 1.7rem;
   font-weight: 800;
   color: #1f2937;
 }
 
+/* Estilos de los grupos (Cajas de colores) */
 .filter-group {
-  margin-bottom: 15px; /* Reducido de 20px */
-  padding: 12px; /* Reducido de 15px */
-  border-radius: 18px;
+  margin-bottom: 16px;
+  padding: 16px;
+  border-radius: 20px; /* Bordes muy redondeados como el diseño */
 }
 
-/* Los colores de fondo se mantienen igual por orden de hijo */
-.filter-group:nth-child(2) { background-color: #eff6ff; }
-.filter-group:nth-child(3) { background-color: #f0fdf4; }
-.filter-group:nth-child(4) { background-color: #fff7ed; }
+/* Colores de fondo por sección */
+.filter-blue { background-color: #f0f7ff; }
+.filter-green { background-color: #f0fdf4; }
+.filter-orange { background-color: #fff7ed; }
 
 .filter-group label {
-  display: block;
-  font-weight: 700;
-  font-size: 0.85rem; /* Letra un poco más pequeña y legible */
-  margin-bottom: 8px;
-  color: #374151;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 800;
+  font-size: 1rem;
+  margin-bottom: 12px;
+  color: #1f2937;
 }
 
+/* Puntos de color al lado del texto */
+.dot-blue, .dot-green, .dot-orange {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+.dot-blue { background-color: #3b82f6; }
+.dot-green { background-color: #22c55e; }
+.dot-orange { background-color: #f97316; }
+
+/* Inputs y Selects */
 .custom-select {
   width: 100%;
-  padding: 8px; /* Reducido de 10px */
-  border-radius: 10px;
-  border: 1px solid #e5e7eb;
+  padding: 10px;
+  border-radius: 12px;
+  border: 1.5px solid #e5e7eb;
   background: white;
   font-weight: 600;
-  font-size: 0.9rem;
+  color: #4b5563;
+}
+/* --- CONFIGURACIÓN DEL SLIDER (ESTILO GRUESO Y NARANJA) --- */
+
+/* Ajuste de márgenes del contenedor */
+.slider-container {
+  width: 100%;       /* Ocupar todo el ancho disponible */
+  padding: 0;        /* Quitamos el relleno lateral para que llegue hasta los bordes */
+  margin-bottom: 10px; 
+}
+
+mat-slider {
+  width: 100% !important;
+  min-width: 100%; 
+  margin: 0;
+}
+
+/* 1. BARRA GRUESA Y FONDO (Naranja suave) */
+::ng-deep .mat-mdc-slider .mdc-slider__track--inactive {
+  background-color: #ffedd5 !important;
+  opacity: 1;
+  height: 8px !important; /* Grosor de la barra */
+  border-radius: 4px;
+}
+
+/* 2. BARRA DE PROGRESO (Naranja Fuerte) */
+::ng-deep .mat-mdc-slider .mdc-slider__track--active_fill {
+  border-color: #f97316 !important;
+  border-top-width: 8px !important; /* Tiene que coincidir con el grosor de arriba */
+}
+
+/* 3. BOTONES (CÍRCULOS GRANDES) */
+::ng-deep .mat-mdc-slider .mdc-slider__thumb-knob {
+  background-color: #f97316 !important; /* Relleno naranja */
+  border: 3px solid white !important;   /* Borde blanco */
+  border-radius: 50% !important;        /* Círculo perfecto */
+  width: 24px !important;               /* Tamaño del botón */
+  height: 24px !important;
+  /* Ajuste para que quede centrado en la barra gruesa */
+  transform: translate(-50%, -50%) !important;
+  top: 50% !important; 
+}
+
+/* 4. ELIMINAR BURBUJAS Y EFECTOS EXTRA */
+/* Ocultamos la burbuja que sale arriba (por si acaso) */
+::ng-deep .mat-mdc-slider .mdc-slider__value-indicator {
+  display: none !important; 
+}
+/* Ocultamos la onda al hacer clic (más limpio) */
+::ng-deep .mat-mdc-slider .mat-ripple-element {
+  display: none !important;
+}
+
+/* --- ESTILO DE LOS NÚMEROS DE ABAJO --- */
+.range-labels {
+  display: flex;
+  justify-content: space-between; /* Esto los pega a los extremos */
+  align-items: center;
+  margin-top: 8px;
+}
+
+.price-tag {
+  font-weight: 800;
+  font-size: 0.95rem;
+  color: #f97316; /* Texto Naranja */
+  background: #fff7ed; /* Fondo cremita */
+  padding: 4px 10px;
+  border-radius: 8px;
+  border: 1px solid #ffedd5;
 }
 
 /* --- Grid de Productos --- */

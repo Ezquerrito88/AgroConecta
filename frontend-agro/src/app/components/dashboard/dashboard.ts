@@ -3,11 +3,13 @@ import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { ProductoService } from '../../services/producto.service';
 import { Producto } from '../../models/producto';
+import { FormsModule } from '@angular/forms'; // <--- Necesario
+import { MatSliderModule } from '@angular/material/slider'; // <--- Necesario
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, FormsModule, MatSliderModule],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css'
 })
@@ -15,6 +17,8 @@ export class Dashboard implements OnInit {
   productos: Producto[] = [];
   paginaActual: number = 1;
   totalPaginas: number = 1;
+  minPrice: number = 0;
+  maxPrice: number = 100;
 
   constructor(
     private router: Router,
@@ -73,5 +77,15 @@ export class Dashboard implements OnInit {
 
   irAlCatalogoCompleto() {
     this.router.navigate(['/productos']);
+  }
+
+  formatLabel(value: number): string {
+    return value + '€';
+  }
+
+  filtrarPorPrecio() {
+    console.log(`Filtrando precios: ${this.minPrice}€ - ${this.maxPrice}€`);
+    // Aquí podrías llamar a this.cargarProductos(1) si el backend soportara filtros
+    this.cdr.detectChanges();
   }
 }
