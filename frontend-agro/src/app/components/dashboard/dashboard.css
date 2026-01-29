@@ -788,3 +788,12 @@ mat-slider {
   font-size: 0.9rem;
   font-family: sans-serif;
 }
+
+.pag-btn:disabled,
+.pag-btn[disabled] {
+    background-color: #d1d5db;
+    color: #a0a0a0;
+    cursor: not-allowed;
+    opacity: 0.6;
+    border-color: #ccc;
+}

@@ -11,12 +11,13 @@ export class ProductoService {
   // Esta URL debe coincidir con tu servidor de Laravel (típicamente puerto 8000)
   // Asegúrate de que termina en /trending como pusiste en Laravel
   // Si en Laravel la ruta es Route::get('/products/featured', ...)
-  private apiURL = 'http://127.0.0.1:8000/api/products/featured';
+  private apiURL = 'http://127.0.0.1:8000/api';
 
-  getDestacados(page: number = 1): Observable<any> {
-    // Laravel detecta automáticamente el parámetro 'page' para el método paginate()
-    return this.http.get<any>(`${this.apiURL}?page=${page}`);
-  }
+  // En producto.service.ts
+ getDestacados(page: number, limit: number = 6) {
+  // 2. Aquí concatenamos una sola vez la ruta
+  return this.http.get(`${this.apiURL}/products/featured?page=${page}&limit=${limit}`);
+}
 
 
   // Obtener TODOS los productos (con filtros opcionales)
@@ -30,7 +31,7 @@ export class ProductoService {
     if (filters.search) params.search = filters.search;
     if (filters.sort) params.sort_by = filters.sort;
 
-     return this.http.get<any>(`${this.apiURL}/products`, { params });
+    return this.http.get<any>(`${this.apiURL}/products`, { params });
   }
 }
 

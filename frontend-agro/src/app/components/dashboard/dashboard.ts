@@ -12,31 +12,31 @@ import { MatFormFieldModule } from '@angular/material/form-field';
   selector: 'app-dashboard',
   standalone: true,
   imports: [
-    CommonModule, 
-    RouterModule, 
-    FormsModule, 
-    MatSliderModule, 
-    MatSelectModule, 
+    CommonModule,
+    RouterModule,
+    FormsModule,
+    MatSliderModule,
+    MatSelectModule,
     MatFormFieldModule
   ],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css'
 })
 export class Dashboard implements OnInit {
-  
+
   // DATOS DE PRODUCTOS
   productos: Producto[] = [];
   paginaActual: number = 1;
   totalPaginas: number = 1;
-  itemsPorPagina: number = 6; 
+  itemsPorPagina: number = 6;
   totalProductos: number = 0;
-  
+
   // FILTROS
   minPrice: number = 0;
   maxPrice: number = 100;
-  
+
   // DATOS DE USUARIO (NUEVO)
-  isFarmer: boolean = false; 
+  isFarmer: boolean = false;
   currentUser: any = null;
 
   // CATEGORÍAS RÁPIDAS (Para los botones tipo píldora)
@@ -53,7 +53,7 @@ export class Dashboard implements OnInit {
   constructor(
     private router: Router,
     private productoService: ProductoService,
-    private cdr: ChangeDetectorRef 
+    private cdr: ChangeDetectorRef
   ) { }
 
   ngOnInit() {
@@ -69,7 +69,7 @@ export class Dashboard implements OnInit {
     const userStr = localStorage.getItem('user');
     if (userStr) {
       this.currentUser = JSON.parse(userStr);
-      
+
       // Comprobamos si es agricultor (ajusta 'agricultor' según tu BD)
       if (this.currentUser.role === 'agricultor' || this.currentUser.role_id === 2) {
         this.isFarmer = true;
@@ -84,7 +84,7 @@ export class Dashboard implements OnInit {
         this.productos = res.data;
         this.paginaActual = res.current_page;
         this.totalPaginas = res.last_page;
-        this.totalProductos = res.total; 
+        this.totalProductos = res.total;
 
         this.cdr.detectChanges();
         console.log('Productos cargados:', this.productos.length);
@@ -103,12 +103,15 @@ export class Dashboard implements OnInit {
         this.productos = [...res.data];
         this.paginaActual = res.current_page;
         this.totalPaginas = res.last_page;
-        this.totalProductos = res.total; 
+        this.totalProductos = res.total;
 
         this.cdr.detectChanges();
-        
-        // Scroll suave hacia arriba al cambiar de página
-        window.scrollTo({ top: 0, behavior: 'smooth' }); 
+
+        const elemento = document.getElementById('inicio-lista');
+        if (elemento) {
+          // Hacemos scroll suave hasta ese elemento (con un margen para que no quede pegado)
+          elemento.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
       },
       error: (err: any) => console.error('Error al cambiar página:', err)
     });
@@ -118,7 +121,7 @@ export class Dashboard implements OnInit {
   toggleFavorite(prod: Producto) {
     prod.fav = !prod.fav;
     // Aquí podrías llamar al servicio para guardar el favorito en BD
-    this.cdr.detectChanges(); 
+    this.cdr.detectChanges();
   }
 
   irAlCatalogoCompleto() {

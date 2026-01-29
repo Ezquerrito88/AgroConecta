@@ -1,137 +1,155 @@
-<div class="catalogo-container">
-  
-  <header class="catalogo-header">
-    <h1 class="page-title">Catálogo de Productos</h1>
-    <div class="breadcrumbs">
-      <a routerLink="/" class="breadcrumb-link">Inicio</a>
-      <span class="breadcrumb-separator">></span>
-      <span class="breadcrumb-current">Productos</span>
+<header class="catalog-hero">
+  <div class="hero-container">
+    <h1 class="hero-title">Catálogo de Productos</h1>
+    <div class="breadcrumb">
+      <a routerLink="/" class="link-inicio">Inicio</a>
+
+      <span class="separator"> > </span>
+
+      <span class="current">Productos</span>
     </div>
-  </header>
-
-  <div class="catalogo-layout">
-    
-    <aside class="filters-sidebar">
-      <div class="filters-header">
-        <h2>Filtros</h2>
-        <button class="clear-filters-btn" (click)="limpiarFiltros()">
-          <i class="fa-solid fa-filter-circle-xmark"></i>
-        </button>
-      </div>
-
-      <div class="filter-group">
-        <label class="filter-label">
-          <i class="fa-solid fa-tags"></i> Categoría
-        </label>
-        <select [(ngModel)]="filtros.categoria">
-          <option value="todas">Todas</option>
-          <option value="frutas">Frutas</option>
-          <option value="verduras">Verduras</option>
-        </select>
-      </div>
-
-      <div class="filter-group">
-        <label class="filter-label">
-          <i class="fa-solid fa-coins"></i> Precio
-        </label>
-        <div class="price-range">
-          <input type="range" min="0" max="50" [(ngModel)]="filtros.precioMax" class="price-slider">
-          <div class="price-values">
-            <span>0€</span>
-            <span>{{ filtros.precioMax }}€</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="filter-group">
-        <label class="filter-label">
-          <i class="fa-solid fa-location-dot"></i> Ubicación
-        </label>
-        <select [(ngModel)]="filtros.ubicacion">
-          <option value="todas">Todas</option>
-          <option value="logrono">Logroño</option>
-          <option value="calahorra">Calahorra</option>
-        </select>
-      </div>
-
-      <div class="filter-group">
-        <label class="filter-label">
-          <i class="fa-solid fa-star"></i> Valoración
-        </label>
-        <select [(ngModel)]="filtros.valoracion">
-          <option value="todas">Todas</option>
-          <option value="4">4 estrellas o más</option>
-          <option value="3">3 estrellas o más</option>
-        </select>
-      </div>
-    </aside>
-
-    <main class="catalogo-main">
-      
-      <div class="results-header">
-        <p class="results-count">Mostrando 1-12 de 145 productos</p>
-        <div class="sort-box">
-          <select [(ngModel)]="filtros.orden">
-            <option value="novedad">Novedad</option>
-            <option value="precio_asc">Precio: Menor a Mayor</option>
-            <option value="precio_desc">Precio: Mayor a Menor</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="products-grid">
-        <div class="product-card" *ngFor="let prod of productos">
-          
-          <div class="card-image">
-            <button class="favorite-btn" [class.active]="prod.esFavorito" (click)="toggleFavorito(prod)">
-              <i [class]="prod.esFavorito ? 'fa-solid fa-heart' : 'fa-regular fa-heart'"></i>
-            </button>
-            <img [src]="prod.imagen" [alt]="prod.nombre">
-          </div>
-
-          <div class="card-content">
-            <h3 class="product-name">{{ prod.nombre }}</h3>
-            
-            <div class="seller-info">
-              <img [src]="prod.vendedor.avatar" [alt]="prod.vendedor.nombre" class="seller-avatar">
-              <div class="seller-details">
-                <span class="seller-name">{{ prod.vendedor.nombre }}</span>
-                <span class="seller-location">
-                  <i class="fa-solid fa-location-dot"></i> {{ prod.vendedor.ubicacion }}
-                </span>
-              </div>
-            </div>
-
-            <div class="rating-box">
-              <div class="stars">
-                <i class="fa-solid fa-star"></i>
-                <i class="fa-solid fa-star"></i>
-                <i class="fa-solid fa-star"></i>
-                <i class="fa-solid fa-star"></i>
-                <i class="fa-solid fa-star-half-stroke"></i>
-              </div>
-              <span class="rating-value">{{ prod.valoracion }}</span>
-            </div>
-
-            <div class="card-footer">
-              <div class="price-box">
-                <span class="price">{{ prod.precio }}€</span>
-                <span class="unit">/{{ prod.unidad }}</span>
-              </div>
-              <button class="add-to-cart-btn">
-                <i class="fa-solid fa-plus"></i> Añadir
-              </button>
-            </div>
-          </div>
-        </div> </div> <div class="pagination">
-        <button class="page-btn prev"><i class="fa-solid fa-chevron-left"></i></button>
-        <button class="page-btn active">1</button>
-        <button class="page-btn">2</button>
-        <button class="page-btn">3</button>
-        <button class="page-btn">4</button>
-        <button class="page-btn next"><i class="fa-solid fa-chevron-right"></i></button>
-      </div>
-    </main>
-
   </div>
+</header>
+
+<div class="catalog-layout container">
+
+  <aside class="filter-card">
+    <div class="filter-header">
+      <h3>Filtros</h3>
+      <button class="clear-filters-btn">
+        <i class="fa-solid fa-filter-circle-xmark"></i>
+      </button>
+    </div>
+
+    <div class="filter-group filter-green">
+      <label><span class="dot-green"></span> Categoría</label>
+      <mat-form-field appearance="outline" class="full-width theme-green" subscriptSizing="dynamic">
+        <mat-select panelClass="panel-green" value="Todas">
+          <mat-option value="Todas">Todas</mat-option>
+          <mat-option value="Frutas">Frutas</mat-option>
+          <mat-option value="Verduras">Verduras</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+
+    <div class="filter-group filter-orange">
+      <label><span class="dot-orange"></span> Rango de Precio</label>
+
+      <div class="slider-container">
+        <mat-slider min="0" max="100" step="1">
+          <input matSliderStartThumb [(ngModel)]="minPrice" (dragEnd)="filtrarPorPrecio()">
+          <input matSliderEndThumb [(ngModel)]="maxPrice" (dragEnd)="filtrarPorPrecio()">
+        </mat-slider>
+      </div>
+
+      <div class="range-labels">
+        <span class="price-tag min">{{ minPrice }}€</span>
+        <span class="price-tag max">{{ maxPrice }}€</span>
+      </div>
+    </div>
+
+    <div class="filter-group filter-blue">
+      <label><span class="dot-blue"></span> Ubicación</label>
+      <mat-form-field appearance="outline" class="full-width theme-blue" subscriptSizing="dynamic">
+        <mat-select panelClass="panel-blue" value="Destacados">
+          <mat-option value="Destacados">Todas</mat-option>
+          <mat-option value="asc">La Rioja</mat-option>
+          <mat-option value="desc">Madrid</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+
+    <div class="filter-group filter-red">
+      <label><span class="dot-red"></span> Valoración</label>
+      <mat-form-field appearance="outline" class="full-width theme-red" subscriptSizing="dynamic">
+        <mat-select panelClass="panel-red" value="Destacados">
+          <mat-option value="Destacados">Todas</mat-option>
+          <mat-option value="asc">5 estrellas</mat-option>
+          <mat-option value="desc">4 estrellas</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+
+    <div class="filter-group filter-purple">
+      <label><span class="dot-purple"></span> Tipo de cultivo</label>
+      <mat-form-field appearance="outline" class="full-width theme-purple" subscriptSizing="dynamic">
+        <mat-select panelClass="panel-purple" value="Destacados">
+          <mat-option value="Destacados">Todos</mat-option>
+          <mat-option value="asc">5 estrellas</mat-option>
+          <mat-option value="desc">4 estrellas</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+  </aside>
+
+  <main class="products-area">
+
+    <div class="area-header">
+      <span class="results-info" *ngIf="totalProductos > 0">
+        Mostrando {{ desde }}-{{ hasta }} de {{ totalProductos }} productos
+      </span>
+      <span class="results-info" *ngIf="totalProductos === 0">
+        No se encontraron productos
+      </span>
+    </div>
+
+    <div class="products-grid">
+      <div class="product-card" *ngFor="let prod of productos">
+
+        <div class="card-image">
+          <div class="stock-badge" *ngIf="prod.stock_quantity <= 5" [class.no-stock]="prod.stock_quantity === 0">
+            {{ prod.stock_quantity === 0 ? 'Agotado' : '¡Casi agotado!' }}
+          </div>
+
+          <button class="wishlist-btn" [class.active]="prod.fav" (click)="toggleFavorite(prod)">
+            <i [class]="prod.fav ? 'fa-solid fa-heart' : 'fa-regular fa-heart'"></i>
+          </button>
+
+          <img *ngIf="prod.images && prod.images.length > 0"
+            [src]="'http://127.0.0.1:8000/storage/' + prod.images[0].image_path" alt="{{ prod.name }}">
+
+          <div *ngIf="!prod.images || prod.images.length === 0" class="placeholder-img">
+            <i class="fa-solid fa-image"></i>
+          </div>
+        </div>
+
+        <div class="card-content">
+          <h4 class="product-title">{{ prod.name }}</h4>
+
+          <p class="product-desc">{{ prod.description }}</p>
+
+          <div class="seller-box" *ngIf="prod.farmer">
+            <span class="seller-name">{{ prod.farmer.full_name || 'Agricultor Local' }}</span>
+            <span class="seller-location"><i class="fa-solid fa-location-dot"></i> Logroño</span>
+          </div>
+
+          <div class="card-footer">
+            <div class="price-box">
+              <span class="price-main">{{ prod.price }}€</span>
+              <span class="price-unit">/{{ prod.unit }}</span>
+            </div>
+            <button class="add-button" [disabled]="prod.stock_quantity === 0" (click)="agregarAlCarrito(prod)">
+              <i class="fa-solid fa-plus"></i> Añadir
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="pagination-wrapper" *ngIf="totalPaginas > 1">
+
+      <button class="pag-arrow" (click)="cambiarPagina(paginaActual - 1)" [disabled]="paginaActual === 1">
+        <i class="fa-solid fa-chevron-left"></i>
+      </button>
+
+      <button *ngFor="let p of numeracionPaginas" class="pag-num" [class.active]="paginaActual === p"
+        (click)="cambiarPagina(p)">
+        {{ p }}
+      </button>
+
+      <button class="pag-arrow" (click)="cambiarPagina(paginaActual + 1)" [disabled]="paginaActual === totalPaginas">
+        <i class="fa-solid fa-chevron-right"></i>
+      </button>
+
+    </div>
+  </main>
 </div>

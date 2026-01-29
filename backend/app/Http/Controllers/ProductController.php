@@ -26,28 +26,16 @@ class ProductController extends Controller
     }
 
     // Crear una función específica para destacados
-    public function getFeatured()
+    public function getFeatured(Request $request)
     {
-        // 1. Obtenemos los productos aprobados (RF14)
-        // 2. Limitamos el total absoluto a 12 (take)
-        // 3. De esos 12, hacemos páginas de 6 (paginate)
+        $limit = $request->input('limit', 6);
 
         $products = Product::with(['category', 'images', 'farmer'])
             ->where('moderation_status', 'approved')
             ->orderBy('created_at', 'desc')
-            ->take(12)
-            ->get(); // Obtenemos el "pedazo" de 12 productos
+            ->paginate($limit);
 
-        // Ahora convertimos manualmente esos 12 en una paginación de 6
-        $currentPage = request()->get('page', 1);
-        $pagedData = $products->forPage($currentPage, 6)->values();
-
-        return response()->json([
-            'data' => $pagedData,
-            'current_page' => (int)$currentPage,
-            'last_page' => 2, // Forzamos a que siempre sean 2 páginas máximo
-            'total' => 12
-        ]);
+        return response()->json($products);
     }
 
     //Crear productos
