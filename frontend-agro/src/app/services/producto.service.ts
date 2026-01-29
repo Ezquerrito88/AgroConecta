@@ -14,10 +14,10 @@ export class ProductoService {
   private apiURL = 'http://127.0.0.1:8000/api';
 
   // En producto.service.ts
- getDestacados(page: number, limit: number = 6) {
-  // 2. Aquí concatenamos una sola vez la ruta
-  return this.http.get(`${this.apiURL}/products/featured?page=${page}&limit=${limit}`);
-}
+  getDestacados(page: number, limit: number = 6) {
+    // 2. Aquí concatenamos una sola vez la ruta
+    return this.http.get(`${this.apiURL}/products/featured?page=${page}&limit=${limit}`);
+  }
 
 
   // Obtener TODOS los productos (con filtros opcionales)
@@ -32,6 +32,12 @@ export class ProductoService {
     if (filters.sort) params.sort_by = filters.sort;
 
     return this.http.get<any>(`${this.apiURL}/products`, { params });
+  }
+
+  // Función para dar/quitar like
+  toggleFavorite(id: number) {
+    // Llamamos a la ruta que acabamos de crear en Laravel
+    return this.http.post(`${this.apiURL}/favorites/${id}`, {});
   }
 }
 

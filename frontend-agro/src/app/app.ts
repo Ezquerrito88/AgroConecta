@@ -7,57 +7,68 @@ import { filter } from 'rxjs/operators';
   selector: 'app-root',
   standalone: true,
   imports: [CommonModule, RouterModule],
-  templateUrl: './app.html',
-  styleUrl: './app.css'
+  templateUrl: './app.html', // Asegúrate de que tu archivo se llama así o app.html
+  styleUrls: ['./app.css']
 })
-
-export class App implements OnInit {
+export class App implements OnInit { // Nombre estándar: AppComponent
   isLoggedIn: boolean = false; 
   mostrarLayout: boolean = true;
-  
-  // NUEVA VARIABLE: Para saber si mostramos el tractor o la persona
   isFarmer: boolean = false; 
 
   constructor(private router: Router) {}
 
   ngOnInit() {
+    // Escuchamos cada cambio de URL
     this.router.events.pipe(
       filter(event => event instanceof NavigationEnd)
-    ).subscribe((event: any) => {
+    ).subscribe((event: NavigationEnd) => {
       
-      // 1. Control de visibilidad del Layout (Ocultar en login)
-      this.mostrarLayout = !event.urlAfterRedirects.includes('/login');
+      // 1. Ocultar header/footer en Login y Registro
+      const rutasOcultas = ['/login', '/registro'];
+      this.mostrarLayout = !rutasOcultas.some(ruta => event.urlAfterRedirects.includes(ruta));
 
-      // 2. Control de sesión y Rol
+      // 2. Comprobar sesión cada vez que cambiamos de página
       this.checkLoginStatus();
     });
   }
 
   checkLoginStatus() {
+    // OJO: Usamos 'auth_token' porque así lo tienes en tu código.
+    // Asegúrate de que en el Login lo guardas con ESTE MISMO NOMBRE.
     const token = localStorage.getItem('auth_token');
+    
+    // Convertimos a booleano real (si hay texto es true, si es null es false)
     this.isLoggedIn = !!token; 
 
-    // Reiniciamos el estado de agricultor por seguridad
+    // Reiniciamos estado
     this.isFarmer = false;
 
     if (this.isLoggedIn) {
-      // Recuperamos los datos del usuario guardados al hacer login
-      // Asegúrate de que en tu login.ts guardaste: localStorage.setItem('user', JSON.stringify(res.user));
       const userStr = localStorage.getItem('user');
 
       if (userStr) {
         try {
           const user = JSON.parse(userStr);
           
-          // COMPROBACIÓN DEL ROL
-          // Cambia 'agricultor' o 'role_id' según cómo venga de tu base de datos (Laravel)
-          if (user.role === 'agricultor' || user.role_id === 2 || user.tipo === 'farmer') {
+          // Lógica de roles unificada
+          // Si tu base de datos usa role_id: 2 para agricultor, o el string 'farmer'
+          if (user.role === 'agricultor' || user.role === 'farmer' || user.role_id === 2) {
             this.isFarmer = true;
           }
         } catch (error) {
-          console.error('Error al leer datos del usuario', error);
+          console.error('Error al leer datos del usuario:', error);
+          // Si falla el JSON, forzamos logout por seguridad
+          this.logout();
         }
       }
     }
+  }
+
+  logout() {
+    localStorage.removeItem('auth_token');
+    localStorage.removeItem('user');
+    this.isLoggedIn = false;
+    this.isFarmer = false;
+    this.router.navigate(['/login']);
   }
 }

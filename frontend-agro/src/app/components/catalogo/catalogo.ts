@@ -1,7 +1,7 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { FormsModule } from '@angular/forms'; 
+import { FormsModule } from '@angular/forms';
 
 // --- IMPORTS DE ANGULAR MATERIAL ---
 import { MatSliderModule } from '@angular/material/slider';
@@ -27,32 +27,32 @@ import { Producto } from '../../models/producto';
     MatIconModule
   ],
   // Asegúrate de que estos nombres coinciden con tus archivos reales
-  templateUrl: './catalogo.html', 
-  styleUrl: './catalogo.css'      
+  templateUrl: './catalogo.html',
+  styleUrl: './catalogo.css'
 })
 export class Catalogo implements OnInit {
   // Datos principales
   productos: Producto[] = [];
-  
+
   // Paginación
   paginaActual: number = 1;
   totalPaginas: number = 1;
-  totalProductos: number = 0; 
-  desde: number = 0;          
-  hasta: number = 0;          
+  totalProductos: number = 0;
+  desde: number = 0;
+  hasta: number = 0;
 
   // --- VARIABLES DE FILTROS ---
   filtroCategoria: string = 'Todas';
   filtroUbicacion: string = 'Todas';
-  
+
   // Slider de Rango de Precio
-  minPrice: number = 0;   
-  maxPrice: number = 100; 
+  minPrice: number = 0;
+  maxPrice: number = 100;
 
   constructor(
     private productoService: ProductoService,
     private cdr: ChangeDetectorRef
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.cargarProductos(1);
@@ -65,12 +65,12 @@ export class Catalogo implements OnInit {
         this.productos = res.data;
         this.paginaActual = res.current_page;
         this.totalPaginas = res.last_page;
-        
+
         // Datos para "Mostrando X-Y de Z productos"
         this.totalProductos = res.total;
         this.desde = res.from;
         this.hasta = res.to;
-        
+
         this.cdr.detectChanges();
         window.scrollTo({ top: 0, behavior: 'smooth' });
       },
@@ -133,7 +133,17 @@ export class Catalogo implements OnInit {
   }
 
   toggleFavorite(prod: Producto) {
-    prod.fav = !prod.fav;
+    // Usamos el nuevo nombre 'is_favorite'
+    prod.is_favorite = !prod.is_favorite;
+
+    this.productoService.toggleFavorite(prod.id).subscribe({
+      next: (res: any) => console.log('Like guardado'),
+      error: (err) => {
+        // Si falla, revertimos usando el nombre nuevo
+        prod.is_favorite = !prod.is_favorite;
+        console.error(err);
+      }
+    });
   }
 
   agregarAlCarrito(prod: Producto) {

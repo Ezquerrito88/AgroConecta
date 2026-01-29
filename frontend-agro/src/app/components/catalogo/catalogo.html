@@ -101,8 +101,8 @@
             {{ prod.stock_quantity === 0 ? 'Agotado' : '¡Casi agotado!' }}
           </div>
 
-          <button class="wishlist-btn" [class.active]="prod.fav" (click)="toggleFavorite(prod)">
-            <i [class]="prod.fav ? 'fa-solid fa-heart' : 'fa-regular fa-heart'"></i>
+          <button class="wishlist-btn" [class.active]="prod.is_favorite" (click)="toggleFavorite(prod)">
+            <i [class]="prod.is_favorite ? 'fa-solid fa-heart' : 'fa-regular fa-heart'"></i>
           </button>
 
           <img *ngIf="prod.images && prod.images.length > 0"

@@ -118,10 +118,19 @@ export class Dashboard implements OnInit {
   }
 
   // --- INTERACCIÓN ---
-  toggleFavorite(prod: Producto) {
-    prod.fav = !prod.fav;
-    // Aquí podrías llamar al servicio para guardar el favorito en BD
-    this.cdr.detectChanges();
+  toggleFavorite(prod: any) {
+    prod.is_favorite = !prod.is_favorite;
+
+    this.productoService.toggleFavorite(prod.id).subscribe({
+      next: (response: any) => {
+        console.log('Guardado correctamente:', response.message);
+      },
+      error: (err) => {
+        console.error('Error al guardar favorito:', err);
+
+        prod.is_favorite = !prod.is_favorite;
+      }
+    });
   }
 
   irAlCatalogoCompleto() {

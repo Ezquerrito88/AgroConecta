@@ -6,7 +6,7 @@ export interface Producto {
   unit: string;
   stock_quantity: number; // <--- FALTABA ESTO PARA EL RF02
   moderation_status: string;
-  fav?: boolean;
+  is_favorite?: boolean;
   farmer?: {
     id: number;
     full_name: string; // <--- En Laravel usas full_name, no name

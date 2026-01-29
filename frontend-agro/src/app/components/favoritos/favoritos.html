@@ -1,0 +1,93 @@
+<header class="catalog-hero">
+  <div class="hero-container">
+    <h1 class="hero-title">Mis Favoritos</h1>
+    <div class="breadcrumb">
+      <a routerLink="/" class="link-inicio">Inicio</a>
+      <span class="separator"> > </span>
+      <a routerLink="/productos" class="link-inicio">Productos</a>
+      <span class="separator"> > </span>
+      <span class="current">Favoritos</span>
+    </div>
+  </div>
+</header>
+
+<div class="catalog-layout container">
+
+  <aside class="filter-card">
+    <div class="filter-header">
+      <h3>Filtros</h3>
+      <button class="clear-filters-btn">
+        <i class="fa-solid fa-filter-circle-xmark"></i>
+      </button>
+    </div>
+    <div class="filter-group filter-green">
+      <label><span class="dot-green"></span> Categoría</label>
+      <mat-form-field appearance="outline" class="full-width theme-green" subscriptSizing="dynamic">
+        <mat-select panelClass="panel-green" value="Todas">
+          <mat-option value="Todas">Todas</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+    </aside>
+
+  <main class="products-area">
+
+    <div class="area-header">
+      <span class="results-info" *ngIf="productos.length > 0">
+        Tienes <strong>{{ productos.length }}</strong> productos guardados
+      </span>
+    </div>
+
+    <div *ngIf="productos.length === 0 && !isLoading" class="empty-state" style="text-align: center; padding: 50px;">
+        <i class="fa-regular fa-heart" style="font-size: 50px; color: #ccc; margin-bottom: 20px;"></i>
+        <h3>No tienes favoritos aún</h3>
+        <p style="color: #666;">Guarda lo que más te guste para comprarlo luego.</p>
+        <button routerLink="/productos" class="add-button" style="margin-top: 20px;">
+            Ir al Catálogo
+        </button>
+    </div>
+
+    <div class="products-grid" *ngIf="productos.length > 0">
+      <div class="product-card" *ngFor="let prod of productos">
+
+        <div class="card-image">
+          <div class="stock-badge" *ngIf="prod.stock_quantity <= 5" [class.no-stock]="prod.stock_quantity === 0">
+            {{ prod.stock_quantity === 0 ? 'Agotado' : '¡Casi agotado!' }}
+          </div>
+
+          <button class="wishlist-btn active" (click)="quitarFavorito(prod.id)">
+            <i class="fa-solid fa-heart"></i>
+          </button>
+
+          <img *ngIf="prod.images && prod.images.length > 0"
+            [src]="'http://127.0.0.1:8000/storage/' + prod.images[0].image_path" alt="{{ prod.name }}">
+
+          <div *ngIf="!prod.images || prod.images.length === 0" class="placeholder-img">
+            <i class="fa-solid fa-image"></i>
+          </div>
+        </div>
+
+        <div class="card-content">
+          <h4 class="product-title">{{ prod.name }}</h4>
+          <p class="product-desc">{{ prod.description }}</p>
+
+          <div class="seller-box" *ngIf="prod.farmer">
+            <span class="seller-name">{{ prod.farmer.full_name || 'Agricultor' }}</span>
+            <span class="seller-location"><i class="fa-solid fa-location-dot"></i> Logroño</span>
+          </div>
+
+          <div class="card-footer">
+            <div class="price-box">
+              <span class="price-main">{{ prod.price }}€</span>
+              <span class="price-unit">/{{ prod.unit }}</span>
+            </div>
+            <button class="add-button" [disabled]="prod.stock_quantity === 0">
+              <i class="fa-solid fa-plus"></i> Añadir
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    </main>
+</div>
