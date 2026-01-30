@@ -98,15 +98,19 @@
         </div>
 
         <div class="tab-content">
-            <div *ngIf="activeTab === 'descripcion'" class="text-content">
-                <p>{{ product.description }}</p>
+            <div *ngIf="activeTab === 'descripcion'" class="text-content description-tab">
+                <h3 class="desc-title">Detalles del producto</h3>
+
+                <p class="desc-text">
+                    {{ product.description }}
+                </p>
             </div>
             <div *ngIf="activeTab === 'origen'" class="text-content origin-tab">
 
                 <p class="origin-intro">
                     Este producto ha sido cultivado de forma sostenible y con mucho cariño en
                     <strong class="location-highlight">
-                        {{  product.farmer?.farmer?.city || 'nuestros campos locales' }}
+                        {{ product.farmer?.farmer?.city || 'nuestros campos locales' }}
                     </strong>.
                 </p>
 
@@ -117,6 +121,10 @@
                     <div class="origin-info">
                         <span class="origin-label">Procedencia Certificada</span>
                         <span class="origin-value">
+                            <span *ngIf="product.farmer?.farmer?.farm_name">
+                                {{ product.farmer?.farmer?.farm_name }},
+                            </span>
+
                             {{ product.farmer?.farmer?.city || 'España' }}
                         </span>
                     </div>
@@ -128,8 +136,39 @@
                 </p>
 
             </div>
-            <div *ngIf="activeTab === 'valoraciones'" class="text-content">
-                <p>⭐⭐⭐⭐⭐ "Excelente calidad, muy fresco." - Juan P.</p>
+            <div *ngIf="activeTab === 'valoraciones'" class="text-content reviews-tab">
+
+                <div class="no-reviews" *ngIf="!product.reviews || product.reviews.length === 0">
+                    <i class="fa-regular fa-comment-dots"></i>
+                    <p>Este producto aún no tiene valoraciones.</p>
+                    <button class="btn-write-review">Sé el primero en opinar</button>
+                </div>
+
+                <div class="reviews-list" *ngIf="product.reviews && product.reviews.length > 0">
+
+                    <h3 class="reviews-title">Opiniones de clientes ({{ product.reviews.length }})</h3>
+
+                    <div class="review-card" *ngFor="let review of product.reviews">
+
+                        <div class="review-header">
+                            <div class="reviewer-avatar">
+                                {{ review.user?.name?.charAt(0) || 'U' }}
+                            </div>
+                            <div class="review-meta">
+                                <span class="reviewer-name">{{ review.user?.name || 'Usuario' }}</span>
+                                <span class="review-date">{{ review.created_at | date:'mediumDate' }}</span>
+                            </div>
+                        </div>
+
+                        <div class="review-stars">
+                            <i class="fa-solid fa-star" *ngFor="let s of [1,2,3,4,5]"
+                                [class.active]="s <= review.rating"></i>
+                        </div>
+
+                        <p class="review-text">{{ review.comment }}</p>
+                    </div>
+
+                </div>
             </div>
         </div>
     </div>

@@ -39,7 +39,7 @@ class Product extends Model
         if ($user) {
             return $user->favorites()->where('product_id', $this->id)->exists();
         }
-        
+
         return false;
     }
 
@@ -61,5 +61,10 @@ class Product extends Model
     public function images()
     {
         return $this->hasMany(ProductImage::class);
+    }
+
+    public function reviews()
+    {
+        return $this->hasMany(Review::class);
     }
 }

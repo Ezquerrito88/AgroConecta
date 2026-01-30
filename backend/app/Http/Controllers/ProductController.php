@@ -82,7 +82,7 @@ class ProductController extends Controller
     //Mostrar producto
     public function show($id)
     {
-        $product = Product::with(['category', 'images', 'farmer.farmer'])->find($id);
+        $product = Product::with(['category', 'images', 'farmer.farmer', 'reviews.user'])->find($id);
 
         if (!$product) {
             return response()->json(['message' => 'Producto no encontrado'], 404);
