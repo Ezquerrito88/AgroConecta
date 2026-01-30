@@ -23,7 +23,7 @@ class User extends Authenticatable
         'email',
         'password',
         'google_id',
-        'role', 
+        'role',
     ];
 
     /**
@@ -58,5 +58,10 @@ class User extends Authenticatable
     public function products()
     {
         return $this->hasMany(Product::class, 'farmer_id');
+    }
+
+    public function favorites()
+    {
+        return $this->belongsToMany(Product::class, 'favorites', 'user_id', 'product_id')->withTimestamps();
     }
 }

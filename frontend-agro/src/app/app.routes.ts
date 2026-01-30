@@ -8,6 +8,6 @@ export const routes: Routes = [
   { path: '', component: Dashboard }, // Esta es tu landing page
   { path: 'login', component: Login },
   { path: 'productos', component: Catalogo },
-  { path: 'favoritos', component: Favoritos},
+  { path: 'productos/favoritos', component: Favoritos},
 
 ];
