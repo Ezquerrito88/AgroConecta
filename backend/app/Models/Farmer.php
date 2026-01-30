@@ -15,6 +15,7 @@ class Farmer extends Model
     protected $fillable = [
         'user_id',
         'farm_name',
+        'city',
         'bio',
         'is_verified'
     ];

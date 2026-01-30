@@ -1,0 +1,445 @@
+/* Hero */
+.catalog-hero {
+    width: 100%;
+    background-image: url('/img/header/header.png');
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    padding: 5dvh 5%;
+    margin-top: 0px;
+}
+
+.hero-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.hero-title {
+    font-family: 'Geist', sans-serif;
+    font-size: 3rem;
+    font-weight: 900;
+    color: #1f2937;
+    margin: 0 0 10px 0;
+    letter-spacing: -1px;
+    text-align: left;
+}
+
+.breadcrumb {
+    font-size: 1rem;
+    color: #6b7280;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.separator {
+    font-size: 0.9rem;
+    color: #9ca3af;
+    margin: 0 5px;
+}
+
+.current {
+    color: #374151;
+    font-weight: 700;
+}
+
+.link-inicio {
+    text-decoration: none;
+    color: #4b5563;
+    cursor: pointer;
+    transition: color 0.3s;
+}
+
+.link-inicio:hover {
+    color: #2ecc71;
+    font-weight: 600;
+}
+
+/* =========================================
+   2. LAYOUT PRINCIPAL (Tus márgenes negativos)
+========================================= */
+.main-content {
+    max-width: 1400px;
+    margin: 40px auto;
+    padding: 0 20px;
+}
+
+.product-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 130px;
+    margin-bottom: 60px;
+    align-items: start;
+}
+
+/* =========================================
+   3. COLUMNA IZQUIERDA (Tus 800px intactos)
+========================================= */
+.image-placeholder {
+    background-color: #f3f4f6;
+    border-radius: 20px;
+    height: 450px;
+    width: 750px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    position: relative;
+}
+
+.image-placeholder img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.icon-placeholder {
+    color: #d1d5db;
+    font-size: 4rem;
+}
+
+/* =========================================
+   4. COLUMNA DERECHA (CORRECCIÓN ALINEACIÓN)
+========================================= */
+
+.info-column {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    width: 100%;
+}
+
+/* Grupo Dinámico (Título + Tarjeta) */
+.dynamic-group {
+    width: fit-content;
+    min-width: 350px;
+    /* Un poco más ancho por defecto */
+    max-width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    margin: 0;
+    padding: 0;
+}
+
+/* Título */
+.product-name-title {
+    font-size: 3.1rem;
+    color: #07A350;
+    margin: 0 0 10px 0;
+    font-weight: 700;
+    line-height: 1.1;
+    text-align: left;
+    white-space: nowrap;
+}
+
+/* Estrellas */
+.rating-box {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 25px;
+    color: #f1c40f;
+    width: 100%;
+    font-size: 1.4rem;
+}
+
+.rating-text {
+    color: #7f8c8d;
+    font-size: 1.1rem;
+    font-weight: 500;
+}
+
+/* Tarjeta Agricultor */
+.farmer-card {
+    background: linear-gradient(to right, #FFFBED, #FFF7ED);
+    border: 1px solid #ffeacc;
+    padding: 15px 20px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 10px;
+    margin-left: 0;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.farmer-avatar {
+    width: 55px;
+    height: 55px;
+    border-radius: 50%;
+    overflow: hidden;
+    background: #e2e8f0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #9ca3af;
+    flex-shrink: 0;
+}
+
+.farmer-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.farmer-avatar i {
+    font-size: 1.4rem;
+}
+
+.farmer-info {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 3px;
+}
+
+.farmer-info .label {
+    font-size: 0.75rem;
+    color: #9ca3af;
+    text-transform: uppercase;
+    margin-bottom: 2px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+.farmer-info .name {
+    font-size: 1.1rem;
+    color: #1f2937;
+    font-weight: 700;
+}
+
+.farmer-info .location {
+    font-size: 0.9rem;
+    color: #6b7280;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+/* Precio */
+.price-box {
+    margin-top: 20px;
+    margin-bottom: 25px;
+    display: flex;
+    align-items: baseline;
+    width: 100%;
+}
+
+.price {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: #07A350;
+}
+
+.unit {
+    font-size: 1.25rem;
+    color: #6b7280;
+    font-weight: 500;
+    margin-left: 5px;
+}
+
+/* Botones */
+.actions-row {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    width: 100%;
+}
+
+.qty-selector {
+    display: flex;
+    align-items: center;
+    background-color: #E0FFEC;
+    border-radius: 8px;
+    padding: 5px;
+    border: 1px solid #BAF5D2;
+    flex-shrink: 0;
+}
+
+.qty-selector button {
+    width: 36px;
+    height: 36px;
+    border: none;
+    background: #84e5b2;
+    border-radius: 6px;
+    color: #ffffff;
+    font-size: 1.2rem;
+    font-weight: bold;
+    cursor: pointer;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+}
+
+.qty-selector button.plus {
+    background: #4ade80;
+    color: white;
+}
+
+.qty-selector button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.qty-selector button:hover:not(:disabled) {
+    filter: brightness(0.95);
+}
+
+.qty-selector input {
+    width: 60px;
+    border: none;
+    background: transparent;
+    text-align: center;
+    font-weight: 700;
+    color: #064e3b;
+    outline: none;
+    font-size: 1rem;
+}
+
+.add-cart-btn {
+    background: linear-gradient(to right, #11C267, #02BA7A);
+    color: white;
+    border: none;
+    padding: 0 40px;
+    height: 46px;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 1rem;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(16, 185, 129, 0.2);
+    transition: all 0.2s;
+    flex: 1;
+    width: auto;
+    display: flex; 
+    align-items: center; 
+    justify-content: center;
+}
+
+.add-cart-btn:hover {
+    background-color: #059669;
+    transform: translateY(-1px);
+}
+
+.add-cart-btn:active {
+    transform: translateY(0);
+}
+
+/* Pestañas */
+.tabs-container {
+    border-top: 1px solid #e5e7eb;
+    padding-top: 30px;
+}
+
+.tabs-header {
+    display: flex;
+    gap: 40px;
+    border-bottom: 2px solid #f3f4f6;
+    margin-bottom: 20px;
+}
+
+.tabs-header button {
+    background: none;
+    border: none;
+    padding-bottom: 10px;
+    font-size: 1.1rem;
+    color: #6b7280;
+    cursor: pointer;
+    position: relative;
+    top: 2px;
+}
+
+.tabs-header button.active {
+    color: #064e3b;
+    font-weight: 600;
+    border-bottom: 3px solid #10b981;
+}
+
+.text-content {
+    color: #4b5563;
+    line-height: 1.6;
+    font-size: 1rem;
+}
+
+/* PESTAÑA ORIGEN */
+.origin-tab {
+    animation: fadeIn 0.3s ease-in;
+}
+
+.origin-intro {
+    font-size: 1.1rem;
+    color: #4b5563;
+    margin-bottom: 25px;
+}
+
+.location-highlight {
+    color: #00b894; /* Tu verde corporativo */
+    font-weight: 700;
+}
+
+/* Tarjeta de Origen */
+.origin-card {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    background-color: #f0fdf4; /* Fondo verde muy suave */
+    border: 1px solid #bbf7d0;
+    padding: 20px;
+    border-radius: 12px;
+    margin-bottom: 25px;
+    max-width: 400px; /* Que no sea gigante */
+}
+
+.origin-icon i {
+    font-size: 2rem;
+    color: #10b981;
+}
+
+.origin-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.origin-label {
+    font-size: 0.8rem;
+    color: #6b7280;
+    text-transform: uppercase;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+.origin-value {
+    font-size: 1.2rem;
+    color: #1f2937;
+    font-weight: 700;
+}
+
+.origin-desc {
+    font-size: 1rem;
+    color: #6b7280;
+    line-height: 1.6;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .product-grid {
+        grid-template-columns: 1fr;
+        gap: 30px;
+        margin-left: 0;
+    }
+
+    .image-placeholder {
+        width: 100%;
+        height: 250px;
+    }
+}

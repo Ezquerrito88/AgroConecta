@@ -15,6 +15,7 @@ class Product extends Model
         'category_id',
         'name',
         'description',
+        'short_description',
         'price',
         'unit',
         'stock_quantity',

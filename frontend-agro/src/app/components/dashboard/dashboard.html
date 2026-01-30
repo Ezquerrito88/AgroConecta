@@ -92,17 +92,23 @@
             </button>
 
             <img *ngIf="prod.images && prod.images.length > 0"
-              [src]="'http://127.0.0.1:8000/storage/' + prod.images[0].image_path" alt="{{ prod.name }}">
+              [src]="'http://127.0.0.1:8000/storage/' + prod.images[0].image_path" alt="{{ prod.name }}"
+              [routerLink]="['/producto', prod.id]" style="cursor: pointer;">
 
-            <div *ngIf="!prod.images || prod.images.length === 0" class="placeholder-img">
+            <div *ngIf="!prod.images || prod.images.length === 0" class="placeholder-img"
+              [routerLink]="['/producto', prod.id]" style="cursor: pointer;">
               <i class="fa-solid fa-image"></i>
             </div>
           </div>
 
           <div class="card-content">
-            <h4 class="product-title">{{ prod.name }}</h4>
+            <h4 class="product-title" [routerLink]="['/producto', prod.id]" style="cursor: pointer;">
+              {{ prod.name }}
+            </h4>
 
-            <p class="product-desc">{{ prod.description }}</p>
+            <p class="short-desc" *ngIf="prod.short_description">
+              {{ prod.short_description }}
+            </p>
 
             <div class="seller-box" *ngIf="prod.farmer">
               <span class="seller-name">{{ prod.farmer.full_name || 'Agricultor Local' }}</span>
