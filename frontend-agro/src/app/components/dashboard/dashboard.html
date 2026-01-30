@@ -80,29 +80,30 @@
       </div>
 
       <div class="products-grid">
-        <div class="product-card" *ngFor="let prod of productos">
+        <div class="product-card" *ngFor="let prod of productos" [routerLink]="['/producto', prod.id]"
+          style="cursor: pointer;">
 
           <div class="card-image">
             <div class="stock-badge" *ngIf="prod.stock_quantity <= 5" [class.no-stock]="prod.stock_quantity === 0">
               {{ prod.stock_quantity === 0 ? 'Agotado' : '¡Casi agotado!' }}
             </div>
 
-            <button class="wishlist-btn" [class.active]="prod.is_favorite" (click)="toggleFavorite(prod)">
+            <button class="wishlist-btn" [class.active]="prod.is_favorite"
+              (click)="$event.stopPropagation(); toggleFavorite(prod)">
               <i [class]="prod.is_favorite ? 'fa-solid fa-heart' : 'fa-regular fa-heart'"></i>
             </button>
 
             <img *ngIf="prod.images && prod.images.length > 0"
-              [src]="'http://127.0.0.1:8000/storage/' + prod.images[0].image_path" alt="{{ prod.name }}"
-              [routerLink]="['/producto', prod.id]" style="cursor: pointer;">
+              [src]="'http://127.0.0.1:8000/storage/' + prod.images[0].image_path" alt="{{ prod.name }}">
 
-            <div *ngIf="!prod.images || prod.images.length === 0" class="placeholder-img"
-              [routerLink]="['/producto', prod.id]" style="cursor: pointer;">
+            <div *ngIf="!prod.images || prod.images.length === 0" class="placeholder-img">
               <i class="fa-solid fa-image"></i>
             </div>
           </div>
 
           <div class="card-content">
-            <h4 class="product-title" [routerLink]="['/producto', prod.id]" style="cursor: pointer;">
+
+            <h4 class="product-title">
               {{ prod.name }}
             </h4>
 
@@ -120,7 +121,9 @@
                 <span class="price-main">{{ prod.price }}€</span>
                 <span class="price-unit">/{{ prod.unit }}</span>
               </div>
-              <button class="add-button" [disabled]="prod.stock_quantity === 0">
+
+              <button class="add-button" [disabled]="prod.stock_quantity === 0"
+                (click)="$event.stopPropagation();">
                 <i class="fa-solid fa-plus"></i> Añadir
               </button>
             </div>

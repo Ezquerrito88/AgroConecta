@@ -6,10 +6,10 @@
             <a routerLink="/" class="link-inicio">Inicio</a>
             <span class="separator"> > </span>
 
-            <a routerLink="/catalogo" class="link-inicio">Productos</a>
+            <a routerLink="/productos" class="link-inicio">Productos</a>
             <span class="separator"> > </span>
 
-            <a [routerLink]="['/catalogo']" [queryParams]="{ category: product.category.name }" class="link-inicio">
+            <a [routerLink]="['/productos']" [queryParams]="{ category: product.category.name }" class="link-inicio">
                 {{ product.category.name }}
             </a>
             <span class="separator"> > </span>

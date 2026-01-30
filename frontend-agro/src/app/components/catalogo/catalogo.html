@@ -94,14 +94,16 @@
     </div>
 
     <div class="products-grid">
-      <div class="product-card" *ngFor="let prod of productos">
+      <div class="product-card" *ngFor="let prod of productos" [routerLink]="['/producto', prod.id]"
+        style="cursor: pointer;">
 
         <div class="card-image">
           <div class="stock-badge" *ngIf="prod.stock_quantity <= 5" [class.no-stock]="prod.stock_quantity === 0">
             {{ prod.stock_quantity === 0 ? 'Agotado' : '¡Casi agotado!' }}
           </div>
 
-          <button class="wishlist-btn" [class.active]="prod.is_favorite" (click)="toggleFavorite(prod)">
+          <button class="wishlist-btn" [class.active]="prod.is_favorite"
+            (click)="$event.stopPropagation(); toggleFavorite(prod)">
             <i [class]="prod.is_favorite ? 'fa-solid fa-heart' : 'fa-regular fa-heart'"></i>
           </button>
 
@@ -120,7 +122,9 @@
 
           <div class="seller-box" *ngIf="prod.farmer">
             <span class="seller-name">{{ prod.farmer.full_name || 'Agricultor Local' }}</span>
-            <span class="seller-location"><i class="fa-solid fa-location-dot"></i> Logroño</span>
+            <span class="seller-location">
+              <i class="fa-solid fa-location-dot"></i> {{ prod.farmer.farmer?.city || 'Logroño' }}
+            </span>
           </div>
 
           <div class="card-footer">
@@ -128,7 +132,9 @@
               <span class="price-main">{{ prod.price }}€</span>
               <span class="price-unit">/{{ prod.unit }}</span>
             </div>
-            <button class="add-button" [disabled]="prod.stock_quantity === 0" (click)="agregarAlCarrito(prod)">
+
+            <button class="add-button" [disabled]="prod.stock_quantity === 0"
+              (click)="$event.stopPropagation(); agregarAlCarrito(prod)">
               <i class="fa-solid fa-plus"></i> Añadir
             </button>
           </div>
