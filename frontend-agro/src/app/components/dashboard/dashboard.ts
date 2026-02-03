@@ -7,6 +7,7 @@ import { FormsModule } from '@angular/forms';
 import { MatSliderModule } from '@angular/material/slider';
 import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 @Component({
   selector: 'app-dashboard',
@@ -17,7 +18,8 @@ import { MatFormFieldModule } from '@angular/material/form-field';
     FormsModule,
     MatSliderModule,
     MatSelectModule,
-    MatFormFieldModule
+    MatFormFieldModule,
+    MatProgressSpinnerModule
   ],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css'
@@ -35,11 +37,14 @@ export class Dashboard implements OnInit {
   minPrice: number = 0;
   maxPrice: number = 100;
 
-  // DATOS DE USUARIO (NUEVO)
+  // DATOS DE USUARIO
   isFarmer: boolean = false;
   currentUser: any = null;
 
-  // CATEGORÍAS RÁPIDAS (Para los botones tipo píldora)
+  // 🌀 VARIABLE DE CARGA (Empieza en true para que salga al inicio)
+  isLoading: boolean = true;
+
+  // CATEGORÍAS RÁPIDAS
   categoriasRapidas: string[] = ['Todas', 'Frutas', 'Verduras', 'Granos', 'Lácteos', 'Especias'];
 
   filtros = {
@@ -57,20 +62,16 @@ export class Dashboard implements OnInit {
   ) { }
 
   ngOnInit() {
-    // 1. Verificamos quién es el usuario antes de cargar nada
     this.verificarUsuario();
-
-    // 2. Cargamos los productos
+    // Cargamos la primera página
     this.cargarProductos(1);
   }
 
-  // --- LÓGICA DE USUARIO (NUEVO) ---
+  // --- LÓGICA DE USUARIO ---
   verificarUsuario() {
     const userStr = localStorage.getItem('user');
     if (userStr) {
       this.currentUser = JSON.parse(userStr);
-
-      // Comprobamos si es agricultor (ajusta 'agricultor' según tu BD)
       if (this.currentUser.role === 'agricultor' || this.currentUser.role_id === 2) {
         this.isFarmer = true;
       }
@@ -78,56 +79,70 @@ export class Dashboard implements OnInit {
   }
 
   // --- LÓGICA DE PRODUCTOS ---
+  
   cargarProductos(page: number) {
+    // 1. Activamos el spinner antes de llamar al servicio
+    this.isLoading = true;
+    this.paginaActual = page;
+
     this.productoService.getDestacados(page).subscribe({
       next: (res: any) => {
-        this.productos = res.data;
-        this.paginaActual = res.current_page;
-        this.totalPaginas = res.last_page;
-        this.totalProductos = res.total;
+        // Obtenemos los datos (ajusta si tu backend devuelve res.data o res directamente)
+        this.productos = res.data || res;
+        
+        // Actualizamos contadores de paginación
+        this.paginaActual = res.current_page || page;
+        this.totalPaginas = res.last_page || 1;
+        this.totalProductos = res.total || 0;
 
+        // 2. Desactivamos el spinner porque ya tenemos datos
+        this.isLoading = false;
         this.cdr.detectChanges();
+        
         console.log('Productos cargados:', this.productos.length);
       },
-      error: (err: any) => console.error('Error:', err)
+      error: (err: any) => {
+        console.error('Error cargando productos:', err);
+        // 3. Desactivamos el spinner aunque falle (para no bloquear la pantalla)
+        this.isLoading = false;
+        this.cdr.detectChanges();
+      }
     });
   }
 
   cambiarPagina(nuevaPagina: number) {
+    // Validaciones para no pedir páginas que no existen
     if (nuevaPagina === this.paginaActual || nuevaPagina < 1 || nuevaPagina > this.totalPaginas) {
       return;
     }
 
-    this.productoService.getDestacados(nuevaPagina).subscribe({
-      next: (res: any) => {
-        this.productos = [...res.data];
-        this.paginaActual = res.current_page;
-        this.totalPaginas = res.last_page;
-        this.totalProductos = res.total;
+    // Activamos spinner manual (opcional, ya lo hace cargarProductos, pero para asegurar)
+    this.isLoading = true;
 
-        this.cdr.detectChanges();
+    // Reutilizamos la función principal (más limpio)
+    this.cargarProductos(nuevaPagina);
 
-        const elemento = document.getElementById('inicio-lista');
-        if (elemento) {
-          // Hacemos scroll suave hasta ese elemento (con un margen para que no quede pegado)
-          elemento.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-      },
-      error: (err: any) => console.error('Error al cambiar página:', err)
-    });
+    // Scroll suave hacia arriba
+    const elemento = document.getElementById('inicio-lista');
+    if (elemento) {
+      setTimeout(() => {
+        elemento.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 100); // Pequeño delay para dejar que Angular renderice
+    }
   }
 
   // --- INTERACCIÓN ---
   toggleFavorite(prod: any) {
+    // UI Optimista: cambiamos el icono al instante
     prod.is_favorite = !prod.is_favorite;
 
     this.productoService.toggleFavorite(prod.id).subscribe({
       next: (response: any) => {
-        console.log('Guardado correctamente:', response.message);
+        console.log('Favorito actualizado');
       },
       error: (err) => {
         console.error('Error al guardar favorito:', err);
-
+        // Si falla, revertimos el cambio visual
         prod.is_favorite = !prod.is_favorite;
       }
     });
@@ -140,8 +155,8 @@ export class Dashboard implements OnInit {
   // --- LÓGICA DE FILTROS ---
   seleccionarCategoriaRapida(categoria: string) {
     this.filtros.categoria = categoria.toLowerCase();
-    // Aquí podrías recargar productos filtrados si tu backend lo soporta
     console.log('Categoría seleccionada:', this.filtros.categoria);
+    // Aquí podrías llamar a this.cargarProductos(1) si el backend filtra
   }
 
   formatLabel(value: number): string {
@@ -150,6 +165,7 @@ export class Dashboard implements OnInit {
 
   filtrarPorPrecio() {
     console.log(`Filtrando precios: ${this.minPrice}€ - ${this.maxPrice}€`);
+    // Aquí llamarías al servicio con los filtros
     this.cdr.detectChanges();
   }
 

@@ -814,6 +814,16 @@ mat-slider {
   border: 2px solid #6EE7B7; /* Borde verde medio */
 }
 
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px; /* Importante para que no salga aplastado */
+  gap: 15px;
+  color: #666;
+}
+
 /* Ajuste Responsive para móviles */
 @media (max-width: 600px) {
   .pag-num, .pag-arrow {

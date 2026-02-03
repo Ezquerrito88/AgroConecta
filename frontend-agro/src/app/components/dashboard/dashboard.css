@@ -141,7 +141,7 @@
 
 .main-layout {
   display: grid;
-  grid-template-columns: 315px 1fr; 
+  grid-template-columns: 315px 1fr;
   gap: 40px;
   max-width: 1400px;
   margin: 0 auto;
@@ -166,7 +166,8 @@
 }
 
 .clear-filters-btn:hover {
-  color: #ef4444; /* Rojo al pasar el ratón */
+  color: #ef4444;
+  /* Rojo al pasar el ratón */
 }
 
 .filter-header {
@@ -188,9 +189,17 @@
   border-radius: 20px;
 }
 
-.filter-blue { background-color: #f0f7ff; }
-.filter-green { background-color: #f0fdf4; }
-.filter-orange { background-color: #fff7ed; }
+.filter-blue {
+  background-color: #f0f7ff;
+}
+
+.filter-green {
+  background-color: #f0fdf4;
+}
+
+.filter-orange {
+  background-color: #fff7ed;
+}
 
 .filter-group label {
   display: flex;
@@ -203,14 +212,25 @@
 }
 
 /* Puntos de color al lado del texto */
-.dot-blue, .dot-green, .dot-orange {
+.dot-blue,
+.dot-green,
+.dot-orange {
   width: 8px;
   height: 8px;
   border-radius: 50%;
 }
-.dot-blue { background-color: #3b82f6; }
-.dot-green { background-color: #22c55e; }
-.dot-orange { background-color: #f97316; }
+
+.dot-blue {
+  background-color: #3b82f6;
+}
+
+.dot-green {
+  background-color: #22c55e;
+}
+
+.dot-orange {
+  background-color: #f97316;
+}
 
 /* Inputs y Selects */
 .custom-select {
@@ -229,14 +249,14 @@
 }
 
 ::ng-deep .mat-mdc-text-field-wrapper {
-  border-radius: 24px !important; 
+  border-radius: 24px !important;
   padding-left: 12px !important;
 }
 
 ::ng-deep .mdc-notched-outline__leading {
   border-top-left-radius: 24px !important;
   border-bottom-left-radius: 24px !important;
-  width: 24px !important; 
+  width: 24px !important;
   flex: 0 0 24px !important;
 }
 
@@ -291,13 +311,13 @@
 }
 
 ::ng-deep .theme-blue .mat-mdc-text-field-wrapper {
-  background-color: #ffffff !important; 
+  background-color: #ffffff !important;
 }
 
 ::ng-deep .theme-blue .mdc-notched-outline__leading,
 ::ng-deep .theme-blue .mdc-notched-outline__notch,
 ::ng-deep .theme-blue .mdc-notched-outline__trailing {
-  border-color: #bfdbfe !important; 
+  border-color: #bfdbfe !important;
   border-width: 1px !important;
 }
 
@@ -314,7 +334,7 @@
 }
 
 ::ng-deep .theme-green .mat-mdc-text-field-wrapper {
-  background-color: #ffffff !important; 
+  background-color: #ffffff !important;
 }
 
 ::ng-deep .theme-green .mdc-notched-outline__leading,
@@ -338,7 +358,7 @@
 ::ng-deep .mat-mdc-select-panel {
   background-color: white !important;
   border-radius: 12px !important;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.15) !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15) !important;
   border: 1px solid #f3f4f6;
   padding: 4px 0 !important;
 }
@@ -353,7 +373,7 @@
 
 ::ng-deep .panel-blue .mat-mdc-option:hover,
 ::ng-deep .panel-blue .mat-mdc-option.mdc-list-item--selected:hover {
-  background-color: #eff6ff !important; 
+  background-color: #eff6ff !important;
 }
 
 ::ng-deep .panel-blue .mat-mdc-option.mdc-list-item--selected {
@@ -380,7 +400,7 @@
 }
 
 .slider-container {
-  padding: 0 12px !important; 
+  padding: 0 12px !important;
   width: 100% !important;
   box-sizing: border-box;
   margin-bottom: 5px;
@@ -388,7 +408,7 @@
 
 mat-slider {
   width: 100% !important;
-  min-width: 100%; 
+  min-width: 100%;
   margin: 0;
 }
 
@@ -396,33 +416,40 @@ mat-slider {
 ::ng-deep .mat-mdc-slider .mdc-slider__track--inactive {
   background-color: #ffedd5 !important;
   opacity: 1;
-  height: 8px !important; /* Grosor de la barra */
+  height: 8px !important;
+  /* Grosor de la barra */
   border-radius: 4px;
 }
 
 /* 2. BARRA DE PROGRESO (Naranja Fuerte) */
 ::ng-deep .mat-mdc-slider .mdc-slider__track--active_fill {
   border-color: #f97316 !important;
-  border-top-width: 8px !important; /* Tiene que coincidir con el grosor de arriba */
+  border-top-width: 8px !important;
+  /* Tiene que coincidir con el grosor de arriba */
 }
 
 /* 3. BOTONES (CÍRCULOS GRANDES) */
 ::ng-deep .mat-mdc-slider .mdc-slider__thumb-knob {
-  background-color: #f97316 !important; /* Relleno naranja */
-  border: 3px solid white !important;   /* Borde blanco */
-  border-radius: 50% !important;        /* Círculo perfecto */
-  width: 24px !important;               /* Tamaño del botón */
+  background-color: #f97316 !important;
+  /* Relleno naranja */
+  border: 3px solid white !important;
+  /* Borde blanco */
+  border-radius: 50% !important;
+  /* Círculo perfecto */
+  width: 24px !important;
+  /* Tamaño del botón */
   height: 24px !important;
   /* Ajuste para que quede centrado en la barra gruesa */
   transform: translate(-50%, -50%) !important;
-  top: 50% !important; 
+  top: 50% !important;
 }
 
 /* 4. ELIMINAR BURBUJAS Y EFECTOS EXTRA */
 /* Ocultamos la burbuja que sale arriba (por si acaso) */
 ::ng-deep .mat-mdc-slider .mdc-slider__value-indicator {
-  display: none !important; 
+  display: none !important;
 }
+
 /* Ocultamos la onda al hacer clic (más limpio) */
 ::ng-deep .mat-mdc-slider .mat-ripple-element {
   display: none !important;
@@ -431,7 +458,8 @@ mat-slider {
 /* --- ESTILO DE LOS NÚMEROS DE ABAJO --- */
 .range-labels {
   display: flex;
-  justify-content: space-between; /* Esto los pega a los extremos */
+  justify-content: space-between;
+  /* Esto los pega a los extremos */
   align-items: center;
   margin-top: 8px;
 }
@@ -439,8 +467,10 @@ mat-slider {
 .price-tag {
   font-weight: 800;
   font-size: 0.95rem;
-  color: #f97316; /* Texto Naranja */
-  background: #fff7ed; /* Fondo cremita */
+  color: #f97316;
+  /* Texto Naranja */
+  background: #fff7ed;
+  /* Fondo cremita */
   padding: 4px 10px;
   border-radius: 8px;
   border: 1px solid #ffedd5;
@@ -492,10 +522,13 @@ mat-slider {
 
 /* --- Imagen y Favoritos --- */
 .card-image {
-  position: relative; /* Para poder posicionar el corazón y el stock encima */
+  position: relative;
+  /* Para poder posicionar el corazón y el stock encima */
   width: 100%;
-  height: 200px; /* ALTURA FIJA: Cambia esto si quieres la imagen más alta o baja */
-  background-color: #f3f4f6; /* Color de fondo mientras carga */
+  height: 200px;
+  /* ALTURA FIJA: Cambia esto si quieres la imagen más alta o baja */
+  background-color: #f3f4f6;
+  /* Color de fondo mientras carga */
   overflow: hidden;
 }
 
@@ -503,7 +536,8 @@ mat-slider {
 .card-image img {
   width: 100%;
   height: 100%;
-  object-fit: cover; /* MAGIA: Recorta la imagen para llenar el hueco sin deformarla */
+  object-fit: cover;
+  /* MAGIA: Recorta la imagen para llenar el hueco sin deformarla */
   display: block;
   transition: transform 0.5s ease;
 }
@@ -516,7 +550,8 @@ mat-slider {
   justify-content: center;
   background-color: #e5e7eb;
   color: #9ca3af;
-  font-size: 2.5rem; /* Icono grande */
+  font-size: 2.5rem;
+  /* Icono grande */
 }
 
 .product-card:hover .card-image img {
@@ -543,6 +578,27 @@ mat-slider {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+/* BADGE DE STOCK (Añadido extra porque estaba en el HTML) */
+.stock-badge {
+  position: absolute;
+  top: 15px;
+  left: 15px;
+  background: #fbbf24;
+  /* Amarillo aviso */
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 800;
+  padding: 4px 10px;
+  border-radius: 20px;
+  z-index: 10;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.stock-badge.no-stock {
+  background: #ef4444;
+  /* Rojo agotado */
 }
 
 /* --- Contenido de Texto --- */
@@ -784,16 +840,27 @@ mat-slider {
 /* Contenedor del texto */
 .pagination-info {
   text-align: center;
-  color: #10b981; 
+  color: #10b981;
   font-size: 0.9rem;
   font-family: sans-serif;
 }
 
 .pag-btn:disabled,
 .pag-btn[disabled] {
-    background-color: #d1d5db;
-    color: #a0a0a0;
-    cursor: not-allowed;
-    opacity: 0.6;
-    border-color: #ccc;
+  background-color: #d1d5db;
+  color: #a0a0a0;
+  cursor: not-allowed;
+  opacity: 0.6;
+  border-color: #ccc;
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 300px;
+  gap: 1rem;
+  color: #666;
+  width: 100%;
 }
