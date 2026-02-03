@@ -1,0 +1,66 @@
+<div class="cart-backdrop" *ngIf="isOpen" (click)="close()"></div>
+
+<div class="cart-drawer" [class.open]="isOpen">
+
+  <div class="drawer-header">
+    <h3>
+      Tu Cesta
+      <span class="count-badge" *ngIf="items.length > 0">{{ items.length }}</span>
+    </h3>
+    <button class="close-btn" (click)="close()">
+      <i class="fa-solid fa-xmark"></i>
+    </button>
+  </div>
+
+  <div class="drawer-body">
+
+    <div *ngIf="items.length === 0" class="empty-cart">
+      <i class="fa-solid fa-basket-shopping"></i>
+      <p>Tu cesta está vacía.<br>¡Añade algo fresco!</p>
+    </div>
+
+    <div class="cart-item" *ngFor="let item of items">
+
+      <img class="item-img"
+        [src]="item.images && item.images.length > 0 ? 'http://127.0.0.1:8000/storage/' + item.images[0].image_path : 'assets/placeholder.png'"
+        alt="{{ item.name }}">
+
+      <div class="item-details">
+        <h4>{{ item.name }}</h4>
+
+        <div class="item-meta">
+          <span class="price-highlight">{{ item.price }}€ / {{ item.unit || 'un' }}</span>
+
+          <div class="qty-selector">
+            <button class="qty-btn minus" (click)="updateQuantity(item.id, -1)" [disabled]="item.quantity <= 1">
+              <i class="fa-solid fa-minus"></i>
+            </button>
+
+            <span class="qty-number">{{ item.quantity }}</span>
+
+            <button class="qty-btn plus" (click)="updateQuantity(item.id, 1)">
+              <i class="fa-solid fa-plus"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <button class="remove-btn" (click)="removeItem(item.id)" title="Eliminar">
+        <i class="fa-regular fa-trash-can"></i>
+      </button>
+
+    </div>
+  </div>
+
+  <div class="drawer-footer" *ngIf="items.length > 0">
+    <div class="total-row">
+      <span class="total-label">Total a pagar:</span>
+      <span class="total-amount">{{ total | number:'1.2-2' }}€</span>
+    </div>
+
+    <button class="checkout-btn">
+      <i class="fa-solid fa-lock"></i> Tramitar Pedido
+    </button>
+  </div>
+
+</div>

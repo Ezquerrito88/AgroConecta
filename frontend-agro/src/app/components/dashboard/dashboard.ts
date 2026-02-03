@@ -8,6 +8,7 @@ import { MatSliderModule } from '@angular/material/slider';
 import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { CartService } from '../../services/cart.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -58,7 +59,8 @@ export class Dashboard implements OnInit {
   constructor(
     private router: Router,
     private productoService: ProductoService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private cartService: CartService
   ) { }
 
   ngOnInit() {
@@ -179,5 +181,9 @@ export class Dashboard implements OnInit {
     };
     this.minPrice = 0;
     this.maxPrice = 100;
+  }
+
+  addToCart(producto: any) {
+    this.cartService.addToCart(producto);
   }
 }

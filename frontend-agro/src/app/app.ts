@@ -2,11 +2,13 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, NavigationEnd, RouterModule } from '@angular/router';
 import { filter } from 'rxjs/operators';
+import { CartDrawer } from './components/cart-drawer/cart-drawer';
+import { CartService } from './services/cart.service';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, CartDrawer],
   templateUrl: './app.html', // Asegúrate de que tu archivo se llama así o app.html
   styleUrls: ['./app.css']
 })
@@ -15,7 +17,7 @@ export class App implements OnInit { // Nombre estándar: AppComponent
   mostrarLayout: boolean = true;
   isFarmer: boolean = false; 
 
-  constructor(private router: Router) {}
+  constructor(private router: Router, public cartService: CartService) {}
 
   ngOnInit() {
     // Escuchamos cada cambio de URL
