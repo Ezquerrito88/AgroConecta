@@ -17,7 +17,7 @@ return new class extends Migration
             $table->foreignId('category_id')->constrained('categories');
             $table->string('name');
             $table->text('description');
-            $table->string('short_description')->nullable()->after('name');
+            $table->string('short_description')->nullable();
             $table->decimal('price', 8, 2);
             $table->enum('unit', [
                 'kg',       // Granel (Manzanas, Patatas)

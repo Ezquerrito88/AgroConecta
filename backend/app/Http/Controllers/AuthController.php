@@ -5,10 +5,10 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Models\Farmer;
 use Illuminate\Http\Request;
-use Laravel\Socialite\Facades\Socialite;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
+use Laravel\Socialite\Facades\Socialite;
 
 class AuthController extends Controller
 {
