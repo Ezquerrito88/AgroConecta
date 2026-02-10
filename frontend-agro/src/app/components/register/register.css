@@ -1,0 +1,513 @@
+/* --- ESTILOS IDENTICOS AL LOGIN --- */
+
+/* Fondo */
+.login-wrapper {
+  margin: 0;
+  padding: 20px;
+  padding-top: 90px;
+  /* Un poco más de espacio para el header fijo */
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-image: linear-gradient(rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.6)),
+    url('/img/login/fondo.png');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+}
+
+/* Header Fijo */
+.login-nav {
+  width: 100%;
+  background: white;
+  padding: 15px 40px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 100;
+}
+
+.nav-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.logo-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logo-img {
+  height: 50px;
+}
+
+.brand-name {
+  display: block;
+  font-family: var(--fuente-logo, sans-serif);
+  font-size: 1.6rem;
+  font-weight: 400;
+  color: #313131;
+}
+
+.brand-slogan {
+  display: block;
+  font-size: 1rem;
+  color: #ED5924;
+  margin-top: -4px;
+}
+
+.btn-back {
+  text-decoration: none;
+  color: #878E96;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  transition: 0.3s;
+}
+
+.btn-back:hover {
+  color: #333;
+}
+
+/* Tarjeta Principal */
+.login-card {
+  background: white;
+  width: 100%;
+  max-width: 500px;
+  /* Un pelín más ancha para el registro */
+  padding: 40px;
+  border-radius: 15px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+  text-align: center;
+  margin-top: 20px;
+  /* Margen extra por si la pantalla es baja */
+}
+
+/* Avatar Animado */
+.main-avatar-square {
+  width: 70px;
+  height: 70px;
+  margin: 0 auto 15px auto;
+  background: linear-gradient(135deg, #11C267 0%, #059669 100%);
+  border-radius: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 8px 15px rgba(129, 140, 248, 0.3);
+  position: relative;
+}
+
+.main-avatar-square::before {
+  content: '';
+  width: 18px;
+  height: 18px;
+  border: 2.5px solid white;
+  border-radius: 50%;
+  position: absolute;
+  top: 18px;
+}
+
+.main-avatar-square::after {
+  content: '';
+  width: 32px;
+  height: 15px;
+  border: 2.5px solid white;
+  border-bottom: none;
+  border-radius: 16px 16px 0 0;
+  position: absolute;
+  bottom: 18px;
+}
+
+/* Textos Cabecera */
+.login-header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.login-header h2 {
+  margin-top: 15px;
+  margin-bottom: 0px;
+  font-size: 1.5rem;
+  color: #333;
+}
+
+.login-header p {
+  margin-top: 4px;
+  color: #888;
+  font-size: 0.9rem;
+}
+
+/* --- PESTAÑAS (SELECTOR ROL) --- */
+.profile-tabs {
+  display: flex;
+  background: #F2F3F5;
+  border-radius: 14px;
+  margin: 20px 0;
+  padding: 5px;
+  position: relative;
+}
+
+.slider {
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  width: calc(50% - 5px);
+  height: calc(100% - 10px);
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  transition: all 0.4s cubic-bezier(0.65, 0, 0.35, 1);
+  z-index: 1;
+  border: 2px solid transparent;
+}
+
+/* Lógica de colores para el slider */
+/* Si se mueve a la derecha (Agricultor) -> Borde Naranja */
+.slider.slide-right {
+  transform: translateX(100%);
+  border-color: #ea580c;
+}
+
+/* Si NO se mueve (Comprador) -> Borde Verde (Truco CSS moderno) */
+.profile-tabs:not(:has(.slide-right)) .slider {
+  border-color: #11C267;
+}
+
+.tab {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-weight: 500;
+  color: #000;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+  z-index: 2;
+}
+
+.emoji-icon {
+  font-size: 1.4rem;
+  line-height: 1;
+}
+
+.tab-text {
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+/* Inputs */
+.input-group {
+  text-align: left;
+  margin-bottom: 15px;
+}
+
+.input-group label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: 5px;
+}
+
+.input-group input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  box-sizing: border-box;
+  transition: all 0.3s ease;
+  outline: none;
+}
+
+.input-group input:focus {
+  border-color: #11C267;
+  box-shadow: 0 0 0 3px rgba(17, 194, 103, 0.2);
+  background-color: #f0fdf4;
+}
+
+.password-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.password-toggle-icon {
+  position: absolute;
+  right: 15px;
+  cursor: pointer;
+  color: #666;
+  font-size: 1.1rem;
+  z-index: 10;
+  padding: 5px;
+}
+
+.password-toggle-icon:hover {
+  color: #11C267;
+}
+
+.password-wrapper input {
+  padding-right: 40px !important;
+}
+
+/* Botón Registro */
+.btn-login {
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: 10px;
+  background: linear-gradient(to right, #11C267, #02BA7A);
+  color: white;
+  font-weight: bold;
+  font-size: 1rem;
+  cursor: pointer;
+  margin-top: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 48px;
+  transition: all 0.3s ease;
+}
+
+.btn-login:active {
+  transform: scale(0.98);
+}
+
+.btn-login:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  filter: grayscale(1);
+}
+
+/* Checkbox Términos */
+.form-options {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  margin: 15px 0 20px 0;
+}
+
+.remember-me {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  gap: 10px;
+  font-size: 0.9rem;
+  color: #4b5563;
+}
+
+.remember-me input {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 20px;
+  height: 20px;
+  border: 2px solid #d1d5db;
+  border-radius: 6px;
+  background-color: #fff;
+  cursor: pointer;
+  display: grid;
+  place-content: center;
+  transition: all 0.2s ease;
+}
+
+.remember-me input:checked {
+  background: linear-gradient(135deg, #11C267 0%, #02BA7A 100%);
+  border-color: transparent;
+}
+
+.remember-me:hover input {
+  border-color: #11C267;
+}
+
+.remember-me input::before {
+  content: "";
+  width: 10px;
+  height: 10px;
+  transform: scale(0);
+  transition: 120ms transform ease-in-out;
+  background-color: white;
+  clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
+}
+
+.remember-me input:checked::before {
+  transform: scale(1);
+}
+
+/* Separador Social */
+.divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin: 20px 0;
+  color: #888;
+  font-size: 0.85rem;
+}
+
+.divider::before,
+.divider::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid #eee;
+}
+
+.divider span {
+  padding: 0 10px;
+}
+
+.social-login {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.btn-social {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 12px;
+  background: white;
+  cursor: pointer;
+  font-weight: 500;
+  transition: 0.3s;
+}
+
+.btn-social img {
+  width: 20px;
+}
+
+.btn-social.google:hover {
+  border-color: #f4b400;
+  background-color: #fffaf0;
+  transform: translateY(-2px);
+}
+
+.btn-social.apple:hover {
+  border-color: #000000;
+  background-color: #f3f4f6;
+  color: #000000;
+  transform: translateY(-2px);
+}
+
+/* --- ESTO ES LO NUEVO PARA EL FOOTER DEL REGISTRO --- */
+.centered-link {
+  text-align: center;
+  margin-top: 10px;
+  font-size: 0.95rem;
+  color: #555;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-link-text {
+  color: #11C267;
+  font-weight: 700;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.btn-link-text:hover {
+  color: #059669;
+  text-decoration: underline;
+}
+
+.error-message {
+  background-color: #fef2f2;
+  color: #ef4444;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #fca5a5;
+  margin-bottom: 15px;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* --- MEDIA QUERY AJUSTADA PARA PANTALLAS PEQUEÑAS --- */
+/* Como el registro es muy alto, ajustamos márgenes en portátiles */
+@media screen and (max-height: 900px) and (min-width: 1024px) {
+
+  .login-card {
+    padding: 25px 35px;
+  }
+
+  /* Menos padding vertical */
+
+  .main-avatar-square {
+    width: 50px;
+    height: 50px;
+    margin-bottom: 10px;
+  }
+
+  /* Avatar más pequeño */
+  .main-avatar-square::before {
+    top: 12px;
+    width: 14px;
+    height: 14px;
+  }
+
+  .main-avatar-square::after {
+    bottom: 12px;
+    width: 24px;
+    height: 10px;
+  }
+
+  .login-header h2 {
+    font-size: 1.3rem;
+    margin: 0;
+  }
+
+  .login-header p {
+    margin-bottom: 10px;
+  }
+
+  .profile-tabs {
+    margin: 10px 0;
+  }
+
+  /* Hacemos los inputs un pelín más compactos */
+  .input-group {
+    margin-bottom: 10px;
+  }
+
+  .input-group label {
+    margin-bottom: 2px;
+  }
+
+  .input-group input {
+    padding: 9px;
+    font-size: 0.9rem;
+  }
+
+  .form-options {
+    margin: 10px 0;
+  }
+
+  .divider {
+    margin: 10px 0;
+  }
+
+  .social-login {
+    margin-bottom: 10px;
+  }
+
+  .btn-social {
+    padding: 8px;
+  }
+}

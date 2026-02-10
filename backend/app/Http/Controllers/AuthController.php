@@ -14,42 +14,41 @@ class AuthController extends Controller
 {
     //Registro manual
     public function register(Request $request)
-    {
-        //A. Validar datos
-        $fields = $request->validate([
-            'name' => 'required|string',
-            'email' => 'required|string|unique:users,email',
-            'password' => 'required|string|confirmed',
-            'role' => ['required', Rule::in(['buyer', 'farmer', 'admin'])],
+{
+    // 1. Validar los datos que vienen del formulario
+    $fields = $request->validate([
+        'name' => 'required|string',
+        'email' => 'required|string|unique:users,email',
+        'password' => 'required|string|confirmed', // 'confirmed' busca password_confirmation
+        'role' => 'required|in:buyer,farmer', // Solo permite estos dos valores
+    ]);
+
+    // 2. Crear el Usuario básico
+    $user = User::create([
+        'name' => $fields['name'],
+        'email' => $fields['email'],
+        'password' => Hash::make($fields['password']),
+        'role' => $fields['role'],
+    ]);
+
+    // 3. ¡IMPORTANTE! Si es Agricultor, creamos su ficha vacía
+    if ($fields['role'] === 'farmer') {
+        Farmer::create([
+            'user_id' => $user->id,
+            'is_verified' => 0,
+            'bio' => 'Agricultor nuevo.',
         ]);
-
-        //B. Crear Usuario
-        $user = User::create([
-            'name' => $fields['name'],
-            'email' => $fields['email'],
-            'password' => Hash::make($fields['password']),
-            'role' => $fields['role'],
-        ]);
-
-        //C. Si es Agricultor, crear perfil vacío
-        if ($fields['role'] === 'farmer') {
-            Farmer::create([
-                'user_id' => $user->id,
-                'is_verified' => 0,
-                'bio' => 'Nuevo agricultor registrado manualmente.',
-            ]);
-        }
-
-        //D. Crear Token
-        $token = $user->createToken('myapptoken')->plainTextToken;
-
-        //E. Respuesta
-        return response()->json([
-            'user' => $user,
-            'token' => $token,
-            'message' => 'Usuario registrado correctamente'
-        ], 201);
     }
+
+    // 4. Crear el Token para que entre directo
+    $token = $user->createToken('auth_token')->plainTextToken;
+
+    return response()->json([
+        'user' => $user,
+        'token' => $token,
+        'message' => 'Usuario registrado correctamente'
+    ], 201);
+}
 
     //Login manual
     public function login(Request $request)

@@ -1,0 +1,115 @@
+<nav class="login-nav">
+    <div class="nav-container">
+        <div class="logo-brand">
+            <img src="img/logo/logo.png" alt="Logo" class="logo-img"> <div class="brand-text">
+                <span class="brand-name">AgroConecta</span>
+                <span class="brand-slogan">Sabores del Campo</span>
+            </div>
+        </div>
+        <a routerLink="/" class="btn-back">
+            <i class="fas fa-arrow-left"></i> Volver
+        </a>
+    </div>
+</nav>
+
+<div class="login-wrapper">
+    <div class="login-card">
+        <div class="login-header">
+            <div class="main-avatar-square">
+                <div class="user-silhouette">
+                    <div class="head"></div>
+                    <div class="body"></div>
+                </div>
+            </div>
+            <h2>Crear Cuenta</h2>
+            <p>Únete para comprar o vender</p>
+        </div>
+
+        <div class="profile-tabs">
+            <div class="slider" [class.slide-right]="userData.role === 'farmer'"></div>
+
+            <button type="button" class="tab" [class.active]="userData.role === 'buyer'"
+                (click)="userData.role = 'buyer'">
+                <span class="emoji-icon">👤</span>
+                <span class="tab-text">Comprador</span>
+            </button>
+
+            <button type="button" class="tab" [class.active]="userData.role === 'farmer'"
+                (click)="userData.role = 'farmer'">
+                <span class="emoji-icon">🚜</span>
+                <span class="tab-text">Agricultor</span>
+            </button>
+        </div>
+
+        <form (ngSubmit)="onRegister()" #registerForm="ngForm" class="login-form">
+
+            <div *ngIf="errorMessage" class="error-message">
+                <i class="fa-solid fa-circle-exclamation"></i> {{ errorMessage }}
+            </div>
+
+            <div class="input-group">
+                <label>Nombre Completo</label>
+                <input type="text" name="name" placeholder="Ej: Adrián Ezquerro" 
+                       [(ngModel)]="userData.name" required>
+            </div>
+
+            <div class="input-group">
+                <label>Email</label>
+                <input type="email" name="email" placeholder="correo@ejemplo.com" 
+                       [(ngModel)]="userData.email" required>
+            </div>
+
+            <div class="input-group">
+                <label>Contraseña</label>
+                <div class="password-wrapper">
+                    <input [type]="showPassword ? 'text' : 'password'" name="password" placeholder="••••••••"
+                        [(ngModel)]="userData.password" required minlength="6">
+                    
+                    <i class="fa-regular password-toggle-icon" 
+                       [ngClass]="showPassword ? 'fa-eye-slash' : 'fa-eye'"
+                       (click)="showPassword = !showPassword">
+                    </i>
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label>Repetir Contraseña</label>
+                <div class="password-wrapper">
+                    <input [type]="showPassword ? 'text' : 'password'" name="password_confirmation" placeholder="••••••••"
+                        [(ngModel)]="userData.password_confirmation" required>
+                </div>
+            </div>
+
+            <div class="form-options">
+                <label class="remember-me">
+                    <input type="checkbox" required name="terms" ngModel> Acepto los términos y condiciones
+                </label>
+            </div>
+
+            <button type="submit" class="btn-login" [disabled]="!registerForm.valid">
+                <span>Registrarse</span>
+            </button>
+        </form>
+
+        <div class="divider">
+            <span>o regístrate con</span>
+        </div>
+
+        <div class="social-login">
+            <button type="button" class="btn-social google" (click)="registerWithGoogle()">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="G">
+                <span>Google</span>
+            </button>
+
+            <button type="button" class="btn-social apple">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/f/fa/Apple_logo_black.svg" alt="Apple">
+                <span>Apple</span>
+            </button>
+        </div>
+
+        <div class="registration-links centered-link">
+            <p>¿Ya tienes cuenta?</p>
+            <a routerLink="/login" class="btn-link-text">Iniciar Sesión aquí</a>
+        </div>
+    </div>
+</div>

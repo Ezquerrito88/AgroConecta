@@ -96,9 +96,15 @@
 
         </div>
 
+
         <div class="registration-links">
-            <button class="btn-link btn-blue">Crear cuenta de comprador</button>
-            <button class="btn-link btn-orange">Registrarse como agricultor</button>
+            <button class="btn-link btn-blue" routerLink="/registro" [queryParams]="{ role: 'buyer' }">
+                Crear cuenta de comprador
+            </button>
+
+            <button class="btn-link btn-orange" routerLink="/registro" [queryParams]="{ role: 'farmer' }">
+                Registrarse como agricultor
+            </button>
         </div>
     </div>
 </div>

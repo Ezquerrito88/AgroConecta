@@ -1,13 +1,14 @@
 import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common'; 
-import { FormsModule } from '@angular/forms'; // <--- IMPORTANTE: Para leer los inputs
-import { ActivatedRoute, Router } from '@angular/router';
+import { FormsModule } from '@angular/forms';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, FormsModule], // <--- AÑÁDELO AQUÍ TAMBIÉN
+  imports: [CommonModule, FormsModule, RouterLink], // <--- AÑÁDELO AQUÍ TAMBIÉN
   templateUrl: './login.html',
   styleUrl: './login.css',
 })
