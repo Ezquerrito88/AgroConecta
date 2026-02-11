@@ -15,6 +15,11 @@ use App\Http\Controllers\FavoriteController;
 |--------------------------------------------------------------------------
 */
 
+// Health check para Docker
+Route::get('/health', function () {
+    return response()->json(['status' => 'ok', 'service' => 'agroconecta-api']);
+});
+
 // Autenticación (RF01 y RF07) [cite: 44]
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);

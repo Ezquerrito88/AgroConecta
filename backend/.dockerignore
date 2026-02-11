@@ -1,0 +1,61 @@
+# Git
+.git
+.gitignore
+
+# Docker
+Dockerfile
+docker-compose.yml
+.dockerignore
+# NOTA: docker-entrypoint.sh NO debe ignorarse, se necesita en la imagen
+
+# Dependencias de Composer (se instalarán en el contenedor)
+vendor/
+
+# Dependencias de Node (no se usan en producción backend)
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Entorno
+.env
+.env.backup
+.env.production
+.phpunit.result.cache
+
+# Almacenamiento y caché
+storage/*.key
+storage/logs/*
+storage/framework/cache/*
+storage/framework/sessions/*
+storage/framework/views/*
+bootstrap/cache/*
+!storage/app/public/.gitignore
+!storage/framework/cache/.gitignore
+!storage/framework/sessions/.gitignore
+!storage/framework/testing/.gitignore
+!storage/framework/views/.gitignore
+!storage/logs/.gitignore
+!bootstrap/cache/.gitignore
+
+# Testing
+.phpunit.cache
+coverage/
+
+# IDE
+.idea
+.vscode
+*.swp
+*.swo
+*~
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+
+# Documentación
+README.md
+CHANGELOG.md
+
+# CI/CD
+.github
+.gitlab-ci.yml
