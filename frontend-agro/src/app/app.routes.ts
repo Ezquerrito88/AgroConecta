@@ -5,6 +5,7 @@ import { Dashboard } from './components/dashboard/dashboard';
 import { Catalogo } from './components/catalogo/catalogo';
 import { Favoritos } from './components/favoritos/favoritos';
 import { DetalleProducto } from './components/detalle-producto/detalle-producto';
+import { LoginSuccess } from './components/login-success/login-success';
 
 export const routes: Routes = [
   { path: '', component: Dashboard }, // Esta es tu landing page
@@ -13,5 +14,5 @@ export const routes: Routes = [
   { path: 'productos/favoritos', component: Favoritos},
   { path: 'producto/:id', component: DetalleProducto },
   { path: 'registro', component: Register },
-
+  { path: 'login-success', component: LoginSuccess }
 ];

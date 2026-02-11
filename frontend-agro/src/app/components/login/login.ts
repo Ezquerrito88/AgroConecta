@@ -4,13 +4,12 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 
-
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink], // <--- AÑÁDELO AQUÍ TAMBIÉN
+  imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './login.html',
-  styleUrl: './login.css',
+  styleUrls: ['./login.css'],
 })
 export class Login implements OnInit {
   
@@ -20,10 +19,10 @@ export class Login implements OnInit {
     password: ''
   };
 
-  perfilSeleccionado: string = 'comprador';
+  // Variables de estado
   showPassword: boolean = false;
   isLoading: boolean = false;
-  errorMessage: string = ''; // Para mostrar errores en pantalla si falla
+  errorMessage: string = '';
 
   constructor(
     private http: HttpClient,
@@ -35,33 +34,35 @@ export class Login implements OnInit {
     // Si vienes de Google (con token en la URL)
     this.route.queryParams.subscribe(params => {
       if (params['token']) {
-        this.guardarSesion(params['token'], null); // Guardamos token y redirigimos
+        // Intentamos parsear el usuario si viene en la URL
+        let userObj = null;
+        if (params['user']) {
+            try {
+                userObj = JSON.parse(params['user']);
+            } catch (e) {
+                console.error('Error leyendo usuario de Google', e);
+            }
+        }
+        this.guardarSesion(params['token'], userObj); 
       }
     });
   }
   
-  seleccionarPerfil(perfil: string) {
-    this.perfilSeleccionado = perfil;
-  }
-
   // LOGIN NORMAL (EMAIL Y PASSWORD)
-  onLogin(event: Event) {
-    event.preventDefault(); // Evita que la página se recargue sola
+  // Nota: Ya no necesitamos pasar 'event' porque usamos (ngSubmit) en el HTML
+  onLogin() {
     this.isLoading = true;
     this.errorMessage = '';
 
     console.log('Intentando login con:', this.loginData);
 
-    // LLAMADA AL BACKEND (Laravel)
-    // Asegúrate de que la ruta es correcta. Normalmente es /api/login
-    this.http.post('http://127.0.0.1:8000/api/login', this.loginData).subscribe({
+    // IMPORTANTE: Usar 'localhost' en lugar de 127.0.0.1 para coincidir con Google
+    this.http.post('http://localhost:8000/api/login', this.loginData).subscribe({
       next: (res: any) => {
         console.log('Respuesta del Servidor:', res);
         
-        // 1. Obtener el token (a veces viene como access_token o token)
+        // Obtenemos token y usuario
         const token = res.access_token || res.token;
-        
-        // 2. Obtener el usuario
         const user = res.user || res.data;
 
         if (token) {
@@ -75,10 +76,10 @@ export class Login implements OnInit {
         console.error('Error login:', err);
         this.isLoading = false;
         
-        if (err.status === 401) {
+        if (err.status === 401 || err.status === 422) {
           this.errorMessage = 'Email o contraseña incorrectos.';
         } else {
-          this.errorMessage = 'Error de conexión con el servidor.';
+          this.errorMessage = 'Error de conexión. Inténtalo más tarde.';
         }
       }
     });
@@ -87,22 +88,25 @@ export class Login implements OnInit {
   // LOGIN CON GOOGLE
   loginWithGoogle() {
     this.isLoading = true;
-    const role = this.perfilSeleccionado === 'agricultor' ? 'farmer' : 'buyer';
-    window.location.href = `http://127.0.0.1:8000/api/auth/google?role=${role}`;
+    // Ya no enviamos rol, dejamos que el backend decida o cree uno por defecto
+    window.location.href = `http://localhost:8000/api/auth/google`;
   }
 
-  // FUNCIÓN AUXILIAR PARA GUARDAR Y REDIRIGIR
+  // FUNCIÓN INTELIGENTE PARA GUARDAR Y REDIRIGIR 🧠
   private guardarSesion(token: string, user: any) {
-    localStorage.setItem('auth_token', token);
+    localStorage.setItem('token', token); // Recomiendo usar 'token' a secas
     
     if (user) {
       localStorage.setItem('user', JSON.stringify(user));
     }
 
-    // Redirigir al dashboard
-    this.router.navigate(['/dashboard']).then(() => {
-      // Recargar para que app.component.ts lea el nuevo usuario y ponga el Tractor
-      window.location.reload(); 
-    });
+    // AQUI ESTA LA MAGIA: Decidimos a dónde ir según el rol
+    if (user && (user.role === 'farmer' || user.role === 'agricultor')) {
+        // Si es agricultor -> Al Dashboard
+        this.router.navigate(['/agricultor/dashboard']);
+    } else {
+        // Si es comprador o cualquier otro -> A la Home
+        this.router.navigate(['/']);
+    }
   }
 }
