@@ -15,7 +15,7 @@ export class Login implements OnInit {
   
   private apiUrl = isDevMode() 
     ? 'http://localhost:8000/api'  // Desarrollo
-    : 'https://agroconecta-backend.azurewebsites.net/api'; // Producción
+    : 'agroconecta-backend-v2-bxbxfudaatbmgxdg.spaincentral-01.azurewebsites.net/api'; // Producción
 
   loginData = {
     email: '',
