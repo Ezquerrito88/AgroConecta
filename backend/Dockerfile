@@ -14,7 +14,7 @@ RUN apt-get update && apt-get install -y \
     sqlite3 \
     && rm -rf /var/lib/apt/lists/*
 
-# 2. Instalar extensiones PHP (AQUÍ ESTÁ LA SOLUCIÓN AL ERROR)
+# 2. Instalar extensiones PHP
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install -j$(nproc) gd \
     && docker-php-ext-install pdo pdo_mysql pdo_sqlite zip
@@ -47,6 +47,10 @@ RUN mkdir -p storage/framework/sessions \
     && chmod -R 775 /var/www/html/storage \
     && chmod -R 775 /var/www/html/bootstrap/cache
 
-# 10. Exponer puerto y arrancar
+# 10. Script de inicio CONDICIONAL (respeta RUN_MIGRATIONS)
+RUN printf '#!/bin/bash\nset -e\nif [ "$RUN_MIGRATIONS" = "true" ]; then\n  echo "Running Laravel migrations..."\n  php artisan migrate --force 2>&1 || echo "Migrations failed, continuing..."\n  echo "Caching configuration..."\n  php artisan config:cache 2>&1 || true\n  php artisan route:cache 2>&1 || true\nelse\n  echo "Skipping migrations (RUN_MIGRATIONS=false)"\nfi\necho "Starting Apache..."\nexec apache2-foreground\n' > /usr/local/bin/docker-entrypoint.sh \
+    && chmod +x /usr/local/bin/docker-entrypoint.sh
+
+# 11. Exponer puerto y arrancar
 EXPOSE 80
-CMD ["apache2-foreground"]
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
