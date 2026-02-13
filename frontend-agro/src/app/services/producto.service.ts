@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, isDevMode } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
@@ -8,7 +8,8 @@ import { Observable } from 'rxjs';
 export class ProductoService {
 
   // URL de tu backend Laravel
-  private apiUrl = 'http://127.0.0.1:8000/api'; 
+  private apiUrl = isDevMode() ? 'http://localhost:8000/api' 
+  : 'https://agroconecta-backend-v2-bxbxfudaatbmgxdg.spaincentral-01.azurewebsites.net/api'; 
 
   constructor(private http: HttpClient) { }
 
