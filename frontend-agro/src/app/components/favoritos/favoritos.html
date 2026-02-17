@@ -12,7 +12,6 @@
 </header>
 
 <div class="catalog-layout container">
-
   <aside class="filter-card">
     <div class="filter-header">
       <h3>Filtros</h3>
@@ -31,7 +30,6 @@
   </aside>
 
   <main class="products-area">
-
     @if (isLoading) {
       <div class="loading-container">
         <mat-spinner diameter="50"></mat-spinner>
@@ -40,7 +38,6 @@
     } 
     
     @else {
-
       <div class="area-header">
         <span class="results-info" *ngIf="productos.length > 0">
           Tienes <strong>{{ productos.length }}</strong> productos guardados
@@ -69,7 +66,8 @@
             </button>
 
             <img *ngIf="prod.images && prod.images.length > 0"
-              [src]="'http://127.0.0.1:8000/storage/' + prod.images[0].image_path" alt="{{ prod.name }}">
+              [src]="getImagenUrl(prod)" 
+              alt="{{ prod.name }}">
 
             <div *ngIf="!prod.images || prod.images.length === 0" class="placeholder-img">
               <i class="fa-solid fa-image"></i>
@@ -97,6 +95,6 @@
           </div>
         </div>
       </div>
-
-    } </main>
+    } 
+  </main>
 </div>

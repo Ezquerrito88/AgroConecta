@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
-import { C } from '@angular/cdk/keycodes';
 
 @Component({
   selector: 'app-detalle-producto',
@@ -14,11 +13,12 @@ import { C } from '@angular/cdk/keycodes';
 })
 export class DetalleProducto implements OnInit {
 
+  // URL de tu Backend en Azure
+  private readonly API_URL = 'https://agroconecta-backend-v2-bxbxfudaatbmgxdg.spaincentral-01.azurewebsites.net';
+
   product: any = null;
   cantidad: number = 1;
   isLoading: boolean = true;
-
-  // 👇 ESTA ES LA VARIABLE QUE FALTABA 👇
   activeTab: string = 'descripcion';
 
   constructor(
@@ -30,26 +30,38 @@ export class DetalleProducto implements OnInit {
   ngOnInit() {
     this.route.paramMap.subscribe(params => {
       const id = params.get('id');
-      console.log('➡️ PASO 1: ID detectado en URL:', id);
-
       if (id) {
         this.cargarProducto(id);
       } else {
-        console.error('❌ Error: No se encontró ID en la URL');
         this.isLoading = false;
       }
     });
   }
 
+  getImagenUrl(product: any): string {
+    if (product && product.images && product.images.length > 0) {
+      const path = product.images[0].image_path;
+      
+      // Si la URL ya es completa (y apunta a localhost), la corregimos
+      if (path.startsWith('http')) {
+        return path.replace(/http:\/\/127\.0\.0\.1:8000/g, this.API_URL);
+      }
+      
+      // Si es una ruta relativa, le ponemos el prefijo de Azure
+      return `${this.API_URL}/storage/${path}`;
+    }
+    return 'assets/placeholder.png'; // Imagen por defecto si no hay fotos
+  }
+
   cargarProducto(id: string) {
     this.isLoading = true;
 
-    this.http.get(`http://127.0.0.1:8000/api/products/${id}`).subscribe({
+    this.http.get(`${this.API_URL}/api/products/${id}`).subscribe({
       next: (data: any) => {
-        console.log('✅ PASO 2: Datos recibidos:', data);
+        // Guardamos los datos. El HTML ahora llamará a getImagenUrl(product)
         this.product = data;
         this.isLoading = false;
-        this.cd.detectChanges(); // <--- FUERZA LA ACTUALIZACIÓN DE PANTALLA
+        this.cd.detectChanges();
       },
       error: (err) => {
         console.error('❌ ERROR de carga:', err);

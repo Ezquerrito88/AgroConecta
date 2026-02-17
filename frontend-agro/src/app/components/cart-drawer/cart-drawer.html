@@ -22,7 +22,7 @@
     <div class="cart-item" *ngFor="let item of items">
 
       <img class="item-img"
-        [src]="item.images && item.images.length > 0 ? 'http://127.0.0.1:8000/storage/' + item.images[0].image_path : 'assets/placeholder.png'"
+        [src]="getImageUrl(item)"
         alt="{{ item.name }}">
 
       <div class="item-details">

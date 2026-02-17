@@ -47,8 +47,32 @@ RUN mkdir -p storage/framework/sessions \
     && chmod -R 775 /var/www/html/storage \
     && chmod -R 775 /var/www/html/bootstrap/cache
 
-# 10. Script de inicio CONDICIONAL (respeta RUN_MIGRATIONS)
-RUN printf '#!/bin/bash\nset -e\nif [ "$RUN_MIGRATIONS" = "true" ]; then\n  echo "Running Laravel migrations..."\n  php artisan migrate --force 2>&1 || echo "Migrations failed, continuing..."\n  echo "Caching configuration..."\n  php artisan config:cache 2>&1 || true\n  php artisan route:cache 2>&1 || true\nelse\n  echo "Skipping migrations (RUN_MIGRATIONS=false)"\nfi\necho "Starting Apache..."\nexec apache2-foreground\n' > /usr/local/bin/docker-entrypoint.sh \
+# 10. Script de inicio mejorado
+RUN printf '#!/bin/bash\n\
+set -e\n\
+\n\
+# Crear el enlace simbólico para las imágenes (CRÍTICO para las fotos)\n\
+echo "Linking storage..."\n\
+php artisan storage:link --force || true\n\
+\n\
+if [ "$RUN_MIGRATIONS" = "true" ]; then\n\
+  echo "Running Laravel migrations..."\n\
+  php artisan migrate --force 2>&1 || echo "Migrations failed, continuing..."\n\
+fi\n\
+\n\
+# Limpiar caches viejas para evitar el 404 en rutas nuevas\n\
+echo "Optimizing Laravel..."\n\
+php artisan config:clear\n\
+php artisan route:clear\n\
+php artisan view:clear\n\
+\n\
+# Volver a cachear (opcional en desarrollo, recomendado en producción)\n\
+php artisan config:cache\n\
+php artisan route:cache\n\
+\n\
+echo "Starting Apache..."\n\
+exec apache2-foreground\n\
+' > /usr/local/bin/docker-entrypoint.sh \
     && chmod +x /usr/local/bin/docker-entrypoint.sh
 
 # 11. Exponer puerto y arrancar

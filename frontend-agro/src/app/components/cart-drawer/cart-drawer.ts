@@ -14,10 +14,12 @@ export class CartDrawer implements OnInit {
   isOpen: boolean = false;
   total: number = 0;
 
+  // URL de tu Backend en Azure
+  private readonly API_URL = 'https://agroconecta-backend-v2-bxbxfudaatbmgxdg.spaincentral-01.azurewebsites.net';
+
   constructor(private cartService: CartService) {}
 
   ngOnInit() {
-    // Nos suscribimos a los cambios
     this.cartService.items$.subscribe(items => {
       this.items = items;
       this.total = this.cartService.getTotalPrice();
@@ -26,6 +28,22 @@ export class CartDrawer implements OnInit {
     this.cartService.isOpen$.subscribe(open => {
       this.isOpen = open;
     });
+  }
+
+  // Función para resolver la URL de la imagen correctamente
+  getImageUrl(item: any): string {
+    if (item.images && item.images.length > 0) {
+      const path = item.images[0].image_path;
+      
+      // Si la ruta ya es una URL completa (y apunta a localhost), la corregimos
+      if (path.startsWith('http')) {
+        return path.replace(/http:\/\/127\.0\.0\.1:8000/g, this.API_URL);
+      }
+      
+      // Si es una ruta relativa, le pegamos el prefijo de Azure
+      return `${this.API_URL}/storage/${path}`;
+    }
+    return 'assets/placeholder.png';
   }
 
   close() { this.cartService.closeCart(); }

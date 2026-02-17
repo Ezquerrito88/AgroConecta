@@ -26,7 +26,7 @@
         <div class="image-column">
             <div class="image-placeholder">
                 <img *ngIf="product.images && product.images.length > 0"
-                    [src]="'http://127.0.0.1:8000/storage/' + product.images[0].image_path" [alt]="product.name">
+                    [src]="getImagenUrl(product)" [alt]="product.name">
 
                 <div *ngIf="!product.images || product.images.length === 0" class="icon-placeholder">
                     <i class="fa-regular fa-image"></i>
@@ -35,9 +35,7 @@
         </div>
 
         <div class="info-column">
-
             <div class="dynamic-group">
-
                 <h2 class="product-name-title">{{ product.name }}</h2>
 
                 <div class="rating-box">
@@ -81,10 +79,7 @@
                         + Añadir a la cesta
                     </button>
                 </div>
-
             </div>
-
-
         </div>
     </div>
 
@@ -100,13 +95,11 @@
         <div class="tab-content">
             <div *ngIf="activeTab === 'descripcion'" class="text-content description-tab">
                 <h3 class="desc-title">Detalles del producto</h3>
-
                 <p class="desc-text">
                     {{ product.description }}
                 </p>
             </div>
             <div *ngIf="activeTab === 'origen'" class="text-content origin-tab">
-
                 <p class="origin-intro">
                     Este producto ha sido cultivado de forma sostenible y con mucho cariño en
                     <strong class="location-highlight">
@@ -124,7 +117,6 @@
                             <span *ngIf="product.farmer?.farmer?.farm_name">
                                 {{ product.farmer?.farmer?.farm_name }},
                             </span>
-
                             {{ product.farmer?.farmer?.city || 'España' }}
                         </span>
                     </div>
@@ -134,10 +126,9 @@
                     Al comprar este producto, estás apoyando directamente a la economía local
                     y reduciendo la huella de carbono del transporte.
                 </p>
-
             </div>
+            
             <div *ngIf="activeTab === 'valoraciones'" class="text-content reviews-tab">
-
                 <div class="no-reviews" *ngIf="!product.reviews || product.reviews.length === 0">
                     <i class="fa-regular fa-comment-dots"></i>
                     <p>Este producto aún no tiene valoraciones.</p>
@@ -145,11 +136,8 @@
                 </div>
 
                 <div class="reviews-list" *ngIf="product.reviews && product.reviews.length > 0">
-
                     <h3 class="reviews-title">Opiniones de clientes ({{ product.reviews.length }})</h3>
-
                     <div class="review-card" *ngFor="let review of product.reviews">
-
                         <div class="review-header">
                             <div class="reviewer-avatar">
                                 {{ review.user?.name?.charAt(0) || 'U' }}
@@ -164,13 +152,10 @@
                             <i class="fa-solid fa-star" *ngFor="let s of [1,2,3,4,5]"
                                 [class.active]="s <= review.rating"></i>
                         </div>
-
                         <p class="review-text">{{ review.comment }}</p>
                     </div>
-
                 </div>
             </div>
         </div>
     </div>
-
 </div>
