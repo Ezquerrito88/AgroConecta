@@ -122,11 +122,9 @@ class AuthController extends Controller
                 'role' => $user->role
             ]);
 
-            // Redirigimos a Angular (Ajusta el puerto si es necesario)
-            return redirect("http://localhost:4200/login-success?token={$token}&user={$userData}");
+            return redirect(env('APP_URL', 'https://agroconecta.store') . "/login-success?token={$token}&user={$userData}");
 
         } catch (\Exception $e) {
-            // 👇 ESTO ES LO QUE NOS DIRÁ EL ERROR REAL
             dd("Error capturado:", $e->getMessage(), $e); 
         }
     }
