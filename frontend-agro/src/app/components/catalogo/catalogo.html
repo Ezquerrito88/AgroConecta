@@ -37,8 +37,8 @@
 
       <div class="slider-container">
         <mat-slider min="0" max="100" step="1">
-          <input matSliderStartThumb [(ngModel)]="minPrice" (dragEnd)="filtrarPorPrecio()">
-          <input matSliderEndThumb [(ngModel)]="maxPrice" (dragEnd)="filtrarPorPrecio()">
+          <input matSliderStartThumb [(ngModel)]="minPrice" (dragEnd)="aplicarFiltros()">
+          <input matSliderEndThumb [(ngModel)]="maxPrice" (dragEnd)="aplicarFiltros()">
         </mat-slider>
       </div>
 
