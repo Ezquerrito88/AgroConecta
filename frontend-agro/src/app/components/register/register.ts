@@ -62,6 +62,6 @@ export class Register implements OnInit { // <--- Añade implements OnInit
 
   registerWithGoogle() {
     sessionStorage.setItem('google_role_intent', this.userData.role);
-    window.location.href = 'http://localhost:8000/api/auth/google';
+    window.location.href = 'https://agroconecta-backend-v2-bxbxfudaatbmgxdg.spaincentral-01.azurewebsites.net/api/auth/google';
   }
 }
