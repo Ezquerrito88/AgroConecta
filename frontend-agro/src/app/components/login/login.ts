@@ -52,19 +52,9 @@ export class Login implements OnInit {
 
     console.log('Intentando login con:', this.loginData);
 
-    this.http.post(`${this.apiUrl}/login`, this.loginData).subscribe({
+    this.http.post(`${this.apiUrl}/login`, this.loginData, { withCredentials: true }).subscribe({
       next: (res: any) => {
         console.log('Respuesta del Servidor:', res);
-
-        const token = res.access_token || res.token;
-        const user = res.user || res.data;
-
-        if (token) {
-          this.guardarSesion(token, user);
-        } else {
-          this.errorMessage = 'El servidor no devolvió un token válido.';
-          this.isLoading = false;
-        }
       },
       error: (err) => {
         console.error('Error login:', err);
