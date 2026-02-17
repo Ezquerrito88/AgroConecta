@@ -8,7 +8,7 @@ import { DetalleProducto } from './components/detalle-producto/detalle-producto'
 import { LoginSuccess } from './components/login-success/login-success';
 
 export const routes: Routes = [
-  { path: '', component: Dashboard }
+  { path: '', component: Dashboard },
   { path: 'login', component: Login },
   { path: 'productos', component: Catalogo },
   { path: 'productos/favoritos', component: Favoritos},
