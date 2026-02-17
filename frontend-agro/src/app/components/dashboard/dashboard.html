@@ -86,7 +86,7 @@
 
       <div class="grid-header">
         <h2>Selección fresca del día</h2>
-        <span class="results-count">Página {{ paginaActual }} de 2</span>
+        <span class="results-count">Página {{ paginaActual }} de {{ totalPaginas }}</span>
       </div>
 
       <div class="products-grid">
@@ -104,7 +104,7 @@
             </button>
 
             <img *ngIf="prod.images && prod.images.length > 0"
-              [src]="'https://agroconecta-backend-v2-bxbxfudaatbmgxdg.spaincentral-01.azurewebsites.net/storage/' + prod.images[0].image_path"
+              [src]="getImagenUrl(prod)"
               alt="{{ prod.name }}">
 
             <div *ngIf="!prod.images || prod.images.length === 0" class="placeholder-img">
@@ -158,7 +158,7 @@
             2
           </button>
 
-          <button type="button" class="pag-btn nav-btn" [disabled]="paginaActual === 2 || paginaActual >= totalPaginas"
+          <button type="button" class="pag-btn nav-btn" [disabled]="paginaActual >= totalPaginas"
             (click)="cambiarPagina(paginaActual + 1)">
             <i class="fa-solid fa-chevron-right"></i>
           </button>
@@ -172,7 +172,7 @@
         -
         <span class="numbers">{{ ((paginaActual - 1) * itemsPorPagina) + productos.length }}</span>
         de
-        <span class="numbers">12</span>
+        <span class="numbers">{{ totalProductos }}</span>
         productos.
       </div>
 
