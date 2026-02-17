@@ -2,9 +2,15 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use Illuminate\Support\Facades\Artisan;
 
-Route::get('/', function () {
-    return view('welcome');
+Route::get('/ejecutar-link', function () {
+    try {
+        Artisan::call('storage:link');
+        return "✅ Enlace simbólico creado con éxito en Azure.";
+    } catch (\Exception $e) {
+        return "❌ Error: " . $e->getMessage();
+    }
 });
 
 Route::middleware('web')->group(function () {
