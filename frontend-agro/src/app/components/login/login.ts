@@ -47,12 +47,11 @@ export class Login implements OnInit {
   }
 
   onLogin() {
-  this.isLoading = true;
+    this.isLoading = true;
+    this.errorMessage = '';
 
-  this.http.get('https://agroconecta-backend-v2-bxbxfudaatbmgxdg.spaincentral-01.azurewebsites.net/sanctum/csrf-cookie', { withCredentials: true })
-  .subscribe({
-    next: () => {
-      this.http.post(`${this.apiUrl}/login`, this.loginData, { withCredentials: true })
+    // Login directo sin CSRF - tu backend ya usa tokens
+    this.http.post(`${this.apiUrl}/login`, this.loginData)
       .subscribe({
         next: (res: any) => {
           this.guardarSesion(res.access_token || res.token, res.user);
@@ -60,16 +59,18 @@ export class Login implements OnInit {
         },
         error: (err) => {
           this.isLoading = false;
-          this.errorMessage = 'Credenciales incorrectas.';
+          console.error('Error completo:', err); // Para ver qué pasa
+
+          if (err.status === 401) {
+            this.errorMessage = 'Credenciales incorrectas.';
+          } else {
+            this.errorMessage = 'Error de comunicación con el servidor.';
+          }
         }
       });
-    },
-    error: (err) => {
-      this.isLoading = false;
-      this.errorMessage = 'Error de comunicación con el servidor de seguridad.';
-    }
-  });
-}
+  }
+
+
 
   loginWithGoogle() {
     this.isLoading = true;
