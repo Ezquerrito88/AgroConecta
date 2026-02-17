@@ -1,8 +1,9 @@
-import { Component, OnInit, isDevMode } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-login',
@@ -13,7 +14,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 })
 export class Login implements OnInit {
 
-  private apiUrl = 'https://agroconecta-backend-v2-bxbxfudaatbmgxdg.spaincentral-01.azurewebsites.net/api';
+  private apiUrl = `${environment.apiUrl}/api`;
 
   loginData = {
     email: '',
@@ -50,7 +51,6 @@ export class Login implements OnInit {
     this.isLoading = true;
     this.errorMessage = '';
 
-    // Login directo sin CSRF - tu backend ya usa tokens
     this.http.post(`${this.apiUrl}/login`, this.loginData)
       .subscribe({
         next: (res: any) => {
@@ -59,7 +59,7 @@ export class Login implements OnInit {
         },
         error: (err) => {
           this.isLoading = false;
-          console.error('Error completo:', err); // Para ver qué pasa
+          console.error('Error completo:', err);
 
           if (err.status === 401) {
             this.errorMessage = 'Credenciales incorrectas.';
@@ -70,10 +70,9 @@ export class Login implements OnInit {
       });
   }
 
-
-
   loginWithGoogle() {
     this.isLoading = true;
+    // 👇 También dinámico para Google
     window.location.href = `${this.apiUrl}/auth/google`;
   }
 
@@ -84,10 +83,7 @@ export class Login implements OnInit {
       localStorage.setItem('user', JSON.stringify(user));
     }
 
-    if (user && (user.role === 'farmer' || user.role === 'agricultor')) {
-      this.router.navigate(['/']);
-    } else {
-      this.router.navigate(['/']);
-    }
+    // Redirección simple a home
+    this.router.navigate(['/']);
   }
 }

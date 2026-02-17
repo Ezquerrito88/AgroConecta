@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
+import { environment } from '../../../environments/environment'; // <--- Importación clave
 
 @Component({
   selector: 'app-detalle-producto',
@@ -13,8 +14,7 @@ import { FormsModule } from '@angular/forms';
 })
 export class DetalleProducto implements OnInit {
 
-  // URL de tu Backend en Azure
-  private readonly API_URL = 'https://agroconecta-backend-v2-bxbxfudaatbmgxdg.spaincentral-01.azurewebsites.net';
+  private readonly API_URL = environment.apiUrl;
 
   product: any = null;
   cantidad: number = 1;
@@ -39,26 +39,23 @@ export class DetalleProducto implements OnInit {
   }
 
   getImagenUrl(product: any): string {
-    if (product && product.images && product.images.length > 0) {
+    if (product?.images?.length > 0) {
       const path = product.images[0].image_path;
       
-      // Si la URL ya es completa (y apunta a localhost), la corregimos
       if (path.startsWith('http')) {
-        return path.replace(/http:\/\/127\.0\.0\.1:8000/g, this.API_URL);
+        return path.replace(/http:\/\/127\.0\.0\.1:8000|https:\/\/agroconecta-backend-v2-.*\.azurewebsites\.net/g, this.API_URL);
       }
       
-      // Si es una ruta relativa, le ponemos el prefijo de Azure
       return `${this.API_URL}/storage/${path}`;
     }
-    return 'assets/placeholder.png'; // Imagen por defecto si no hay fotos
+    return 'assets/placeholder.png';
   }
 
   cargarProducto(id: string) {
     this.isLoading = true;
-
+    // Construimos la ruta API dinámicamente
     this.http.get(`${this.API_URL}/api/products/${id}`).subscribe({
       next: (data: any) => {
-        // Guardamos los datos. El HTML ahora llamará a getImagenUrl(product)
         this.product = data;
         this.isLoading = false;
         this.cd.detectChanges();
@@ -73,7 +70,6 @@ export class DetalleProducto implements OnInit {
   cambiarCantidad(valor: number) {
     const nuevaCantidad = this.cantidad + valor;
     const maxStock = this.product?.stock_quantity || 100;
-
     if (nuevaCantidad >= 1 && nuevaCantidad <= maxStock) {
       this.cantidad = nuevaCantidad;
     }
@@ -81,7 +77,6 @@ export class DetalleProducto implements OnInit {
 
   agregarAlCarrito() {
     if (!this.product) return;
-    console.log(`🛒 Añadiendo ${this.cantidad} de ${this.product.name}`);
     alert(`Se han añadido ${this.cantidad} kgs de ${this.product.name} al carrito`);
   }
 }

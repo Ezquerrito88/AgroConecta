@@ -9,9 +9,12 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
+// --- SERVICIOS Y MODELOS ---
 import { ProductoService } from '../../services/producto.service';
 import { Producto } from '../../models/producto';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-catalogo',
@@ -24,15 +27,21 @@ import { Producto } from '../../models/producto';
     MatSelectModule,
     MatFormFieldModule,
     MatInputModule,
-    MatIconModule
+    MatIconModule,
+    MatProgressSpinnerModule
   ],
-  // Asegúrate de que estos nombres coinciden con tus archivos reales
   templateUrl: './catalogo.html',
   styleUrl: './catalogo.css'
 })
 export class Catalogo implements OnInit {
+  
+  // URL dinámica del entorno actual
+  private readonly API_URL = environment.apiUrl;
+
   // Datos principales
   productos: Producto[] = [];
+  categorias: any[] = [];
+  isLoading: boolean = true;
 
   // Paginación
   paginaActual: number = 1;
@@ -42,10 +51,7 @@ export class Catalogo implements OnInit {
   hasta: number = 0;
 
   // --- VARIABLES DE FILTROS ---
-  filtroCategoria: string = 'Todas';
-  filtroUbicacion: string = 'Todas';
-
-  // Slider de Rango de Precio
+  filtroCategoria: any = 'Todas';
   minPrice: number = 0;
   maxPrice: number = 100;
 
@@ -55,28 +61,81 @@ export class Catalogo implements OnInit {
   ) { }
 
   ngOnInit(): void {
+    this.cargarCategorias();
     this.cargarProductos(1);
   }
 
+  // 👇 GESTIÓN DE IMÁGENES HÍBRIDA
+  getImagenUrl(prod: any): string {
+    if (prod.images && prod.images.length > 0) {
+      const path = prod.images[0].image_path;
+      
+      // Limpiamos URLs absolutas que vengan de la DB para que coincidan con el entorno actual
+      if (path.startsWith('http')) {
+        return path.replace(/http:\/\/127\.0\.0\.1:8000|https:\/\/agroconecta-backend-v2-.*\.azurewebsites\.net/g, this.API_URL);
+      }
+      
+      return `${this.API_URL}/storage/${path}`;
+    }
+    return 'assets/placeholder.png';
+  }
+
+  cargarCategorias(): void {
+    // Asumimos que tienes este método en tu servicio para llenar el select
+    this.productoService.getCategorias().subscribe({
+      next: (res: any) => this.categorias = res,
+      error: (err) => console.error('Error cargando categorías:', err)
+    });
+  }
+
   cargarProductos(page: number): void {
-    // Pedimos 12 productos por página
-    this.productoService.getDestacados(page, 12).subscribe({
+    this.isLoading = true;
+    
+    // Preparamos los filtros para enviarlos al servicio
+    const filtrosParams = {
+      page: page,
+      limit: 12,
+      category_id: this.filtroCategoria !== 'Todas' ? this.filtroCategoria : null,
+      min_price: this.minPrice,
+      max_price: this.maxPrice
+    };
+
+    this.productoService.getProductosFiltrados(filtrosParams).subscribe({
       next: (res: any) => {
-        this.productos = res.data;
-        this.paginaActual = res.current_page;
-        this.totalPaginas = res.last_page;
+        this.productos = res.data || res;
+        this.paginaActual = res.current_page || page;
+        this.totalPaginas = res.last_page || 1;
 
-        // Datos para "Mostrando X-Y de Z productos"
-        this.totalProductos = res.total;
-        this.desde = res.from;
-        this.hasta = res.to;
+        // Datos para el contador de la UI
+        this.totalProductos = res.total || 0;
+        this.desde = res.from || 0;
+        this.hasta = res.to || 0;
 
+        this.isLoading = false;
         this.cdr.detectChanges();
         window.scrollTo({ top: 0, behavior: 'smooth' });
       },
-      error: (err) => console.error('Error:', err)
+      error: (err) => {
+        console.error('Error cargando productos:', err);
+        this.isLoading = false;
+      }
     });
   }
+
+  // --- ACCIONES DE FILTROS ---
+
+  aplicarFiltros(): void {
+    this.cargarProductos(1); // Al filtrar, volvemos a la página 1
+  }
+
+  limpiarFiltros(): void {
+    this.filtroCategoria = 'Todas';
+    this.minPrice = 0;
+    this.maxPrice = 100;
+    this.cargarProductos(1);
+  }
+
+  // --- PAGINACIÓN ---
 
   cambiarPagina(nuevaPagina: number): void {
     if (nuevaPagina >= 1 && nuevaPagina <= this.totalPaginas) {
@@ -84,69 +143,43 @@ export class Catalogo implements OnInit {
     }
   }
 
-  /**
-   * PAGINACIÓN INTELIGENTE (Ventana deslizante)
-   * Soluciona el problema de tener 100 botones.
-   * Muestra máximo 5 botones alrededor de la página actual.
-   */
   get numeracionPaginas(): number[] {
     const total = this.totalPaginas;
     const current = this.paginaActual;
-    const maxVisible = 5; // Número máximo de botones a mostrar
+    const maxVisible = 5;
 
-    // 1. Si hay pocas páginas, las mostramos todas
     if (total <= maxVisible) {
       return Array.from({ length: total }, (_, i) => i + 1);
     }
 
-    // 2. Calculamos el rango (2 atrás y 2 delante)
-    let start = current - 2;
-    let end = current + 2;
+    let start = Math.max(current - 2, 1);
+    let end = Math.min(start + maxVisible - 1, total);
 
-    // 3. Ajuste si estamos al principio (ej: pág 1)
-    if (start < 1) {
-      start = 1;
-      end = maxVisible;
+    if (end === total) {
+      start = Math.max(end - maxVisible + 1, 1);
     }
 
-    // 4. Ajuste si estamos al final (ej: pág 100)
-    if (end > total) {
-      end = total;
-      start = total - maxVisible + 1;
-    }
-
-    // 5. Generamos el array
-    const pages: number[] = [];
-    for (let i = start; i <= end; i++) {
-      pages.push(i);
-    }
-    return pages;
+    return Array.from({ length: (end - start) + 1 }, (_, i) => start + i);
   }
+
+  // --- INTERACCIÓN ---
 
   formatLabel(value: number): string {
-    return value >= 1000 ? Math.round(value / 1000) + 'k' : `${value}€`;
+    return `${value}€`;
   }
 
-  filtrarPorPrecio() {
-    console.log(`Filtrando precio entre: ${this.minPrice}€ y ${this.maxPrice}€`);
-    // Aquí puedes llamar a this.cargarProductos(1) si implementas el filtro en el back
-  }
-
-  toggleFavorite(prod: Producto) {
-    // Usamos el nuevo nombre 'is_favorite'
-    prod.is_favorite = !prod.is_favorite;
-
+  toggleFavorite(prod: Producto): void {
+    prod.is_favorite = !prod.is_favorite; // Optimistic UI
     this.productoService.toggleFavorite(prod.id).subscribe({
-      next: (res: any) => console.log('Like guardado'),
       error: (err) => {
-        // Si falla, revertimos usando el nombre nuevo
-        prod.is_favorite = !prod.is_favorite;
+        prod.is_favorite = !prod.is_favorite; // Revertir si falla
         console.error(err);
       }
     });
   }
 
-  agregarAlCarrito(prod: Producto) {
-    console.log('Añadiendo:', prod.name);
+  agregarAlCarrito(prod: Producto): void {
+    console.log('Añadiendo al carrito:', prod.name);
+    // Aquí llamarías a tu cartService.addToCart(prod)
   }
 }

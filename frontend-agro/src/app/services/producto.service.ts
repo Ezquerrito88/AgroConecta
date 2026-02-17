@@ -1,38 +1,54 @@
-import { Injectable, isDevMode } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { Injectable } from '@angular/core';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../environments/environment';
+import { Producto } from '../models/producto';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ProductoService {
 
-  // URL de tu backend Laravel
-  private apiUrl = 'https://agroconecta-backend-v2-bxbxfudaatbmgxdg.spaincentral-01.azurewebsites.net/api';
+  private apiUrl = `${environment.apiUrl}/api`;
 
   constructor(private http: HttpClient) { }
 
-  // --- 1. PRODUCTOS DESTACADOS (Para solucionar tu error actual) ---
+  // 1. Obtener categorías para el desplegable del catálogo
+  getCategorias(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/categories`);
+  }
+
+  // 2. Obtener productos con filtros (categoría, precio, paginación)
+  getProductosFiltrados(filtros: any): Observable<any> {
+    let params = new HttpParams()
+      .set('page', filtros.page.toString())
+      .set('limit', filtros.limit.toString());
+
+    if (filtros.category_id && filtros.category_id !== 'Todas') {
+      params = params.set('category_id', filtros.category_id.toString());
+    }
+
+    if (filtros.min_price) {
+      params = params.set('min_price', filtros.min_price.toString());
+    }
+
+    if (filtros.max_price) {
+      params = params.set('max_price', filtros.max_price.toString());
+    }
+
+    return this.http.get<any>(`${this.apiUrl}/products`, { params });
+  }
+
+  // 3. Mantener compatibilidad con lo que ya tenías
   getDestacados(page: number = 1, limit: number = 6): Observable<any> {
-    // Llama al endpoint /products/featured con paginación
-    return this.http.get<any>(`${this.apiUrl}/products/featured?page=${page}&limit=${limit}`);
+    return this.http.get<any>(`${this.apiUrl}/products?page=${page}&limit=${limit}`);
   }
 
-  // --- 2. FAVORITOS (Para la sección de favoritos) ---
-  getFavoritos(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/favorites`);
+  toggleFavorite(productId: number): Observable<any> {
+    return this.http.post(`${this.apiUrl}/favorites/toggle`, { product_id: productId });
   }
 
-  toggleFavorite(id: number): Observable<any> {
-    return this.http.post(`${this.apiUrl}/favorites/${id}`, {});
-  }
-
-  // --- 3. OTROS MÉTODOS ÚTILES ---
-  getProductos(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/products`);
-  }
-  
-  getProductoById(id: number): Observable<any> {
-    return this.http.get<any>(`${this.apiUrl}/products/${id}`);
+  getFavoritos(): Observable<Producto[]> {
+    return this.http.get<Producto[]>(`${this.apiUrl}/favorites`);
   }
 }

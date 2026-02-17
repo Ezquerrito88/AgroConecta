@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CartService } from '../../services/cart.service';
+import { environment } from '../../../environments/environment'; // <--- IMPORTANTE
 
 @Component({
   selector: 'app-cart-drawer',
@@ -14,8 +15,8 @@ export class CartDrawer implements OnInit {
   isOpen: boolean = false;
   total: number = 0;
 
-  // URL de tu Backend en Azure
-  private readonly API_URL = 'https://agroconecta-backend-v2-bxbxfudaatbmgxdg.spaincentral-01.azurewebsites.net';
+  // 👇 Ahora es dinámico
+  private readonly API_URL = environment.apiUrl;
 
   constructor(private cartService: CartService) {}
 
@@ -30,17 +31,15 @@ export class CartDrawer implements OnInit {
     });
   }
 
-  // Función para resolver la URL de la imagen correctamente
   getImageUrl(item: any): string {
     if (item.images && item.images.length > 0) {
       const path = item.images[0].image_path;
       
-      // Si la ruta ya es una URL completa (y apunta a localhost), la corregimos
       if (path.startsWith('http')) {
-        return path.replace(/http:\/\/127\.0\.0\.1:8000/g, this.API_URL);
+        // Corregimos dinámicamente según el entorno
+        return path.replace(/http:\/\/127\.0\.0\.1:8000|https:\/\/agroconecta-backend-v2-.*\.azurewebsites\.net/g, this.API_URL);
       }
       
-      // Si es una ruta relativa, le pegamos el prefijo de Azure
       return `${this.API_URL}/storage/${path}`;
     }
     return 'assets/placeholder.png';
@@ -48,7 +47,6 @@ export class CartDrawer implements OnInit {
 
   close() { this.cartService.closeCart(); }
   removeItem(id: number) { this.cartService.removeFromCart(id); }
-
   updateQuantity(id: number, change: number) {
     this.cartService.updateQuantity(id, change);
   }
