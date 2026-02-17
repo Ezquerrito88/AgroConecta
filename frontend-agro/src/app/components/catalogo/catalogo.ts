@@ -34,7 +34,7 @@ import { environment } from '../../../environments/environment';
   styleUrl: './catalogo.css'
 })
 export class Catalogo implements OnInit {
-  
+
   // URL dinámica del entorno actual
   private readonly API_URL = environment.apiUrl;
 
@@ -69,28 +69,27 @@ export class Catalogo implements OnInit {
   getImagenUrl(prod: any): string {
     if (prod.images && prod.images.length > 0) {
       const path = prod.images[0].image_path;
-      
+
       // Limpiamos URLs absolutas que vengan de la DB para que coincidan con el entorno actual
       if (path.startsWith('http')) {
         return path.replace(/http:\/\/127\.0\.0\.1:8000|https:\/\/agroconecta-backend-v2-.*\.azurewebsites\.net/g, this.API_URL);
       }
-      
+
       return `${this.API_URL}/storage/${path}`;
     }
     return 'assets/placeholder.png';
   }
 
   cargarCategorias(): void {
-    // Asumimos que tienes este método en tu servicio para llenar el select
     this.productoService.getCategorias().subscribe({
       next: (res: any) => this.categorias = res,
-      error: (err) => console.error('Error cargando categorías:', err)
+      error: (err: any) => console.error('Error cargando categorías:', err)
     });
   }
 
   cargarProductos(page: number): void {
     this.isLoading = true;
-    
+
     // Preparamos los filtros para enviarlos al servicio
     const filtrosParams = {
       page: page,
@@ -115,7 +114,7 @@ export class Catalogo implements OnInit {
         this.cdr.detectChanges();
         window.scrollTo({ top: 0, behavior: 'smooth' });
       },
-      error: (err) => {
+      error: (err: any) => {
         console.error('Error cargando productos:', err);
         this.isLoading = false;
       }
