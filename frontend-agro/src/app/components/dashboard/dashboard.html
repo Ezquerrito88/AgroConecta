@@ -113,14 +113,8 @@
           </div>
 
           <div class="card-content">
-
-            <h4 class="product-title">
-              {{ prod.name }}
-            </h4>
-
-            <p class="short-desc" *ngIf="prod.short_description">
-              {{ prod.short_description }}
-            </p>
+            <h4 class="product-title">{{ prod.name }}</h4>
+            <p class="short-desc" *ngIf="prod.short_description">{{ prod.short_description }}</p>
 
             <div class="seller-box" *ngIf="prod.farmer">
               <span class="seller-name">{{ prod.farmer.full_name || 'Agricultor Local' }}</span>
@@ -134,7 +128,8 @@
               </div>
 
               <button class="add-button" [disabled]="prod.stock_quantity === 0"
-                (click)="$event.stopPropagation(); addToCart(prod)"> <i class="fa-solid fa-plus"></i> Añadir
+                (click)="$event.stopPropagation(); addToCart(prod)"> 
+                <i class="fa-solid fa-plus"></i> Añadir
               </button>
             </div>
           </div>
@@ -143,7 +138,6 @@
 
       <div class="pagination-container" *ngIf="totalPaginas > 1">
         <div class="pagination-controls">
-
           <button type="button" class="pag-btn nav-btn" [disabled]="paginaActual === 1"
             (click)="cambiarPagina(paginaActual - 1)">
             <i class="fa-solid fa-chevron-left"></i>
@@ -162,7 +156,6 @@
             (click)="cambiarPagina(paginaActual + 1)">
             <i class="fa-solid fa-chevron-right"></i>
           </button>
-
         </div>
       </div>
 

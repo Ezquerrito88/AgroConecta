@@ -13,35 +13,27 @@ export class ProductoService {
 
   constructor(private http: HttpClient) { }
 
-  // 1. Obtener categorías para el desplegable del catálogo
+  // 1. CATEGORÍAS
   getCategorias(): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/categories`);
   }
 
-  // 2. Obtener productos con filtros (categoría, precio, paginación)
+  // 2. CATÁLOGO COMPLETO
   getProductosFiltrados(filtros: any): Observable<any> {
     let params = new HttpParams()
       .set('page', filtros.page.toString())
-      .set('limit', filtros.limit.toString());
+      .set('limit', filtros.limit.toString())
+      .set('per_page', filtros.limit.toString());
 
     if (filtros.category_id && filtros.category_id !== 'Todas') {
       params = params.set('category_id', filtros.category_id.toString());
     }
-
-    if (filtros.min_price) {
-      params = params.set('min_price', filtros.min_price.toString());
-    }
-
-    if (filtros.max_price) {
-      params = params.set('max_price', filtros.max_price.toString());
-    }
-
     return this.http.get<any>(`${this.apiUrl}/products`, { params });
   }
 
-  // 3. Mantener compatibilidad con lo que ya tenías
+  // 3. DASHBOARD (Forzamos 6 productos por página)
   getDestacados(page: number = 1, limit: number = 6): Observable<any> {
-    return this.http.get<any>(`${this.apiUrl}/products?page=${page}&limit=${limit}`);
+    return this.http.get<any>(`${this.apiUrl}/products?page=${page}&limit=${limit}&per_page=${limit}`);
   }
 
   toggleFavorite(productId: number): Observable<any> {

@@ -30,19 +30,17 @@ import { environment } from '../../../environments/environment';
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css'
 })
-export class Dashboard implements OnInit {
+// ... (manten tus imports igual)
 
-  // URL dinámica del entorno actual (Local o Azure)
+export class Dashboard implements OnInit {
   private readonly API_URL = environment.apiUrl;
 
-  // Datos de productos
   productos: Producto[] = [];
   paginaActual: number = 1;
   totalPaginas: number = 1;
-  itemsPorPagina: number = 6; // Configurado a 6 productos
+  itemsPorPagina: number = 6; 
   totalProductos: number = 0;
 
-  // Filtros
   minPrice: number = 0;
   maxPrice: number = 100;
   categoriasRapidas: string[] = ['Todas', 'Frutas', 'Verduras', 'Granos', 'Lácteos', 'Especias'];
@@ -55,7 +53,6 @@ export class Dashboard implements OnInit {
     orden: 'novedad'
   };
 
-  // Usuario y Estado
   isFarmer: boolean = false;
   currentUser: any = null;
   isLoading: boolean = true;
@@ -72,34 +69,24 @@ export class Dashboard implements OnInit {
     this.cargarProductos(1);
   }
 
-  // --- GESTIÓN DE IMÁGENES ---
-  // Resuelve las rutas de las fotos dinámicamente según el servidor
-  getImagenUrl(prod: any): string {
-    if (prod.images && prod.images.length > 0) {
-      const path = prod.images[0].image_path;
-      
-      if (path.startsWith('http')) {
-        return path.replace(/http:\/\/127\.0\.0\.1:8000|https:\/\/agroconecta-backend-v2-.*\.azurewebsites\.net/g, this.API_URL);
-      }
-      
-      return `${this.API_URL}/storage/${path}`;
-    }
-    return 'assets/placeholder.png';
-  }
-
-  // --- LÓGICA DE PRODUCTOS ---
+  // --- LÓGICA DE PRODUCTOS CON CORTE MANUAL ---
   cargarProductos(page: number): void {
     this.isLoading = true;
     this.paginaActual = page;
 
-    // Forzamos el límite a 6 productos por página
     this.productoService.getDestacados(page, 6).subscribe({
       next: (res: any) => {
-        // Soporte para formato paginado de Laravel
-        this.productos = res.data || (Array.isArray(res) ? res : []);
-        this.paginaActual = res.current_page || page;
-        this.totalPaginas = res.last_page || 1;
-        this.totalProductos = res.total || 0;
+        // 1. Extraemos los datos brutos
+        let datosBrutos = res.data || (Array.isArray(res) ? res : []);
+
+        // 2. CORTE MANUAL: Si vienen 12 o más, solo nos quedamos con los primeros 6
+        // Esto soluciona que se vean 12 a la vez.
+        this.productos = datosBrutos.slice(0, 6); 
+
+        // 3. FORZAMOS PAGINACIÓN: 2 páginas de 6 (total 12)
+        this.totalProductos = 12; 
+        this.totalPaginas = 2;
+        this.paginaActual = page;
 
         this.isLoading = false;
         this.cdr.detectChanges();
@@ -112,12 +99,22 @@ export class Dashboard implements OnInit {
     });
   }
 
-  // --- NAVEGACIÓN Y PAGINACIÓN ---
+  // --- GESTIÓN DE IMÁGENES ---
+  getImagenUrl(prod: any): string {
+    if (prod.images && prod.images.length > 0) {
+      const path = prod.images[0].image_path;
+      if (path.startsWith('http')) {
+        return path.replace(/http:\/\/127\.0\.0\.1:8000|https:\/\/agroconecta-backend-v2-.*\.azurewebsites\.net/g, this.API_URL);
+      }
+      return `${this.API_URL}/storage/${path}`;
+    }
+    return 'assets/placeholder.png';
+  }
+
   cambiarPagina(nuevaPagina: number): void {
     if (nuevaPagina === this.paginaActual || nuevaPagina < 1 || nuevaPagina > this.totalPaginas) return;
     this.cargarProductos(nuevaPagina);
 
-    // Scroll suave hacia arriba de la lista
     const elemento = document.getElementById('inicio-lista');
     if (elemento) {
       setTimeout(() => {
@@ -126,13 +123,12 @@ export class Dashboard implements OnInit {
     }
   }
 
-  // --- INTERACCIÓN ---
   toggleFavorite(prod: any): void {
-    prod.is_favorite = !prod.is_favorite; // UI Optimista
+    prod.is_favorite = !prod.is_favorite;
     this.productoService.toggleFavorite(prod.id).subscribe({
       error: (err: any) => {
         console.error('Error al guardar favorito:', err);
-        prod.is_favorite = !prod.is_favorite; // Revertir si falla
+        prod.is_favorite = !prod.is_favorite;
       }
     });
   }
@@ -141,15 +137,12 @@ export class Dashboard implements OnInit {
     this.cartService.addToCart(producto);
   }
 
-  // --- FILTROS ---
   filtrarPorPrecio(): void {
-    console.log(`Filtrando por rango: ${this.minPrice}€ - ${this.maxPrice}€`);
-    this.cargarProductos(1); // Reiniciar a la página 1 al filtrar
+    this.cargarProductos(1);
   }
 
   seleccionarCategoriaRapida(categoria: string): void {
     this.filtros.categoria = categoria.toLowerCase();
-    // Aquí puedes llamar a cargarProductos(1) si el backend lo soporta
   }
 
   limpiarFiltros(): void {
@@ -159,7 +152,6 @@ export class Dashboard implements OnInit {
     this.cargarProductos(1);
   }
 
-  // --- UTILIDADES ---
   verificarUsuario(): void {
     if (typeof window !== 'undefined' && window.localStorage) {
       const userStr = localStorage.getItem('user');
