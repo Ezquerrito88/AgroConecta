@@ -108,7 +108,8 @@
           </button>
 
           <img *ngIf="prod.images && prod.images.length > 0"
-            [src]="'http://127.0.0.1:8000/storage/' + prod.images[0].image_path" alt="{{ prod.name }}">
+            [src]="'https://agroconecta-backend-v2-bxbxfudaatbmgxdg.spaincentral-01.azurewebsites.net/storage/' + prod.images[0].image_path"
+            alt="{{ prod.name }}">
 
           <div *ngIf="!prod.images || prod.images.length === 0" class="placeholder-img">
             <i class="fa-solid fa-image"></i>
