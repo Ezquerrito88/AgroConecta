@@ -85,7 +85,7 @@ export class Login implements OnInit {
     }
 
     if (user && (user.role === 'farmer' || user.role === 'agricultor')) {
-      this.router.navigate(['/agricultor/dashboard']);
+      this.router.navigate(['/']);
     } else {
       this.router.navigate(['/']);
     }
