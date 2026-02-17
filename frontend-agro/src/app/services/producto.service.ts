@@ -8,8 +8,7 @@ import { Observable } from 'rxjs';
 export class ProductoService {
 
   // URL de tu backend Laravel
-  private apiUrl = isDevMode() ? 'http://localhost:8000/api' 
-  : 'https://agroconecta-backend-v2-bxbxfudaatbmgxdg.spaincentral-01.azurewebsites.net/api'; 
+  private apiUrl = 'https://agroconecta-backend-v2-bxbxfudaatbmgxdg.spaincentral-01.azurewebsites.net/api';
 
   constructor(private http: HttpClient) { }
 
