@@ -47,27 +47,29 @@ export class Login implements OnInit {
   }
 
   onLogin() {
-    this.isLoading = true;
-    this.errorMessage = '';
+  this.isLoading = true;
 
-    console.log('Intentando login con:', this.loginData);
-
-    this.http.post(`${this.apiUrl}/login`, this.loginData, { withCredentials: true }).subscribe({
-      next: (res: any) => {
-        console.log('Respuesta del Servidor:', res);
-      },
-      error: (err) => {
-        console.error('Error login:', err);
-        this.isLoading = false;
-
-        if (err.status === 401 || err.status === 422) {
-          this.errorMessage = 'Email o contraseña incorrectos.';
-        } else {
-          this.errorMessage = 'Error de conexión. Inténtalo más tarde.';
+  this.http.get('https://agroconecta-backend-v2-bxbxfudaatbmgxdg.spaincentral-01.azurewebsites.net/sanctum/csrf-cookie', { withCredentials: true })
+  .subscribe({
+    next: () => {
+      this.http.post(`${this.apiUrl}/login`, this.loginData, { withCredentials: true })
+      .subscribe({
+        next: (res: any) => {
+          this.guardarSesion(res.access_token || res.token, res.user);
+          this.isLoading = false;
+        },
+        error: (err) => {
+          this.isLoading = false;
+          this.errorMessage = 'Credenciales incorrectas.';
         }
-      }
-    });
-  }
+      });
+    },
+    error: (err) => {
+      this.isLoading = false;
+      this.errorMessage = 'Error de comunicación con el servidor de seguridad.';
+    }
+  });
+}
 
   loginWithGoogle() {
     this.isLoading = true;
