@@ -1,3 +1,7 @@
+:root {
+  --green-gradient: linear-gradient(135deg, #11C267 0%, #02BA7A 100%);
+}
+
 .hero-banner {
   position: relative;
   width: 100%;
@@ -500,45 +504,37 @@ mat-slider {
   gap: 25px;
 }
 
-/* --- Contenedor de la Tarjeta --- */
 .product-card {
   background: white;
-  border-radius: 28px;
+  border-radius: 24px;
   overflow: hidden;
-  border: 2px solid transparent;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1.5px solid #e5e7eb;
+  transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
   display: flex;
   flex-direction: column;
+  position: relative;
+  cursor: pointer;
 }
 
-/* --- EFECTO HOVER: Borde verde y elevación --- */
 .product-card:hover {
-  transform: translateY(-10px);
+  transform: translateY(-8px);
   border-color: #11C267;
-  /* El verde de tu logo */
-  box-shadow: 0 20px 40px rgba(17, 194, 103, 0.15);
+  box-shadow: 0 20px 30px rgba(17, 194, 103, 0.12);
 }
 
-/* --- Imagen y Favoritos --- */
+/* Imagen */
 .card-image {
   position: relative;
-  /* Para poder posicionar el corazón y el stock encima */
   width: 100%;
   height: 200px;
-  /* ALTURA FIJA: Cambia esto si quieres la imagen más alta o baja */
   background-color: #f3f4f6;
-  /* Color de fondo mientras carga */
   overflow: hidden;
 }
 
-/* --- 3. LA IMAGEN REAL --- */
 .card-image img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  /* MAGIA: Recorta la imagen para llenar el hueco sin deformarla */
-  display: block;
   transition: transform 0.5s ease;
 }
 
@@ -621,34 +617,31 @@ mat-slider {
 
 /* --- Caja del Vendedor (Fondo naranja suave) --- */
 .seller-box {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  background: #FFF7ED;
-  /* Color crema/naranja muy suave */
-  padding: 10px 15px;
-  border-radius: 16px;
-  margin-bottom: 15px;
-}
-
-.seller-avatar {
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
-  object-fit: cover;
+  background: #fffcf9;
+  border-left: 3px solid #f97316;
+  padding: 8px 12px;
+  margin: 15px 0;
+  border-radius: 4px 12px 12px 4px;
+  transition: all 0.3s ease;
 }
 
 .seller-name {
   display: block;
   font-weight: 700;
   color: #1f2937;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
+  margin-bottom: 2px;
 }
 
 .seller-location {
-  font-size: 0.8rem;
-  color: #6b7280;
+  font-size: 0.75rem;
+  color: #9ca3af;
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
+
+.seller-location i { color: #f87171; }
 
 /* --- Rating y Estrellas --- */
 .rating-container {
@@ -675,33 +668,40 @@ mat-slider {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  margin-top: auto;
 }
 
-.price-box .price-main {
+.price-main {
   font-size: 1.6rem;
   font-weight: 900;
   color: #11C267;
-  /* Precio en verde como en la imagen */
-}
-
-.price-box .price-unit {
-  color: #6b7280;
-  font-size: 0.9rem;
-  margin-left: 2px;
 }
 
 .add-button {
-  background: linear-gradient(to right, #11C267, #02BA7A);
+  width: 42px;
+  height: 42px;
+  border-radius: 50% !important;
+  background: linear-gradient(135deg, #11C267 0%, #02BA7A 100%);
   color: white;
   border: none;
-  padding: 10px 10px;
-  border-radius: 4px;
-  font-weight: 500;
-  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 10px rgba(17, 194, 103, 0.3);
+  transition: all 0.3s ease;
   cursor: pointer;
 }
 
+.add-button:hover:not(:disabled) {
+  transform: rotate(90deg) scale(1.1);
+  box-shadow: 0 6px 15px rgba(17, 194, 103, 0.4);
+}
 
+.add-button:disabled {
+  background: #e5e7eb;
+  box-shadow: none;
+  cursor: not-allowed;
+}
 
 .wishlist-btn {
   position: absolute;

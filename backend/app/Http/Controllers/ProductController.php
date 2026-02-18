@@ -13,7 +13,7 @@ class ProductController extends Controller
     public function index(Request $request)
     {
         $query = Product::with(['category', 'images', 'farmer'])
-            ->where('moderation_status', 'approved'); // Solo lo aprobado (RF14) [cite: 20, 45]
+            ->where('moderation_status', 'approved');
 
         if ($request->has('category_id')) {
             $query->where('category_id', $request->input('category_id'));
@@ -26,16 +26,26 @@ class ProductController extends Controller
     }
 
     // Crear una función específica para destacados
-    public function getFeatured(Request $request)
+    public function getLatest()
     {
-        $limit = $request->input('limit', 6);
+        try {
+            // 1. Obtener los IDs
+            $latestIds = \App\Models\Product::query()
+                ->orderBy('created_at', 'desc')
+                ->take(12)
+                ->pluck('id');
 
-        $products = Product::with(['category', 'images', 'farmer'])
-            ->where('moderation_status', 'approved')
-            ->orderBy('created_at', 'desc')
-            ->paginate($limit);
+            // 2. Paginar los productos
+            $products = \App\Models\Product::query()
+                ->with(['images', 'farmer'])
+                ->whereIn('id', $latestIds)
+                ->orderBy('created_at', 'desc')
+                ->paginate(6);
 
-        return response()->json($products);
+            return response()->json($products);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
 
     //Crear productos

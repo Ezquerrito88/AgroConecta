@@ -26,8 +26,13 @@ export interface Producto {
   farmer?: {
     id: number;
     full_name: string;
+    name?: string;       
+    location?: string;   
+    city?: string;       
+    
     email: string;
     role: string;
+    
     farmer?: {
         city?: string;
         farm_name?: string;
