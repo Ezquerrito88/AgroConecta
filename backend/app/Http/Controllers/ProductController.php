@@ -12,6 +12,8 @@ class ProductController extends Controller
     //Listar todos los productos
     public function index(Request $request)
     {
+        $perPage = $request->query('per_page', 12);
+
         $query = Product::with(['category', 'images', 'farmer'])
             ->where('moderation_status', 'approved');
 
@@ -19,11 +21,11 @@ class ProductController extends Controller
             $query->where('category_id', $request->input('category_id'));
         }
 
-        // Usamos paginate(12) para que salgan 12 productos por página en el catálogo
-        $products = $query->orderBy('created_at', 'desc')->paginate(12);
+        $products = $query->orderBy('created_at', 'desc')->paginate($perPage);
 
         return response()->json($products);
     }
+
 
     // Crear una función específica para destacados
     public function getLatest(Request $request)

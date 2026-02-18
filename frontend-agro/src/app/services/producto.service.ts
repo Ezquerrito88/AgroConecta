@@ -12,13 +12,19 @@ export class ProductoService {
 
   constructor(private http: HttpClient) { }
 
-  // Obtener productos destacados (Paginados)
-  // Ahora acepta 'page' y opcionalmente 'perPage'
-getDestacados(page: number = 1, perPage: number = 6): Observable<any> {
-  // Usamos environment.apiUrl directamente para evitar duplicar /products
-  const urlBase = environment.apiUrl; 
-  return this.http.get<any>(`${urlBase}/products/latest?page=${page}&per_page=${perPage}`);
-}
+  // Dashboard: últimos 12 productos, máximo 2 páginas
+  getDestacados(page: number = 1, perPage: number = 6): Observable<any> {
+    return this.http.get<any>(
+      `${environment.apiUrl}/products/latest?page=${page}&per_page=${perPage}`
+    );
+  }
+
+  // Catálogo completo sin límite de productos
+  getCatalogo(page: number = 1, perPage: number = 12): Observable<any> {
+    return this.http.get<any>(
+      `${this.apiUrl}?page=${page}&per_page=${perPage}`
+    );
+  }
 
   // Obtener todos los productos con filtros
   getProductos(filtros: any = {}): Observable<Producto[]> {
@@ -30,14 +36,14 @@ getDestacados(page: number = 1, perPage: number = 6): Observable<any> {
     return this.http.get<Producto>(`${this.apiUrl}/${id}`);
   }
 
-  // Lógica de Favoritos (Requiere auth_token via Interceptor)
+  // Favoritos (Requiere auth_token via Interceptor)
   toggleFavorite(productId: number): Observable<any> {
     return this.http.post(`${environment.apiUrl}/favorites/toggle`, {
       product_id: productId
     });
   }
 
-  // Obtener lista de favoritos del usuario
+  // Lista de favoritos del usuario
   getFavoritos(): Observable<Producto[]> {
     return this.http.get<Producto[]>(`${environment.apiUrl}/favorites`);
   }
