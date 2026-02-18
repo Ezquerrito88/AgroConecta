@@ -12,8 +12,10 @@
     <div class="search-section">
       <div class="search-pill">
         <i class="fas fa-search"></i>
-        <input type="text" placeholder="¿Qué cosecha buscas hoy?">
+        <input type="text" placeholder="¿Qué cosecha buscas hoy?" [(ngModel)]="textoBusquedaGlobal"
+          (keyup.enter)="buscarDesdeHeader()" />
       </div>
+
     </div>
 
     <div class="header-actions">
@@ -49,7 +51,7 @@
 
         </ng-container>
 
-        <button class="action-btn user-btn" [class.farmer-style]="isFarmer"  title="Mi Perfil">
+        <button class="action-btn user-btn" [class.farmer-style]="isFarmer" title="Mi Perfil">
           <i [class]="isFarmer ? 'fa-solid fa-tractor' : 'fa-regular fa-user'"></i>
         </button>
 

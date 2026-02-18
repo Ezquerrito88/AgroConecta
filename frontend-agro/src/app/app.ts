@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, NavigationEnd, RouterModule } from '@angular/router';
+import { FormsModule } from '@angular/forms'; // ✅ añadido
 import { filter } from 'rxjs/operators';
 import { CartService } from './services/cart.service';
 import { CartDrawer } from './components/cart-drawer/cart-drawer';
@@ -8,98 +9,88 @@ import { CartDrawer } from './components/cart-drawer/cart-drawer';
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, RouterModule, CartDrawer], 
+  imports: [CommonModule, RouterModule, FormsModule, CartDrawer], // ✅ FormsModule añadido
   templateUrl: './app.html',
   styleUrls: ['./app.css']
 })
-export class App implements OnInit { // Mejor usar AppComponent
+export class App implements OnInit {
 
-  // Variables de estado
-  isLoggedIn: boolean = false;
-  mostrarLayout: boolean = true;
-  isFarmer: boolean = false;
-
-  isUserMenuOpen: boolean = false;
+  isLoggedIn = false;
+  mostrarLayout = true;
+  isFarmer = false;
+  isUserMenuOpen = false;
   currentUser: any = null;
 
-  constructor(private router: Router, public cartService: CartService) { }
+  textoBusquedaGlobal = ''; // ✅ añadido
 
-  ngOnInit() {
-    // Escuchamos cada cambio de URL
+  constructor(private router: Router, public cartService: CartService) {}
+
+  ngOnInit(): void {
     this.router.events.pipe(
       filter(event => event instanceof NavigationEnd)
     ).subscribe((event: NavigationEnd) => {
-
-      // 1. Ocultar header/footer en Login y Registro
       const rutasOcultas = ['/login', '/registro'];
-      // Solo ocultamos si la URL exacta está en la lista (evita ocultar en subrutas si no quieres)
       this.mostrarLayout = !rutasOcultas.some(ruta => event.urlAfterRedirects.includes(ruta));
-
-      // 2. Cerrar el menú si cambiamos de página
       this.isUserMenuOpen = false;
-
-      // 3. Comprobar sesión
       this.checkLoginStatus();
+
+      // ✅ Limpia el buscador al salir del catálogo
+      if (!event.urlAfterRedirects.includes('/productos')) {
+        this.textoBusquedaGlobal = '';
+      }
     });
 
-    // Comprobación inicial
     this.checkLoginStatus();
   }
 
-  // --- LÓGICA DEL MENÚ DESPLEGABLE ---
-  toggleUserMenu() {
+  // ✅ Navega al catálogo con el texto de búsqueda como query param
+  buscarDesdeHeader(): void {
+    if (this.textoBusquedaGlobal.trim()) {
+      this.router.navigate(['/productos'], {
+        queryParams: { search: this.textoBusquedaGlobal.trim() }
+      });
+    }
+  }
+
+  toggleUserMenu(): void {
     this.isUserMenuOpen = !this.isUserMenuOpen;
   }
 
-  closeUserMenu() {
+  closeUserMenu(): void {
     this.isUserMenuOpen = false;
   }
 
-  // --- LÓGICA DE SESIÓN ---
-  checkLoginStatus() {
-    // NOTA: En el Registro usamos la clave 'token', asegúrate de usar la misma aquí.
+  checkLoginStatus(): void {
     const token = localStorage.getItem('token');
-
-    this.isLoggedIn = !!token; // true si hay token, false si no
-
-    // Reiniciamos estado
+    this.isLoggedIn = !!token;
     this.isFarmer = false;
     this.currentUser = null;
 
     if (this.isLoggedIn) {
-      // Intentamos recuperar los datos del usuario
-      const userStr = localStorage.getItem('user'); // Asegúrate de guardar esto en el Login/Registro
-
+      const userStr = localStorage.getItem('user');
       if (userStr) {
         try {
           this.currentUser = JSON.parse(userStr);
-
-          // Lógica de roles: Miramos si el rol es 'farmer' o 'agricultor'
           const role = this.currentUser.role;
           if (role === 'agricultor' || role === 'farmer') {
             this.isFarmer = true;
           }
         } catch (error) {
           console.error('Error al leer datos del usuario:', error);
-          this.logout(); // Si los datos están corruptos, cerramos sesión
+          this.logout();
         }
       }
     }
   }
 
-  logout() {
-    // Borramos todo
+  logout(): void {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     localStorage.removeItem('user_role');
-
-    // Reseteamos variables
     this.isLoggedIn = false;
     this.isFarmer = false;
     this.currentUser = null;
     this.isUserMenuOpen = false;
-
-    // Redirigimos al login
     this.router.navigate(['/login']);
   }
 }

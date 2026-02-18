@@ -20,7 +20,8 @@
 <section class="products-section" id="inicio-lista">
   <div class="category-pills">
     <button *ngFor="let cat of categoriasRapidas" class="cat-btn"
-      [class.active]="filtros.categoria === cat.toLowerCase()" (click)="$event.stopPropagation(); seleccionarCategoriaRapida(cat)">
+      [class.active]="filtros.categoria === cat.toLowerCase()"
+      (click)="$event.stopPropagation(); seleccionarCategoriaRapida(cat)">
       {{ cat }}
     </button>
   </div>
@@ -72,10 +73,34 @@
     </aside>
 
     <main class="products-grid-container">
+
       @if (isLoading) {
-        <div class="loading-container">
-          <mat-spinner diameter="50"></mat-spinner>
-          <p>Buscando los mejores productos...</p>
+        <!-- ✅ SKELETON en lugar del spinner -->
+        <div class="grid-header">
+          <h2>Selección fresca del día</h2>
+          <span class="results-count skeleton-count"></span>
+        </div>
+        <div class="products-grid">
+          <div class="skeleton-card" *ngFor="let i of [1,2,3,4,5,6]">
+            <div class="skeleton-img">
+              <div class="skeleton-field-icon">
+                <i class="fa-solid fa-seedling"></i>
+              </div>
+              <div class="skeleton-wave"></div>
+            </div>
+            <div class="skeleton-content">
+              <div class="skeleton-line long"></div>
+              <div class="skeleton-line short"></div>
+              <div class="skeleton-farmer">
+                <div class="skeleton-avatar"></div>
+                <div class="skeleton-line medium"></div>
+              </div>
+              <div class="skeleton-footer">
+                <div class="skeleton-price"></div>
+                <div class="skeleton-btn"></div>
+              </div>
+            </div>
+          </div>
         </div>
       }
 
@@ -86,10 +111,12 @@
         </div>
 
         <div class="products-grid">
-          <div class="product-card" *ngFor="let prod of productos" [routerLink]="['/producto', prod.id]" style="cursor: pointer;">
-            
+          <div class="product-card" *ngFor="let prod of productos"
+            [routerLink]="['/producto', prod.id]" style="cursor: pointer;">
+
             <div class="card-image">
-              <div class="stock-badge" *ngIf="prod.stock_quantity <= 5" [class.no-stock]="prod.stock_quantity === 0">
+              <div class="stock-badge" *ngIf="prod.stock_quantity <= 5"
+                [class.no-stock]="prod.stock_quantity === 0">
                 {{ prod.stock_quantity === 0 ? 'Agotado' : '¡Casi agotado!' }}
               </div>
 
@@ -98,8 +125,9 @@
                 <i [class]="prod.is_favorite ? 'fa-solid fa-heart' : 'fa-regular fa-heart'"></i>
               </button>
 
-              <img *ngIf="prod.images && prod.images.length > 0" [src]="getImagenUrl(prod)" alt="{{ prod.name }}">
-              
+              <img *ngIf="prod.images && prod.images.length > 0"
+                [src]="getImagenUrl(prod)" alt="{{ prod.name }}">
+
               <div *ngIf="!prod.images || prod.images.length === 0" class="placeholder-img">
                 <i class="fa-solid fa-image"></i>
               </div>
@@ -116,7 +144,7 @@
                   {{ prod.farmer.full_name || prod.farmer.name || 'Agricultor Local' }}
                 </span>
                 <span class="seller-location">
-                  <i class="fa-solid fa-location-dot"></i> 
+                  <i class="fa-solid fa-location-dot"></i>
                   {{ prod.farmer.city || prod.farmer.location || 'Logroño' }}
                 </span>
               </div>
@@ -126,7 +154,6 @@
                   <span class="price-main">{{ prod.price }}€</span>
                   <span class="price-unit">/{{ prod.unit }}</span>
                 </div>
-
                 <button class="add-button" [disabled]="prod.stock_quantity === 0"
                   (click)="$event.stopPropagation(); addToCart(prod)">
                   <i class="fa-solid fa-plus"></i>
@@ -138,19 +165,23 @@
 
         <div class="pagination-container" *ngIf="totalPaginas > 1">
           <div class="pagination-controls">
-            <button class="pag-btn nav-btn" [disabled]="paginaActual === 1" (click)="cambiarPagina(paginaActual - 1)">
+            <button class="pag-btn nav-btn" [disabled]="paginaActual === 1"
+              (click)="cambiarPagina(paginaActual - 1)">
               <i class="fa-solid fa-chevron-left"></i>
             </button>
-            <button class="pag-btn num-btn" [class.active]="paginaActual === 1" (click)="cambiarPagina(1)">1</button>
-            <button *ngIf="totalPaginas >= 2" class="pag-btn num-btn" [class.active]="paginaActual === 2" (click)="cambiarPagina(2)">2</button>
-            <button class="pag-btn nav-btn" [disabled]="paginaActual >= totalPaginas" (click)="cambiarPagina(paginaActual + 1)">
+            <button class="pag-btn num-btn" [class.active]="paginaActual === 1"
+              (click)="cambiarPagina(1)">1</button>
+            <button *ngIf="totalPaginas >= 2" class="pag-btn num-btn"
+              [class.active]="paginaActual === 2" (click)="cambiarPagina(2)">2</button>
+            <button class="pag-btn nav-btn" [disabled]="paginaActual >= totalPaginas"
+              (click)="cambiarPagina(paginaActual + 1)">
               <i class="fa-solid fa-chevron-right"></i>
             </button>
           </div>
 
           <div class="pagination-info">
-            Mostrando <strong>{{ ((paginaActual - 1) * itemsPorPagina) + 1 }}</strong> - 
-            <strong>{{ ((paginaActual - 1) * itemsPorPagina) + productos.length }}</strong> de 
+            Mostrando <strong>{{ ((paginaActual - 1) * itemsPorPagina) + 1 }}</strong> -
+            <strong>{{ ((paginaActual - 1) * itemsPorPagina) + productos.length }}</strong> de
             <strong>{{ totalProductos }}</strong> productos.
           </div>
 
@@ -159,6 +190,7 @@
           </button>
         </div>
       }
+
     </main>
   </div>
 </section>

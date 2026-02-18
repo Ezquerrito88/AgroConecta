@@ -3,14 +3,38 @@
 
 :root {
   /* Tipografías */
-  --fuente-logo: "Poetsen One", sans-serif;
-  --fuente-principal: "Geist", sans-serif;
+  --fuente-logo:       "Poetsen One", sans-serif;
+  --fuente-principal:  "Geist", sans-serif;
 
-  /* Colores */
-  --color-negro-login: #313131;
+  /* Verdes */
+  --green-primary:     #11C267;
+  --green-dark:        #0ea858;
+  --green-gradient:    linear-gradient(135deg, #11C267 0%, #02BA7A 100%);
+  --green-shadow:      rgba(17, 194, 103, 0.3);
+  --color-verde-agro:  #22c55e; 
+
+  /* Naranjas */
+  --orange-primary:    #F97316;
+  --orange-light:      #fff7ed;
+  --orange-border:     #ffedd5;
   --color-naranja-login: #ED5924;
-  --color-verde-agro: #22c55e;
-  --color-bg-light: #f8fafc;
+
+  /* Azules */
+  --blue-primary:      #3B82F6;
+
+  /* Grises y neutros */
+  --gray-text:         #4B5563;
+  --gray-dark:         #1F2937;
+  --gray-border:       #e5e7eb;
+  --color-negro-login: #313131;
+  --color-bg-light:    #f8fafc; 
+
+  /* Border radius */
+  --radius-pill:       50px;
+  --radius-card:       24px;
+  --radius-md:         20px;
+  --radius-sm:         12px;
+  --radius-xs:         8px;
 }
 
 html, body {

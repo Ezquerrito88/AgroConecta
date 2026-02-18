@@ -3,9 +3,7 @@
     <h1 class="hero-title">Catálogo de Productos</h1>
     <div class="breadcrumb">
       <a routerLink="/" class="link-inicio">Inicio</a>
-
       <span class="separator"> > </span>
-
       <span class="current">Productos</span>
     </div>
   </div>
@@ -16,7 +14,7 @@
   <aside class="filter-card">
     <div class="filter-header">
       <h3>Filtros</h3>
-      <button class="clear-filters-btn">
+      <button class="clear-filters-btn" (click)="limpiarFiltros()">
         <i class="fa-solid fa-filter-circle-xmark"></i>
       </button>
     </div>
@@ -24,24 +22,25 @@
     <div class="filter-group filter-green">
       <label><span class="dot-green"></span> Categoría</label>
       <mat-form-field appearance="outline" class="full-width theme-green" subscriptSizing="dynamic">
-        <mat-select panelClass="panel-green" value="Todas">
-          <mat-option value="Todas">Todas</mat-option>
+        <mat-select panelClass="panel-green" [(ngModel)]="filtroCategoria" (ngModelChange)="cargarProductos(1)">
+          <mat-option value="">Todas</mat-option>
           <mat-option value="Frutas">Frutas</mat-option>
           <mat-option value="Verduras">Verduras</mat-option>
+          <mat-option value="Granos">Granos</mat-option>
+          <mat-option value="Lácteos">Lácteos</mat-option>
+          <mat-option value="Especias">Especias</mat-option>
         </mat-select>
       </mat-form-field>
     </div>
 
     <div class="filter-group filter-orange">
       <label><span class="dot-orange"></span> Rango de Precio</label>
-
       <div class="slider-container">
         <mat-slider min="0" max="100" step="1">
-          <input matSliderStartThumb [(ngModel)]="minPrice" (dragEnd)="filtrarPorPrecio()">
-          <input matSliderEndThumb [(ngModel)]="maxPrice" (dragEnd)="filtrarPorPrecio()">
+          <input matSliderStartThumb [(ngModel)]="minPrice" (dragEnd)="cargarProductos(1)">
+          <input matSliderEndThumb [(ngModel)]="maxPrice" (dragEnd)="cargarProductos(1)">
         </mat-slider>
       </div>
-
       <div class="range-labels">
         <span class="price-tag min">{{ minPrice }}€</span>
         <span class="price-tag max">{{ maxPrice }}€</span>
@@ -51,54 +50,70 @@
     <div class="filter-group filter-blue">
       <label><span class="dot-blue"></span> Ubicación</label>
       <mat-form-field appearance="outline" class="full-width theme-blue" subscriptSizing="dynamic">
-        <mat-select panelClass="panel-blue" value="Destacados">
-          <mat-option value="Destacados">Todas</mat-option>
-          <mat-option value="asc">La Rioja</mat-option>
-          <mat-option value="desc">Madrid</mat-option>
+        <mat-select panelClass="panel-blue" [(ngModel)]="filtroUbicacion" (ngModelChange)="cargarProductos(1)">
+          <mat-option value="">Todas</mat-option>
+          <mat-option value="La Rioja">La Rioja</mat-option>
+          <mat-option value="Madrid">Madrid</mat-option>
         </mat-select>
       </mat-form-field>
     </div>
 
     <div class="filter-group filter-red">
-      <label><span class="dot-red"></span> Valoración</label>
+      <label><span class="dot-red"></span> Ordenar por</label>
       <mat-form-field appearance="outline" class="full-width theme-red" subscriptSizing="dynamic">
-        <mat-select panelClass="panel-red" value="Destacados">
-          <mat-option value="Destacados">Todas</mat-option>
-          <mat-option value="asc">5 estrellas</mat-option>
-          <mat-option value="desc">4 estrellas</mat-option>
+        <mat-select panelClass="panel-red" [(ngModel)]="filtroOrden" (ngModelChange)="cargarProductos(1)">
+          <mat-option value="novedad">Más recientes</mat-option>
+          <mat-option value="precio_asc">Precio: menor a mayor</mat-option>
+          <mat-option value="precio_desc">Precio: mayor a menor</mat-option>
         </mat-select>
       </mat-form-field>
     </div>
 
-    <div class="filter-group filter-purple">
-      <label><span class="dot-purple"></span> Tipo de cultivo</label>
-      <mat-form-field appearance="outline" class="full-width theme-purple" subscriptSizing="dynamic">
-        <mat-select panelClass="panel-purple" value="Destacados">
-          <mat-option value="Destacados">Todos</mat-option>
-          <mat-option value="asc">5 estrellas</mat-option>
-          <mat-option value="desc">4 estrellas</mat-option>
-        </mat-select>
-      </mat-form-field>
-    </div>
   </aside>
 
   <main class="products-area">
 
     <div class="area-header">
-      <span class="results-info" *ngIf="totalProductos > 0">
+      <span class="results-info" *ngIf="!isLoading && totalProductos > 0">
         Mostrando {{ desde }}-{{ hasta }} de {{ totalProductos }} productos
       </span>
-      <span class="results-info" *ngIf="totalProductos === 0">
+      <span class="results-info" *ngIf="!isLoading && totalProductos === 0">
         No se encontraron productos
       </span>
     </div>
 
-    <div class="products-grid">
-      <div class="product-card" *ngFor="let prod of productos" [routerLink]="['/producto', prod.id]"
-        style="cursor: pointer;">
+    <!-- ✅ SKELETON mientras carga -->
+    <div class="products-grid" *ngIf="isLoading">
+      <div class="skeleton-card" *ngFor="let i of [1,2,3,4,5,6,7,8,9,10,11,12]">
+        <div class="skeleton-img">
+          <div class="skeleton-field-icon">
+            <i class="fa-solid fa-seedling"></i>
+          </div>
+          <div class="skeleton-wave"></div>
+        </div>
+        <div class="skeleton-content">
+          <div class="skeleton-line long"></div>
+          <div class="skeleton-line short"></div>
+          <div class="skeleton-farmer">
+            <div class="skeleton-avatar"></div>
+            <div class="skeleton-line medium"></div>
+          </div>
+          <div class="skeleton-footer">
+            <div class="skeleton-price"></div>
+            <div class="skeleton-btn"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ✅ Grid real cuando hay datos -->
+    <div class="products-grid" *ngIf="!isLoading">
+      <div class="product-card" *ngFor="let prod of productos"
+        [routerLink]="['/producto', prod.id]" style="cursor: pointer;">
 
         <div class="card-image">
-          <div class="stock-badge" *ngIf="prod.stock_quantity <= 5" [class.no-stock]="prod.stock_quantity === 0">
+          <div class="stock-badge" *ngIf="prod.stock_quantity <= 5"
+            [class.no-stock]="prod.stock_quantity === 0">
             {{ prod.stock_quantity === 0 ? 'Agotado' : '¡Casi agotado!' }}
           </div>
 
@@ -118,13 +133,13 @@
 
         <div class="card-content">
           <h4 class="product-title">{{ prod.name }}</h4>
-
           <p class="product-desc">{{ prod.description }}</p>
 
           <div class="seller-box" *ngIf="prod.farmer">
             <span class="seller-name">{{ prod.farmer.full_name || 'Agricultor Local' }}</span>
             <span class="seller-location">
-              <i class="fa-solid fa-location-dot"></i> {{ prod.farmer.farmer?.city || 'Logroño' }}
+              <i class="fa-solid fa-location-dot"></i>
+              {{ prod.farmer.farmer?.city || 'Logroño' }}
             </span>
           </div>
 
@@ -133,7 +148,6 @@
               <span class="price-main">{{ prod.price }}€</span>
               <span class="price-unit">/{{ prod.unit }}</span>
             </div>
-
             <button class="add-button" [disabled]="prod.stock_quantity === 0"
               (click)="$event.stopPropagation(); agregarAlCarrito(prod)">
               <i class="fa-solid fa-plus"></i> Añadir
@@ -142,21 +156,24 @@
         </div>
       </div>
     </div>
-    <div class="pagination-wrapper" *ngIf="totalPaginas > 1">
 
-      <button class="pag-arrow" (click)="cambiarPagina(paginaActual - 1)" [disabled]="paginaActual === 1">
+    <!-- Paginación -->
+    <div class="pagination-wrapper" *ngIf="!isLoading && totalPaginas > 1">
+      <button class="pag-arrow" (click)="cambiarPagina(paginaActual - 1)"
+        [disabled]="paginaActual === 1">
         <i class="fa-solid fa-chevron-left"></i>
       </button>
 
-      <button *ngFor="let p of numeracionPaginas" class="pag-num" [class.active]="paginaActual === p"
-        (click)="cambiarPagina(p)">
+      <button *ngFor="let p of numeracionPaginas" class="pag-num"
+        [class.active]="paginaActual === p" (click)="cambiarPagina(p)">
         {{ p }}
       </button>
 
-      <button class="pag-arrow" (click)="cambiarPagina(paginaActual + 1)" [disabled]="paginaActual === totalPaginas">
+      <button class="pag-arrow" (click)="cambiarPagina(paginaActual + 1)"
+        [disabled]="paginaActual === totalPaginas">
         <i class="fa-solid fa-chevron-right"></i>
       </button>
-
     </div>
+
   </main>
 </div>

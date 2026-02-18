@@ -20,11 +20,10 @@ export class ProductoService {
   }
 
   // Catálogo completo sin límite de productos
-  getCatalogo(page: number = 1, perPage: number = 12): Observable<any> {
-    return this.http.get<any>(
-      `${this.apiUrl}?page=${page}&per_page=${perPage}`
-    );
+  getCatalogo(filtros: any = {}): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}`, { params: filtros });
   }
+
 
   // Obtener todos los productos con filtros
   getProductos(filtros: any = {}): Observable<Producto[]> {

@@ -811,6 +811,135 @@ mat-slider {
   border: 2px solid #6EE7B7; /* Borde verde medio */
 }
 
+/* =====================
+   SKELETON - AgroConecta
+   ===================== */
+
+.skeleton-card {
+  border-radius: 16px;
+  overflow: hidden;
+  background: #fff;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.07);
+  display: flex;
+  flex-direction: column;
+}
+
+/* Imagen superior con ola y semilla */
+.skeleton-img {
+  position: relative;
+  width: 100%;
+  height: 200px;
+  background: linear-gradient(160deg, #d4edda, #a8d5b5, #7ec8a0);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Icono de planta pulsante */
+.skeleton-field-icon {
+  font-size: 3rem;
+  color: rgba(255, 255, 255, 0.5);
+  animation: pulse-icon 1.8s ease-in-out infinite;
+  z-index: 1;
+}
+
+/* Ola animada en la parte inferior de la imagen */
+.skeleton-wave {
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 200%;
+  height: 40px;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 60'%3E%3Cpath d='M0,30 C200,60 400,0 600,30 C800,60 1000,0 1200,30 L1200,60 L0,60 Z' fill='%23ffffff'/%3E%3C/svg%3E") repeat-x;
+  background-size: 600px 40px;
+  animation: wave-slide 2s linear infinite;
+}
+
+/* Contenido inferior */
+.skeleton-content {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex: 1;
+}
+
+/* Líneas de texto */
+.skeleton-line {
+  height: 11px;
+  border-radius: 6px;
+  background: linear-gradient(90deg, #e8f5e9 25%, #f1f8f2 50%, #e8f5e9 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.6s infinite;
+}
+
+.skeleton-line.long   { width: 80%; }
+.skeleton-line.medium { width: 55%; }
+.skeleton-line.short  { width: 35%; }
+
+/* Fila agricultor */
+.skeleton-farmer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.skeleton-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: linear-gradient(90deg, #c8e6c9 25%, #e8f5e9 50%, #c8e6c9 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.6s infinite;
+}
+
+/* Footer precio + botón */
+.skeleton-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: auto;
+  padding-top: 8px;
+}
+
+.skeleton-price {
+  width: 70px;
+  height: 24px;
+  border-radius: 8px;
+  background: linear-gradient(90deg, #c8e6c9 25%, #e8f5e9 50%, #c8e6c9 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.6s infinite;
+}
+
+.skeleton-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: linear-gradient(90deg, #a5d6a7 25%, #c8e6c9 50%, #a5d6a7 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.6s infinite;
+}
+
+/* Animaciones */
+@keyframes shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+@keyframes wave-slide {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+@keyframes pulse-icon {
+  0%, 100% { opacity: 0.4; transform: scale(1);    }
+  50%       { opacity: 0.8; transform: scale(1.12); }
+}
+
+
 /* Ajuste Responsive para móviles */
 @media (max-width: 600px) {
   .pag-num, .pag-arrow {

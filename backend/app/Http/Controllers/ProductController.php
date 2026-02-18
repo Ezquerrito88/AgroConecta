@@ -17,14 +17,41 @@ class ProductController extends Controller
         $query = Product::with(['category', 'images', 'farmer'])
             ->where('moderation_status', 'approved');
 
-        if ($request->has('category_id')) {
-            $query->where('category_id', $request->input('category_id'));
+        if ($request->filled('search')) {
+            $query->where('name', 'like', '%' . $request->search . '%');
         }
 
-        $products = $query->orderBy('created_at', 'desc')->paginate($perPage);
+        if ($request->filled('category')) {
+            $query->whereHas('category', fn($q) => $q->where('name', $request->category));
+        }
 
-        return response()->json($products);
+        if ($request->filled('location')) {
+            $query->whereHas('farmer', fn($q) => $q->where('city', $request->location));
+        }
+
+        if ($request->filled('min_price')) {
+            $query->where('price', '>=', $request->min_price);
+        }
+
+        if ($request->filled('max_price')) {
+            $query->where('price', '<=', $request->max_price);
+        }
+
+        $query->orderBy(
+            'created_at',
+            $request->orden === 'precio_asc'  ? 'asc'  : ($request->orden === 'precio_desc' ? 'desc' : 'desc')
+        );
+
+        if (in_array($request->orden, ['precio_asc', 'precio_desc'])) {
+            $query->reorder()->orderBy(
+                'price',
+                $request->orden === 'precio_asc' ? 'asc' : 'desc'
+            );
+        }
+
+        return response()->json($query->paginate($perPage));
     }
+
 
 
     // Crear una función específica para destacados
