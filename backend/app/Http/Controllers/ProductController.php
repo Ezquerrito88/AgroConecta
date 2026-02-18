@@ -26,27 +26,28 @@ class ProductController extends Controller
     }
 
     // Crear una función específica para destacados
-    public function getLatest()
+    public function getLatest(Request $request)
     {
-        try {
-            // 1. Obtener los IDs
-            $latestIds = \App\Models\Product::query()
-                ->orderBy('created_at', 'desc')
-                ->take(12)
-                ->pluck('id');
+        $perPage = $request->query('per_page', 6);
+        $page    = $request->query('page', 1);
 
-            // 2. Paginar los productos
-            $products = \App\Models\Product::query()
-                ->with(['images', 'farmer'])
-                ->whereIn('id', $latestIds)
-                ->orderBy('created_at', 'desc')
-                ->paginate(6);
+        $products = Product::with(['images', 'farmer', 'category'])
+            ->where('moderation_status', 'approved')
+            ->orderBy('created_at', 'desc')
+            ->paginate($perPage, ['*'], 'page', $page);
 
-            return response()->json($products);
-        } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 500);
-        }
+        // Limitamos el total a 12 productos máximo (2 páginas de 6)
+        $data = $products->getCollection()->take(12 - (($page - 1) * $perPage));
+
+        return response()->json([
+            'data'         => $data->values(),
+            'total'        => min($products->total(), 12),
+            'per_page'     => (int) $perPage,
+            'current_page' => (int) $page,
+            'last_page'    => min($products->lastPage(), 2),
+        ]);
     }
+
 
     //Crear productos
     public function store(Request $request)

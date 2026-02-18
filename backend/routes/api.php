@@ -25,7 +25,6 @@ Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 
 // Catálogo y Búsqueda
-Route::get('/products/featured', [ProductController::class, 'getFeatured']); 
 Route::get('/products/latest', [ProductController::class, 'getLatest']);
 Route::get('/products', [ProductController::class, 'index']);
 Route::get('/products/{id}', [ProductController::class, 'show']);

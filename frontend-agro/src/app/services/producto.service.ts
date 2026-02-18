@@ -1,73 +1,44 @@
-import { Injectable, isDevMode } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../environments/environment';
+import { Producto } from '../models/producto';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ProductoService {
-
-  // URL de tu backend Laravel
-  private apiUrl = 'https://agroconecta-backend-v2-bxbxfudaatbmgxdg.spaincentral-01.azurewebsites.net/api';
+  private apiUrl = `${environment.apiUrl}/products`;
 
   constructor(private http: HttpClient) { }
 
-<<<<<<< HEAD
-  // --- 1. PRODUCTOS DESTACADOS (Para solucionar tu error actual) ---
-  getDestacados(page: number = 1, limit: number = 6): Observable<any> {
-    // Llama al endpoint /products/featured con paginación
-    return this.http.get<any>(`${this.apiUrl}/products/featured?page=${page}&limit=${limit}`);
+  // Obtener productos destacados (Paginados)
+  // Ahora acepta 'page' y opcionalmente 'perPage'
+getDestacados(page: number = 1, perPage: number = 6): Observable<any> {
+  // Usamos environment.apiUrl directamente para evitar duplicar /products
+  const urlBase = environment.apiUrl; 
+  return this.http.get<any>(`${urlBase}/products/latest?page=${page}&per_page=${perPage}`);
+}
+
+  // Obtener todos los productos con filtros
+  getProductos(filtros: any = {}): Observable<Producto[]> {
+    return this.http.get<Producto[]>(this.apiUrl, { params: filtros });
   }
 
-  // --- 2. FAVORITOS (Para la sección de favoritos) ---
-  getFavoritos(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/favorites`);
-=======
-  // 1. Obtener categorías para filtros
-  getCategorias(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/categories`);
+  // Obtener un producto por ID
+  getProducto(id: number): Observable<Producto> {
+    return this.http.get<Producto>(`${this.apiUrl}/${id}`);
   }
 
-  // 2. Obtener productos filtrados (Catálogo Completo)
-  getProductosFiltrados(filtros: any): Observable<any> {
-    let params = new HttpParams()
-      .set('page', filtros.page.toString())
-      .set('limit', filtros.limit.toString())
-      .set('per_page', filtros.limit.toString());
-
-    if (filtros.category_id && filtros.category_id !== 'Todas') {
-      params = params.set('category_id', filtros.category_id.toString());
-    }
-
-    if (filtros.min_price) params = params.set('min_price', filtros.min_price.toString());
-    if (filtros.max_price) params = params.set('max_price', filtros.max_price.toString());
-
-    params = params.set('sort', 'latest');
-
-    return this.http.get<any>(`${this.apiUrl}/products`, { params });
-  }
-
-  // 3. Obtener productos destacados (Dashboard - SOLO LOS 12 ÚLTIMOS)
-  getDestacados(page: number = 1): Observable<any> {
-    return this.http.get<any>(`${this.apiUrl}/products/latest?page=${page}`);
-  }
-
-  // 4. Gestión de Favoritos
+  // Lógica de Favoritos (Requiere auth_token via Interceptor)
   toggleFavorite(productId: number): Observable<any> {
-    return this.http.post(`${this.apiUrl}/favorites/toggle`, { product_id: productId });
->>>>>>> 1af9321 (feat: implementar diseño premium de cards y corregir error 401 en favoritos)
+    return this.http.post(`${environment.apiUrl}/favorites/toggle`, {
+      product_id: productId
+    });
   }
 
-  toggleFavorite(id: number): Observable<any> {
-    return this.http.post(`${this.apiUrl}/favorites/${id}`, {});
-  }
-
-  // --- 3. OTROS MÉTODOS ÚTILES ---
-  getProductos(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/products`);
-  }
-  
-  getProductoById(id: number): Observable<any> {
-    return this.http.get<any>(`${this.apiUrl}/products/${id}`);
+  // Obtener lista de favoritos del usuario
+  getFavoritos(): Observable<Producto[]> {
+    return this.http.get<Producto[]>(`${environment.apiUrl}/favorites`);
   }
 }

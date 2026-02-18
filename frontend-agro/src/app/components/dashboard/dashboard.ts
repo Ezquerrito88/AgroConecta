@@ -32,8 +32,8 @@ import { environment } from '../../../environments/environment';
 })
 export class Dashboard implements OnInit {
 
-  // URL Base de la API
-  private readonly API_URL = environment.apiUrl;
+  // URL Base de la API (Limpiamos el /api para las imágenes)
+  private readonly BASE_HOST = environment.apiUrl.split('/api')[0];
 
   // DATOS DE PRODUCTOS
   productos: Producto[] = [];
@@ -42,22 +42,19 @@ export class Dashboard implements OnInit {
   itemsPorPagina: number = 6;
   totalProductos: number = 0;
 
-  // FILTROS
-  minPrice: number = 0;
-  maxPrice: number = 100;
-  categoriasRapidas: string[] = ['Todas', 'Frutas', 'Verduras', 'Granos', 'Lácteos', 'Especias'];
-  filtros = { 
-    categoria: 'todas', 
-    precioMax: 50, 
-    ubicacion: 'todas', 
-    valoracion: 'todas', 
-    orden: 'novedad' 
-  };
+  // IMPORTANTE: Array real para evitar el error NG02200
+  paginasArray: number[] = [];
 
   // ESTADO Y USUARIO
   isFarmer: boolean = false;
   currentUser: any = null;
-  isLoading: boolean = true;
+  isLoading: boolean = false; // Empezamos en false para evitar NG0100 al inicio
+
+  // FILTROS
+  minPrice: number = 0;
+  maxPrice: number = 100;
+  categoriasRapidas: string[] = ['Todas', 'Frutas', 'Verduras', 'Granos', 'Lácteos', 'Especias'];
+  filtros = { categoria: 'todas', precioMax: 50, ubicacion: 'todas', valoracion: 'todas', orden: 'novedad' };
 
   constructor(
     private router: Router,
@@ -68,35 +65,45 @@ export class Dashboard implements OnInit {
 
   ngOnInit(): void {
     this.verificarUsuario();
-    this.cargarProductos(1);
+    // ✅ Espera a que Angular termine el ciclo de inicialización
+    Promise.resolve().then(() => this.cargarProductos(1));
   }
 
-  // --- LÓGICA DE USUARIO ---
+
   verificarUsuario(): void {
     if (typeof window !== 'undefined' && window.localStorage) {
       const userStr = localStorage.getItem('user');
       if (userStr) {
         this.currentUser = JSON.parse(userStr);
-        if (this.currentUser.role === 'agricultor' || this.currentUser.role_id === 2 || this.currentUser.role === 'farmer') {
+        const role = this.currentUser.role?.toLowerCase();
+        if (role === 'agricultor' || role === 'farmer' || this.currentUser.role_id === 2) {
           this.isFarmer = true;
         }
       }
     }
   }
 
-  // --- LÓGICA DE PRODUCTOS ---
+  // --- CARGA DE PRODUCTOS (6 POR PÁGINA) ---
   cargarProductos(page: number): void {
+    // ✅ Cambio síncrono ANTES de lanzar la petición, no en setTimeout
     this.isLoading = true;
     this.paginaActual = page;
 
-    this.productoService.getDestacados(page).subscribe({
+    this.productoService.getDestacados(page, this.itemsPorPagina).subscribe({
       next: (res: any) => {
-        this.productos = res.data || (Array.isArray(res) ? res : []);
+        this.productos = Array.isArray(res.data) ? res.data : [];
         this.totalProductos = res.total || 0;
-        this.totalPaginas = res.last_page || 1;
+
+        const paginasDesdeServer = res.last_page || 1;
+        this.totalPaginas = paginasDesdeServer > 2 ? 2 : paginasDesdeServer;
+
+        this.paginasArray = [];
+        for (let i = 1; i <= this.totalPaginas; i++) {
+          this.paginasArray.push(i);
+        }
 
         this.isLoading = false;
-        this.cdr.detectChanges();
+        this.cdr.detectChanges(); // ✅ Solo aquí, tras recibir datos
       },
       error: (err: any) => {
         console.error('Error cargando productos:', err);
@@ -106,26 +113,18 @@ export class Dashboard implements OnInit {
     });
   }
 
-  // --- GESTIÓN DE IMÁGENES ---
+
   getImagenUrl(prod: any): string {
     if (prod.images && prod.images.length > 0) {
       const path = prod.images[0].image_path;
-      
-      // Si ya es una URL completa (Google/Azure), se limpia para usar el proxy local si es necesario
-      if (path.startsWith('http')) {
-        return path.replace(/http:\/\/127\.0\.0\.1:8000|https:\/\/agroconecta-backend-v2-.*\.azurewebsites\.net/g, this.API_URL);
-      }
-      
-      // Si es ruta relativa de Laravel
-      return `${this.API_URL}/storage/${path}`;
+      if (path.startsWith('http')) return path;
+      return `${this.BASE_HOST}/storage/${path}`;
     }
     return 'assets/placeholder.png';
   }
 
-  // --- NAVEGACIÓN ---
   cambiarPagina(nuevaPagina: number): void {
     if (nuevaPagina === this.paginaActual || nuevaPagina < 1 || nuevaPagina > this.totalPaginas) return;
-
     this.cargarProductos(nuevaPagina);
 
     const elemento = document.getElementById('inicio-lista');
@@ -136,66 +135,40 @@ export class Dashboard implements OnInit {
     }
   }
 
-  // --- INTERACCIÓN ---
   toggleFavorite(prod: any): void {
     const token = localStorage.getItem('auth_token');
-
     if (!token) {
-      alert('Debes iniciar sesión para guardar favoritos');
       this.router.navigate(['/login']);
       return;
     }
-
     prod.is_favorite = !prod.is_favorite;
-
     this.productoService.toggleFavorite(prod.id).subscribe({
-      next: () => console.log('Favorito actualizado correctamente'),
+      next: () => console.log('Favorito actualizado'),
       error: (err: any) => {
-        console.error('Error al actualizar favorito:', err);
         prod.is_favorite = !prod.is_favorite;
-
-        if (err.status === 401) {
-          alert('Tu sesión ha expirado. Por favor, vuelve a entrar.');
-          localStorage.removeItem('auth_token');
-          localStorage.removeItem('user');
-          this.router.navigate(['/login']);
-        }
+        if (err.status === 401) this.router.navigate(['/login']);
       }
     });
   }
 
-  addToCart(producto: any): void {
-    this.cartService.addToCart(producto);
-  }
+  addToCart(producto: any): void { this.cartService.addToCart(producto); }
+  irAlCatalogoCompleto(): void { this.router.navigate(['/productos']); }
 
-  irAlCatalogoCompleto(): void {
-    this.router.navigate(['/productos']);
-  }
-
-  // --- LÓGICA DE FILTROS ---
-  seleccionarCategoriaRapida(categoria: string): void {
-    this.filtros.categoria = categoria.toLowerCase();
-    this.cargarProductos(1); 
-  }
-
-  filtrarPorPrecio(): void {
+  seleccionarCategoriaRapida(cat: string): void {
+    this.filtros.categoria = cat.toLowerCase();
     this.cargarProductos(1);
   }
 
   limpiarFiltros(): void {
-    this.filtros = { 
-      categoria: 'todas', 
-      precioMax: 50, 
-      ubicacion: 'todas', 
-      valoracion: 'todas', 
-      orden: 'novedad' 
-    };
+    this.filtros = { categoria: 'todas', precioMax: 50, ubicacion: 'todas', valoracion: 'todas', orden: 'novedad' };
     this.minPrice = 0;
     this.maxPrice = 100;
     this.cargarProductos(1);
   }
 
-  formatLabel(value: number): string {
-    return `${value}€`;
+  formatLabel(value: number): string { return `${value}€`; }
+
+  filtrarPorPrecio(): void {
+    this.cargarProductos(1);
   }
 }
