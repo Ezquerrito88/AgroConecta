@@ -714,7 +714,7 @@ mat-slider { width: 100% !important; }
 .skeleton-price {
   width: 70px;
   height: 24px;
-  border-radius: var(--radius-xs); /* ✅ era 8px */
+  border-radius: var(--radius-xs);
   background: linear-gradient(90deg, #c8e6c9 25%, #e8f5e9 50%, #c8e6c9 75%);
   background-size: 200% 100%;
   animation: shimmer 1.6s infinite;
@@ -743,3 +743,68 @@ mat-slider { width: 100% !important; }
   0%, 100% { opacity: 0.4; transform: scale(1);    }
   50%       { opacity: 0.8; transform: scale(1.12); }
 }
+
+/* =====================
+   ESTADO VACÍO
+   ===================== */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 80px 24px;
+  gap: 16px;
+}
+
+.empty-icon {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #d4edda, #a8d5b5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.5rem;
+  color: var(--green-primary);
+  box-shadow: 0 8px 24px rgba(17, 194, 103, 0.15);
+  animation: pulse-icon 2.5s ease-in-out infinite;
+}
+
+.empty-title {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: var(--gray-dark);
+  margin: 0;
+}
+
+.empty-subtitle {
+  font-size: 1rem;
+  color: #6b7280;
+  line-height: 1.6;
+  max-width: 360px;
+  margin: 0;
+}
+
+.empty-btn {
+  margin-top: 8px;
+  padding: 12px 32px;
+  background: var(--green-gradient);
+  color: white;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 12px var(--green-shadow);
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.empty-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px var(--green-shadow);
+}
+

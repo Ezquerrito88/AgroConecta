@@ -35,28 +35,34 @@
         </button>
       </div>
 
+      <!-- Ordenar por -->
       <div class="filter-group filter-blue">
         <label><span class="dot-blue"></span> Ordenar por</label>
         <mat-form-field appearance="outline" class="full-width theme-blue" subscriptSizing="dynamic">
-          <mat-select panelClass="panel-blue" value="Destacados">
-            <mat-option value="Destacados">Destacados</mat-option>
-            <mat-option value="asc">Precio: Menor a Mayor</mat-option>
-            <mat-option value="desc">Precio: Mayor a Menor</mat-option>
+          <mat-select panelClass="panel-blue" [(ngModel)]="filtros.orden" (ngModelChange)="onFiltroChange()">
+            <mat-option value="novedad">Destacados</mat-option>
+            <mat-option value="precio_asc">Precio: Menor a Mayor</mat-option>
+            <mat-option value="precio_desc">Precio: Mayor a Menor</mat-option>
           </mat-select>
         </mat-form-field>
       </div>
 
+      <!-- Categoría -->
       <div class="filter-group filter-green">
         <label><span class="dot-green"></span> Categoría</label>
         <mat-form-field appearance="outline" class="full-width theme-green" subscriptSizing="dynamic">
-          <mat-select panelClass="panel-green" value="Todas">
-            <mat-option value="Todas">Todas</mat-option>
-            <mat-option value="Frutas">Frutas</mat-option>
-            <mat-option value="Verduras">Verduras</mat-option>
+          <mat-select panelClass="panel-green" [(ngModel)]="filtros.categoria" (ngModelChange)="onFiltroChange()">
+            <mat-option value="todas">Todas</mat-option>
+            <mat-option value="frutas">Frutas</mat-option>
+            <mat-option value="verduras">Verduras</mat-option>
+            <mat-option value="granos">Granos</mat-option>
+            <mat-option value="lácteos">Lácteos</mat-option>
+            <mat-option value="especias">Especias</mat-option>
           </mat-select>
         </mat-form-field>
       </div>
 
+      <!-- Precio -->
       <div class="filter-group filter-orange">
         <label><span class="dot-orange"></span> Rango de Precio</label>
         <div class="slider-container">
@@ -75,120 +81,134 @@
     <main class="products-grid-container">
 
       @if (isLoading) {
-        <!-- ✅ SKELETON en lugar del spinner -->
-        <div class="grid-header">
-          <h2>Selección fresca del día</h2>
-          <span class="results-count skeleton-count"></span>
-        </div>
-        <div class="products-grid">
-          <div class="skeleton-card" *ngFor="let i of [1,2,3,4,5,6]">
-            <div class="skeleton-img">
-              <div class="skeleton-field-icon">
-                <i class="fa-solid fa-seedling"></i>
-              </div>
-              <div class="skeleton-wave"></div>
+      <div class="grid-header">
+        <h2>Selección fresca del día</h2>
+        <span class="results-count skeleton-count"></span>
+      </div>
+      <div class="products-grid">
+        <div class="skeleton-card" *ngFor="let i of [1,2,3,4,5,6]">
+          <div class="skeleton-img">
+            <div class="skeleton-field-icon">
+              <i class="fa-solid fa-seedling"></i>
             </div>
-            <div class="skeleton-content">
-              <div class="skeleton-line long"></div>
-              <div class="skeleton-line short"></div>
-              <div class="skeleton-farmer">
-                <div class="skeleton-avatar"></div>
-                <div class="skeleton-line medium"></div>
-              </div>
-              <div class="skeleton-footer">
-                <div class="skeleton-price"></div>
-                <div class="skeleton-btn"></div>
-              </div>
+            <div class="skeleton-wave"></div>
+          </div>
+          <div class="skeleton-content">
+            <div class="skeleton-line long"></div>
+            <div class="skeleton-line short"></div>
+            <div class="skeleton-farmer">
+              <div class="skeleton-avatar"></div>
+              <div class="skeleton-line medium"></div>
+            </div>
+            <div class="skeleton-footer">
+              <div class="skeleton-price"></div>
+              <div class="skeleton-btn"></div>
             </div>
           </div>
         </div>
+      </div>
       }
 
       @else {
-        <div class="grid-header">
-          <h2>Selección fresca del día</h2>
-          <span class="results-count">Página {{ paginaActual }} de {{ totalPaginas }}</span>
+      <div class="grid-header">
+        <h2>Selección fresca del día</h2>
+        <span class="results-count">Página {{ paginaActual }} de {{ totalPaginas }}</span>
+      </div>
+
+      @if (productos.length === 0) {
+      <div class="empty-state">
+        <div class="empty-icon">
+          <i class="fa-solid fa-wheat-awn"></i>
         </div>
+        <h3 class="empty-title">Sin cosecha por aquí</h3>
+        <p class="empty-subtitle">
+          No encontramos productos con los filtros aplicados.<br>
+          Prueba a ampliar la búsqueda o limpia los filtros.
+        </p>
+        <button class="empty-btn" (click)="limpiarFiltros()">
+          <i class="fa-solid fa-arrows-rotate"></i> Limpiar filtros
+        </button>
+      </div>
+      }
 
-        <div class="products-grid">
-          <div class="product-card" *ngFor="let prod of productos"
-            [routerLink]="['/producto', prod.id]" style="cursor: pointer;">
+      @if (productos.length > 0) {
+      <div class="products-grid">
+        <div class="product-card" *ngFor="let prod of productos" [routerLink]="['/producto', prod.id]"
+          style="cursor: pointer;">
 
-            <div class="card-image">
-              <div class="stock-badge" *ngIf="prod.stock_quantity <= 5"
-                [class.no-stock]="prod.stock_quantity === 0">
-                {{ prod.stock_quantity === 0 ? 'Agotado' : '¡Casi agotado!' }}
+          <div class="card-image">
+            <div class="stock-badge" *ngIf="prod.stock_quantity <= 5" [class.no-stock]="prod.stock_quantity === 0">
+              {{ prod.stock_quantity === 0 ? 'Agotado' : '¡Casi agotado!' }}
+            </div>
+
+            <button class="wishlist-btn" [class.active]="prod.is_favorite"
+              (click)="$event.stopPropagation(); toggleFavorite(prod)">
+              <i [class]="prod.is_favorite ? 'fa-solid fa-heart' : 'fa-regular fa-heart'"></i>
+            </button>
+
+            <img *ngIf="prod.images && prod.images.length > 0" [src]="getImagenUrl(prod)" alt="{{ prod.name }}">
+
+            <div *ngIf="!prod.images || prod.images.length === 0" class="placeholder-img">
+              <i class="fa-solid fa-image"></i>
+            </div>
+          </div>
+
+          <div class="card-content">
+            <h4 class="product-title">{{ prod.name }}</h4>
+            <p class="product-desc" *ngIf="prod.short_description || prod.description">
+              {{ prod.short_description || prod.description }}
+            </p>
+
+            <div class="seller-box" *ngIf="prod.farmer">
+              <span class="seller-name">
+                {{ prod.farmer.full_name || prod.farmer.name || 'Agricultor Local' }}
+              </span>
+              <span class="seller-location">
+                <i class="fa-solid fa-location-dot"></i>
+                {{ prod.farmer.city || prod.farmer.location || 'Logroño' }}
+              </span>
+            </div>
+
+            <div class="card-footer">
+              <div class="price-box">
+                <span class="price-main">{{ prod.price }}€</span>
+                <span class="price-unit">/{{ prod.unit }}</span>
               </div>
-
-              <button class="wishlist-btn" [class.active]="prod.is_favorite"
-                (click)="$event.stopPropagation(); toggleFavorite(prod)">
-                <i [class]="prod.is_favorite ? 'fa-solid fa-heart' : 'fa-regular fa-heart'"></i>
+              <button class="add-button" [disabled]="prod.stock_quantity === 0"
+                (click)="$event.stopPropagation(); addToCart(prod)">
+                <i class="fa-solid fa-plus"></i>
               </button>
-
-              <img *ngIf="prod.images && prod.images.length > 0"
-                [src]="getImagenUrl(prod)" alt="{{ prod.name }}">
-
-              <div *ngIf="!prod.images || prod.images.length === 0" class="placeholder-img">
-                <i class="fa-solid fa-image"></i>
-              </div>
-            </div>
-
-            <div class="card-content">
-              <h4 class="product-title">{{ prod.name }}</h4>
-              <p class="product-desc" *ngIf="prod.short_description || prod.description">
-                {{ prod.short_description || prod.description }}
-              </p>
-
-              <div class="seller-box" *ngIf="prod.farmer">
-                <span class="seller-name">
-                  {{ prod.farmer.full_name || prod.farmer.name || 'Agricultor Local' }}
-                </span>
-                <span class="seller-location">
-                  <i class="fa-solid fa-location-dot"></i>
-                  {{ prod.farmer.city || prod.farmer.location || 'Logroño' }}
-                </span>
-              </div>
-
-              <div class="card-footer">
-                <div class="price-box">
-                  <span class="price-main">{{ prod.price }}€</span>
-                  <span class="price-unit">/{{ prod.unit }}</span>
-                </div>
-                <button class="add-button" [disabled]="prod.stock_quantity === 0"
-                  (click)="$event.stopPropagation(); addToCart(prod)">
-                  <i class="fa-solid fa-plus"></i>
-                </button>
-              </div>
             </div>
           </div>
         </div>
+      </div>
 
-        <div class="pagination-container" *ngIf="totalPaginas > 1">
-          <div class="pagination-controls">
-            <button class="pag-btn nav-btn" [disabled]="paginaActual === 1"
-              (click)="cambiarPagina(paginaActual - 1)">
-              <i class="fa-solid fa-chevron-left"></i>
-            </button>
-            <button class="pag-btn num-btn" [class.active]="paginaActual === 1"
-              (click)="cambiarPagina(1)">1</button>
-            <button *ngIf="totalPaginas >= 2" class="pag-btn num-btn"
-              [class.active]="paginaActual === 2" (click)="cambiarPagina(2)">2</button>
-            <button class="pag-btn nav-btn" [disabled]="paginaActual >= totalPaginas"
-              (click)="cambiarPagina(paginaActual + 1)">
-              <i class="fa-solid fa-chevron-right"></i>
-            </button>
-          </div>
-
-          <div class="pagination-info">
-            Mostrando <strong>{{ ((paginaActual - 1) * itemsPorPagina) + 1 }}</strong> -
-            <strong>{{ ((paginaActual - 1) * itemsPorPagina) + productos.length }}</strong> de
-            <strong>{{ totalProductos }}</strong> productos.
-          </div>
-
-          <button class="btn-full-catalog" (click)="irAlCatalogoCompleto()">
-            Ver Catálogo Completo
+      <div class="pagination-container" *ngIf="totalPaginas > 1">
+        <div class="pagination-controls">
+          <button class="pag-btn nav-btn" [disabled]="paginaActual === 1" (click)="cambiarPagina(paginaActual - 1)">
+            <i class="fa-solid fa-chevron-left"></i>
+          </button>
+          <button class="pag-btn num-btn" [class.active]="paginaActual === 1" (click)="cambiarPagina(1)">1</button>
+          <button *ngIf="totalPaginas >= 2" class="pag-btn num-btn" [class.active]="paginaActual === 2"
+            (click)="cambiarPagina(2)">2</button>
+          <button class="pag-btn nav-btn" [disabled]="paginaActual >= totalPaginas"
+            (click)="cambiarPagina(paginaActual + 1)">
+            <i class="fa-solid fa-chevron-right"></i>
           </button>
         </div>
+
+        <div class="pagination-info">
+          Mostrando <strong>{{ (paginaActual - 1) * itemsPorPagina + 1 }}</strong> –
+          <strong>{{ (paginaActual - 1) * itemsPorPagina + productos.length }}</strong>
+          de <strong>12</strong> destacados
+        </div>
+
+
+        <button class="btn-full-catalog" (click)="irAlCatalogoCompleto()">
+          Ver Catálogo Completo
+        </button>
+      </div>
+      }
       }
 
     </main>

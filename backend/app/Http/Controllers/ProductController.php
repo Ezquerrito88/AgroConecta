@@ -57,25 +57,60 @@ class ProductController extends Controller
     // Crear una función específica para destacados
     public function getLatest(Request $request)
     {
-        $perPage = $request->query('per_page', 6);
-        $page    = $request->query('page', 1);
+        $perPage  = $request->query('per_page', 6);
+        $page     = $request->query('page', 1);
+        $categoria = $request->query('categoria');
+        $orden     = $request->query('orden', 'novedad');
+        $precioMin = $request->query('precio_min');
+        $precioMax = $request->query('precio_max');
 
-        $products = Product::with(['images', 'farmer', 'category'])
-            ->where('moderation_status', 'approved')
-            ->orderBy('created_at', 'desc')
-            ->paginate($perPage, ['*'], 'page', $page);
+        $query = Product::with(['images', 'farmer', 'category'])
+            ->where('moderation_status', 'approved');
 
-        // Limitamos el total a 12 productos máximo (2 páginas de 6)
-        $data = $products->getCollection()->take(12 - (($page - 1) * $perPage));
+        // Filtro categoría
+        if ($categoria && $categoria !== 'todas') {
+            $query->whereHas('category', function ($q) use ($categoria) {
+                $q->whereRaw('LOWER(name) = ?', [strtolower($categoria)]);
+            });
+        }
 
+        // Filtro precio
+        if (!is_null($precioMin)) $query->where('price', '>=', (float) $precioMin);
+        if (!is_null($precioMax)) $query->where('price', '<=', (float) $precioMax);
+
+        // Ordenación
+        match ($orden) {
+            'precio_asc'  => $query->orderBy('price', 'asc'),
+            'precio_desc' => $query->orderBy('price', 'desc'),
+            default       => $query->orderBy('created_at', 'desc'),
+        };
+
+        $products = $query->paginate($perPage, ['*'], 'page', $page);
+
+        // Sin filtros activos mantenemos el límite de 12
+        $hayFiltros = $categoria || $precioMin || $precioMax || $orden !== 'novedad';
+
+        if (!$hayFiltros) {
+            $data = $products->getCollection()->take(12 - (($page - 1) * $perPage));
+            return response()->json([
+                'data'         => $data->values(),
+                'total'        => min($products->total(), 12),
+                'per_page'     => (int) $perPage,
+                'current_page' => (int) $page,
+                'last_page'    => min($products->lastPage(), 2),
+            ]);
+        }
+
+        // Con filtros devolvemos todo sin límite artificial
         return response()->json([
-            'data'         => $data->values(),
-            'total'        => min($products->total(), 12),
+            'data'         => $products->getCollection()->values(),
+            'total'        => $products->total(),
             'per_page'     => (int) $perPage,
             'current_page' => (int) $page,
-            'last_page'    => min($products->lastPage(), 2),
+            'last_page'    => $products->lastPage(),
         ]);
     }
+
 
 
     //Crear productos

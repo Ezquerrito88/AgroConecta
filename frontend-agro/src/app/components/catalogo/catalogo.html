@@ -73,16 +73,14 @@
 
   <main class="products-area">
 
+    <!-- Contador de resultados -->
     <div class="area-header">
       <span class="results-info" *ngIf="!isLoading && totalProductos > 0">
         Mostrando {{ desde }}-{{ hasta }} de {{ totalProductos }} productos
       </span>
-      <span class="results-info" *ngIf="!isLoading && totalProductos === 0">
-        No se encontraron productos
-      </span>
     </div>
 
-    <!-- ✅ SKELETON mientras carga -->
+    <!-- Skeleton mientras carga -->
     <div class="products-grid" *ngIf="isLoading">
       <div class="skeleton-card" *ngFor="let i of [1,2,3,4,5,6,7,8,9,10,11,12]">
         <div class="skeleton-img">
@@ -106,8 +104,23 @@
       </div>
     </div>
 
-    <!-- ✅ Grid real cuando hay datos -->
-    <div class="products-grid" *ngIf="!isLoading">
+    <!-- ✅ Estado vacío -->
+    <div class="empty-state" *ngIf="!isLoading && totalProductos === 0">
+      <div class="empty-icon">
+        <i class="fa-solid fa-wheat-awn"></i>
+      </div>
+      <h3 class="empty-title">Sin cosecha por aquí</h3>
+      <p class="empty-subtitle">
+        No encontramos productos con los filtros aplicados.<br>
+        Prueba a ampliar la búsqueda o limpia los filtros.
+      </p>
+      <button class="empty-btn" (click)="limpiarFiltros()">
+        <i class="fa-solid fa-arrows-rotate"></i> Limpiar filtros
+      </button>
+    </div>
+
+    <!-- Grid real cuando hay productos -->
+    <div class="products-grid" *ngIf="!isLoading && totalProductos > 0">
       <div class="product-card" *ngFor="let prod of productos"
         [routerLink]="['/producto', prod.id]" style="cursor: pointer;">
 
