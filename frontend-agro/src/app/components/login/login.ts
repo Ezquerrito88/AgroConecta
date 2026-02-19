@@ -1,4 +1,4 @@
-import { Component, OnInit, isDevMode } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -27,7 +27,8 @@ export class Login implements OnInit {
   constructor(
     private http: HttpClient,
     private route: ActivatedRoute,
-    private router: Router
+    private router: Router,
+    private cdr: ChangeDetectorRef
   ) { }
 
   ngOnInit() {
@@ -50,7 +51,6 @@ export class Login implements OnInit {
     this.isLoading = true;
     this.errorMessage = '';
 
-    // Login directo sin CSRF - tu backend ya usa tokens
     this.http.post(`${this.apiUrl}/login`, this.loginData)
       .subscribe({
         next: (res: any) => {
@@ -59,18 +59,18 @@ export class Login implements OnInit {
         },
         error: (err) => {
           this.isLoading = false;
-          console.error('Error completo:', err); // Para ver qué pasa
+          console.error('Error completo:', err);
 
           if (err.status === 401) {
             this.errorMessage = 'Credenciales incorrectas.';
           } else {
             this.errorMessage = 'Error de comunicación con el servidor.';
           }
+
+          this.cdr.detectChanges();
         }
       });
   }
-
-
 
   loginWithGoogle() {
     this.isLoading = true;

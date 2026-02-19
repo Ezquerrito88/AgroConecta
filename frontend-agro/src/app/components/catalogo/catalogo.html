@@ -68,25 +68,21 @@
         </mat-select>
       </mat-form-field>
     </div>
-
   </aside>
 
   <main class="products-area">
 
-    <!-- Contador de resultados -->
     <div class="area-header">
       <span class="results-info" *ngIf="!isLoading && totalProductos > 0">
         Mostrando {{ desde }}-{{ hasta }} de {{ totalProductos }} productos
       </span>
     </div>
 
-    <!-- Skeleton mientras carga -->
+    <!-- Skeleton -->
     <div class="products-grid" *ngIf="isLoading">
       <div class="skeleton-card" *ngFor="let i of [1,2,3,4,5,6,7,8,9,10,11,12]">
         <div class="skeleton-img">
-          <div class="skeleton-field-icon">
-            <i class="fa-solid fa-seedling"></i>
-          </div>
+          <div class="skeleton-field-icon"><i class="fa-solid fa-seedling"></i></div>
           <div class="skeleton-wave"></div>
         </div>
         <div class="skeleton-content">
@@ -104,11 +100,9 @@
       </div>
     </div>
 
-    <!-- ✅ Estado vacío -->
+    <!-- Estado vacío -->
     <div class="empty-state" *ngIf="!isLoading && totalProductos === 0">
-      <div class="empty-icon">
-        <i class="fa-solid fa-wheat-awn"></i>
-      </div>
+      <div class="empty-icon"><i class="fa-solid fa-wheat-awn"></i></div>
       <h3 class="empty-title">Sin cosecha por aquí</h3>
       <p class="empty-subtitle">
         No encontramos productos con los filtros aplicados.<br>
@@ -119,14 +113,13 @@
       </button>
     </div>
 
-    <!-- Grid real cuando hay productos -->
+    <!-- Grid -->
     <div class="products-grid" *ngIf="!isLoading && totalProductos > 0">
-      <div class="product-card" *ngFor="let prod of productos"
-        [routerLink]="['/producto', prod.id]" style="cursor: pointer;">
+      <div class="product-card" *ngFor="let prod of productos" [routerLink]="['/producto', prod.id]"
+        style="cursor: pointer;">
 
         <div class="card-image">
-          <div class="stock-badge" *ngIf="prod.stock_quantity <= 5"
-            [class.no-stock]="prod.stock_quantity === 0">
+          <div class="stock-badge" *ngIf="prod.stock_quantity <= 5" [class.no-stock]="prod.stock_quantity === 0">
             {{ prod.stock_quantity === 0 ? 'Agotado' : '¡Casi agotado!' }}
           </div>
 
@@ -135,9 +128,7 @@
             <i [class]="prod.is_favorite ? 'fa-solid fa-heart' : 'fa-regular fa-heart'"></i>
           </button>
 
-          <img *ngIf="prod.images && prod.images.length > 0"
-            [src]="'https://agroconecta-backend-v2-bxbxfudaatbmgxdg.spaincentral-01.azurewebsites.net/storage/' + prod.images[0].image_path"
-            alt="{{ prod.name }}">
+          <img *ngIf="prod.images && prod.images.length > 0" [src]="getImagenUrl(prod)" [alt]="prod.name">
 
           <div *ngIf="!prod.images || prod.images.length === 0" class="placeholder-img">
             <i class="fa-solid fa-image"></i>
@@ -146,13 +137,17 @@
 
         <div class="card-content">
           <h4 class="product-title">{{ prod.name }}</h4>
-          <p class="product-desc">{{ prod.description }}</p>
+          <p class="product-desc" *ngIf="prod.short_description || prod.description">
+            {{ prod.short_description || prod.description }}
+          </p>
 
           <div class="seller-box" *ngIf="prod.farmer">
-            <span class="seller-name">{{ prod.farmer.full_name || 'Agricultor Local' }}</span>
+            <span class="seller-name">
+              {{ prod.farmer.full_name || prod.farmer.name || 'Agricultor Local' }}
+            </span>
             <span class="seller-location">
               <i class="fa-solid fa-location-dot"></i>
-              {{ prod.farmer.farmer?.city || 'Logroño' }}
+              {{ prod.farmer.farmer?.city || prod.farmer.city || 'Logroño' }}
             </span>
           </div>
 
@@ -163,27 +158,24 @@
             </div>
             <button class="add-button" [disabled]="prod.stock_quantity === 0"
               (click)="$event.stopPropagation(); agregarAlCarrito(prod)">
-              <i class="fa-solid fa-plus"></i> Añadir
+              <i class="fa-solid fa-plus"></i>
             </button>
           </div>
         </div>
+
       </div>
     </div>
 
     <!-- Paginación -->
     <div class="pagination-wrapper" *ngIf="!isLoading && totalPaginas > 1">
-      <button class="pag-arrow" (click)="cambiarPagina(paginaActual - 1)"
-        [disabled]="paginaActual === 1">
+      <button class="pag-arrow" (click)="cambiarPagina(paginaActual - 1)" [disabled]="paginaActual === 1">
         <i class="fa-solid fa-chevron-left"></i>
       </button>
-
-      <button *ngFor="let p of numeracionPaginas" class="pag-num"
-        [class.active]="paginaActual === p" (click)="cambiarPagina(p)">
+      <button *ngFor="let p of numeracionPaginas" class="pag-num" [class.active]="paginaActual === p"
+        (click)="cambiarPagina(p)">
         {{ p }}
       </button>
-
-      <button class="pag-arrow" (click)="cambiarPagina(paginaActual + 1)"
-        [disabled]="paginaActual === totalPaginas">
+      <button class="pag-arrow" (click)="cambiarPagina(paginaActual + 1)" [disabled]="paginaActual === totalPaginas">
         <i class="fa-solid fa-chevron-right"></i>
       </button>
     </div>

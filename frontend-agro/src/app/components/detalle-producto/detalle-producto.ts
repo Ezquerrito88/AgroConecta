@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, AfterViewInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
@@ -11,9 +11,8 @@ import { FormsModule } from '@angular/forms';
   templateUrl: './detalle-producto.html',
   styleUrls: ['./detalle-producto.css']
 })
-export class DetalleProducto implements OnInit {
+export class DetalleProducto implements OnInit, AfterViewInit {
 
-  // URL de tu Backend en Azure
   private readonly API_URL = 'https://agroconecta-backend-v2-bxbxfudaatbmgxdg.spaincentral-01.azurewebsites.net';
 
   product: any = null;
@@ -25,9 +24,9 @@ export class DetalleProducto implements OnInit {
     private route: ActivatedRoute,
     private http: HttpClient,
     private cd: ChangeDetectorRef
-  ) { }
+  ) {}
 
-  ngOnInit() {
+  ngOnInit(): void {
     this.route.paramMap.subscribe(params => {
       const id = params.get('id');
       if (id) {
@@ -38,30 +37,48 @@ export class DetalleProducto implements OnInit {
     });
   }
 
+  ngAfterViewInit(): void {
+    // Esperamos a que el DOM esté listo para calcular la posición inicial
+    setTimeout(() => this.moveIndicator(), 0);
+  }
+
+  setTab(tab: string): void {
+    this.activeTab = tab;
+    // Esperamos un tick para que Angular aplique [class.active] antes de medir
+    setTimeout(() => this.moveIndicator(), 0);
+  }
+
+  private moveIndicator(): void {
+    const activeBtn = document.querySelector<HTMLElement>('.tabs-header button.active');
+    const indicator = document.querySelector<HTMLElement>('.tab-indicator');
+    if (!activeBtn || !indicator) return;
+
+    indicator.style.width = `${activeBtn.offsetWidth}px`;
+    indicator.style.left  = `${activeBtn.offsetLeft}px`;
+  }
+
   getImagenUrl(product: any): string {
-    if (product && product.images && product.images.length > 0) {
+    if (product?.images?.length > 0) {
       const path = product.images[0].image_path;
-      
-      // Si la URL ya es completa (y apunta a localhost), la corregimos
       if (path.startsWith('http')) {
         return path.replace(/http:\/\/127\.0\.0\.1:8000/g, this.API_URL);
       }
-      
-      // Si es una ruta relativa, le ponemos el prefijo de Azure
       return `${this.API_URL}/storage/${path}`;
     }
-    return 'assets/placeholder.png'; // Imagen por defecto si no hay fotos
+    return 'assets/placeholder.png';
   }
 
-  cargarProducto(id: string) {
+  cargarProducto(id: string): void {
     this.isLoading = true;
 
     this.http.get(`${this.API_URL}/api/products/${id}`).subscribe({
       next: (data: any) => {
-        // Guardamos los datos. El HTML ahora llamará a getImagenUrl(product)
         this.product = data;
         this.isLoading = false;
         this.cd.detectChanges();
+        // Reposicionamos el indicador tras cargar el producto
+        // por si el DOM tardó en renderizar las pestañas
+        setTimeout(() => this.moveIndicator(), 0);
       },
       error: (err) => {
         console.error('❌ ERROR de carga:', err);
@@ -70,7 +87,7 @@ export class DetalleProducto implements OnInit {
     });
   }
 
-  cambiarCantidad(valor: number) {
+  cambiarCantidad(valor: number): void {
     const nuevaCantidad = this.cantidad + valor;
     const maxStock = this.product?.stock_quantity || 100;
 
@@ -79,7 +96,7 @@ export class DetalleProducto implements OnInit {
     }
   }
 
-  agregarAlCarrito() {
+  agregarAlCarrito(): void {
     if (!this.product) return;
     console.log(`🛒 Añadiendo ${this.cantidad} de ${this.product.name}`);
     alert(`Se han añadido ${this.cantidad} kgs de ${this.product.name} al carrito`);

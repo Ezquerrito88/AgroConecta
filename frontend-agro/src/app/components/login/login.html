@@ -28,22 +28,31 @@
 
         <form (ngSubmit)="onLogin()" class="login-form">
 
-            <div *ngIf="errorMessage" class="error-message">
+            @if (errorMessage) {
+              <div class="error-message">
                 <i class="fa-solid fa-circle-exclamation"></i> {{ errorMessage }}
-            </div>
+              </div>
+            }
 
             <div class="input-group">
                 <label>Email</label>
-                <input type="email" name="email" placeholder="pepe@gmail.com" [(ngModel)]="loginData.email" required>
+                <input type="email" name="email" placeholder="pepe@gmail.com" 
+                    [(ngModel)]="loginData.email" 
+                    (input)="errorMessage = ''"
+                    required>
             </div>
 
             <div class="input-group">
                 <label>Contraseña</label>
                 <div class="password-wrapper">
-                    <input [type]="showPassword ? 'text' : 'password'" name="password" placeholder="••••••••"
-                        [(ngModel)]="loginData.password" required>
+                    <input [type]="showPassword ? 'text' : 'password'" name="password" 
+                        placeholder="••••••••"
+                        [(ngModel)]="loginData.password" 
+                        (input)="errorMessage = ''"
+                        required>
 
-                    <i class="fa-regular password-toggle-icon" [ngClass]="showPassword ? 'fa-eye-slash' : 'fa-eye'"
+                    <i class="fa-regular password-toggle-icon" 
+                        [ngClass]="showPassword ? 'fa-eye-slash' : 'fa-eye'"
                         (click)="showPassword = !showPassword">
                     </i>
                 </div>

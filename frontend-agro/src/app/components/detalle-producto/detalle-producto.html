@@ -1,161 +1,168 @@
 <header class="catalog-hero" *ngIf="product">
-    <div class="hero-container">
-        <h1 class="hero-title">{{ product.name }}</h1>
-
-        <div class="breadcrumb">
-            <a routerLink="/" class="link-inicio">Inicio</a>
-            <span class="separator"> > </span>
-
-            <a routerLink="/productos" class="link-inicio">Productos</a>
-            <span class="separator"> > </span>
-
-            <a [routerLink]="['/productos']" [queryParams]="{ category: product.category.name }" class="link-inicio">
-                {{ product.category.name }}
-            </a>
-            <span class="separator"> > </span>
-
-            <span class="current">{{ product.name }}</span>
-        </div>
+  <div class="hero-container">
+    <h1 class="hero-title">{{ product.name }}</h1>
+    <div class="breadcrumb">
+      <a routerLink="/" class="link-inicio">Inicio</a>
+      <span class="separator"> > </span>
+      <a routerLink="/productos" class="link-inicio">Productos</a>
+      <span class="separator"> > </span>
+      <a [routerLink]="['/productos']" [queryParams]="{ category: product.category.name }" class="link-inicio">
+        {{ product.category.name }}
+      </a>
+      <span class="separator"> > </span>
+      <span class="current">{{ product.name }}</span>
     </div>
+  </div>
 </header>
 
 <div class="container main-content" *ngIf="product">
+  <div class="product-grid">
 
-    <div class="product-grid">
-
-        <div class="image-column">
-            <div class="image-placeholder">
-                <img *ngIf="product.images && product.images.length > 0"
-                    [src]="getImagenUrl(product)" [alt]="product.name">
-
-                <div *ngIf="!product.images || product.images.length === 0" class="icon-placeholder">
-                    <i class="fa-regular fa-image"></i>
-                </div>
-            </div>
+    <!-- Imagen -->
+    <div class="image-column">
+      <div class="image-placeholder">
+        <img *ngIf="product.images?.length > 0"
+             [src]="getImagenUrl(product)"
+             [alt]="product.name">
+        <div *ngIf="!product.images?.length" class="icon-placeholder">
+          <i class="fa-regular fa-image"></i>
         </div>
-
-        <div class="info-column">
-            <div class="dynamic-group">
-                <h2 class="product-name-title">{{ product.name }}</h2>
-
-                <div class="rating-box">
-                    <div class="stars">
-                        <i class="fa-solid fa-star"></i>
-                        <i class="fa-solid fa-star"></i>
-                        <i class="fa-solid fa-star"></i>
-                        <i class="fa-solid fa-star"></i>
-                        <i class="fa-solid fa-star-half-stroke"></i>
-                    </div>
-                    <span class="rating-text">4.9 / 32 valoraciones</span>
-                </div>
-
-                <div class="farmer-card">
-                    <div class="farmer-avatar">
-                        <img *ngIf="product.farmer?.image_path" [src]="'assets/' + product.farmer.image_path"
-                            alt="Agricultor">
-                        <i *ngIf="!product.farmer?.image_path" class="fa-solid fa-user-straw-hat"></i>
-                    </div>
-                    <div class="farmer-info">
-                        <span class="label">Cultivado por</span>
-                        <strong class="name">{{ product.farmer?.full_name || 'Huerta Valenciana' }}</strong>
-                        <span class="location"><i class="fa-solid fa-location-dot"></i> Logroño</span>
-                    </div>
-                </div>
-
-                <div class="price-box">
-                    <span class="price">{{ product.price }}€</span>
-                    <span class="unit">/{{ product.unit }}</span>
-                </div>
-
-                <div class="actions-row">
-                    <div class="qty-selector">
-                        <button (click)="cambiarCantidad(-1)" [disabled]="cantidad <= 1">−</button>
-                        <input type="text" [value]="cantidad + ' ' + (product.unit === 'unidad' ? 'ud' : 'kg')"
-                            readonly>
-                        <button class="plus" (click)="cambiarCantidad(1)">+</button>
-                    </div>
-
-                    <button class="add-cart-btn" (click)="agregarAlCarrito()">
-                        + Añadir a la cesta
-                    </button>
-                </div>
-            </div>
-        </div>
+      </div>
     </div>
 
-    <div class="tabs-container">
-        <div class="tabs-header">
-            <button [class.active]="activeTab === 'descripcion'"
-                (click)="activeTab = 'descripcion'">Descripción</button>
-            <button [class.active]="activeTab === 'origen'" (click)="activeTab = 'origen'">Origen</button>
-            <button [class.active]="activeTab === 'valoraciones'"
-                (click)="activeTab = 'valoraciones'">Valoraciones</button>
+    <!-- Info -->
+    <div class="info-column">
+      <div class="dynamic-group">
+
+        <h2 class="product-name-title">{{ product.name }}</h2>
+
+        <div class="rating-box">
+          <div class="stars">
+            <i class="fa-solid fa-star"></i>
+            <i class="fa-solid fa-star"></i>
+            <i class="fa-solid fa-star"></i>
+            <i class="fa-solid fa-star"></i>
+            <i class="fa-solid fa-star-half-stroke"></i>
+          </div>
+          <span class="rating-text">4.9 / 32 valoraciones</span>
         </div>
 
-        <div class="tab-content">
-            <div *ngIf="activeTab === 'descripcion'" class="text-content description-tab">
-                <h3 class="desc-title">Detalles del producto</h3>
-                <p class="desc-text">
-                    {{ product.description }}
-                </p>
-            </div>
-            <div *ngIf="activeTab === 'origen'" class="text-content origin-tab">
-                <p class="origin-intro">
-                    Este producto ha sido cultivado de forma sostenible y con mucho cariño en
-                    <strong class="location-highlight">
-                        {{ product.farmer?.farmer?.city || 'nuestros campos locales' }}
-                    </strong>.
-                </p>
-
-                <div class="origin-card">
-                    <div class="origin-icon">
-                        <i class="fa-solid fa-map-location-dot"></i>
-                    </div>
-                    <div class="origin-info">
-                        <span class="origin-label">Procedencia Certificada</span>
-                        <span class="origin-value">
-                            <span *ngIf="product.farmer?.farmer?.farm_name">
-                                {{ product.farmer?.farmer?.farm_name }},
-                            </span>
-                            {{ product.farmer?.farmer?.city || 'España' }}
-                        </span>
-                    </div>
-                </div>
-
-                <p class="origin-desc">
-                    Al comprar este producto, estás apoyando directamente a la economía local
-                    y reduciendo la huella de carbono del transporte.
-                </p>
-            </div>
-            
-            <div *ngIf="activeTab === 'valoraciones'" class="text-content reviews-tab">
-                <div class="no-reviews" *ngIf="!product.reviews || product.reviews.length === 0">
-                    <i class="fa-regular fa-comment-dots"></i>
-                    <p>Este producto aún no tiene valoraciones.</p>
-                    <button class="btn-write-review">Sé el primero en opinar</button>
-                </div>
-
-                <div class="reviews-list" *ngIf="product.reviews && product.reviews.length > 0">
-                    <h3 class="reviews-title">Opiniones de clientes ({{ product.reviews.length }})</h3>
-                    <div class="review-card" *ngFor="let review of product.reviews">
-                        <div class="review-header">
-                            <div class="reviewer-avatar">
-                                {{ review.user?.name?.charAt(0) || 'U' }}
-                            </div>
-                            <div class="review-meta">
-                                <span class="reviewer-name">{{ review.user?.name || 'Usuario' }}</span>
-                                <span class="review-date">{{ review.created_at | date:'mediumDate' }}</span>
-                            </div>
-                        </div>
-
-                        <div class="review-stars">
-                            <i class="fa-solid fa-star" *ngFor="let s of [1,2,3,4,5]"
-                                [class.active]="s <= review.rating"></i>
-                        </div>
-                        <p class="review-text">{{ review.comment }}</p>
-                    </div>
-                </div>
-            </div>
+        <div class="farmer-card">
+          <div class="farmer-avatar">
+            <img *ngIf="product.farmer?.image_path"
+                 [src]="'assets/' + product.farmer.image_path"
+                 alt="Agricultor">
+            <i *ngIf="!product.farmer?.image_path" class="fa-solid fa-user-straw-hat"></i>
+          </div>
+          <div class="farmer-info">
+            <span class="label">Cultivado por</span>
+            <strong class="name">{{ product.farmer?.full_name || 'Huerta Valenciana' }}</strong>
+            <span class="location">
+              <i class="fa-solid fa-location-dot"></i>
+              Logroño
+            </span>
+          </div>
         </div>
+
+        <div class="price-box">
+          <span class="price">{{ product.price }}€</span>
+          <span class="unit">/{{ product.unit }}</span>
+        </div>
+
+        <div class="actions-row">
+          <div class="qty-selector">
+            <button (click)="cambiarCantidad(-1)" [disabled]="cantidad <= 1">−</button>
+            <input type="text"
+                   [value]="cantidad + ' ' + (product.unit === 'unidad' ? 'ud' : 'kg')"
+                   readonly>
+            <button class="plus" (click)="cambiarCantidad(1)">+</button>
+          </div>
+          <button class="add-cart-btn" (click)="agregarAlCarrito()">
+            + Añadir a la cesta
+          </button>
+        </div>
+
+      </div>
     </div>
+  </div>
+
+  <!-- Pestañas -->
+  <div class="tabs-container">
+    <div class="tabs-header">
+      <button [class.active]="activeTab === 'descripcion'"
+              (click)="setTab('descripcion')">Descripción</button>
+      <button [class.active]="activeTab === 'origen'"
+              (click)="setTab('origen')">Origen</button>
+      <button [class.active]="activeTab === 'valoraciones'"
+              (click)="setTab('valoraciones')">Valoraciones</button>
+      <span class="tab-indicator"></span>
+    </div>
+
+    <div class="tab-content">
+
+      <!-- Descripción -->
+      <div *ngIf="activeTab === 'descripcion'" class="text-content description-tab">
+        <h3 class="desc-title">Detalles del producto</h3>
+        <p class="desc-text">{{ product.description }}</p>
+      </div>
+
+      <!-- Origen -->
+      <div *ngIf="activeTab === 'origen'" class="text-content origin-tab">
+        <p class="origin-intro">
+          Este producto ha sido cultivado de forma sostenible y con mucho cariño en
+          <strong class="location-highlight">
+            {{ product.farmer?.farmer?.city || 'nuestros campos locales' }}
+          </strong>.
+        </p>
+        <div class="origin-card">
+          <div class="origin-icon">
+            <i class="fa-solid fa-map-location-dot"></i>
+          </div>
+          <div class="origin-info">
+            <span class="origin-label">Procedencia Certificada</span>
+            <span class="origin-value">
+              <span *ngIf="product.farmer?.farmer?.farm_name">
+                {{ product.farmer?.farmer?.farm_name }},
+              </span>
+              {{ product.farmer?.farmer?.city || 'España' }}
+            </span>
+          </div>
+        </div>
+        <p class="origin-desc">
+          Al comprar este producto, estás apoyando directamente a la economía local
+          y reduciendo la huella de carbono del transporte.
+        </p>
+      </div>
+
+      <!-- Valoraciones -->
+      <div *ngIf="activeTab === 'valoraciones'" class="text-content reviews-tab">
+        <div class="no-reviews" *ngIf="!product.reviews?.length">
+          <i class="fa-regular fa-comment-dots"></i>
+          <p>Este producto aún no tiene valoraciones.</p>
+          <button class="btn-write-review">Sé el primero en opinar</button>
+        </div>
+        <div class="reviews-list" *ngIf="product.reviews?.length > 0">
+          <h3 class="reviews-title">Opiniones de clientes ({{ product.reviews.length }})</h3>
+          <div class="review-card" *ngFor="let review of product.reviews">
+            <div class="review-header">
+              <div class="reviewer-avatar">
+                {{ review.user?.name?.charAt(0) || 'U' }}
+              </div>
+              <div class="review-meta">
+                <span class="reviewer-name">{{ review.user?.name || 'Usuario' }}</span>
+                <span class="review-date">{{ review.created_at | date:'mediumDate' }}</span>
+              </div>
+            </div>
+            <div class="review-stars">
+              <i class="fa-solid fa-star"
+                 *ngFor="let s of [1,2,3,4,5]"
+                 [class.active]="s <= review.rating"></i>
+            </div>
+            <p class="review-text">{{ review.comment }}</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
 </div>

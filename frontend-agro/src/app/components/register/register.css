@@ -1,29 +1,27 @@
-/* --- ESTILOS IDENTICOS AL LOGIN --- */
-
-/* Fondo */
+/* =====================
+   LOGIN WRAPPER
+   ===================== */
 .login-wrapper {
-  margin: 0;
-  padding: 20px;
-  padding-top: 90px;
-  /* Un poco más de espacio para el header fijo */
   min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  background-image: linear-gradient(rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.6)),
-    url('/img/login/fondo.png');
-  background-size: cover;
-  background-position: center;
-  background-attachment: fixed;
+  padding: 20px;
+  padding-top: 90px;
+  background:
+    linear-gradient(rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.6)),
+    url('/img/login/fondo.png') center / cover fixed;
 }
 
-/* Header Fijo */
+/* =====================
+   NAV
+   ===================== */
 .login-nav {
   width: 100%;
   background: white;
   padding: 15px 40px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-  position: absolute;
+  position: fixed; /* ✅ fixed en vez de absolute — el header no desaparece al hacer scroll */
   top: 0;
   left: 0;
   z-index: 100;
@@ -43,9 +41,7 @@
   gap: 12px;
 }
 
-.logo-img {
-  height: 50px;
-}
+.logo-img { height: 50px; }
 
 .brand-name {
   display: block;
@@ -69,33 +65,33 @@
   display: flex;
   align-items: center;
   gap: 5px;
-  transition: 0.3s;
+  transition: color 0.3s;
 }
 
-.btn-back:hover {
-  color: #333;
-}
+.btn-back:hover { color: #333; }
 
-/* Tarjeta Principal */
+/* =====================
+   CARD
+   ===================== */
 .login-card {
   background: white;
   width: 100%;
   max-width: 500px;
-  /* Un pelín más ancha para el registro */
   padding: 40px;
   border-radius: 15px;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
   text-align: center;
   margin-top: 20px;
-  /* Margen extra por si la pantalla es baja */
 }
 
-/* Avatar Animado */
+/* =====================
+   AVATAR
+   ===================== */
 .main-avatar-square {
   width: 70px;
   height: 70px;
-  margin: 0 auto 15px auto;
-  background: linear-gradient(135deg, #11C267 0%, #059669 100%);
+  margin: 0 auto 15px;
+  background: linear-gradient(135deg, #11C267, #059669);
   border-radius: 20px;
   display: flex;
   justify-content: center;
@@ -125,15 +121,16 @@
   bottom: 18px;
 }
 
-/* Textos Cabecera */
+/* =====================
+   HEADER
+   ===================== */
 .login-header {
   text-align: center;
   margin-bottom: 20px;
 }
 
 .login-header h2 {
-  margin-top: 15px;
-  margin-bottom: 0px;
+  margin: 15px 0 0;
   font-size: 1.5rem;
   color: #333;
 }
@@ -144,7 +141,9 @@
   font-size: 0.9rem;
 }
 
-/* --- PESTAÑAS (SELECTOR ROL) --- */
+/* =====================
+   PESTAÑAS (ROL)
+   ===================== */
 .profile-tabs {
   display: flex;
   background: #F2F3F5;
@@ -163,22 +162,13 @@
   background: white;
   border-radius: 10px;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  border: 2px solid transparent;
   transition: all 0.4s cubic-bezier(0.65, 0, 0.35, 1);
   z-index: 1;
-  border: 2px solid transparent;
 }
 
-/* Lógica de colores para el slider */
-/* Si se mueve a la derecha (Agricultor) -> Borde Naranja */
-.slider.slide-right {
-  transform: translateX(100%);
-  border-color: #ea580c;
-}
-
-/* Si NO se mueve (Comprador) -> Borde Verde (Truco CSS moderno) */
-.profile-tabs:not(:has(.slide-right)) .slider {
-  border-color: #11C267;
-}
+.slider.slide-right                           { transform: translateX(100%); border-color: #ea580c; }
+.profile-tabs:not(:has(.slide-right)) .slider { border-color: #11C267; }
 
 .tab {
   flex: 1;
@@ -197,17 +187,12 @@
   z-index: 2;
 }
 
-.emoji-icon {
-  font-size: 1.4rem;
-  line-height: 1;
-}
+.emoji-icon { font-size: 1.4rem; line-height: 1; }
+.tab-text   { font-size: 1rem; font-weight: 500; }
 
-.tab-text {
-  font-size: 1rem;
-  font-weight: 500;
-}
-
-/* Inputs */
+/* =====================
+   INPUTS
+   ===================== */
 .input-group {
   text-align: left;
   margin-bottom: 15px;
@@ -226,21 +211,37 @@
   border: 1px solid #ddd;
   border-radius: 8px;
   box-sizing: border-box;
-  transition: all 0.3s ease;
   outline: none;
+  transition: all 0.3s ease;
 }
 
-.input-group input:focus {
+/* ✅ :focus-visible en vez de :focus — el anillo solo aparece con teclado, no con ratón */
+.input-group input:focus-visible {
   border-color: #11C267;
   box-shadow: 0 0 0 3px rgba(17, 194, 103, 0.2);
-  background-color: #f0fdf4;
+  background: #f0fdf4;
 }
 
+/* Autofill */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+  -webkit-text-fill-color: #333;
+  -webkit-box-shadow: 0 0 0px 1000px white inset;
+  border: 1px solid #ddd;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+/* =====================
+   PASSWORD
+   ===================== */
 .password-wrapper {
   position: relative;
   display: flex;
   align-items: center;
 }
+
+.password-wrapper input { padding-right: 40px !important; }
 
 .password-toggle-icon {
   position: absolute;
@@ -250,20 +251,18 @@
   font-size: 1.1rem;
   z-index: 10;
   padding: 5px;
+  transition: color 0.2s;
 }
 
-.password-toggle-icon:hover {
-  color: #11C267;
-}
+.password-toggle-icon:hover { color: #11C267; }
 
-.password-wrapper input {
-  padding-right: 40px !important;
-}
-
-/* Botón Registro */
+/* =====================
+   BOTÓN REGISTRO
+   ===================== */
 .btn-login {
   width: 100%;
   padding: 14px;
+  min-height: 48px;
   border: none;
   border-radius: 10px;
   background: linear-gradient(to right, #11C267, #02BA7A);
@@ -275,33 +274,34 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 48px;
   transition: all 0.3s ease;
 }
 
-.btn-login:active {
-  transform: scale(0.98);
+/* ✅ Hover añadido — feedback visual al pasar el ratón */
+.btn-login:hover:not(:disabled) {
+  filter: brightness(1.07);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(17, 194, 103, 0.35);
 }
 
-.btn-login:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-  filter: grayscale(1);
-}
+.btn-login:active   { transform: scale(0.98); }
+.btn-login:disabled { opacity: 0.6; cursor: not-allowed; filter: grayscale(1); }
 
-/* Checkbox Términos */
+/* =====================
+   FORM OPTIONS (Checkbox)
+   ===================== */
 .form-options {
   display: flex;
   justify-content: flex-start;
   align-items: center;
-  margin: 15px 0 20px 0;
+  margin: 15px 0 20px;
 }
 
 .remember-me {
   display: flex;
   align-items: center;
-  cursor: pointer;
   gap: 10px;
+  cursor: pointer;
   font-size: 0.9rem;
   color: #4b5563;
 }
@@ -313,57 +313,47 @@
   height: 20px;
   border: 2px solid #d1d5db;
   border-radius: 6px;
-  background-color: #fff;
+  background: white;
   cursor: pointer;
   display: grid;
   place-content: center;
   transition: all 0.2s ease;
 }
 
-.remember-me input:checked {
-  background: linear-gradient(135deg, #11C267 0%, #02BA7A 100%);
-  border-color: transparent;
-}
-
-.remember-me:hover input {
-  border-color: #11C267;
-}
+.remember-me input:checked    { background: linear-gradient(135deg, #11C267, #02BA7A); border-color: transparent; }
+.remember-me:hover input       { border-color: #11C267; }
 
 .remember-me input::before {
-  content: "";
+  content: '';
   width: 10px;
   height: 10px;
   transform: scale(0);
-  transition: 120ms transform ease-in-out;
-  background-color: white;
+  background: white;
   clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
+  transition: 120ms transform ease-in-out;
 }
 
-.remember-me input:checked::before {
-  transform: scale(1);
-}
+.remember-me input:checked::before { transform: scale(1); }
 
-/* Separador Social */
+/* =====================
+   DIVIDER
+   ===================== */
 .divider {
   display: flex;
   align-items: center;
-  text-align: center;
   margin: 20px 0;
   color: #888;
   font-size: 0.85rem;
 }
 
 .divider::before,
-.divider::after {
-  content: '';
-  flex: 1;
-  border-bottom: 1px solid #eee;
-}
+.divider::after { content: ''; flex: 1; border-bottom: 1px solid #eee; }
 
-.divider span {
-  padding: 0 10px;
-}
+.divider span { padding: 0 10px; }
 
+/* =====================
+   SOCIAL LOGIN
+   ===================== */
 .social-login {
   display: flex;
   gap: 15px;
@@ -382,27 +372,19 @@
   background: white;
   cursor: pointer;
   font-weight: 500;
-  transition: 0.3s;
+  transition: all 0.3s ease;
 }
 
-.btn-social img {
-  width: 20px;
-}
+/* ✅ Transición añadida al logo social por si se usa en dark mode o animaciones futuras */
+.btn-social img { width: 20px; transition: transform 0.2s ease; }
+.btn-social:hover img { transform: scale(1.1); }
 
-.btn-social.google:hover {
-  border-color: #f4b400;
-  background-color: #fffaf0;
-  transform: translateY(-2px);
-}
+.btn-social.google:hover { border-color: #f4b400; background: #fffaf0; transform: translateY(-2px); }
+.btn-social.apple:hover  { border-color: #000; background: #f3f4f6; color: #000; transform: translateY(-2px); }
 
-.btn-social.apple:hover {
-  border-color: #000000;
-  background-color: #f3f4f6;
-  color: #000000;
-  transform: translateY(-2px);
-}
-
-/* --- ESTO ES LO NUEVO PARA EL FOOTER DEL REGISTRO --- */
+/* =====================
+   FOOTER REGISTRO
+   ===================== */
 .centered-link {
   text-align: center;
   margin-top: 10px;
@@ -421,13 +403,13 @@
   transition: color 0.2s;
 }
 
-.btn-link-text:hover {
-  color: #059669;
-  text-decoration: underline;
-}
+.btn-link-text:hover { color: #059669; text-decoration: underline; }
 
+/* =====================
+   ERROR
+   ===================== */
 .error-message {
-  background-color: #fef2f2;
+  background: #fef2f2;
   color: #ef4444;
   padding: 10px;
   border-radius: 8px;
@@ -439,75 +421,27 @@
   gap: 8px;
 }
 
-/* --- MEDIA QUERY AJUSTADA PARA PANTALLAS PEQUEÑAS --- */
-/* Como el registro es muy alto, ajustamos márgenes en portátiles */
+/* =====================
+   RESPONSIVE — pantallas bajas
+   ===================== */
 @media screen and (max-height: 900px) and (min-width: 1024px) {
+  .login-card                 { padding: 25px 35px; }
 
-  .login-card {
-    padding: 25px 35px;
-  }
+  .main-avatar-square         { width: 50px; height: 50px; margin-bottom: 10px; }
+  .main-avatar-square::before { top: 12px; width: 14px; height: 14px; }
+  .main-avatar-square::after  { bottom: 12px; width: 24px; height: 10px; }
 
-  /* Menos padding vertical */
+  .login-header h2            { font-size: 1.3rem; margin: 0; }
+  .login-header p             { margin-bottom: 10px; }
 
-  .main-avatar-square {
-    width: 50px;
-    height: 50px;
-    margin-bottom: 10px;
-  }
+  .profile-tabs               { margin: 10px 0; }
 
-  /* Avatar más pequeño */
-  .main-avatar-square::before {
-    top: 12px;
-    width: 14px;
-    height: 14px;
-  }
+  .input-group                { margin-bottom: 10px; }
+  .input-group label          { margin-bottom: 2px; }
+  .input-group input          { padding: 9px; font-size: 0.9rem; }
 
-  .main-avatar-square::after {
-    bottom: 12px;
-    width: 24px;
-    height: 10px;
-  }
-
-  .login-header h2 {
-    font-size: 1.3rem;
-    margin: 0;
-  }
-
-  .login-header p {
-    margin-bottom: 10px;
-  }
-
-  .profile-tabs {
-    margin: 10px 0;
-  }
-
-  /* Hacemos los inputs un pelín más compactos */
-  .input-group {
-    margin-bottom: 10px;
-  }
-
-  .input-group label {
-    margin-bottom: 2px;
-  }
-
-  .input-group input {
-    padding: 9px;
-    font-size: 0.9rem;
-  }
-
-  .form-options {
-    margin: 10px 0;
-  }
-
-  .divider {
-    margin: 10px 0;
-  }
-
-  .social-login {
-    margin-bottom: 10px;
-  }
-
-  .btn-social {
-    padding: 8px;
-  }
+  .form-options               { margin: 10px 0; }
+  .divider                    { margin: 10px 0; }
+  .social-login               { margin-bottom: 10px; }
+  .btn-social                 { padding: 8px; }
 }

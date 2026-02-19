@@ -23,21 +23,23 @@ import { Producto } from '../../models/producto';
 })
 export class Catalogo implements OnInit {
 
+  private readonly API_URL = 'https://agroconecta-backend-v2-bxbxfudaatbmgxdg.spaincentral-01.azurewebsites.net';
+
   productos: Producto[] = [];
 
-  paginaActual = 1;
-  totalPaginas = 1;
-  totalProductos = 0;
-  desde = 0;
-  hasta = 0;
-  isLoading = false; // ✅ añadido
+  paginaActual    = 1;
+  totalPaginas    = 1;
+  totalProductos  = 0;
+  desde           = 0;
+  hasta           = 0;
+  isLoading       = false;
 
-  textoBusqueda = '';
+  textoBusqueda   = '';
   filtroCategoria = '';
   filtroUbicacion = '';
-  filtroOrden = 'novedad';
-  minPrice = 0;
-  maxPrice = 100;
+  filtroOrden     = 'novedad';
+  minPrice        = 0;
+  maxPrice        = 100;
 
   constructor(
     private productoService: ProductoService,
@@ -52,8 +54,20 @@ export class Catalogo implements OnInit {
     });
   }
 
+  // ✅ Mismo método que detalle-producto.ts
+  getImagenUrl(prod: any): string {
+    if (prod?.images?.length > 0) {
+      const path = prod.images[0].image_path;
+      if (path.startsWith('http')) {
+        return path.replace(/http:\/\/127\.0\.0\.1:8000/g, this.API_URL);
+      }
+      return `${this.API_URL}/storage/${path}`;
+    }
+    return 'assets/placeholder.png';
+  }
+
   cargarProductos(page: number): void {
-    this.isLoading = true; // ✅ activa skeleton
+    this.isLoading = true;
 
     const filtros = {
       page,
@@ -74,13 +88,13 @@ export class Catalogo implements OnInit {
         this.totalProductos = res.total;
         this.desde          = res.from;
         this.hasta          = res.to;
-        this.isLoading = false; // ✅ desactiva skeleton
+        this.isLoading      = false;
         this.cdr.detectChanges();
         window.scrollTo({ top: 0, behavior: 'smooth' });
       },
       error: (err) => {
         console.error('Error loading products:', err);
-        this.isLoading = false; // ✅ desactiva skeleton en error
+        this.isLoading = false;
         this.cdr.detectChanges();
       }
     });
