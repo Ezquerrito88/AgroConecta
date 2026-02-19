@@ -1,6 +1,6 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule, ActivatedRoute } from '@angular/router';
+import { RouterModule, ActivatedRoute, Router } from '@angular/router'; // ✅ Router añadido
 import { FormsModule } from '@angular/forms';
 import { MatSliderModule } from '@angular/material/slider';
 import { MatSelectModule } from '@angular/material/select';
@@ -44,7 +44,8 @@ export class Catalogo implements OnInit {
   constructor(
     private productoService: ProductoService,
     private cdr: ChangeDetectorRef,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private router: Router  // ✅ añadido
   ) {}
 
   ngOnInit(): void {
@@ -54,7 +55,6 @@ export class Catalogo implements OnInit {
     });
   }
 
-  // ✅ Mismo método que detalle-producto.ts
   getImagenUrl(prod: any): string {
     if (prod?.images?.length > 0) {
       const path = prod.images[0].image_path;
@@ -96,6 +96,7 @@ export class Catalogo implements OnInit {
         console.error('Error loading products:', err);
         this.isLoading = false;
         this.cdr.detectChanges();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
       }
     });
   }
@@ -135,16 +136,26 @@ export class Catalogo implements OnInit {
   }
 
   toggleFavorite(prod: Producto): void {
+    const token = localStorage.getItem('token');
+
+    // ✅ Sin sesión → login
+    if (!token) {
+      this.router.navigate(['/login']);
+      return;
+    }
+
+    // ✅ Con sesión → optimistic update inmediato
     prod.is_favorite = !prod.is_favorite;
+
     this.productoService.toggleFavorite(prod.id).subscribe({
-      error: (err) => {
-        prod.is_favorite = !prod.is_favorite;
-        console.error('Failed to update favourite:', err);
+      error: () => {
+        prod.is_favorite = !prod.is_favorite; // revierte si falla la API
       }
     });
   }
 
   agregarAlCarrito(prod: Producto): void {
-    console.log('Adding to cart:', prod.name);
+    console.log('🛒 Añadir al carrito:', prod.name);
+    // TODO: conectar con CartService
   }
 }

@@ -4,7 +4,7 @@ import { environment } from '../../environments/environment';
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   
   // 1. Obtenemos el token
-  const token = localStorage.getItem('auth_token'); 
+  const token = localStorage.getItem('token'); 
 
   // 2. Definimos la URL
   const isApiUrl = req.url.startsWith(environment.apiUrl) || req.url.includes('127.0.0.1:8000');

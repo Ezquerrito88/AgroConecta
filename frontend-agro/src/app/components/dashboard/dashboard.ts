@@ -2,12 +2,10 @@ import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-
 import { MatSliderModule } from '@angular/material/slider';
 import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-
 import { ProductoService } from '../../services/producto.service';
 import { CartService } from '../../services/cart.service';
 import { environment } from '../../../environments/environment';
@@ -24,23 +22,23 @@ import { environment } from '../../../environments/environment';
 })
 export class Dashboard implements OnInit {
 
-  private readonly BASE_HOST = environment.apiUrl.split('/api')[0];
+  private readonly API_URL = environment.apiUrl.split('/api')[0];
 
-  productos: any[]   = [];
-  paginaActual       = 1;
-  totalPaginas       = 1;
-  itemsPorPagina     = 6;
-  totalProductos     = 0;
+  productos: any[]       = [];
+  paginaActual           = 1;
+  totalPaginas           = 1;
+  itemsPorPagina         = 6;
+  totalProductos         = 0;
   paginasArray: number[] = [];
 
-  isFarmer           = false;
-  currentUser: any   = null;
-  isLoading          = false;
+  isFarmer               = false;
+  currentUser: any       = null;
+  isLoading              = false;
 
-  minPrice = 0;
-  maxPrice = 100;
-  categoriasRapidas  = ['Todas', 'Frutas', 'Verduras', 'Granos', 'Lácteos', 'Especias'];
-  filtros = { categoria: 'todas', orden: 'novedad' };
+  minPrice               = 0;
+  maxPrice               = 100;
+  categoriasRapidas      = ['Todas', 'Frutas', 'Verduras', 'Granos', 'Lácteos', 'Especias'];
+  filtros                = { categoria: 'todas', orden: 'novedad' };
 
   constructor(
     private router: Router,
@@ -65,16 +63,27 @@ export class Dashboard implements OnInit {
     }
   }
 
+  // ✅ Igual que catalogo.ts — corrige URLs de localhost
+  getImagenUrl(prod: any): string {
+    if (prod?.images?.length > 0) {
+      const path = prod.images[0].image_path;
+      if (path.startsWith('http')) {
+        return path.replace(/http:\/\/127\.0\.0\.1:8000/g, this.API_URL);
+      }
+      return `${this.API_URL}/storage/${path}`;
+    }
+    return 'assets/placeholder.png';
+  }
+
   cargarProductos(page: number): void {
     this.isLoading    = true;
     this.paginaActual = page;
 
-    // Solo mandamos filtros con valor real
     const filtrosActivos: any = {};
-    if (this.filtros.categoria !== 'todas')  filtrosActivos.categoria  = this.filtros.categoria;
-    if (this.filtros.orden !== 'novedad')    filtrosActivos.orden      = this.filtros.orden;
-    if (this.minPrice > 0)                   filtrosActivos.precio_min = this.minPrice;
-    if (this.maxPrice < 100)                 filtrosActivos.precio_max = this.maxPrice;
+    if (this.filtros.categoria !== 'todas') filtrosActivos.categoria  = this.filtros.categoria;
+    if (this.filtros.orden !== 'novedad')   filtrosActivos.orden      = this.filtros.orden;
+    if (this.minPrice > 0)                  filtrosActivos.precio_min = this.minPrice;
+    if (this.maxPrice < 100)                filtrosActivos.precio_max = this.maxPrice;
 
     this.productoService.getDestacados(page, this.itemsPorPagina, filtrosActivos).subscribe({
       next: (res: any) => {
@@ -116,8 +125,12 @@ export class Dashboard implements OnInit {
     if (el) setTimeout(() => el.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
   }
 
+  // ✅ Sin token → login | Con token → optimistic update
   toggleFavorite(prod: any): void {
-    if (!localStorage.getItem('auth_token')) { this.router.navigate(['/login']); return; }
+    if (!localStorage.getItem('token')) {
+      this.router.navigate(['/login']);
+      return;
+    }
     prod.is_favorite = !prod.is_favorite;
     this.productoService.toggleFavorite(prod.id).subscribe({
       error: (err: any) => {
@@ -125,14 +138,6 @@ export class Dashboard implements OnInit {
         if (err.status === 401) this.router.navigate(['/login']);
       }
     });
-  }
-
-  getImagenUrl(prod: any): string {
-    if (prod.images?.length > 0) {
-      const path = prod.images[0].image_path;
-      return path.startsWith('http') ? path : `${this.BASE_HOST}/storage/${path}`;
-    }
-    return 'assets/placeholder.png';
   }
 
   addToCart(producto: any): void     { this.cartService.addToCart(producto); }

@@ -12,63 +12,133 @@
 </header>
 
 <div class="catalog-layout container">
+
   <aside class="filter-card">
     <div class="filter-header">
       <h3>Filtros</h3>
-      <button class="clear-filters-btn">
+      <button class="clear-filters-btn" (click)="limpiarFiltros()">
         <i class="fa-solid fa-filter-circle-xmark"></i>
       </button>
     </div>
+
+    <!-- Ordenar por -->
+    <div class="filter-group filter-blue">
+      <label><span class="dot-blue"></span> Ordenar por</label>
+      <mat-form-field appearance="outline" class="full-width theme-blue" subscriptSizing="dynamic">
+        <mat-select panelClass="panel-blue" [(ngModel)]="filtros.orden" (ngModelChange)="aplicarFiltros()">
+          <mat-option value="novedad">Más recientes</mat-option>
+          <mat-option value="precio_asc">Precio: Menor a Mayor</mat-option>
+          <mat-option value="precio_desc">Precio: Mayor a Menor</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+
+    <!-- Categoría -->
     <div class="filter-group filter-green">
       <label><span class="dot-green"></span> Categoría</label>
       <mat-form-field appearance="outline" class="full-width theme-green" subscriptSizing="dynamic">
-        <mat-select panelClass="panel-green" value="Todas">
-          <mat-option value="Todas">Todas</mat-option>
+        <mat-select panelClass="panel-green" [(ngModel)]="filtros.categoria" (ngModelChange)="aplicarFiltros()">
+          <mat-option value="todas">Todas</mat-option>
+          <mat-option value="frutas">Frutas</mat-option>
+          <mat-option value="verduras">Verduras</mat-option>
+          <mat-option value="granos">Granos</mat-option>
+          <mat-option value="lácteos">Lácteos</mat-option>
+          <mat-option value="especias">Especias</mat-option>
         </mat-select>
       </mat-form-field>
+    </div>
+
+    <!-- Precio -->
+    <div class="filter-group filter-orange">
+      <label><span class="dot-orange"></span> Rango de Precio</label>
+      <div class="slider-container">
+        <mat-slider min="0" max="100" step="1">
+          <input matSliderStartThumb [(ngModel)]="minPrice" (dragEnd)="aplicarFiltros()">
+          <input matSliderEndThumb   [(ngModel)]="maxPrice" (dragEnd)="aplicarFiltros()">
+        </mat-slider>
+      </div>
+      <div class="range-labels">
+        <span class="price-tag">{{ minPrice }}€</span>
+        <span class="price-tag">{{ maxPrice }}€</span>
+      </div>
     </div>
   </aside>
 
   <main class="products-area">
+
     @if (isLoading) {
-      <div class="loading-container">
-        <mat-spinner diameter="50"></mat-spinner>
-        <p>Cargando tus productos favoritos...</p>
+      <div class="products-grid">
+        <div class="skeleton-card" *ngFor="let i of [1,2,3,4,5,6]">
+          <div class="skeleton-img">
+            <div class="skeleton-field-icon"><i class="fa-solid fa-seedling"></i></div>
+            <div class="skeleton-wave"></div>
+          </div>
+          <div class="skeleton-content">
+            <div class="skeleton-line long"></div>
+            <div class="skeleton-line short"></div>
+            <div class="skeleton-farmer">
+              <div class="skeleton-avatar"></div>
+              <div class="skeleton-line medium"></div>
+            </div>
+            <div class="skeleton-footer">
+              <div class="skeleton-price"></div>
+              <div class="skeleton-btn"></div>
+            </div>
+          </div>
+        </div>
       </div>
-    } 
-    
+    }
+
     @else {
+
       <div class="area-header">
-        <span class="results-info" *ngIf="productos.length > 0">
-          Tienes <strong>{{ productos.length }}</strong> productos guardados
+        <span class="results-info" *ngIf="productosFiltrados.length > 0">
+          Tienes <strong>{{ productosFiltrados.length }}</strong>
+          producto{{ productosFiltrados.length === 1 ? '' : 's' }}
+          guardado{{ productosFiltrados.length === 1 ? '' : 's' }}
         </span>
       </div>
 
-      <div *ngIf="productos.length === 0" class="empty-state" style="text-align: center; padding: 50px;">
-        <i class="fa-regular fa-heart" style="font-size: 50px; color: #ccc; margin-bottom: 20px;"></i>
-        <h3>No tienes favoritos aún</h3>
-        <p style="color: #666;">Guarda lo que más te guste para comprarlo luego.</p>
-        <button routerLink="/productos" class="add-button" style="margin-top: 20px;">
-            Ir al Catálogo
+      <!-- Estado vacío -->
+      <div class="empty-state" *ngIf="productosFiltrados.length === 0">
+        <div class="empty-icon">
+          <i class="fa-regular fa-heart"></i>
+        </div>
+        <h3 class="empty-title">
+          {{ productos.length === 0 ? 'No tienes favoritos aún' : 'Sin resultados' }}
+        </h3>
+        <p class="empty-subtitle">
+          {{ productos.length === 0
+            ? 'Guarda lo que más te guste para comprarlo cuando quieras.'
+            : 'Ningún favorito coincide con los filtros aplicados.' }}
+        </p>
+        <button *ngIf="productos.length === 0" routerLink="/productos" class="empty-btn">
+          <i class="fa-solid fa-store"></i> Ir al Catálogo
+        </button>
+        <button *ngIf="productos.length > 0" class="empty-btn" (click)="limpiarFiltros()">
+          <i class="fa-solid fa-arrows-rotate"></i> Limpiar filtros
         </button>
       </div>
 
-      <div class="products-grid" *ngIf="productos.length > 0">
-        <div class="product-card" *ngFor="let prod of productos">
+      <!-- Grid -->
+      <div class="products-grid" *ngIf="productosFiltrados.length > 0">
+        <div class="product-card" *ngFor="let prod of productosFiltrados"
+          [routerLink]="['/producto', prod.id]" style="cursor: pointer;">
 
           <div class="card-image">
-            <div class="stock-badge" *ngIf="prod.stock_quantity <= 5" [class.no-stock]="prod.stock_quantity === 0">
+            <div class="stock-badge"
+              *ngIf="prod.stock_quantity <= 5"
+              [class.no-stock]="prod.stock_quantity === 0">
               {{ prod.stock_quantity === 0 ? 'Agotado' : '¡Casi agotado!' }}
             </div>
 
-            <button class="wishlist-btn active" (click)="quitarFavorito(prod.id)">
+            <button class="wishlist-btn active"
+              (click)="$event.stopPropagation(); quitarFavorito(prod)">
               <i class="fa-solid fa-heart"></i>
             </button>
 
             <img *ngIf="prod.images && prod.images.length > 0"
-              [src]="getImagenUrl(prod)" 
-              alt="{{ prod.name }}">
-
+              [src]="getImagenUrl(prod)" [alt]="prod.name">
             <div *ngIf="!prod.images || prod.images.length === 0" class="placeholder-img">
               <i class="fa-solid fa-image"></i>
             </div>
@@ -76,11 +146,18 @@
 
           <div class="card-content">
             <h4 class="product-title">{{ prod.name }}</h4>
-            <p class="product-desc">{{ prod.description }}</p>
+            <p class="product-desc" *ngIf="prod.short_description || prod.description">
+              {{ prod.short_description || prod.description }}
+            </p>
 
             <div class="seller-box" *ngIf="prod.farmer">
-              <span class="seller-name">{{ prod.farmer.full_name || 'Agricultor' }}</span>
-              <span class="seller-location"><i class="fa-solid fa-location-dot"></i> Logroño</span>
+              <span class="seller-name">
+                {{ prod.farmer.full_name || prod.farmer.name || 'Agricultor Local' }}
+              </span>
+              <span class="seller-location">
+                <i class="fa-solid fa-location-dot"></i>
+                {{ prod.farmer.farmer?.city || prod.farmer.city || 'Logroño' }}
+              </span>
             </div>
 
             <div class="card-footer">
@@ -88,13 +165,17 @@
                 <span class="price-main">{{ prod.price }}€</span>
                 <span class="price-unit">/{{ prod.unit }}</span>
               </div>
-              <button class="add-button" [disabled]="prod.stock_quantity === 0">
-                <i class="fa-solid fa-plus"></i> Añadir
+              <button class="add-button"
+                [disabled]="prod.stock_quantity === 0"
+                (click)="$event.stopPropagation(); agregarAlCarrito(prod)">
+                <i class="fa-solid fa-plus"></i>
               </button>
             </div>
           </div>
+
         </div>
       </div>
-    } 
+    }
+
   </main>
 </div>

@@ -31,7 +31,7 @@ export class ProductoService {
   }
 
   toggleFavorite(productId: number): Observable<any> {
-    return this.http.post(`${environment.apiUrl}/favorites/toggle`, { product_id: productId });
+    return this.http.post(`${environment.apiUrl}/favorites/${productId}`, {});
   }
 
   getFavoritos(): Observable<Producto[]> {
