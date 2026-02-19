@@ -129,7 +129,7 @@ class ProductController extends Controller
         ]);
 
         $product = Product::create([
-            'farmer_id'          => $request->user()->id,
+            'farmer_id'          => $request->user()->farmer->id,
             'category_id'        => $validated['category_id'],
             'name'               => $validated['name'],
             'description'        => $validated['description'],

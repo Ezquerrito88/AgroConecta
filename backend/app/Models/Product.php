@@ -54,7 +54,7 @@ class Product extends Model
     // Relacion 2: Pertenece a un agricultor (User)
     public function farmer()
     {
-        return $this->belongsTo(User::class, 'farmer_id');
+        return $this->belongsTo(Farmer::class, 'farmer_id');
     }
 
     // Relacion 3: Tiene muchas imágenes
