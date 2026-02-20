@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-detalle-producto',
@@ -13,7 +14,7 @@ import { FormsModule } from '@angular/forms';
 })
 export class DetalleProducto implements OnInit, AfterViewInit {
 
-  private readonly API_URL = 'https://agroconecta-backend-v2-bxbxfudaatbmgxdg.spaincentral-01.azurewebsites.net';
+  private readonly API_URL = environment.apiUrl;
 
   product: any = null;
   cantidad: number = 1;

@@ -27,13 +27,14 @@ export class CrearProducto implements OnInit {
   error             = '';
 
   form = {
-    category_id:    '',
-    name:           '',
-    description:    '',
-    price:          '',
-    unit:           '',
-    stock_quantity: '',
-    season_end:     ''
+    category_id:        '',
+    name:               '',
+    short_description:  '',
+    description:      '',
+    price:            '',
+    unit:             '',
+    stock_quantity:   '',
+    season_end:       ''
   };
 
   readonly unidades = [

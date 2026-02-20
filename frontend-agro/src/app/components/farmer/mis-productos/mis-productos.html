@@ -1,1 +1,41 @@
-<p>mis-productos works!</p>
+<div class="product-container">
+  <div class="header-actions">
+    <h2>Mis Productos</h2>
+    <button class="btn-primary">+ Añadir Nuevo Producto</button>
+  </div>
+
+  <table class="product-table">
+    <thead>
+      <tr>
+        <th>Nombre</th>
+        <th>Precio (€)</th>
+        <th>Stock</th>
+        <th>Fin de Temporada</th>
+        <th>Estado (Moderación)</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let product of products">
+        <td>
+          <strong>{{ product.name }}</strong>
+          <p class="description">{{ product.description }}</p>
+        </td>
+        <td>{{ product.price | number:'1.2-2' }}</td>
+        <td [class.low-stock]="product.stock_quantity < 20">
+          {{ product.stock_quantity }} ud.
+        </td>
+        <td>{{ product.season_end | date:'dd/MM/yyyy' }}</td>
+        <td>
+          <span class="badge" [ngClass]="product.moderation_status.toLowerCase()">
+            {{ product.moderation_status }}
+          </span>
+        </td>
+        <td class="actions">
+          <button class="btn-edit">Editar</button>
+          <button class="btn-delete" (click)="deleteProduct(product.id)">Eliminar</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>

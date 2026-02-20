@@ -7,6 +7,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSliderModule } from '@angular/material/slider';
 import { ProductoService } from '../../services/producto.service';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-favoritos',
@@ -21,7 +22,7 @@ import { ProductoService } from '../../services/producto.service';
 })
 export class Favoritos implements OnInit {
 
-  private readonly API_URL = 'https://agroconecta-backend-v2-bxbxfudaatbmgxdg.spaincentral-01.azurewebsites.net';
+  private readonly API_URL = environment.apiUrl;
 
   productos: any[] = [];           // todos los favoritos de la BD
   productosFiltrados: any[] = [];  // los que se muestran tras filtrar

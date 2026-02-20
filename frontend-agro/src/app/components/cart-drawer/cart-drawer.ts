@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CartService } from '../../services/cart.service';
+import { environment } from '../../../environments/environment';  
 
 @Component({
   selector: 'app-cart-drawer',
@@ -15,7 +16,7 @@ export class CartDrawer implements OnInit {
   total: number = 0;
 
   // URL de tu Backend en Azure
-  private readonly API_URL = 'https://agroconecta-backend-v2-bxbxfudaatbmgxdg.spaincentral-01.azurewebsites.net';
+  API_URL = environment.apiUrl;
 
   constructor(private cartService: CartService) {}
 

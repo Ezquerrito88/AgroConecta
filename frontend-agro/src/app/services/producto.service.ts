@@ -37,4 +37,12 @@ export class ProductoService {
   getFavoritos(): Observable<Producto[]> {
     return this.http.get<Producto[]>(`${environment.apiUrl}/favorites`);
   }
+
+  getMisProductos(): Observable<Producto[]> {
+    return this.http.get<Producto[]>(`${this.apiUrl}/mis-productos`);
+  }
+
+  deleteProducto(id: number): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/${id}`);
+  }
 }

@@ -9,6 +9,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
 import { ProductoService } from '../../services/producto.service';
 import { Producto } from '../../models/producto';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-catalogo',
@@ -23,7 +24,7 @@ import { Producto } from '../../models/producto';
 })
 export class Catalogo implements OnInit {
 
-  private readonly API_URL = 'https://agroconecta-backend-v2-bxbxfudaatbmgxdg.spaincentral-01.azurewebsites.net';
+  private readonly API_URL = environment.apiUrl;
 
   productos: Producto[] = [];
 

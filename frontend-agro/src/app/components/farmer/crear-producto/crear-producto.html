@@ -1,121 +1,196 @@
 <div class="crear-layout">
 
+  <!-- Header -->
   <div class="crear-header">
     <a routerLink="/mis-productos" class="back-btn">
       <i class="fa-solid fa-arrow-left"></i> Mis Productos
     </a>
-    <h1 class="crear-title">Crear Producto</h1>
-    <p class="crear-subtitle">Rellena los datos y sube fotos de tu producto.</p>
+    <div class="header-content">
+      <div class="header-icon">🌱</div>
+      <div>
+        <h1 class="crear-title">Publicar Producto</h1>
+        <p class="crear-subtitle">Tu producto se publica inmediatamente en tu perfil</p>
+      </div>
+    </div>
   </div>
 
-  <div class="crear-card">
+  <!-- Error -->
+  <div class="alert-error" *ngIf="error">
+    <i class="fa-solid fa-circle-exclamation"></i> {{ error }}
+  </div>
 
-    <!-- Error -->
-    <div class="alert-error" *ngIf="error">
-      <i class="fa-solid fa-circle-exclamation"></i> {{ error }}
-    </div>
+  <form (ngSubmit)="guardar()" #f="ngForm">
+    <div class="crear-body">
 
-    <form (ngSubmit)="guardar()" #f="ngForm">
+      <!-- COLUMNA IZQUIERDA -->
+      <div class="col-main">
 
-      <div class="form-grid">
+        <!-- Información básica -->
+        <div class="section-card">
+          <div class="section-header">
+            <span class="section-icon">📋</span>
+            <h2 class="section-title">Información básica</h2>
+          </div>
 
-        <!-- Nombre -->
-        <div class="form-group full">
-          <label>Nombre del producto <span class="req">*</span></label>
-          <input type="text" class="form-input" placeholder="Ej: Tomates cherry ecológicos"
-            [(ngModel)]="form.name" name="name" required>
-        </div>
+          <!-- Nombre -->
+          <div class="form-group">
+            <label>Nombre del producto <span class="req">*</span></label>
+            <input type="text" class="form-input"
+              placeholder="Ej: Tomates cherry ecológicos"
+              [(ngModel)]="form.name" name="name" required>
+          </div>
 
-        <!-- Descripción -->
-        <div class="form-group full">
-          <label>Descripción <span class="req">*</span></label>
-          <textarea class="form-input textarea" rows="3"
-            placeholder="Describe tu producto..."
-            [(ngModel)]="form.description" name="description" required></textarea>
-        </div>
+          <!-- Descripción corta (para cards) -->
+          <div class="form-group">
+            <label>Descripción corta <span class="req">*</span></label>
+            <p class="field-hint">Aparece en las tarjetas de productos (máx. 80 caracteres)</p>
+            <input type="text" class="form-input"
+              placeholder="Ej: Tomates cherry rojos, dulces y recién cosechados"
+              [(ngModel)]="form.short_description" name="short_description" maxlength="80" required>
+            <small class="char-count">{{ form.short_description?.length || 0 }}/80</small>
+          </div>
 
-        <!-- Categoría -->
-        <div class="form-group">
-          <label>Categoría <span class="req">*</span></label>
-          <mat-form-field appearance="outline" class="full-width theme-green" subscriptSizing="dynamic">
-            <mat-select panelClass="panel-green" [(ngModel)]="form.category_id" name="category_id">
-              <mat-option *ngFor="let cat of categorias" [value]="cat.id">
-                {{ cat.icon }} {{ cat.name }}
-              </mat-option>
-            </mat-select>
-          </mat-form-field>
-        </div>
+          <!-- Descripción larga -->
+          <div class="form-group">
+            <label>Descripción completa <span class="req">*</span></label>
+            <p class="field-hint">Detalles completos para la página del producto</p>
+            <textarea class="form-input textarea" rows="4"
+              placeholder="Describe tu producto: origen, método de cultivo, características..."
+              [(ngModel)]="form.description" name="description" required></textarea>
+          </div>
 
-        <!-- Unidad -->
-        <div class="form-group">
-          <label>Unidad de venta <span class="req">*</span></label>
-          <mat-form-field appearance="outline" class="full-width theme-blue" subscriptSizing="dynamic">
-            <mat-select panelClass="panel-blue" [(ngModel)]="form.unit" name="unit">
-              <mat-option *ngFor="let u of unidades" [value]="u.value">
-                {{ u.label }}
-              </mat-option>
-            </mat-select>
-          </mat-form-field>
-        </div>
+          <div class="form-row">
 
-        <!-- Precio -->
-        <div class="form-group">
-          <label>Precio (€) <span class="req">*</span></label>
-          <input type="number" class="form-input" placeholder="0.00" min="0" step="0.01"
-            [(ngModel)]="form.price" name="price" required>
-        </div>
+            <!-- Categoría (estilo filtros) -->
+            <div class="form-group filter-group filter-green">
+              <label><span class="dot-green"></span> Categoría <span class="req">*</span></label>
+              <mat-form-field appearance="outline" class="full-width theme-green" subscriptSizing="dynamic">
+                <mat-select panelClass="panel-green" [(ngModel)]="form.category_id" name="category_id">
+                  <mat-option *ngFor="let cat of categorias" [value]="cat.id">
+                    {{ cat.icon }} {{ cat.name }}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
 
-        <!-- Stock -->
-        <div class="form-group">
-          <label>Stock disponible <span class="req">*</span></label>
-          <input type="number" class="form-input" placeholder="0" min="0"
-            [(ngModel)]="form.stock_quantity" name="stock_quantity" required>
-        </div>
+            <!-- Unidad (estilo filtros) -->
+            <div class="form-group filter-group filter-blue">
+              <label><span class="dot-blue"></span> Unidad de venta <span class="req">*</span></label>
+              <mat-form-field appearance="outline" class="full-width theme-blue" subscriptSizing="dynamic">
+                <mat-select panelClass="panel-blue" [(ngModel)]="form.unit" name="unit">
+                  <mat-option *ngFor="let u of unidades" [value]="u.value">
+                    {{ u.label }}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
 
-        <!-- Fecha fin temporada -->
-        <div class="form-group full">
-          <label>Fin de temporada <span class="optional">(opcional)</span></label>
-          <input type="date" class="form-input"
-            [(ngModel)]="form.season_end" name="season_end">
-        </div>
-
-      </div>
-
-      <!-- Imágenes -->
-      <div class="form-group full">
-        <label>Fotos del producto <span class="optional">(máx. 4)</span></label>
-
-        <label class="upload-area" for="imgInput">
-          <i class="fa-solid fa-cloud-arrow-up"></i>
-          <span>Arrastra o haz clic para subir fotos</span>
-          <span class="upload-hint">JPG, PNG, WEBP — máx. 2MB por foto</span>
-        </label>
-        <input id="imgInput" type="file" multiple accept="image/*"
-          (change)="onImagenesSeleccionadas($event)" style="display:none">
-
-        <!-- Preview -->
-        <div class="preview-grid" *ngIf="preview.length > 0">
-          <div class="preview-item" *ngFor="let src of preview; let i = index">
-            <img [src]="src" alt="Preview">
-            <button type="button" class="remove-img" (click)="eliminarImagen(i)">
-              <i class="fa-solid fa-xmark"></i>
-            </button>
           </div>
         </div>
+
+        <!-- Fotos -->
+        <div class="section-card">
+          <div class="section-header">
+            <span class="section-icon">📸</span>
+            <h2 class="section-title">Fotos del producto</h2>
+            <span class="section-badge">máx. 4 fotos</span>
+          </div>
+
+          <label class="upload-area" for="imgInput">
+            <div class="upload-icon-wrap">
+              <i class="fa-solid fa-cloud-arrow-up"></i>
+            </div>
+            <span class="upload-text">Arrastra o haz clic para subir fotos</span>
+            <span class="upload-hint">JPG, PNG, WEBP — máx. 2MB por foto</span>
+          </label>
+          <input id="imgInput" type="file" multiple accept="image/*"
+            (change)="onImagenesSeleccionadas($event)" style="display:none">
+
+          <div class="preview-grid" *ngIf="preview.length > 0">
+            <div class="preview-item" *ngFor="let src of preview; let i = index">
+              <img [src]="src" alt="Preview">
+              <button type="button" class="remove-img" (click)="eliminarImagen(i)">
+                <i class="fa-solid fa-xmark"></i>
+              </button>
+              <div class="preview-badge" *ngIf="i === 0">Principal</div>
+            </div>
+          </div>
+        </div>
+
       </div>
 
-      <!-- Acciones -->
-      <div class="form-actions">
-        <button type="button" class="btn-cancel" routerLink="/mis-productos">
-          Cancelar
-        </button>
-        <button type="submit" class="btn-save" [disabled]="isLoading">
-          <i class="fa-solid fa-spinner fa-spin" *ngIf="isLoading"></i>
-          <i class="fa-solid fa-check" *ngIf="!isLoading"></i>
-          {{ isLoading ? 'Guardando...' : 'Publicar Producto' }}
-        </button>
-      </div>
+      <!-- COLUMNA DERECHA -->
+      <div class="col-side">
 
-    </form>
-  </div>
+        <!-- Precio y stock -->
+        <div class="section-card">
+          <div class="section-header">
+            <span class="section-icon">💰</span>
+            <h2 class="section-title">Precio y stock</h2>
+          </div>
+
+          <div class="form-group">
+            <label>Precio (€) <span class="req">*</span></label>
+            <div class="input-prefix-wrap">
+              <span class="input-prefix">€</span>
+              <input type="number" class="form-input with-prefix"
+                placeholder="0.00" min="0" step="0.01"
+                [(ngModel)]="form.price" name="price" required>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Stock disponible <span class="req">*</span></label>
+            <div class="input-prefix-wrap">
+              <span class="input-prefix">📦</span>
+              <input type="number" class="form-input with-prefix"
+                placeholder="0" min="0"
+                [(ngModel)]="form.stock_quantity" name="stock_quantity" required>
+            </div>
+          </div>
+        </div>
+
+        <!-- Temporada -->
+        <div class="section-card">
+          <div class="section-header">
+            <span class="section-icon">📅</span>
+            <h2 class="section-title">Temporada</h2>
+          </div>
+
+          <div class="form-group">
+            <label>Fin de temporada <span class="optional">(opcional)</span></label>
+            <input type="date" class="form-input"
+              [(ngModel)]="form.season_end" name="season_end">
+          </div>
+
+          <div class="season-tip">
+            <i class="fa-solid fa-circle-info"></i>
+            Indica cuándo termina la disponibilidad de este producto.
+          </div>
+        </div>
+
+        <!-- Publicar -->
+        <div class="section-card publish-card">
+          <div class="publish-status success">
+            <i class="fa-solid fa-circle-check"></i>
+            <div>
+              <strong>¡Producto publicado!</strong>
+              <p>Se mostrará inmediatamente en tu perfil de agricultor. Un admin puede revisarlo después.</p>
+            </div>
+          </div>
+
+          <button type="submit" class="btn-save" [disabled]="isLoading">
+            <i class="fa-solid fa-spinner fa-spin" *ngIf="isLoading"></i>
+            <i class="fa-solid fa-seedling" *ngIf="!isLoading"></i>
+            {{ isLoading ? 'Publicando...' : 'Publicar Producto' }}
+          </button>
+
+          <button type="button" class="btn-cancel" routerLink="/mis-productos">
+            Cancelar
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </form>
 </div>

@@ -20,10 +20,11 @@ export const routes: Routes = [
   // Solo usuarios logueados
   { path: 'productos/favoritos', component: Favoritos, canActivate: [authGuard] },
 
-  // Solo agricultores (pendiente de crear el componente)
+  // Solo agricultores
   {
     path: 'mis-productos',
     canActivate: [farmerGuard],
+    // CORRECCIÓN AQUÍ: Cambiado m.MisProductos por m.MisProductosComponent
     loadComponent: () => import('./components/farmer/mis-productos/mis-productos').then(m => m.MisProductos)
   },
   {

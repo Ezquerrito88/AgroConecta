@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-login',
@@ -13,7 +14,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 })
 export class Login implements OnInit {
 
-  private apiUrl = 'https://agroconecta-backend-v2-bxbxfudaatbmgxdg.spaincentral-01.azurewebsites.net/api';
+  private apiUrl = environment.apiUrl;
 
   loginData = {
     email: '',
