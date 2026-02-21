@@ -1,6 +1,6 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule, ActivatedRoute, Router } from '@angular/router'; // ✅ Router añadido
+import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { MatSliderModule } from '@angular/material/slider';
 import { MatSelectModule } from '@angular/material/select';
@@ -46,7 +46,7 @@ export class Catalogo implements OnInit {
     private productoService: ProductoService,
     private cdr: ChangeDetectorRef,
     private route: ActivatedRoute,
-    private router: Router  // ✅ añadido
+    private router: Router
   ) {}
 
   ngOnInit(): void {
@@ -57,15 +57,16 @@ export class Catalogo implements OnInit {
   }
 
   getImagenUrl(prod: any): string {
-    if (prod?.images?.length > 0) {
-      const path = prod.images[0].image_path;
-      if (path.startsWith('http')) {
-        return path.replace(/http:\/\/127\.0\.0\.1:8000/g, this.API_URL);
-      }
-      return `${this.API_URL}/storage/${path}`;
+  if (prod?.images?.length > 0) {
+    const path = prod.images[0].image_path;
+    if (path.startsWith('http')) {
+      return path.replace(/http:\/\/127\.0\.0\.1:8000/g, 'http://localhost:8000');
     }
-    return 'assets/placeholder.png';
+    return `http://localhost:8000/storage/${path}`;
   }
+  return 'assets/placeholder.png';
+}
+
 
   cargarProductos(page: number): void {
     this.isLoading = true;

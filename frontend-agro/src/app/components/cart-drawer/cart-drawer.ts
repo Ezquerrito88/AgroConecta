@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CartService } from '../../services/cart.service';
-import { environment } from '../../../environments/environment';  
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-cart-drawer',
@@ -15,8 +15,8 @@ export class CartDrawer implements OnInit {
   isOpen: boolean = false;
   total: number = 0;
 
-  // URL de tu Backend en Azure
-  API_URL = environment.apiUrl;
+  private readonly API_URL = environment.apiUrl;
+  private readonly STORAGE_URL = environment.storageUrl;
 
   constructor(private cartService: CartService) {}
 
@@ -31,26 +31,16 @@ export class CartDrawer implements OnInit {
     });
   }
 
-  // Función para resolver la URL de la imagen correctamente
   getImageUrl(item: any): string {
     if (item.images && item.images.length > 0) {
       const path = item.images[0].image_path;
-      
-      // Si la ruta ya es una URL completa (y apunta a localhost), la corregimos
-      if (path.startsWith('http')) {
-        return path.replace(/http:\/\/127\.0\.0\.1:8000/g, this.API_URL);
-      }
-      
-      // Si es una ruta relativa, le pegamos el prefijo de Azure
-      return `${this.API_URL}/storage/${path}`;
+      if (path.startsWith('http')) return path;
+      return `${this.STORAGE_URL}/${path}`;
     }
     return 'assets/placeholder.png';
   }
 
   close() { this.cartService.closeCart(); }
   removeItem(id: number) { this.cartService.removeFromCart(id); }
-
-  updateQuantity(id: number, change: number) {
-    this.cartService.updateQuantity(id, change);
-  }
+  updateQuantity(id: number, change: number) { this.cartService.updateQuantity(id, change); }
 }
