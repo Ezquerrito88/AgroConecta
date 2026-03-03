@@ -1,15 +1,15 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, NavigationEnd, RouterModule } from '@angular/router';
-import { FormsModule } from '@angular/forms'; // ✅ añadido
+import { FormsModule } from '@angular/forms';
 import { filter } from 'rxjs/operators';
-import { CartService } from './services/cart.service';
+import { CartService } from './core/services/cart.service';
 import { CartDrawer } from './components/cart-drawer/cart-drawer';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, CartDrawer], // ✅ FormsModule añadido
+  imports: [CommonModule, RouterModule, FormsModule, CartDrawer],
   templateUrl: './app.html',
   styleUrls: ['./app.css']
 })
@@ -21,7 +21,7 @@ export class App implements OnInit {
   isUserMenuOpen = false;
   currentUser: any = null;
 
-  textoBusquedaGlobal = ''; // ✅ añadido
+  textoBusquedaGlobal = '';
 
   constructor(private router: Router, public cartService: CartService) {}
 
@@ -29,12 +29,11 @@ export class App implements OnInit {
     this.router.events.pipe(
       filter(event => event instanceof NavigationEnd)
     ).subscribe((event: NavigationEnd) => {
-      const rutasOcultas = ['/login', '/registro'];
+      const rutasOcultas = ['/login', '/registro', '/agricultor'];
       this.mostrarLayout = !rutasOcultas.some(ruta => event.urlAfterRedirects.includes(ruta));
       this.isUserMenuOpen = false;
       this.checkLoginStatus();
 
-      // ✅ Limpia el buscador al salir del catálogo
       if (!event.urlAfterRedirects.includes('/productos')) {
         this.textoBusquedaGlobal = '';
       }
@@ -43,7 +42,6 @@ export class App implements OnInit {
     this.checkLoginStatus();
   }
 
-  // ✅ Navega al catálogo con el texto de búsqueda como query param
   buscarDesdeHeader(): void {
     if (this.textoBusquedaGlobal.trim()) {
       this.router.navigate(['/productos'], {

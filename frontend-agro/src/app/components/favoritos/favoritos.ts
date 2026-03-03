@@ -6,7 +6,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSliderModule } from '@angular/material/slider';
-import { ProductoService } from '../../services/producto.service';
+import { ProductoService } from '../../core/services/producto.service';
 import { environment } from '../../../environments/environment';
 
 @Component({

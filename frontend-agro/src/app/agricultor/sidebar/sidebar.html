@@ -1,0 +1,73 @@
+<aside class="sidebar">
+  
+  <div class="sidebar-header">
+    <img src="img/logo/logo.png" alt="Logo AgroConecta" class="logo-img">
+    <div class="brand-text">
+      <h2>AgroConecta</h2>
+      <span>Panel del Agricultor</span>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <div class="user-profile">
+    <div class="avatar">
+      AE
+      <span class="status-dot"></span>
+    </div>
+    <div class="user-info">
+      <h3>Adrián Ezquerro</h3>
+      <span>Finca El Paraíso</span>
+    </div>
+  </div>
+
+  <nav class="sidebar-nav">
+    <ul>
+      <li>
+        <a routerLink="/inicio" routerLinkActive="active">
+          <i class="bx bx-home-alt"></i>
+          <span>Inicio</span>
+        </a>
+      </li>
+      <li>
+        <a routerLink="/productos" routerLinkActive="active">
+          <i class="bx bx-cube"></i>
+          <span>Mis Productos</span>
+        </a>
+      </li>
+      <li>
+        <a routerLink="/pedidos" routerLinkActive="active">
+          <i class="bx bx-shopping-bag"></i>
+          <span>Pedidos</span>
+        </a>
+      </li>
+      <li>
+        <a routerLink="/estadisticas" routerLinkActive="active">
+          <i class="bx bx-bar-chart-alt-2"></i>
+          <span>Estadísticas</span>
+        </a>
+      </li>
+      <li>
+        <a routerLink="/mensajes" routerLinkActive="active">
+          <i class="bx bx-message-rounded-dots"></i>
+          <span>Mensajes</span>
+        </a>
+      </li>
+      <li>
+        <a routerLink="/configuracion" routerLinkActive="active">
+          <i class="bx bx-cog"></i>
+          <span>Configuración</span>
+        </a>
+      </li>
+    </ul>
+  </nav>
+
+  <div class="sidebar-footer">
+    <hr class="divider">
+    <button class="logout-btn" (click)="cerrarSesion()">
+      <i class="bx bx-log-out" style="color: #ef5b45;"></i>
+      <span>Cerrar Sesión</span>
+    </button>
+  </div>
+
+</aside>

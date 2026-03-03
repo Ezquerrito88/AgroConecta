@@ -1,0 +1,202 @@
+/* Variables de color nativas CSS basades en Geist design system */
+:root {
+  --primary-orange: #ef5b45; /* El naranja exacto de tu captura */
+  --text-dark: #111827;     /* Un gris casi negro súper premium (típico de Geist) */
+  --text-light: #6b7280;    /* Gris para subtextos */
+  --border-color: #e5e7eb;  /* Gris muy suave para líneas */
+  --bg-hover: #f3f4f6;
+  --status-green: #22c55e;
+}
+
+.sidebar {
+  width: 275px;
+  height: 100vh;
+  background-color: #ffffff;
+  border-right: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  /* 👇 APLICAMOS GEIST 👇 */
+  font-family: 'Geist', sans-serif;
+  letter-spacing: -0.015em; /* Un pequeño ajuste para que Geist se vea aún mejor */
+}
+
+/* Líneas separadoras marcadas */
+.sidebar .divider {
+  border: none;
+  border-top: 1px solid var(--border-color);
+  margin: 0;
+  width: 100%;
+}
+
+/* HEADER (Logo) */
+.sidebar .sidebar-header {
+  display: flex;
+  align-items: center;
+  padding: 24px 24px;
+  gap: 14px;
+}
+
+.sidebar .sidebar-header .logo-img {
+  width: 38px;
+  height: 38px;
+  object-fit: contain;
+}
+
+.sidebar .sidebar-header .brand-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar .sidebar-header .brand-text h2 {
+  margin: 0;
+  font-size: 1.35rem;
+  color: var(--text-dark);
+  font-weight: 700;
+  letter-spacing: -0.03em; /* Geist se ve brutal con tracking negativo en títulos */
+}
+
+.sidebar .sidebar-header .brand-text span {
+  font-size: 0.9rem;
+  color: var(--primary-orange);
+  font-weight: 500;
+  margin-top: -1px;
+}
+
+/* PERFIL DE USUARIO - CON LÍNEA INFERIOR */
+.sidebar .user-profile {
+  display: flex;
+  align-items: center;
+  padding: 22px 24px;
+  gap: 16px;
+  /* 👇 Aquí está la línea separadora inferior 👇 */
+  border-bottom: 1px solid var(--border-color);
+}
+
+.sidebar .user-profile .avatar {
+  position: relative;
+  width: 50px;
+  height: 50px;
+  /* Fondo salmón claro con degradado moderno */
+  background: linear-gradient(135deg, #fca5a5, #fca5a5);
+  color: white;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  font-weight: 600; /* Medium-SemiBold */
+  box-shadow: 0 4px 6px -1px rgba(252, 165, 165, 0.4);
+}
+
+.sidebar .user-profile .avatar .status-dot {
+  position: absolute;
+  bottom: -4px;
+  right: -4px;
+  width: 16px;
+  height: 16px;
+  background-color: var(--status-green);
+  border: 3px solid #ffffff; /* Borde grueso para cortar */
+  border-radius: 50%;
+}
+
+.sidebar .user-profile .user-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar .user-profile .user-info h3 {
+  margin: 0;
+  font-size: 1.05rem;
+  color: var(--text-dark);
+  font-weight: 600; /* SemiBold */
+}
+
+.sidebar .user-profile .user-info span {
+  font-size: 0.88rem;
+  color: var(--text-light);
+  font-weight: 400; /* Regular */
+  margin-top: 1px;
+}
+
+/* NAVEGACIÓN */
+.sidebar .sidebar-nav {
+  flex: 1;
+  padding: 24px 16px;
+  overflow-y: auto;
+}
+
+.sidebar .sidebar-nav ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.sidebar .sidebar-nav ul li a {
+  display: flex;
+  align-items: center;
+  padding: 12px 18px;
+  text-decoration: none;
+  color: #374151; /* Gris oscuro Geist */
+  border-radius: 12px;
+  font-weight: 500; /* Medium */
+  font-size: 1rem;
+  transition: all 0.15s ease;
+  gap: 16px;
+}
+
+.sidebar .sidebar-nav ul li a i {
+  font-size: 1.4rem;
+  color: #1f2937;
+  transition: color 0.15s ease;
+}
+
+.sidebar .sidebar-nav ul li a:hover {
+  background-color: var(--bg-hover);
+  color: var(--text-dark);
+}
+
+/* ESTILO ACTIVO (Botón Naranja) */
+.sidebar .sidebar-nav ul li a.active {
+  background-color: var(--primary-orange);
+  color: white;
+  box-shadow: 0 4px 12px rgba(239, 91, 69, 0.25);
+  font-weight: 600; /* Un pelín más grueso al estar activo */
+}
+
+.sidebar .sidebar-nav ul li a.active i {
+  color: white;
+}
+
+/* FOOTER / CERRAR SESIÓN */
+.sidebar .sidebar-footer {
+  padding-bottom: 12px;
+}
+
+.sidebar .sidebar-footer .logout-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 20px 24px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-dark);
+  font-size: 1rem;
+  font-weight: 500;
+  transition: color 0.15s;
+  font-family: 'Geist', sans-serif; /* Geist también en el botón */
+}
+
+.sidebar .sidebar-footer .logout-btn i {
+  font-size: 1.4rem;
+  color: var(--primary-orange);
+}
+
+.sidebar .sidebar-footer .logout-btn:hover {
+  color: #000;
+}
