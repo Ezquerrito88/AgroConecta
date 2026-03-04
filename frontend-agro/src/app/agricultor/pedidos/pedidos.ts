@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, ViewEncapsulation  } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -12,6 +12,7 @@ import { SmartDatePipe } from '../../core/pipes/smart-date-pipe';
   imports: [CommonModule, RouterModule, FormsModule, Sidebar, SmartDatePipe],
   templateUrl: './pedidos.html',
   styleUrls: ['./pedidos.css'],
+  encapsulation: ViewEncapsulation.None
 })
 export class Pedidos implements OnInit {
   orders: Order[] = [];
