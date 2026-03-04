@@ -1,5 +1,4 @@
 <div class="dashboard-layout">
-
   <app-sidebar></app-sidebar>
 
   <main class="main-content">
@@ -40,7 +39,7 @@
           </div>
           <span class="kpi-badge positive">+ 8%</span>
         </div>
-        <span class="kpi-value">12.5K €</span>
+        <span class="kpi-value">{{ kpis.ventas | currency:'EUR':'symbol':'1.0-0' }}</span>
         <span class="kpi-label">Ventas este mes</span>
       </div>
       <div class="kpi-card">
@@ -71,7 +70,12 @@
         <h2>Pedidos Recientes</h2>
         <a routerLink="/agricultor/pedidos" class="ver-todos">Ver Todos &gt;</a>
       </div>
-      <table class="orders-table">
+
+      <div *ngIf="recentOrders.length === 0" class="empty-state">
+        Aún no tienes pedidos recientes.
+      </div>
+
+      <table class="orders-table" *ngIf="recentOrders.length > 0">
         <thead>
           <tr>
             <th>CLIENTE</th>
@@ -85,19 +89,21 @@
           <tr *ngFor="let order of recentOrders">
             <td>
               <div class="client-cell">
-                <img [src]="order.avatar" [alt]="order.client" class="client-avatar" />
-                {{ order.client }}
+                <div class="client-avatar-initial">
+                  {{ order.buyer.name.charAt(0).toUpperCase() }}
+                </div>
+                {{ order.buyer.name }}
               </div>
             </td>
-            <td>{{ order.code }}</td>
-            <td>{{ order.date }}</td>
-            <td><strong>{{ order.total | currency:'EUR':'symbol':'1.3-3' }}</strong></td>
+            <td>ORD-{{ order.id }}</td>
+            <td>{{ order.created_at | smartDate }}</td>
+            <td><strong>{{ order.total | currency:'EUR':'symbol':'1.2-2' }}</strong></td>
             <td>
-              <span class="status-badge" [ngClass]="order.status">
+              <span class="status-badge" [ngClass]="statusClasses[order.status]">
                 <span class="material-symbols-rounded status-icon">
-                  {{ order.status === 'pendiente' ? 'schedule' : order.status === 'procesando' ? 'sync' : 'local_shipping' }}
+                  {{ statusIcons[order.status] }}
                 </span>
-                {{ order.statusLabel }}
+                {{ statusLabels[order.status] }}
               </span>
             </td>
           </tr>
