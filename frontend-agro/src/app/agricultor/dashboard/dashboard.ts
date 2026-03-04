@@ -13,8 +13,6 @@ import { Sidebar } from '../sidebar/sidebar';
 })
 export class Dashboard implements OnInit {
   user: any = null;
-  initials = '';
-
   kpis = { pedidos: 24, ventas: 12500, agotados: 6, calificacion: 4.8 };
 
   recentOrders = [
@@ -33,14 +31,5 @@ export class Dashboard implements OnInit {
 
   ngOnInit() {
     this.user = this.authService.getCurrentUser();
-    if (this.user?.name) {
-      const parts = this.user.name.trim().split(' ');
-      this.initials = (parts[0][0] + (parts[1]?.[0] ?? '')).toUpperCase();
-    }
-  }
-
-  logout() {
-    this.authService.logout();
-    this.router.navigate(['/login']);
   }
 }

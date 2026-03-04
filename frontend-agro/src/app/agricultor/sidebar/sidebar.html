@@ -1,7 +1,7 @@
 <aside class="sidebar">
-  
+
   <div class="sidebar-header">
-    <img src="img/logo/logo.png" alt="Logo AgroConecta" class="logo-img">
+    <img src="img/logo/logo.png" alt="AgroConecta" class="logo-img">
     <div class="brand-text">
       <h2>AgroConecta</h2>
       <span>Panel del Agricultor</span>
@@ -12,11 +12,11 @@
 
   <div class="user-profile">
     <div class="avatar">
-      AE
+      {{ initials }}
       <span class="status-dot"></span>
     </div>
     <div class="user-info">
-      <h3>Adrián Ezquerro</h3>
+      <h3>{{ user?.name }}</h3>
       <span>Finca El Paraíso</span>
     </div>
   </div>
@@ -24,38 +24,38 @@
   <nav class="sidebar-nav">
     <ul>
       <li>
-        <a routerLink="/inicio" routerLinkActive="active">
-          <i class="bx bx-home-alt"></i>
+        <a routerLink="/agricultor/dashboard" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}">
+          <span class="material-symbols-rounded">Home</span>
           <span>Inicio</span>
         </a>
       </li>
       <li>
-        <a routerLink="/productos" routerLinkActive="active">
-          <i class="bx bx-cube"></i>
+        <a routerLink="/agricultor/mis-productos" routerLinkActive="active">
+          <span class="material-symbols-rounded">storefront</span>
           <span>Mis Productos</span>
         </a>
       </li>
       <li>
-        <a routerLink="/pedidos" routerLinkActive="active">
-          <i class="bx bx-shopping-bag"></i>
+        <a routerLink="/agricultor/pedidos" routerLinkActive="active">
+          <span class="material-symbols-rounded">receipt_long</span>
           <span>Pedidos</span>
         </a>
       </li>
       <li>
-        <a routerLink="/estadisticas" routerLinkActive="active">
-          <i class="bx bx-bar-chart-alt-2"></i>
+        <a routerLink="/agricultor/estadisticas" routerLinkActive="active">
+          <span class="material-symbols-rounded">bar_chart</span>
           <span>Estadísticas</span>
         </a>
       </li>
       <li>
-        <a routerLink="/mensajes" routerLinkActive="active">
-          <i class="bx bx-message-rounded-dots"></i>
+        <a routerLink="/agricultor/mensajes" routerLinkActive="active">
+          <span class="material-symbols-rounded">chat_bubble</span>
           <span>Mensajes</span>
         </a>
       </li>
       <li>
-        <a routerLink="/configuracion" routerLinkActive="active">
-          <i class="bx bx-cog"></i>
+        <a routerLink="/agricultor/configuracion" routerLinkActive="active">
+          <span class="material-symbols-rounded">settings</span>
           <span>Configuración</span>
         </a>
       </li>
@@ -64,8 +64,8 @@
 
   <div class="sidebar-footer">
     <hr class="divider">
-    <button class="logout-btn" (click)="cerrarSesion()">
-      <i class="bx bx-log-out" style="color: #ef5b45;"></i>
+    <button class="logout-btn" (click)="logout()">
+      <span class="material-symbols-rounded">logout</span>
       <span>Cerrar Sesión</span>
     </button>
   </div>
