@@ -121,7 +121,7 @@
             <button class="btn-outline btn-sm">
               <span class="material-symbols-rounded">visibility</span> Ver
             </button>
-            <button class="btn-primary btn-sm">
+            <button class="btn-primary btn-sm" [routerLink]="['/agricultor/mis-productos/editar', p.id]">
               <span class="material-symbols-rounded">edit</span> Editar Producto
             </button>
           </div>
@@ -139,11 +139,8 @@
       <button class="page-btn" (click)="goToPage(currentPage - 1)" [disabled]="currentPage === 1">
         <span class="material-symbols-rounded">chevron_left</span>
       </button>
-      <button
-        class="page-btn"
-        *ngFor="let p of [].constructor(lastPage); let i = index"
-        [class.active]="currentPage === i + 1"
-        (click)="goToPage(i + 1)">
+      <button class="page-btn" *ngFor="let p of [].constructor(lastPage); let i = index"
+        [class.active]="currentPage === i + 1" (click)="goToPage(i + 1)">
         {{ i + 1 }}
       </button>
       <button class="page-btn" (click)="goToPage(currentPage + 1)" [disabled]="currentPage === lastPage">

@@ -44,8 +44,16 @@ export class ProductoService {
     });
   }
 
-
   deleteProducto(id: number): Observable<any> {
     return this.http.delete(`${this.apiUrl}/${id}`);
   }
+
+  updateProducto(id: number, formData: FormData): Observable<any> {
+    return this.http.post(`${this.apiUrl}/${id}`, formData);
+  }
+
+  deleteImage(imageId: number): Observable<any> {
+    return this.http.delete(`${environment.apiUrl}/product-images/${imageId}`);
+  }
+
 }

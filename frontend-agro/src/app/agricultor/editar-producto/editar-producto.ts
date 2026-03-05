@@ -1,0 +1,124 @@
+import { Component, OnInit, ViewEncapsulation, ChangeDetectorRef } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { RouterModule, ActivatedRoute, Router } from '@angular/router';
+import { FormsModule } from '@angular/forms';
+import { MatSelectModule } from '@angular/material/select';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { Sidebar } from '../sidebar/sidebar';
+import { ProductoService } from '../../core/services/producto.service';
+import { CategoryService } from '../../core/services/category';
+
+@Component({
+  selector: 'app-editar-producto',
+  standalone: true,
+  imports: [CommonModule, RouterModule, FormsModule, Sidebar, MatSelectModule, MatFormFieldModule],
+  templateUrl: './editar-producto.html',
+  styleUrls: ['./editar-producto.css'],
+  encapsulation: ViewEncapsulation.None
+})
+export class EditarProducto implements OnInit {
+
+  producto: any = {};
+  categorias: any[] = [];
+  loading = true;
+  saving = false;
+
+  newImages: File[] = [];
+  newImagePreviews: string[] = [];
+
+  unidades = ['kg', 'g', 'l', 'ml', 'ud', 'docena', 'manojo', 'caja', 'bandeja', 'saco', 'pack'];
+
+  constructor(
+    private route: ActivatedRoute,
+    private router: Router,
+    private productoService: ProductoService,
+    private categoryService: CategoryService,
+    private cdr: ChangeDetectorRef
+  ) { }
+
+  ngOnInit(): void {
+    const id = this.route.snapshot.paramMap.get('id');
+    this.loadCategorias();
+    this.loadProducto(Number(id));
+  }
+
+  loadProducto(id: number): void {
+    this.productoService.getProducto(id).subscribe({
+      next: (data: any) => {
+        this.producto = {
+          ...data,
+          images: data.images?.map((img: any) => ({
+            id: img.id,
+            url: `http://localhost:8000/storage/${img.image_path}`
+          })) ?? []
+        };
+        this.loading = false;
+        this.cdr.detectChanges();
+      },
+      error: () => { this.loading = false; }
+    });
+  }
+
+  loadCategorias(): void {
+    this.categoryService.getCategorias().subscribe({
+      next: (data: any[]) => this.categorias = data,
+      error: () => { }
+    });
+  }
+
+  onImageSelected(event: any): void {
+    const files: FileList = event.target.files;
+    for (let i = 0; i < files.length; i++) {
+      this.newImages.push(files[i]);
+      const reader = new FileReader();
+      reader.onload = (e: any) => {
+        this.newImagePreviews.push(e.target.result);
+        this.cdr.detectChanges();
+      };
+      reader.readAsDataURL(files[i]);
+    }
+  }
+
+  removeNewImage(index: number): void {
+    this.newImages.splice(index, 1);
+    this.newImagePreviews.splice(index, 1);
+  }
+
+  deleteImage(imageId: number): void {
+    this.productoService.deleteImage(imageId).subscribe({
+      next: () => {
+        this.producto.images = this.producto.images.filter((img: any) => img.id !== imageId);
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  guardar(): void {
+    this.saving = true;
+    const formData = new FormData();
+    formData.append('_method', 'PUT');
+    formData.append('name', this.producto.name);
+    formData.append('description', this.producto.description);
+    formData.append('short_description', this.producto.short_description ?? '');
+    formData.append('price', this.producto.price);
+    formData.append('unit', this.producto.unit);
+    formData.append('stock_quantity', this.producto.stock_quantity);
+    formData.append('category_id', this.producto.category_id);
+    this.newImages.forEach(img => formData.append('images[]', img));
+
+    this.productoService.updateProducto(this.producto.id, formData).subscribe({
+      next: () => {
+        this.saving = false;
+        this.router.navigate(['/agricultor/mis-productos']);
+      },
+      error: () => { this.saving = false; }
+    });
+  }
+
+  eliminar(): void {
+    if (!confirm('¿Seguro que quieres eliminar este producto?')) return;
+    this.productoService.deleteProducto(this.producto.id).subscribe({
+      next: () => this.router.navigate(['/agricultor/mis-productos'])
+    });
+  }
+}

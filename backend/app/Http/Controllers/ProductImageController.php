@@ -8,16 +8,15 @@ use Illuminate\Support\Facades\Storage;
 
 class ProductImageController extends Controller
 {
-    //Elinir imagen de producto
     public function destroy(Request $request, $id)
     {
-        $productImage = ProductImage::find($id);
+        $productImage = ProductImage::with('product')->find($id);
 
         if (!$productImage) {
             return response()->json(['message' => 'Imagen no encontrada'], 404);
         }
 
-        if ($request->farmer_id != $productImage->product->farmer_id) {
+        if ($request->user()->id !== $productImage->product->farmer_id) {
             return response()->json(['message' => 'No tienes permisos para eliminar esta imagen'], 403);
         }
 
