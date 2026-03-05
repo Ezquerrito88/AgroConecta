@@ -34,6 +34,10 @@ export const routes: Routes = [
         loadComponent: () => import('./agricultor/mis-productos/mis-productos').then(m => m.MisProductos)
       },
       {
+        path: 'mis-productos/nuevo',
+        loadComponent: () => import('./agricultor/nuevo-producto/nuevo-producto').then(m => m.NuevoProducto)
+      },
+      {
         path: 'mis-productos/editar/:id',
         loadComponent: () => import('./agricultor/editar-producto/editar-producto').then(m => m.EditarProducto)
       },

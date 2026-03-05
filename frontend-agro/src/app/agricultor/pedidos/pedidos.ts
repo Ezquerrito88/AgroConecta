@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef, ViewEncapsulation  } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, ViewEncapsulation } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -23,39 +23,39 @@ export class Pedidos implements OnInit {
   selectedPeriod = '30';
   openMenuId: number | null = null;
 
-  get totalPedidos()    { return this.orders.length; }
-  get pendingCount()    { return this.orders.filter(o => o.status === 'pending').length; }
+  get totalPedidos() { return this.orders.length; }
+  get pendingCount() { return this.orders.filter(o => o.status === 'pending').length; }
   get processingCount() { return this.orders.filter(o => o.status === 'processing').length; }
-  get deliveredCount()  { return this.orders.filter(o => o.status === 'delivered').length; }
+  get deliveredCount() { return this.orders.filter(o => o.status === 'delivered').length; }
 
   statusLabels: Record<string, string> = {
-    pending:    'Pendiente',
+    pending: 'Pendiente',
     processing: 'Procesando',
-    shipped:    'En camino',
-    delivered:  'Entregado',
-    cancelled:  'Cancelado',
+    shipped: 'En camino',
+    delivered: 'Entregado',
+    cancelled: 'Cancelado',
   };
 
   statusClasses: Record<string, string> = {
-    pending:    'status-pending',
+    pending: 'status-pending',
     processing: 'status-processing',
-    shipped:    'status-shipped',
-    delivered:  'status-delivered',
-    cancelled:  'status-cancelled',
+    shipped: 'status-shipped',
+    delivered: 'status-delivered',
+    cancelled: 'status-cancelled',
   };
 
   statusIcons: Record<string, string> = {
-    pending:    'schedule',
+    pending: 'schedule',
     processing: 'sync',
-    shipped:    'local_shipping',
-    delivered:  'check_circle',
-    cancelled:  'cancel',
+    shipped: 'local_shipping',
+    delivered: 'check_circle',
+    cancelled: 'cancel',
   };
 
   constructor(
     private orderService: OrderService,
     private cdr: ChangeDetectorRef
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.orderService.getFarmerOrders().subscribe({
@@ -82,7 +82,7 @@ export class Pedidos implements OnInit {
   applyFilters(): void {
     let result = [...this.orders];
     if (this.activeTab !== 'all') result = result.filter(o => o.status === this.activeTab);
-    if (this.selectedStatus)      result = result.filter(o => o.status === this.selectedStatus);
+    if (this.selectedStatus) result = result.filter(o => o.status === this.selectedStatus);
     this.filteredOrders = result;
   }
 
@@ -101,4 +101,11 @@ export class Pedidos implements OnInit {
   toggleMenu(id: number): void {
     this.openMenuId = this.openMenuId === id ? null : id;
   }
+
+  getAvatarColor(name: string): string {
+    const colors = ['#dcfce7', '#dbeafe', '#fef9c3', '#f3e8ff', '#ffedd5', '#fce7f3'];
+    const index = (name?.charCodeAt(0) ?? 0) % colors.length;
+    return colors[index];
+  }
+
 }

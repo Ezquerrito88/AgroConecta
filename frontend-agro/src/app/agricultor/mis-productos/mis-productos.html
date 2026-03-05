@@ -66,7 +66,7 @@
     <!-- Filtros -->
     <div class="filters-bar">
       <div class="filters-left">
-        <button class="btn-primary">
+        <button class="btn-primary" [routerLink]="['/agricultor/mis-productos/nuevo']">
           <span class="material-symbols-rounded">add</span> Nuevo Producto
         </button>
         <button class="btn-outline">
@@ -88,41 +88,65 @@
 
     <!-- Grid de productos -->
     <div class="products-grid" *ngIf="!loading && productos.length > 0">
-      <div class="product-card-full" *ngFor="let p of productos">
+      <div class="product-card-full"
+        [routerLink]="['/agricultor/mis-productos/editar', p.id]"
+        *ngFor="let p of productos">
+
+        <!-- Imagen -->
         <div class="product-img-wrapper">
           <img *ngIf="p.image" [src]="p.image" [alt]="p.name" class="product-img-full" />
           <div *ngIf="!p.image" class="product-img-placeholder">
-            <span class="material-symbols-rounded">image</span>
+            <div class="placeholder-inner">
+              <span class="material-symbols-rounded placeholder-icon">eco</span>
+            </div>
           </div>
         </div>
+
         <div class="product-body">
           <h3 class="product-name">{{ p.name }}</h3>
+
           <div class="product-tags">
             <span class="tag">{{ p.category }}</span>
-            <span class="product-rating">
-              <span class="material-symbols-rounded star">star</span> {{ p.rating }}
+            <span class="moderation-badge" [ngClass]="{
+              'mod-approved': p.moderation_status === 'approved',
+              'mod-pending':  p.moderation_status === 'pending',
+              'mod-rejected': p.moderation_status === 'rejected'
+            }">
+              <span class="mod-dot"></span>
+              {{ p.moderation_status }}
             </span>
           </div>
+
           <div class="product-price-row">
             <span class="product-price-big">{{ p.price | currency:'EUR':'symbol':'1.2-2' }}</span>
             <span class="product-price-unit">/{{ p.unit || 'ud' }}</span>
-            <span class="product-sold">
-              <span class="material-symbols-rounded">inventory_2</span> {{ p.sold }} vendidos
+            <span class="product-sold" [class.no-sales]="!p.sold">
+              <span class="material-symbols-rounded">inventory_2</span>
+              {{ p.sold ? (p.sold + ' vendidos') : 'Sin ventas aún' }}
             </span>
           </div>
+
           <div class="product-stock-row">
-            <span class="stock-label">Stock: {{ p.stock }}</span>
-            <span class="stock-pct">{{ p.stockPct }}%</span>
+            <span>Stock: {{ p.stock }}</span>
+            <span>{{ p.stockPct }}%</span>
           </div>
           <div class="stock-bar">
-            <div class="stock-bar-fill" [style.width.%]="p.stockPct" [ngClass]="stockBarClass(p.stockPct)"></div>
+            <div class="stock-bar-fill"
+              [style.width.%]="p.stockPct"
+              [ngClass]="stockBarClass(p.stockPct)">
+            </div>
           </div>
+
           <div class="product-actions">
-            <button class="btn-outline btn-sm">
-              <span class="material-symbols-rounded">visibility</span> Ver
+            <button class="btn-ver" (click)="$event.stopPropagation()"
+              [routerLink]="['/producto', p.id]">
+              <span class="material-symbols-rounded">storefront</span>
+              Ver en tienda
             </button>
-            <button class="btn-primary btn-sm" [routerLink]="['/agricultor/mis-productos/editar', p.id]">
-              <span class="material-symbols-rounded">edit</span> Editar Producto
+            <button class="btn-editar" (click)="$event.stopPropagation()"
+              [routerLink]="['/agricultor/mis-productos/editar', p.id]">
+              <span class="material-symbols-rounded">edit</span>
+              Editar
             </button>
           </div>
         </div>
@@ -131,7 +155,11 @@
 
     <!-- Empty state -->
     <div *ngIf="!loading && productos.length === 0" class="empty-state">
-      No tienes productos aún.
+      <span class="material-symbols-rounded empty-icon">eco</span>
+      <p>No tienes productos aún.</p>
+      <button class="btn-primary" [routerLink]="['/agricultor/mis-productos/nuevo']">
+        <span class="material-symbols-rounded">add</span> Crear primer producto
+      </button>
     </div>
 
     <!-- Paginación -->

@@ -98,9 +98,11 @@
     <div class="tabs-bar">
       <button class="tab-btn" [class.active]="activeTab === 'all'" (click)="setTab('all')">Todos</button>
       <button class="tab-btn" [class.active]="activeTab === 'pending'" (click)="setTab('pending')">Pendientes</button>
-      <button class="tab-btn" [class.active]="activeTab === 'processing'" (click)="setTab('processing')">Procesando</button>
+      <button class="tab-btn" [class.active]="activeTab === 'processing'"
+        (click)="setTab('processing')">Procesando</button>
       <button class="tab-btn" [class.active]="activeTab === 'shipped'" (click)="setTab('shipped')">Enviados</button>
-      <button class="tab-btn" [class.active]="activeTab === 'delivered'" (click)="setTab('delivered')">Entregados</button>
+      <button class="tab-btn" [class.active]="activeTab === 'delivered'"
+        (click)="setTab('delivered')">Entregados</button>
     </div>
 
     <!-- Tabla -->
@@ -130,10 +132,21 @@
           <tr *ngFor="let order of filteredOrders">
             <td>
               <div class="client-cell">
-                <img src="assets/images/default-avatar.png" [alt]="order.buyer.name" class="client-avatar" />
+                <ng-container *ngIf="order.buyer.profile_photo_url; else initialAvatar">
+                  <img class="client-avatar" [src]="order.buyer.profile_photo_url" [alt]="order.buyer.name" />
+                </ng-container>
+
+                <ng-template #initialAvatar>
+                  <div class="client-avatar-initial" [style.background]="getAvatarColor(order.buyer.name)">
+                    {{ order.buyer.name?.charAt(0)?.toUpperCase() }}
+                  </div>
+                </ng-template>
+
                 <span>{{ order.buyer.name }}</span>
               </div>
             </td>
+
+
             <td>ORD-{{ order.id }}</td>
             <td>{{ order.created_at | smartDate }}</td>
             <td><strong>{{ order.total | currency:'EUR':'symbol':'1.2-2' }}</strong></td>

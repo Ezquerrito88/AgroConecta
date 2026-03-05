@@ -20,7 +20,7 @@ export interface Order {
   total: number;
   shipping_address: string;
   created_at: string;
-  buyer: { id: number; name: string; email: string; };
+  buyer: { id: number; name: string; email: string; profile_photo_url?: string; };
   items: OrderItem[];
 }
 
