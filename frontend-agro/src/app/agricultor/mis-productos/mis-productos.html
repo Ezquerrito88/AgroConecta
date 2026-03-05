@@ -1,1 +1,155 @@
-<p>mis-productos works!</p>
+<div class="dashboard-layout">
+  <app-sidebar></app-sidebar>
+
+  <main class="main-content">
+
+    <!-- Topbar -->
+    <div class="topbar">
+      <h1 class="page-title">Mis Productos</h1>
+      <div class="topbar-right">
+        <div class="search-box">
+          <span class="material-symbols-rounded">search</span>
+          <input type="text" placeholder="Buscar..." />
+        </div>
+        <button class="icon-btn">
+          <span class="material-symbols-rounded">notifications</span>
+        </button>
+        <button class="icon-btn">
+          <span class="material-symbols-rounded">help</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- KPIs -->
+    <div class="kpi-grid" style="margin: 24px 24px 16px;">
+      <div class="kpi-card">
+        <div class="kpi-header">
+          <div class="kpi-icon green">
+            <span class="material-symbols-rounded">inventory_2</span>
+          </div>
+        </div>
+        <span class="kpi-value">{{ totalProductos }}</span>
+        <span class="kpi-label">Productos totales</span>
+        <span class="kpi-sublabel green">{{ disponibles }} disponibles, {{ atencion }} requieren atención</span>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-header">
+          <div class="kpi-icon red">
+            <span class="material-symbols-rounded">warning</span>
+          </div>
+        </div>
+        <span class="kpi-value">{{ agotados }}</span>
+        <span class="kpi-label">Producto(s) agotados</span>
+        <span class="kpi-sublabel red">Requieren reabastecimiento inmediato</span>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-header">
+          <div class="kpi-icon blue">
+            <span class="material-symbols-rounded">schedule</span>
+          </div>
+        </div>
+        <span class="kpi-value">{{ pocoStock }}</span>
+        <span class="kpi-label">Producto con poco stock</span>
+        <span class="kpi-sublabel blue">Considerar reabastecimiento</span>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-header">
+          <div class="kpi-icon purple">
+            <span class="material-symbols-rounded">bar_chart</span>
+          </div>
+        </div>
+        <span class="kpi-value">{{ unidadesVendidas }}</span>
+        <span class="kpi-label">Unidades vendidas este mes</span>
+      </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="filters-bar">
+      <div class="filters-left">
+        <button class="btn-primary">
+          <span class="material-symbols-rounded">add</span> Nuevo Producto
+        </button>
+        <button class="btn-outline">
+          <span class="material-symbols-rounded">filter_list</span> Filtros
+        </button>
+      </div>
+      <div class="filters-right">
+        <select class="filter-select" [(ngModel)]="sortOrder" (change)="onSortChange()">
+          <option value="recent">Más Recientes</option>
+          <option value="oldest">Más Antiguos</option>
+          <option value="price_high">Mayor Precio</option>
+          <option value="price_low">Menor Precio</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Loading -->
+    <div *ngIf="loading" class="empty-state">Cargando productos...</div>
+
+    <!-- Grid de productos -->
+    <div class="products-grid" *ngIf="!loading && productos.length > 0">
+      <div class="product-card-full" *ngFor="let p of productos">
+        <div class="product-img-wrapper">
+          <img *ngIf="p.image" [src]="p.image" [alt]="p.name" class="product-img-full" />
+          <div *ngIf="!p.image" class="product-img-placeholder">
+            <span class="material-symbols-rounded">image</span>
+          </div>
+        </div>
+        <div class="product-body">
+          <h3 class="product-name">{{ p.name }}</h3>
+          <div class="product-tags">
+            <span class="tag">{{ p.category }}</span>
+            <span class="product-rating">
+              <span class="material-symbols-rounded star">star</span> {{ p.rating }}
+            </span>
+          </div>
+          <div class="product-price-row">
+            <span class="product-price-big">{{ p.price | currency:'EUR':'symbol':'1.2-2' }}</span>
+            <span class="product-price-unit">/{{ p.unit || 'ud' }}</span>
+            <span class="product-sold">
+              <span class="material-symbols-rounded">inventory_2</span> {{ p.sold }} vendidos
+            </span>
+          </div>
+          <div class="product-stock-row">
+            <span class="stock-label">Stock: {{ p.stock }}</span>
+            <span class="stock-pct">{{ p.stockPct }}%</span>
+          </div>
+          <div class="stock-bar">
+            <div class="stock-bar-fill" [style.width.%]="p.stockPct" [ngClass]="stockBarClass(p.stockPct)"></div>
+          </div>
+          <div class="product-actions">
+            <button class="btn-outline btn-sm">
+              <span class="material-symbols-rounded">visibility</span> Ver
+            </button>
+            <button class="btn-primary btn-sm">
+              <span class="material-symbols-rounded">edit</span> Editar Producto
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Empty state -->
+    <div *ngIf="!loading && productos.length === 0" class="empty-state">
+      No tienes productos aún.
+    </div>
+
+    <!-- Paginación -->
+    <div class="pagination" *ngIf="lastPage > 1">
+      <button class="page-btn" (click)="goToPage(currentPage - 1)" [disabled]="currentPage === 1">
+        <span class="material-symbols-rounded">chevron_left</span>
+      </button>
+      <button
+        class="page-btn"
+        *ngFor="let p of [].constructor(lastPage); let i = index"
+        [class.active]="currentPage === i + 1"
+        (click)="goToPage(i + 1)">
+        {{ i + 1 }}
+      </button>
+      <button class="page-btn" (click)="goToPage(currentPage + 1)" [disabled]="currentPage === lastPage">
+        <span class="material-symbols-rounded">chevron_right</span>
+      </button>
+    </div>
+
+  </main>
+</div>

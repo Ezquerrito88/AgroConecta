@@ -38,9 +38,12 @@ export class ProductoService {
     return this.http.get<Producto[]>(`${environment.apiUrl}/favorites`);
   }
 
-  getMisProductos(): Observable<Producto[]> {
-    return this.http.get<Producto[]>(`${this.apiUrl}/mis-productos`);
+  getMisProductos(page: number = 1, perPage: number = 12): Observable<any> {
+    return this.http.get<any>(`${environment.apiUrl}/farmer/products`, {
+      params: { page, per_page: perPage }
+    });
   }
+
 
   deleteProducto(id: number): Observable<any> {
     return this.http.delete(`${this.apiUrl}/${id}`);

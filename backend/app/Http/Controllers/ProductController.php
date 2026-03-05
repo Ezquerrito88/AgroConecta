@@ -236,4 +236,53 @@ class ProductController extends Controller
 
         return response()->json(['message' => 'Producto eliminado correctamente']);
     }
+
+    // Productos del agricultor autenticado
+    public function misProductos(Request $request)
+    {
+        $farmer = $request->user()->farmer;
+
+        if (!$farmer) {
+            return response()->json(['message' => 'No eres agricultor'], 403);
+        }
+
+        $perPage = $request->query('per_page', 12);
+
+        // KPIs globales (todos los productos, sin paginar)
+        $todos = Product::where('farmer_id', $farmer->id)->get();
+        $kpis = [
+            'total'     => $todos->count(),
+            'agotados'  => $todos->where('stock_quantity', 0)->count(),
+            'pocoStock' => $todos->where('stock_quantity', '>', 0)->filter(fn($p) => $p->stock_quantity <= 10)->count(),
+            'disponibles' => $todos->where('stock_quantity', '>', 0)->count(),
+        ];
+
+        // Productos paginados
+        $productos = Product::with(['category', 'images'])
+            ->where('farmer_id', $farmer->id)
+            ->paginate($perPage)
+            ->through(function ($product) {
+                return [
+                    'id'          => $product->id,
+                    'name'        => $product->name,
+                    'description' => $product->description,
+                    'price'       => $product->price,
+                    'unit'        => $product->unit,
+                    'stock'       => $product->stock_quantity,
+                    'max_stock'   => max($product->stock_quantity, 100),
+                    'sold'        => 0,
+                    'rating'      => 4.9,
+                    'category'    => $product->category?->name,
+                    'image'       => $product->images->first()
+                        ? asset('storage/' . $product->images->first()->image_path)
+                        : null,
+                    'created_at'  => $product->created_at,
+                ];
+            });
+
+        return response()->json([
+            'kpis'      => $kpis,
+            'productos' => $productos,
+        ]);
+    }
 }

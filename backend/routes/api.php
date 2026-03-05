@@ -45,7 +45,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/user', function (Request $request) { return $request->user(); });
 
-    // Productos
+    // Productos del agricultor (prefijo /farmer para evitar conflicto con {id})
+    Route::get('/farmer/products', [ProductController::class, 'misProductos']);
     Route::post('/products', [ProductController::class, 'store']);
     Route::put('/products/{id}', [ProductController::class, 'update']);
     Route::delete('/products/{id}', [ProductController::class, 'destroy']);
