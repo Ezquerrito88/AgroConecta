@@ -138,9 +138,10 @@
 
                 <ng-template #initialAvatar>
                   <div class="client-avatar-initial" [style.background]="getAvatarColor(order.buyer.name)">
-                    {{ order.buyer.name?.charAt(0)?.toUpperCase() }}
+                    {{ order.buyer.name.charAt(0).toUpperCase() }}
                   </div>
                 </ng-template>
+
 
                 <span>{{ order.buyer.name }}</span>
               </div>
