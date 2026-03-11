@@ -10,6 +10,7 @@ use App\Http\Controllers\ProductImageController;
 use App\Http\Controllers\FavoriteController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ConversationController;
+use App\Http\Controllers\Api\FarmerProfileController;
 
 /*
 |--------------------------------------------------------------------------
@@ -41,6 +42,12 @@ Route::middleware('auth:sanctum')->group(function () {
     // Auth
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/user', function (Request $request) { return $request->user(); });
+
+    // Agricultor - Perfil
+    Route::prefix('farmer')->group(function () {
+        Route::get('/profile', [FarmerProfileController::class, 'show']);
+        Route::put('/profile', [FarmerProfileController::class, 'update']);
+    });
 
     // Productos del agricultor
     Route::get('/farmer/products', [ProductController::class, 'misProductos']);
