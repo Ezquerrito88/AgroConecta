@@ -18,18 +18,26 @@ export class MisProductos implements OnInit {
   productos: any[] = [];
   loading = true;
 
+  // Skeleton loader
+  skeletonItems = Array(6);
+
   // KPIs globales
   totalProductos = 0;
-  disponibles = 0;
-  atencion = 0;
-  agotados = 0;
-  pocoStock = 0;
+  disponibles    = 0;
+  atencion       = 0;
+  agotados       = 0;
+  pocoStock      = 0;
   unidadesVendidas = 0;
 
   // Paginación
   currentPage = 1;
-  lastPage = 1;
-  perPage = 12;
+  lastPage    = 1;
+  perPage     = 12;
+
+  // Paginación — array reactivo derivado de lastPage
+  get pageItems(): number[] {
+    return Array.from({ length: this.lastPage }, (_, i) => i + 1);
+  }
 
   // Filtros
   sortOrder = 'recent';
@@ -48,11 +56,11 @@ export class MisProductos implements OnInit {
     this.productService.getMisProductos(this.currentPage, this.perPage).subscribe({
       next: (res: any) => {
         // KPIs globales del backend
-        this.totalProductos = res.kpis.total;
-        this.agotados       = res.kpis.agotados;
-        this.pocoStock      = res.kpis.pocoStock;
-        this.disponibles    = res.kpis.disponibles;
-        this.atencion       = this.agotados + this.pocoStock;
+        this.totalProductos  = res.kpis.total;
+        this.agotados        = res.kpis.agotados;
+        this.pocoStock       = res.kpis.pocoStock;
+        this.disponibles     = res.kpis.disponibles;
+        this.atencion        = this.agotados + this.pocoStock;
 
         // Productos paginados
         this.productos = res.productos.data.map((p: any) => ({
@@ -60,7 +68,7 @@ export class MisProductos implements OnInit {
           stockPct: p.stock > 0 ? Math.min(Math.round((p.stock / p.max_stock) * 100), 100) : 0
         }));
         this.lastPage = res.productos.last_page;
-        this.loading = false;
+        this.loading  = false;
         this.cdr.detectChanges();
       },
       error: () => {
