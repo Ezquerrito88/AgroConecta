@@ -1,13 +1,16 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule, CurrencyPipe } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CarritoService } from '../../core/services/carrito';
+import { CreateOrderPayload, OrderService } from '../../core/services/order';
+import { forkJoin } from 'rxjs';
 
 export interface CartItem {
   id: number;
   name: string;
   farmer: string;
+  farmerId: number;
   price: number;
   unit: string;
   quantity: number;
@@ -17,7 +20,7 @@ export interface CartItem {
 @Component({
   selector: 'app-cesta',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, CurrencyPipe, NavbarComponent, FooterComponent],
+  imports: [CommonModule, RouterModule, FormsModule, CurrencyPipe],
   templateUrl: './cesta.html',
   styleUrls: ['./cesta.css']
 })
@@ -38,11 +41,16 @@ export class Cesta implements OnInit {
 
   constructor(
     private carritoService: CarritoService,
+    private orderService: OrderService,
+    private router: Router,
     private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
     this.items = this.carritoService.getItems();
+    this.carritoService.items$.subscribe(items => {
+      this.items = items;
+    });
   }
 
   // ── Cantidades ──────────────────────────────────────────
@@ -107,8 +115,52 @@ export class Cesta implements OnInit {
   // ── Checkout ────────────────────────────────────────────
   checkout(): void {
     if (this.items.length === 0) return;
+
+    const token = localStorage.getItem('token');
+    if (!token) {
+      this.router.navigate(['/login']);
+      return;
+    }
+
+    const ordersByFarmer = new Map<number, CreateOrderPayload>();
+
+    for (const item of this.items) {
+      if (!item.farmerId) {
+        console.error('Producto sin farmerId en el carrito', item);
+        return;
+      }
+
+      const existing = ordersByFarmer.get(item.farmerId) ?? {
+        farmer_id: item.farmerId,
+        items: []
+      };
+
+      existing.items.push({
+        product_id: item.id,
+        quantity: item.quantity,
+      });
+
+      ordersByFarmer.set(item.farmerId, existing);
+    }
+
+    const requests = Array.from(ordersByFarmer.values()).map(payload =>
+      this.orderService.createOrder(payload)
+    );
+
     this.loading = true;
-    // navegar a /checkout — aquí conectarás con el backend
-    setTimeout(() => { this.loading = false; }, 1500);
+    forkJoin(requests).subscribe({
+      next: () => {
+        this.carritoService.clear();
+        this.loading = false;
+        this.cdr.detectChanges();
+        alert('Pedido realizado correctamente.');
+      },
+      error: (error) => {
+        this.loading = false;
+        this.cdr.detectChanges();
+        const message = error?.error?.message || 'No se pudo tramitar el pedido.';
+        alert(message);
+      }
+    });
   }
 }

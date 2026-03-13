@@ -10,6 +10,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { ProductoService } from '../../core/services/producto.service';
 import { Producto } from '../../core/models/producto';
 import { environment } from '../../../environments/environment';
+import { CartService } from '../../core/services/cart.service';
 
 @Component({
   selector: 'app-catalogo',
@@ -44,6 +45,7 @@ export class Catalogo implements OnInit {
 
   constructor(
     private productoService: ProductoService,
+    private cartService: CartService,
     private cdr: ChangeDetectorRef,
     private route: ActivatedRoute,
     private router: Router
@@ -157,7 +159,23 @@ export class Catalogo implements OnInit {
   }
 
   agregarAlCarrito(prod: Producto): void {
-    console.log('🛒 Añadir al carrito:', prod.name);
-    // TODO: conectar con CartService
+    this.cartService.addToCart({
+      id: prod.id,
+      name: prod.name,
+      farmer: prod.farmer?.full_name || prod.farmer?.name || 'Agricultor local',
+      farmerId: this.getFarmerUserId(prod) ?? 0,
+      price: Number(prod.price),
+      unit: prod.unit,
+      quantity: 1,
+      image: this.getImagenUrl(prod)
+    });
+  }
+
+  private getFarmerUserId(prod: Producto): number | null {
+    const rawFarmerUserId = (prod as any)?.farmer?.user_id;
+    const rawFarmerId = (prod as any)?.farmer?.id;
+
+    const id = Number(rawFarmerUserId ?? rawFarmerId);
+    return Number.isFinite(id) && id > 0 ? id : null;
   }
 }

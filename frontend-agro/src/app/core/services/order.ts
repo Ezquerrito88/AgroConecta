@@ -24,6 +24,17 @@ export interface Order {
   items: OrderItem[];
 }
 
+export interface CreateOrderItemPayload {
+  product_id: number;
+  quantity: number;
+}
+
+export interface CreateOrderPayload {
+  items: CreateOrderItemPayload[];
+  farmer_id?: number;
+  shipping_address?: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class OrderService {
   private api = environment.apiUrl;
@@ -36,5 +47,13 @@ export class OrderService {
 
   updateOrderStatus(id: number, status: string): Observable<Order> {
     return this.http.put<Order>(`${this.api}/farmer/orders/${id}/status`, { status });
+  }
+
+  createOrder(payload: CreateOrderPayload): Observable<Order> {
+    return this.http.post<Order>(`${this.api}/orders`, payload);
+  }
+
+  getBuyerOrders(): Observable<Order[]> {
+    return this.http.get<Order[]>(`${this.api}/buyer/orders`);
   }
 }

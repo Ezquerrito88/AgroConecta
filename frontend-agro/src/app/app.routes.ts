@@ -6,6 +6,7 @@ import { Catalogo } from './components/catalogo/catalogo';
 import { Favoritos } from './components/favoritos/favoritos';
 import { DetalleProducto } from './components/detalle-producto/detalle-producto';
 import { LoginSuccess } from './components/login-success/login-success';
+import { Cesta } from './components/cesta/cesta';          // ← NUEVO
 import { authGuard } from './core/guards/auth-guard';
 import { farmerGuard } from './core/guards/farmer-guard';
 
@@ -19,6 +20,7 @@ export const routes: Routes = [
 
   // Solo usuarios logueados
   { path: 'productos/favoritos', component: Favoritos, canActivate: [authGuard] },
+  { path: 'cesta', component: Cesta, canActivate: [authGuard] },
 
   // Solo agricultores
   {

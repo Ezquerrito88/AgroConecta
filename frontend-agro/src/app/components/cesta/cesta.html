@@ -1,9 +1,9 @@
-<app-navbar></app-navbar>
-
 <!-- Hero breadcrumb -->
 <section class="cart-hero">
   <div class="cart-hero-inner">
-    <h1>Tu Cesta</h1>
+    <div class="cart-hero-text">
+      <h1>Tu Cesta</h1>
+    </div>
     <nav class="breadcrumb" aria-label="Ruta de navegación">
       <a routerLink="/">Inicio</a>
       <span class="separator" aria-hidden="true">›</span>
@@ -19,7 +19,9 @@
 
     @if (items.length === 0) {
       <div class="empty-cart">
-        <span class="material-symbols-rounded empty-icon">shopping_basket</span>
+        <div class="empty-cart-icon-wrap">
+          <span class="material-symbols-rounded empty-icon">shopping_basket</span>
+        </div>
         <h2>Tu cesta está vacía</h2>
         <p>Descubre productos frescos directamente del campo.</p>
         <a class="btn-primary" routerLink="/productos">
@@ -86,7 +88,10 @@
   <!-- ── Resumen del pedido ── -->
   @if (items.length > 0) {
     <aside class="cart-summary" aria-label="Resumen del pedido">
-      <h2 class="summary-title">Resumen del Pedido</h2>
+      <h2 class="summary-title">
+        <span class="material-symbols-rounded" aria-hidden="true">receipt_long</span>
+        Resumen del Pedido
+      </h2>
 
       <div class="summary-row">
         <span>Subtotal ({{ totalItems }} art.)</span>
@@ -95,7 +100,10 @@
 
       <div class="summary-row">
         <span>Envío</span>
-        <span class="shipping-tag">Por calcular</span>
+        <span class="shipping-tag">
+          <span class="material-symbols-rounded" aria-hidden="true">local_shipping</span>
+          Por calcular
+        </span>
       </div>
 
       @if (discountApplied) {
@@ -107,7 +115,10 @@
 
       <!-- Campo código descuento -->
       <div class="discount-section">
-        <label for="discountInput" class="discount-label">Código de descuento</label>
+        <label for="discountInput" class="discount-label">
+          <span class="material-symbols-rounded" aria-hidden="true">sell</span>
+          Código de descuento
+        </label>
         @if (!discountApplied) {
           <div class="discount-input-row">
             <input
@@ -122,7 +133,10 @@
             <button class="btn-apply" (click)="applyDiscount()">Aplicar</button>
           </div>
           @if (discountError) {
-            <p class="discount-error" role="alert">{{ discountError }}</p>
+            <p class="discount-error" role="alert">
+              <span class="material-symbols-rounded" aria-hidden="true">error</span>
+              {{ discountError }}
+            </p>
           }
         } @else {
           <div class="discount-applied">
@@ -138,7 +152,7 @@
       <div class="summary-divider"></div>
 
       <div class="summary-total-row">
-        <span>Total (IVA inc.)</span>
+        <span>Total <small>(IVA inc.)</small></span>
         <span class="total-amount">{{ total | currency:'EUR':'symbol':'1.2-2' }}</span>
       </div>
 
@@ -161,5 +175,3 @@
   }
 
 </main>
-
-<app-footer></app-footer>

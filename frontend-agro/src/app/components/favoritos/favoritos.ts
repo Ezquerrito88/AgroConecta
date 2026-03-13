@@ -7,6 +7,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSliderModule } from '@angular/material/slider';
 import { ProductoService } from '../../core/services/producto.service';
+import { CartService } from '../../core/services/cart.service';
 import { environment } from '../../../environments/environment';
 
 @Component({
@@ -34,6 +35,7 @@ export class Favoritos implements OnInit {
 
   constructor(
     private productoService: ProductoService,
+    private cartService: CartService,
     private router: Router,
     private cdr: ChangeDetectorRef
   ) {}
@@ -122,7 +124,15 @@ export class Favoritos implements OnInit {
   }
 
   agregarAlCarrito(prod: any): void {
-    console.log('🛒 Añadir al carrito:', prod.name);
-    // TODO: conectar con CartService
+    this.cartService.addToCart({
+      id: Number(prod.id),
+      name: prod.name,
+      farmer: prod?.farmer?.full_name || prod?.farmer?.name || 'Agricultor local',
+      farmerId: Number(prod?.farmer?.user_id ?? prod?.farmer?.id ?? 0),
+      price: Number(prod.price),
+      unit: prod.unit ?? 'ud',
+      quantity: 1,
+      image: this.getImagenUrl(prod)
+    });
   }
 }

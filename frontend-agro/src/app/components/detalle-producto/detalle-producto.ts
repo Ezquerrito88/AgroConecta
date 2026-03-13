@@ -4,6 +4,7 @@ import { ActivatedRoute, RouterModule } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { environment } from '../../../environments/environment';
+import { CartService } from '../../core/services/cart.service';
 
 @Component({
   selector: 'app-detalle-producto',
@@ -25,7 +26,8 @@ export class DetalleProducto implements OnInit, AfterViewInit {
   constructor(
     private route: ActivatedRoute,
     private http: HttpClient,
-    private cd: ChangeDetectorRef
+    private cd: ChangeDetectorRef,
+    private cartService: CartService
   ) {}
 
   ngOnInit(): void {
@@ -91,7 +93,25 @@ export class DetalleProducto implements OnInit, AfterViewInit {
 
   agregarAlCarrito(): void {
     if (!this.product) return;
-    console.log(`🛒 Añadiendo ${this.cantidad} de ${this.product.name}`);
-    alert(`Se han añadido ${this.cantidad} kgs de ${this.product.name} al carrito`);
+
+    const rawFarmerUserId = this.product?.farmer?.user_id;
+    const rawFarmerId = this.product?.farmer?.id;
+    const farmerId = Number(rawFarmerUserId ?? rawFarmerId);
+
+    if (!Number.isFinite(farmerId) || farmerId <= 0) {
+      console.error('No se pudo determinar el agricultor del producto', this.product);
+      return;
+    }
+
+    this.cartService.addToCart({
+      id: this.product.id,
+      name: this.product.name,
+      farmer: this.product?.farmer?.full_name || this.product?.farmer?.name || 'Agricultor local',
+      farmerId,
+      price: Number(this.product.price),
+      unit: this.product.unit,
+      quantity: this.cantidad,
+      image: this.getImagenUrl(this.product)
+    });
   }
 }

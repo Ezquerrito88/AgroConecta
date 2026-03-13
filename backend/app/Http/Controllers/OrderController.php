@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Order;
+use App\Models\Product;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class OrderController extends Controller
 {
@@ -43,31 +45,94 @@ class OrderController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'farmer_id'       => 'required|exists:users,id',
             'items'           => 'required|array|min:1',
             'items.*.product_id' => 'required|exists:products,id',
             'items.*.quantity'   => 'required|integer|min:1',
-            'items.*.price'      => 'required|numeric',
+            'farmer_id'       => 'nullable|exists:users,id',
             'shipping_address'=> 'nullable|string',
         ]);
 
-        $total = collect($request->items)->sum(fn($i) => $i['price'] * $i['quantity']);
+        $items = collect($request->items);
+        $productIds = $items->pluck('product_id')->unique()->values();
 
-        $order = Order::create([
-            'buyer_id'         => $request->user()->id,
-            'farmer_id'        => $request->farmer_id,
-            'total'            => $total,
-            'shipping_address' => $request->shipping_address,
-        ]);
+        $products = Product::with('farmer')
+            ->whereIn('id', $productIds)
+            ->get()
+            ->keyBy('id');
 
-        foreach ($request->items as $item) {
-            $order->items()->create([
-                'product_id' => $item['product_id'],
-                'quantity'   => $item['quantity'],
-                'price'      => $item['price'],
-                'subtotal'   => $item['price'] * $item['quantity'],
-            ]);
+        if ($products->count() !== $productIds->count()) {
+            return response()->json([
+                'message' => 'Uno o más productos no existen.'
+            ], 422);
         }
+
+        $farmerUserIds = $items->map(function ($item) use ($products) {
+            $product = $products->get($item['product_id']);
+            return $product?->farmer?->user_id;
+        })->filter()->unique()->values();
+
+        if ($farmerUserIds->count() !== 1) {
+            return response()->json([
+                'message' => 'Todos los productos del pedido deben pertenecer al mismo agricultor.'
+            ], 422);
+        }
+
+        $farmerUserId = (int) $farmerUserIds->first();
+
+        if ($request->filled('farmer_id') && (int) $request->farmer_id !== $farmerUserId) {
+            return response()->json([
+                'message' => 'El agricultor indicado no coincide con los productos del pedido.'
+            ], 422);
+        }
+
+        $lineItems = [];
+        $total = 0;
+
+        foreach ($items as $item) {
+            $product = $products->get($item['product_id']);
+
+            if (!$product || !$product->farmer) {
+                return response()->json([
+                    'message' => 'Producto inválido en el pedido.'
+                ], 422);
+            }
+
+            if ($product->stock_quantity < (int) $item['quantity']) {
+                return response()->json([
+                    'message' => "Stock insuficiente para {$product->name}."
+                ], 422);
+            }
+
+            $price = (float) $product->price;
+            $quantity = (int) $item['quantity'];
+            $subtotal = $price * $quantity;
+
+            $lineItems[] = [
+                'product_id' => $product->id,
+                'quantity' => $quantity,
+                'price' => $price,
+                'subtotal' => $subtotal,
+            ];
+
+            $total += $subtotal;
+        }
+
+        $order = DB::transaction(function () use ($request, $lineItems, $total, $farmerUserId, $products) {
+            $order = Order::create([
+                'buyer_id' => $request->user()->id,
+                'farmer_id' => $farmerUserId,
+                'total' => $total,
+                'shipping_address' => $request->shipping_address,
+            ]);
+
+            foreach ($lineItems as $item) {
+                $order->items()->create($item);
+                $product = $products->get($item['product_id']);
+                $product->decrement('stock_quantity', $item['quantity']);
+            }
+
+            return $order;
+        });
 
         return response()->json($order->load('items.product'), 201);
     }
