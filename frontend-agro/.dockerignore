@@ -18,8 +18,7 @@ package-lock.json
 .angular/
 dist/
 
-# Entorno
-src/environments/environment*.ts
+# Entorno (NO ignorar environments, se necesitan para el build)
 
 # Testing
 coverage/
