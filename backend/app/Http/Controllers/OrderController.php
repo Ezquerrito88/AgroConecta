@@ -50,6 +50,8 @@ class OrderController extends Controller
             'items.*.quantity'   => 'required|integer|min:1',
             'farmer_id'       => 'nullable|exists:users,id',
             'shipping_address'=> 'nullable|string',
+            'discount_code'   => 'nullable|string|max:40',
+            'discount_pct'    => 'nullable|numeric|min:0|max:100',
         ]);
 
         $items = collect($request->items);
@@ -117,12 +119,24 @@ class OrderController extends Controller
             $total += $subtotal;
         }
 
-        $order = DB::transaction(function () use ($request, $lineItems, $total, $farmerUserId, $products) {
+        $discountPct = (float) ($request->discount_pct ?? 0);
+        $discountPct = max(0, min(100, $discountPct));
+        $discountAmount = round($total * ($discountPct / 100), 2);
+        $finalTotal = max(0, round($total - $discountAmount, 2));
+
+        $order = DB::transaction(function () use ($request, $lineItems, $finalTotal, $farmerUserId, $products, $discountPct, $discountAmount) {
+            $shippingAddress = $request->shipping_address;
+
+            if ($discountPct > 0 && $request->filled('discount_code')) {
+                $discountNote = sprintf('Descuento aplicado: %s (%.0f%%, -%.2f EUR)', $request->discount_code, $discountPct, $discountAmount);
+                $shippingAddress = trim(($shippingAddress ? $shippingAddress . ' | ' : '') . $discountNote);
+            }
+
             $order = Order::create([
                 'buyer_id' => $request->user()->id,
                 'farmer_id' => $farmerUserId,
-                'total' => $total,
-                'shipping_address' => $request->shipping_address,
+                'total' => $finalTotal,
+                'shipping_address' => $shippingAddress,
             ]);
 
             foreach ($lineItems as $item) {

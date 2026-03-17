@@ -13,6 +13,7 @@ import { environment } from '../../../environments/environment';
   styleUrls: ['./login.css'],
 })
 export class Login implements OnInit {
+  private readonly PENDING_CHECKOUT_KEY = 'pending_checkout';
 
   private apiUrl = environment.apiUrl;
 
@@ -85,10 +86,19 @@ export class Login implements OnInit {
       localStorage.setItem('user', JSON.stringify(user));
     }
 
-    if (user && (user.role === 'farmer' || user.role === 'agricultor')) {
-      this.router.navigate(['/']);
-    } else {
-      this.router.navigate(['/']);
+    const redirectTo = this.route.snapshot.queryParamMap.get('redirectTo');
+    const hasPendingCheckout = sessionStorage.getItem(this.PENDING_CHECKOUT_KEY) === '1';
+
+    if (hasPendingCheckout) {
+      this.router.navigate(['/checkout']);
+      return;
     }
+
+    if (redirectTo) {
+      this.router.navigateByUrl(redirectTo);
+      return;
+    }
+
+    this.router.navigate(['/']);
   }
 }

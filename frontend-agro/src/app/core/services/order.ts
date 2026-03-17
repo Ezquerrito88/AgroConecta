@@ -33,6 +33,8 @@ export interface CreateOrderPayload {
   items: CreateOrderItemPayload[];
   farmer_id?: number;
   shipping_address?: string;
+  discount_code?: string;
+  discount_pct?: number;
 }
 
 @Injectable({ providedIn: 'root' })

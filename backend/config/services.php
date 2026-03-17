@@ -41,4 +41,17 @@ return [
         'redirect' => env('GOOGLE_REDIRECT_URL'),
     ],
 
+    'stripe' => [
+        'key' => env('STRIPE_KEY'),
+        'secret' => env('STRIPE_SECRET'),
+    ],
+
+    'paypal' => [
+        'mode' => env('PAYPAL_MODE', 'sandbox'),
+        'sandbox_client_id' => env('PAYPAL_SANDBOX_CLIENT_ID'),
+        'sandbox_secret' => env('PAYPAL_SANDBOX_SECRET'),
+        'live_client_id' => env('PAYPAL_LIVE_CLIENT_ID'),
+        'live_secret' => env('PAYPAL_LIVE_SECRET'),
+    ],
+
 ];

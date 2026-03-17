@@ -1,10 +1,8 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule, CurrencyPipe } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CarritoService } from '../../core/services/carrito';
-import { CreateOrderPayload, OrderService } from '../../core/services/order';
-import { forkJoin } from 'rxjs';
 
 export interface CartItem {
   id: number;
@@ -25,25 +23,25 @@ export interface CartItem {
   styleUrls: ['./cesta.css']
 })
 export class Cesta implements OnInit {
+  private readonly PENDING_CHECKOUT_KEY = 'pending_checkout';
+  private readonly CART_DISCOUNT_KEY = 'cart_discount';
 
   items: CartItem[] = [];
-  discountCode   = '';
+  discountCode = '';
   discountApplied = false;
-  discountPct    = 0;
-  discountError  = '';
-  loading        = false;
+  discountPct = 0;
+  discountError = '';
+  readonly freeShippingThreshold = 20;
 
   private readonly VALID_CODES: Record<string, number> = {
-    'AGRO10': 10,
-    'AGRO20': 20,
-    'CAMPO5': 5
+    AGRO10: 10,
+    AGRO20: 20,
+    CAMPO5: 5
   };
 
   constructor(
     private carritoService: CarritoService,
-    private orderService: OrderService,
-    private router: Router,
-    private cdr: ChangeDetectorRef
+    private router: Router
   ) {}
 
   ngOnInit(): void {
@@ -51,9 +49,10 @@ export class Cesta implements OnInit {
     this.carritoService.items$.subscribe(items => {
       this.items = items;
     });
+
+    this.restoreSavedDiscount();
   }
 
-  // ── Cantidades ──────────────────────────────────────────
   increase(item: CartItem): void {
     item.quantity++;
     this.carritoService.update(item);
@@ -70,11 +69,16 @@ export class Cesta implements OnInit {
     this.carritoService.remove(item.id);
   }
 
+  clearCart(): void {
+    if (this.items.length === 0) return;
+    this.carritoService.clear();
+    this.removeDiscount();
+  }
+
   trackById(_: number, item: CartItem): number {
     return item.id;
   }
 
-  // ── Totales ─────────────────────────────────────────────
   get subtotal(): number {
     return this.items.reduce((acc, i) => acc + i.price * i.quantity, 0);
   }
@@ -83,84 +87,94 @@ export class Cesta implements OnInit {
     return this.discountApplied ? +(this.subtotal * this.discountPct / 100).toFixed(2) : 0;
   }
 
+  get shipping(): number {
+    if (this.items.length === 0) return 0;
+    return this.subtotal >= this.freeShippingThreshold ? 0 : 3.99;
+  }
+
+  get missingForFreeShipping(): number {
+    return Math.max(0, +(this.freeShippingThreshold - this.subtotal).toFixed(2));
+  }
+
   get total(): number {
-    return +(this.subtotal - this.discount).toFixed(2);
+    return +(this.subtotal - this.discount + this.shipping).toFixed(2);
   }
 
   get totalItems(): number {
     return this.items.reduce((acc, i) => acc + i.quantity, 0);
   }
 
-  // ── Descuento ───────────────────────────────────────────
   applyDiscount(): void {
     const code = this.discountCode.trim().toUpperCase();
+
     if (this.VALID_CODES[code]) {
-      this.discountPct     = this.VALID_CODES[code];
+      this.discountCode = code;
+      this.discountPct = this.VALID_CODES[code];
       this.discountApplied = true;
-      this.discountError   = '';
-    } else {
-      this.discountApplied = false;
-      this.discountPct     = 0;
-      this.discountError   = 'Código no válido';
+      this.discountError = '';
+      this.persistDiscount();
+      return;
     }
+
+    this.discountApplied = false;
+    this.discountPct = 0;
+    this.discountError = 'Código no válido';
+    this.clearPersistedDiscount();
   }
 
   removeDiscount(): void {
-    this.discountCode    = '';
+    this.discountCode = '';
     this.discountApplied = false;
-    this.discountPct     = 0;
-    this.discountError   = '';
+    this.discountPct = 0;
+    this.discountError = '';
+    this.clearPersistedDiscount();
   }
 
-  // ── Checkout ────────────────────────────────────────────
   checkout(): void {
     if (this.items.length === 0) return;
 
     const token = localStorage.getItem('token');
     if (!token) {
-      this.router.navigate(['/login']);
+      sessionStorage.setItem(this.PENDING_CHECKOUT_KEY, '1');
+      this.router.navigate(['/login'], { queryParams: { redirectTo: '/checkout' } });
       return;
     }
 
-    const ordersByFarmer = new Map<number, CreateOrderPayload>();
+    sessionStorage.removeItem(this.PENDING_CHECKOUT_KEY);
+    this.router.navigate(['/checkout']);
+  }
 
-    for (const item of this.items) {
-      if (!item.farmerId) {
-        console.error('Producto sin farmerId en el carrito', item);
+  private persistDiscount(): void {
+    localStorage.setItem(this.CART_DISCOUNT_KEY, JSON.stringify({
+      code: this.discountCode,
+      pct: this.discountPct
+    }));
+  }
+
+  private restoreSavedDiscount(): void {
+    const raw = localStorage.getItem(this.CART_DISCOUNT_KEY);
+    if (!raw) return;
+
+    try {
+      const saved = JSON.parse(raw);
+      const code = String(saved?.code ?? '').toUpperCase();
+      const pct = Number(saved?.pct ?? 0);
+
+      if (!code || !this.VALID_CODES[code] || this.VALID_CODES[code] !== pct) {
+        this.clearPersistedDiscount();
         return;
       }
 
-      const existing = ordersByFarmer.get(item.farmerId) ?? {
-        farmer_id: item.farmerId,
-        items: []
-      };
-
-      existing.items.push({
-        product_id: item.id,
-        quantity: item.quantity,
-      });
-
-      ordersByFarmer.set(item.farmerId, existing);
+      this.discountCode = code;
+      this.discountPct = pct;
+      this.discountApplied = true;
+      this.discountError = '';
+    } catch {
+      this.clearPersistedDiscount();
     }
+  }
 
-    const requests = Array.from(ordersByFarmer.values()).map(payload =>
-      this.orderService.createOrder(payload)
-    );
-
-    this.loading = true;
-    forkJoin(requests).subscribe({
-      next: () => {
-        this.carritoService.clear();
-        this.loading = false;
-        this.cdr.detectChanges();
-        alert('Pedido realizado correctamente.');
-      },
-      error: (error) => {
-        this.loading = false;
-        this.cdr.detectChanges();
-        const message = error?.error?.message || 'No se pudo tramitar el pedido.';
-        alert(message);
-      }
-    });
+  private clearPersistedDiscount(): void {
+    localStorage.removeItem(this.CART_DISCOUNT_KEY);
   }
 }

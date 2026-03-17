@@ -13,6 +13,7 @@ import { environment } from '../../../environments/environment';
   styleUrls: ['./register.css']
 })
 export class Register implements OnInit {
+  private readonly PENDING_CHECKOUT_KEY = 'pending_checkout';
 
   userData = {
     name: '',
@@ -45,6 +46,12 @@ export class Register implements OnInit {
       next: (res: any) => {
         localStorage.setItem('token', res.token);
         localStorage.setItem('user', JSON.stringify(res.user));
+
+        const hasPendingCheckout = sessionStorage.getItem(this.PENDING_CHECKOUT_KEY) === '1';
+        if (hasPendingCheckout) {
+          this.router.navigate(['/checkout']);
+          return;
+        }
         
         if (res.user.role === 'farmer') {
           this.router.navigate(['/agricultor/dashboard']);

@@ -9,6 +9,7 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProductImageController;
 use App\Http\Controllers\FavoriteController;
 use App\Http\Controllers\OrderController;
+use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ConversationController;
 use App\Http\Controllers\Api\FarmerProfileController;
 
@@ -75,6 +76,11 @@ Route::middleware('auth:sanctum')->group(function () {
     // Pedidos - Comprador
     Route::post('/orders', [OrderController::class, 'store']);
     Route::get('/buyer/orders', [OrderController::class, 'buyerOrders']);
+
+    // Pagos
+    Route::post('/payments/stripe/intent', [PaymentController::class, 'createStripeIntent']);
+    Route::post('/payments/paypal/orders', [PaymentController::class, 'createPaypalOrder']);
+    Route::post('/payments/paypal/orders/{paypalOrderId}/capture', [PaymentController::class, 'capturePaypalOrder']);
 
     // Mensajería
     Route::get('/conversations', [ConversationController::class, 'index']);
