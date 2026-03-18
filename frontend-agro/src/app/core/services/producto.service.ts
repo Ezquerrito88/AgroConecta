@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { environment } from '../../environments/environment';
+import { environment } from '../../../environments/environment';
 import { Producto } from '../models/producto';
 
 @Injectable({ providedIn: 'root' })
@@ -37,4 +37,23 @@ export class ProductoService {
   getFavoritos(): Observable<Producto[]> {
     return this.http.get<Producto[]>(`${environment.apiUrl}/favorites`);
   }
+
+  getMisProductos(page: number = 1, perPage: number = 12): Observable<any> {
+    return this.http.get<any>(`${environment.apiUrl}/farmer/products`, {
+      params: { page, per_page: perPage }
+    });
+  }
+
+  deleteProducto(id: number): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/${id}`);
+  }
+
+  updateProducto(id: number, formData: FormData): Observable<any> {
+    return this.http.post(`${this.apiUrl}/${id}`, formData);
+  }
+
+  deleteImage(imageId: number): Observable<any> {
+    return this.http.delete(`${environment.apiUrl}/product-images/${imageId}`);
+  }
+
 }

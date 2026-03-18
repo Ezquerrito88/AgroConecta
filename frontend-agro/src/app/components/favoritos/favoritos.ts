@@ -6,7 +6,9 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSliderModule } from '@angular/material/slider';
-import { ProductoService } from '../../services/producto.service';
+import { ProductoService } from '../../core/services/producto.service';
+import { CartService } from '../../core/services/cart.service';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-favoritos',
@@ -21,7 +23,7 @@ import { ProductoService } from '../../services/producto.service';
 })
 export class Favoritos implements OnInit {
 
-  private readonly API_URL = 'https://agroconecta-backend-v2-bxbxfudaatbmgxdg.spaincentral-01.azurewebsites.net';
+  private readonly API_URL = environment.apiUrl;
 
   productos: any[] = [];           // todos los favoritos de la BD
   productosFiltrados: any[] = [];  // los que se muestran tras filtrar
@@ -33,6 +35,7 @@ export class Favoritos implements OnInit {
 
   constructor(
     private productoService: ProductoService,
+    private cartService: CartService,
     private router: Router,
     private cdr: ChangeDetectorRef
   ) {}
@@ -121,7 +124,15 @@ export class Favoritos implements OnInit {
   }
 
   agregarAlCarrito(prod: any): void {
-    console.log('🛒 Añadir al carrito:', prod.name);
-    // TODO: conectar con CartService
+    this.cartService.addToCart({
+      id: Number(prod.id),
+      name: prod.name,
+      farmer: prod?.farmer?.full_name || prod?.farmer?.name || 'Agricultor local',
+      farmerId: Number(prod?.farmer?.user_id ?? prod?.farmer?.id ?? 0),
+      price: Number(prod.price),
+      unit: prod.unit ?? 'ud',
+      quantity: 1,
+      image: this.getImagenUrl(prod)
+    });
   }
 }

@@ -1,0 +1,179 @@
+<div class="dashboard-layout">
+  <app-sidebar></app-sidebar>
+
+  <main class="main-content">
+
+    <!-- Topbar -->
+    <div class="topbar">
+      <h1 class="page-title">Pedidos</h1>
+      <div class="topbar-right">
+        <div class="search-box">
+          <span class="material-symbols-rounded">search</span>
+          <input type="text" placeholder="Buscar..." />
+        </div>
+        <button class="icon-btn">
+          <span class="material-symbols-rounded">notifications</span>
+        </button>
+        <button class="icon-btn">
+          <span class="material-symbols-rounded">help</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- KPIs -->
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-header">
+          <div class="kpi-icon green">
+            <span class="material-symbols-rounded">check_circle</span>
+          </div>
+          <span class="kpi-badge positive">+ 12%</span>
+        </div>
+        <span class="kpi-value">{{ totalPedidos }}</span>
+        <span class="kpi-label">Pedidos este mes</span>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-header">
+          <div class="kpi-icon orange">
+            <span class="material-symbols-rounded">schedule</span>
+          </div>
+        </div>
+        <span class="kpi-value">{{ pendingCount }}</span>
+        <span class="kpi-label">Pedidos pendientes</span>
+        <span class="kpi-sublabel orange">Requieren atención</span>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-header">
+          <div class="kpi-icon blue">
+            <span class="material-symbols-rounded">sync</span>
+          </div>
+        </div>
+        <span class="kpi-value">{{ processingCount }}</span>
+        <span class="kpi-label">Pedidos pendientes</span>
+        <span class="kpi-sublabel blue">En preparación</span>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-header">
+          <div class="kpi-icon purple">
+            <span class="material-symbols-rounded">task_alt</span>
+          </div>
+        </div>
+        <span class="kpi-value">{{ deliveredCount }}</span>
+        <span class="kpi-label">Pedidos completados</span>
+        <span class="kpi-sublabel purple">Este mes</span>
+      </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="filters-bar">
+      <div class="filters-left">
+        <select class="filter-select" [(ngModel)]="selectedStatus" (change)="applyFilters()">
+          <option value="">Todos los estados</option>
+          <option value="pending">Pendiente</option>
+          <option value="processing">Procesando</option>
+          <option value="shipped">Enviado</option>
+          <option value="delivered">Entregado</option>
+          <option value="cancelled">Cancelado</option>
+        </select>
+        <select class="filter-select" [(ngModel)]="selectedPeriod" (change)="applyFilters()">
+          <option value="30">Últimos 30 días</option>
+          <option value="7">Últimos 7 días</option>
+          <option value="90">Últimos 90 días</option>
+        </select>
+        <button class="icon-btn">
+          <span class="material-symbols-rounded">filter_list</span>
+        </button>
+      </div>
+      <div class="filters-right">
+        <button class="btn-outline">
+          <span class="material-symbols-rounded">download</span> Exportar
+        </button>
+        <button class="btn-primary">
+          <span class="material-symbols-rounded">add</span> Nuevo Pedido
+        </button>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs-bar">
+      <button class="tab-btn" [class.active]="activeTab === 'all'" (click)="setTab('all')">Todos</button>
+      <button class="tab-btn" [class.active]="activeTab === 'pending'" (click)="setTab('pending')">Pendientes</button>
+      <button class="tab-btn" [class.active]="activeTab === 'processing'"
+        (click)="setTab('processing')">Procesando</button>
+      <button class="tab-btn" [class.active]="activeTab === 'shipped'" (click)="setTab('shipped')">Enviados</button>
+      <button class="tab-btn" [class.active]="activeTab === 'delivered'"
+        (click)="setTab('delivered')">Entregados</button>
+    </div>
+
+    <!-- Tabla -->
+    <div class="section-card">
+      <div class="section-header">
+        <h2>Listado de Pedidos</h2>
+        <a routerLink="/agricultor/pedidos" class="ver-todos">Ver Todos &gt;</a>
+      </div>
+
+      <div *ngIf="loading" class="empty-state">Cargando pedidos...</div>
+      <div *ngIf="!loading && filteredOrders.length === 0" class="empty-state">
+        No hay pedidos en esta categoría.
+      </div>
+
+      <table class="orders-table" *ngIf="!loading && filteredOrders.length > 0">
+        <thead>
+          <tr>
+            <th>CLIENTE</th>
+            <th>PEDIDO</th>
+            <th>FECHA</th>
+            <th>TOTAL</th>
+            <th>ESTADO</th>
+            <th>ACCIONES</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let order of filteredOrders">
+            <td>
+              <div class="client-cell">
+                <ng-container *ngIf="order.buyer.profile_photo_url; else initialAvatar">
+                  <img class="client-avatar" [src]="order.buyer.profile_photo_url" [alt]="order.buyer.name" />
+                </ng-container>
+
+                <ng-template #initialAvatar>
+                  <div class="client-avatar-initial" [style.background]="getAvatarColor(order.buyer.name)">
+                    {{ order.buyer.name.charAt(0).toUpperCase() }}
+                  </div>
+                </ng-template>
+
+
+                <span>{{ order.buyer.name }}</span>
+              </div>
+            </td>
+
+
+            <td>ORD-{{ order.id }}</td>
+            <td>{{ order.created_at | smartDate }}</td>
+            <td><strong>{{ order.total | currency:'EUR':'symbol':'1.2-2' }}</strong></td>
+            <td>
+              <span class="status-badge" [ngClass]="statusClasses[order.status]">
+                <span class="material-symbols-rounded status-icon">{{ statusIcons[order.status] }}</span>
+                {{ statusLabels[order.status] }}
+              </span>
+            </td>
+            <td>
+              <div class="actions-menu">
+                <button class="icon-btn" (click)="toggleMenu(order.id)">
+                  <span class="material-symbols-rounded">more_vert</span>
+                </button>
+                <div class="dropdown-menu" *ngIf="openMenuId === order.id">
+                  <button (click)="updateStatus(order.id, 'processing')">En proceso</button>
+                  <button (click)="updateStatus(order.id, 'shipped')">Marcar enviado</button>
+                  <button (click)="updateStatus(order.id, 'delivered')">Marcar entregado</button>
+                  <button class="danger" (click)="updateStatus(order.id, 'cancelled')">Cancelar</button>
+                </div>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </main>
+</div>

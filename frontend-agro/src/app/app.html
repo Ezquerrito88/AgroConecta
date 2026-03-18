@@ -34,24 +34,28 @@
             <i class="far fa-heart"></i>
           </button>
 
-          <button class="action-btn bag-btn" title="Mi Cesta">
+          <button class="action-btn bag-btn" title="Mi Cesta" routerLink="/cesta">
             <span class="material-symbols-rounded">shopping_bag</span>
           </button>
         </ng-container>
 
         <ng-container *ngIf="isFarmer">
 
-          <button class="action-btn orders-btn" title="Mis Pedidos">
+          <button class="action-btn orders-btn" routerLink="/agricultor/mis-productos" title="Mis Pedidos">
             <i class="fa-solid fa-box-open"></i>
           </button>
 
-          <button class="action-btn add-btn" routerLink="/nuevo-producto" title="Subir Producto">
+          <button class="action-btn add-btn" routerLink="/agricultor/mis-productos/nuevo" title="Subir Producto">
             <i class="fa-solid fa-plus"></i>
           </button>
 
         </ng-container>
 
-        <button class="action-btn user-btn" [class.farmer-style]="isFarmer" title="Mi Perfil">
+        <button
+          class="action-btn user-btn"
+          [class.farmer-style]="isFarmer"
+          title="Mi Perfil"
+          [routerLink]="isFarmer ? '/agricultor/dashboard' : '/perfil'">
           <i [class]="isFarmer ? 'fa-solid fa-tractor' : 'fa-regular fa-user'"></i>
         </button>
 

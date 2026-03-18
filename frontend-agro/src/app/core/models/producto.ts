@@ -19,6 +19,10 @@ export interface Producto {
   price: string;
   unit: string;
   stock_quantity: number;
+  
+  // ¡AQUÍ AÑADIMOS LA PROPIEDAD QUE FALTA PARA EL TFG Y EL HTML!
+  season_end?: string | Date; 
+  
   moderation_status: string;
   is_favorite?: boolean;
   
@@ -40,6 +44,5 @@ export interface Producto {
   };
   
   reviews?: Review[];
-
   images: any[]; 
 }

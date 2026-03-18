@@ -19,7 +19,6 @@ class Product extends Model
         'price',
         'unit',
         'stock_quantity',
-        'season_end',
         'moderation_status'
     ];
 

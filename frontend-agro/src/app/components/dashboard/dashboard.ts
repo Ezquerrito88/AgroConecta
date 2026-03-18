@@ -6,8 +6,8 @@ import { MatSliderModule } from '@angular/material/slider';
 import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { ProductoService } from '../../services/producto.service';
-import { CartService } from '../../services/cart.service';
+import { ProductoService } from '../../core/services/producto.service';
+import { CartService } from '../../core/services/cart.service';
 import { environment } from '../../../environments/environment';
 
 @Component({
@@ -125,7 +125,6 @@ export class Dashboard implements OnInit {
     if (el) setTimeout(() => el.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
   }
 
-  // ✅ Sin token → login | Con token → optimistic update
   toggleFavorite(prod: any): void {
     if (!localStorage.getItem('token')) {
       this.router.navigate(['/login']);
@@ -140,7 +139,18 @@ export class Dashboard implements OnInit {
     });
   }
 
-  addToCart(producto: any): void     { this.cartService.addToCart(producto); }
+  addToCart(producto: any): void {
+    this.cartService.addToCart({
+      id: Number(producto.id),
+      name: producto.name,
+      farmer: producto?.farmer?.full_name || producto?.farmer?.name || 'Agricultor local',
+      farmerId: Number(producto?.farmer?.user_id ?? producto?.farmer?.id ?? 0),
+      price: Number(producto.price),
+      unit: producto.unit ?? 'ud',
+      quantity: 1,
+      image: this.getImagenUrl(producto)
+    });
+  }
   irAlCatalogoCompleto(): void       { this.router.navigate(['/productos']); }
   formatLabel(value: number): string { return `${value}€`; }
 }

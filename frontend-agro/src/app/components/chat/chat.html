@@ -1,0 +1,72 @@
+<div class="chat-layout">
+
+  <!-- Panel izquierdo: lista de conversaciones -->
+  <div class="conversations-panel">
+    <div class="conversations-header">
+      <span>AgroChat</span>
+      <button class="btn-new" title="Nueva conversación">
+        <mat-icon>add</mat-icon>
+      </button>
+    </div>
+
+    <div class="conversations-list">
+
+      <div
+        *ngFor="let conv of conversations"
+        class="conv-item"
+        [class.active]="selectedConversation?.id === conv.id"
+        (click)="selectConversation(conv)">
+        <div class="conv-avatar">{{ getContactInitial(conv) }}</div>
+        <div class="conv-info">
+          <span class="conv-name">{{ getContactName(conv) }}</span>
+          <span class="conv-last">{{ conv.last_message?.content | slice:0:35 }}...</span>
+        </div>
+      </div>
+
+      <div *ngIf="conversations.length === 0" class="no-convs">
+        No tienes conversaciones aún
+      </div>
+    </div>
+  </div>
+
+  <!-- Panel derecho: ventana de mensajes -->
+  <div class="chat-panel">
+
+    <!-- Sin conversación seleccionada -->
+    <div *ngIf="!selectedConversation" class="empty-chat">
+      <mat-icon>chat_bubble_outline</mat-icon>
+      <p>Selecciona una conversación para empezar</p>
+    </div>
+
+    <!-- Con conversación seleccionada -->
+    <ng-container *ngIf="selectedConversation">
+      <div class="chat-header">
+        <div class="conv-avatar">{{ getContactInitial(selectedConversation) }}</div>
+        <span>{{ getContactName(selectedConversation) }}</span>
+      </div>
+
+      <div class="messages-container">
+        <div
+          *ngFor="let msg of messages"
+          class="message-bubble"
+          [class.own]="isOwn(msg)"
+          [class.other]="!isOwn(msg)">
+          <p>{{ msg.content }}</p>
+          <span class="msg-time">{{ msg.created_at | date:'HH:mm' }}</span>
+        </div>
+      </div>
+
+      <div class="message-input">
+        <input
+          [(ngModel)]="newMessage"
+          (keyup.enter)="send()"
+          placeholder="Escribe un mensaje..."
+          class="input-field" />
+        <button (click)="send()" class="btn-send" [disabled]="!newMessage.trim()">
+          <mat-icon>send</mat-icon>
+        </button>
+      </div>
+    </ng-container>
+
+  </div>
+</div>

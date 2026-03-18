@@ -1,0 +1,136 @@
+<div class="dashboard-layout">
+  <app-sidebar></app-sidebar>
+
+  <main class="main-content">
+
+    <!-- Topbar -->
+    <div class="topbar">
+      <h1 class="page-title">Panel Principal</h1>
+      <div class="topbar-right">
+        <div class="search-box">
+          <span class="material-symbols-rounded">search</span>
+          <input type="text" placeholder="Buscar..." />
+        </div>
+        <button class="icon-btn">
+          <span class="material-symbols-rounded">notifications</span>
+        </button>
+        <button class="icon-btn">
+          <span class="material-symbols-rounded">help</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- KPIs -->
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-header">
+          <div class="kpi-icon green">
+            <span class="material-symbols-rounded">check_circle</span>
+          </div>
+          <span class="kpi-badge positive">+ 12%</span>
+        </div>
+        <span class="kpi-value">{{ kpis.pedidos }}</span>
+        <span class="kpi-label">Pedidos este mes</span>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-header">
+          <div class="kpi-icon orange">
+            <span class="material-symbols-rounded">bar_chart</span>
+          </div>
+          <span class="kpi-badge positive">+ 8%</span>
+        </div>
+        <span class="kpi-value">{{ kpis.ventas | currency:'EUR':'symbol':'1.0-0' }}</span>
+        <span class="kpi-label">Ventas este mes</span>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-header">
+          <div class="kpi-icon blue">
+            <span class="material-symbols-rounded">inventory_2</span>
+          </div>
+          <span class="kpi-badge negative">- 3%</span>
+        </div>
+        <span class="kpi-value">{{ kpis.agotados }}</span>
+        <span class="kpi-label">Productos Agotados</span>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-header">
+          <div class="kpi-icon purple">
+            <span class="material-symbols-rounded">star</span>
+          </div>
+          <span class="kpi-badge positive">+ 5%</span>
+        </div>
+        <span class="kpi-value">{{ kpis.calificacion }}</span>
+        <span class="kpi-label">Calificación Promedio</span>
+      </div>
+    </div>
+
+    <!-- Pedidos Recientes -->
+    <div class="section-card">
+      <div class="section-header">
+        <h2>Pedidos Recientes</h2>
+        <a routerLink="/agricultor/pedidos" class="ver-todos">Ver Todos &gt;</a>
+      </div>
+
+      <div *ngIf="recentOrders.length === 0" class="empty-state">
+        Aún no tienes pedidos recientes.
+      </div>
+
+      <table class="orders-table" *ngIf="recentOrders.length > 0">
+        <thead>
+          <tr>
+            <th>CLIENTE</th>
+            <th>PEDIDO</th>
+            <th>FECHA</th>
+            <th>TOTAL</th>
+            <th>ESTADO</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let order of recentOrders">
+            <td>
+              <div class="client-cell">
+                <div class="client-avatar-initial">
+                  {{ order.buyer.name.charAt(0).toUpperCase() }}
+                </div>
+                {{ order.buyer.name }}
+              </div>
+            </td>
+            <td>ORD-{{ order.id }}</td>
+            <td>{{ order.created_at | smartDate }}</td>
+            <td><strong>{{ order.total | currency:'EUR':'symbol':'1.2-2' }}</strong></td>
+            <td>
+              <span class="status-badge" [ngClass]="statusClasses[order.status]">
+                <span class="material-symbols-rounded status-icon">
+                  {{ statusIcons[order.status] }}
+                </span>
+                {{ statusLabels[order.status] }}
+              </span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Productos Más Vendidos -->
+    <div class="section-card">
+      <div class="section-header">
+        <h2>Productos Más Vendidos</h2>
+        <a routerLink="/agricultor/mis-productos" class="ver-todos">Ver Todos &gt;</a>
+      </div>
+      <div class="top-products-grid">
+        <div class="product-card" *ngFor="let p of topProducts">
+          <img [src]="p.image" [alt]="p.name" class="product-img" />
+          <div class="product-info">
+            <p class="product-name">{{ p.name }}</p>
+            <p class="product-price">{{ p.price | currency:'EUR':'symbol':'1.2-2' }}<span>/kg</span></p>
+            <div class="product-meta">
+              <span class="material-symbols-rounded star-icon">star</span>
+              {{ p.rating }} · {{ p.sold }} vendidos
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>

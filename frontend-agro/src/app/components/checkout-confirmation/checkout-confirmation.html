@@ -1,0 +1,62 @@
+<section class="confirmation-hero">
+  <div class="confirmation-hero-inner">
+    <h1>Pedido confirmado</h1>
+    <p>Tu compra se ha registrado correctamente.</p>
+
+    <div class="checkout-steps" aria-label="Pasos del pago">
+      <div class="step active-step"><span class="step-number">1</span><span class="step-text">Cesta</span></div>
+      <div class="step active-step"><span class="step-number">2</span><span class="step-text">Datos y pago</span></div>
+      <div class="step active-step"><span class="step-number">3</span><span class="step-text">Confirmación</span></div>
+    </div>
+  </div>
+</section>
+
+<main class="confirmation-layout" *ngIf="data as summary">
+  <section class="confirmation-card">
+    <div class="ok-badge">
+      <span class="material-symbols-rounded">check_circle</span>
+      Pedido realizado con exito
+    </div>
+
+    <h2>Gracias por tu compra</h2>
+    <p class="subtitle">Hemos enviado la confirmación y empezaremos a preparar tu pedido.</p>
+
+    <div class="details-grid">
+      <article>
+        <span class="label">Numero de pedido</span>
+        <strong *ngIf="summary.orderIds.length === 1">#{{ summary.orderIds[0] }}</strong>
+        <strong *ngIf="summary.orderIds.length > 1">{{ summary.orderIds.length }} pedidos: #{{ summary.orderIds.join(', #') }}</strong>
+      </article>
+
+      <article>
+        <span class="label">Fecha</span>
+        <strong>{{ summary.createdAt | date:'dd/MM/yyyy HH:mm' }}</strong>
+      </article>
+
+      <article>
+        <span class="label">Metodo de pago</span>
+        <strong>{{ summary.paymentMethod }}</strong>
+      </article>
+
+      <article>
+        <span class="label">Productos</span>
+        <strong>{{ summary.totalItems }} articulos</strong>
+      </article>
+
+      <article>
+        <span class="label">Total pagado</span>
+        <strong>{{ summary.total | currency:'EUR':'symbol':'1.2-2' }}</strong>
+      </article>
+
+      <article *ngIf="summary.discountPct && summary.discountCode">
+        <span class="label">Descuento aplicado</span>
+        <strong>{{ summary.discountCode }} ({{ summary.discountPct }}%)</strong>
+      </article>
+    </div>
+
+    <div class="actions">
+      <a routerLink="/productos" class="btn-secondary">Seguir comprando</a>
+      <button class="btn-primary" (click)="finish()">Ir al inicio</button>
+    </div>
+  </section>
+</main>

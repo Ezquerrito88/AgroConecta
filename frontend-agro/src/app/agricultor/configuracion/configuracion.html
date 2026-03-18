@@ -1,0 +1,547 @@
+<div class="dashboard-layout">
+  <app-sidebar></app-sidebar>
+
+  <main class="main-content">
+
+    <header class="topbar">
+      <h1 class="page-title">Configuración</h1>
+      <div class="topbar-right">
+        <div class="search-box">
+          <span class="material-symbols-rounded" aria-hidden="true">search</span>
+          <input type="search" placeholder="Buscar..." aria-label="Buscar" />
+        </div>
+        <button class="icon-btn" aria-label="Notificaciones">
+          <span class="material-symbols-rounded" aria-hidden="true">notifications</span>
+        </button>
+        <button class="icon-btn" aria-label="Ayuda">
+          <span class="material-symbols-rounded" aria-hidden="true">help</span>
+        </button>
+      </div>
+    </header>
+
+    <div class="config-layout">
+
+      <!-- MENÚ LATERAL -->
+      <nav class="sections-menu" aria-label="Secciones de configuración">
+        <h3 class="menu-title">Secciones</h3>
+        <ul class="menu-list" role="list">
+
+          <li role="button" tabindex="0"
+            [class.active]="isSectionActive('perfil')"
+            (click)="section = 'perfil'"
+            (keydown.enter)="section = 'perfil'"
+            (keydown.space)="section = 'perfil'"
+            [attr.aria-current]="isSectionActive('perfil') ? 'page' : null">
+            <span class="material-symbols-rounded" aria-hidden="true">manage_accounts</span>
+            <div class="menu-text">
+              <span class="title">Perfil de Usuario</span>
+              <span class="subtitle">Información personal</span>
+            </div>
+          </li>
+
+          <li role="button" tabindex="0"
+            [class.active]="isSectionActive('fincas')"
+            (click)="section = 'fincas'"
+            (keydown.enter)="section = 'fincas'"
+            (keydown.space)="section = 'fincas'"
+            [attr.aria-current]="isSectionActive('fincas') ? 'page' : null">
+            <span class="material-symbols-rounded" aria-hidden="true">agriculture</span>
+            <div class="menu-text">
+              <span class="title">Mis fincas</span>
+              <span class="subtitle">Administra todas tus fincas</span>
+            </div>
+          </li>
+
+          <li role="button" tabindex="0"
+            [class.active]="isSectionActive('productos')"
+            (click)="section = 'productos'"
+            (keydown.enter)="section = 'productos'"
+            (keydown.space)="section = 'productos'"
+            [attr.aria-current]="isSectionActive('productos') ? 'page' : null">
+            <span class="material-symbols-rounded" aria-hidden="true">storefront</span>
+            <div class="menu-text">
+              <span class="title">Configuración de Productos</span>
+              <span class="subtitle">Gestión de categorías y precios</span>
+            </div>
+          </li>
+
+          <li role="button" tabindex="0"
+            [class.active]="isSectionActive('notificaciones')"
+            (click)="section = 'notificaciones'"
+            (keydown.enter)="section = 'notificaciones'"
+            (keydown.space)="section = 'notificaciones'"
+            [attr.aria-current]="isSectionActive('notificaciones') ? 'page' : null">
+            <span class="material-symbols-rounded" aria-hidden="true">notifications</span>
+            <div class="menu-text">
+              <span class="title">Notificaciones</span>
+              <span class="subtitle">Preferencias de comunicación</span>
+            </div>
+          </li>
+
+          <li role="button" tabindex="0"
+            [class.active]="isSectionActive('pagos')"
+            (click)="section = 'pagos'"
+            (keydown.enter)="section = 'pagos'"
+            (keydown.space)="section = 'pagos'"
+            [attr.aria-current]="isSectionActive('pagos') ? 'page' : null">
+            <span class="material-symbols-rounded" aria-hidden="true">payments</span>
+            <div class="menu-text">
+              <span class="title">Métodos de Pago</span>
+              <span class="subtitle">Configuración de cobros</span>
+            </div>
+          </li>
+
+          <li role="button" tabindex="0"
+            [class.active]="isSectionActive('seguridad')"
+            (click)="section = 'seguridad'"
+            (keydown.enter)="section = 'seguridad'"
+            (keydown.space)="section = 'seguridad'"
+            [attr.aria-current]="isSectionActive('seguridad') ? 'page' : null">
+            <span class="material-symbols-rounded" aria-hidden="true">lock</span>
+            <div class="menu-text">
+              <span class="title">Seguridad</span>
+              <span class="subtitle">Contraseña y autenticación</span>
+            </div>
+          </li>
+
+          <li role="button" tabindex="0"
+            [class.active]="isSectionActive('integraciones')"
+            (click)="section = 'integraciones'"
+            (keydown.enter)="section = 'integraciones'"
+            (keydown.space)="section = 'integraciones'"
+            [attr.aria-current]="isSectionActive('integraciones') ? 'page' : null">
+            <span class="material-symbols-rounded" aria-hidden="true">hub</span>
+            <div class="menu-text">
+              <span class="title">Integraciones</span>
+              <span class="subtitle">Conectar con otras plataformas</span>
+            </div>
+          </li>
+
+        </ul>
+      </nav>
+
+      <!-- =====================
+           SECCIÓN: PERFIL
+      ===================== -->
+      <div class="config-forms" *ngIf="isSectionActive('perfil')">
+        <form #configForm="ngForm" (ngSubmit)="guardarPerfil(configForm)" novalidate>
+
+          <section class="content-card" aria-labelledby="personal-info-title">
+            <div class="card-header">
+              <div class="header-icon blue-icon" aria-hidden="true">
+                <span class="material-symbols-rounded">person</span>
+              </div>
+              <div class="header-text">
+                <h2 id="personal-info-title">Información Personal</h2>
+                <p>Datos del propietario de la finca</p>
+              </div>
+            </div>
+
+            <div class="avatar-section">
+              <div class="avatar-img">
+                <img [src]="avatarSrc"
+                  alt="Foto de perfil de {{ perfil.name || 'usuario' }}"
+                  (error)="onAvatarError($event)" />
+                <button type="button" class="btn-camera" aria-label="Cambiar foto de perfil">
+                  <span class="material-symbols-rounded" aria-hidden="true">photo_camera</span>
+                </button>
+              </div>
+              <div class="avatar-info">
+                <h3>{{ perfil.name || 'Sin nombre' }}</h3>
+                <p class="avatar-farm">Propietario de {{ perfil.farm_name || 'tu finca' }}</p>
+                <span class="avatar-since" *ngIf="perfil.member_since">
+                  Miembro desde {{ perfil.member_since }}
+                </span>
+              </div>
+            </div>
+
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="name">Nombre completo</label>
+                <input id="name" type="text" name="name"
+                  [(ngModel)]="perfil.name" (ngModelChange)="onFormChange()"
+                  placeholder="Ej: Juan García López" required autocomplete="name" />
+              </div>
+              <div class="form-group">
+                <label for="email">Email</label>
+                <input id="email" type="email" name="email"
+                  [(ngModel)]="perfil.email" (ngModelChange)="onFormChange()"
+                  placeholder="correo@ejemplo.com" required autocomplete="email" />
+              </div>
+              <div class="form-group">
+                <label for="phone">Teléfono</label>
+                <input id="phone" type="tel" name="phone"
+                  [(ngModel)]="perfil.phone" (ngModelChange)="onFormChange()"
+                  placeholder="+34 600 000 000" autocomplete="tel" />
+              </div>
+              <div class="form-group">
+                <label for="birth_date">Fecha de nacimiento</label>
+                <input id="birth_date" type="date" name="birth_date" autocomplete="bday" />
+              </div>
+            </div>
+          </section>
+
+          <section class="content-card" aria-labelledby="farm-data-title">
+            <div class="card-header">
+              <div class="header-icon green-icon" aria-hidden="true">
+                <span class="material-symbols-rounded">yard</span>
+              </div>
+              <div class="header-text">
+                <h2 id="farm-data-title">Datos de tu Finca</h2>
+                <p>Describe las características de tu explotación</p>
+              </div>
+            </div>
+
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="farm_name">Nombre de la finca</label>
+                <input id="farm_name" type="text" name="farm_name"
+                  [(ngModel)]="perfil.farm_name" (ngModelChange)="onFormChange()"
+                  placeholder="Ej: Finca El Paraíso" required />
+              </div>
+              <div class="form-group">
+                <label for="crop_type">Tipo de cultivo principal</label>
+                <select id="crop_type" name="crop_type" (change)="onFormChange()">
+                  <option value="" disabled selected>Selecciona un tipo...</option>
+                  <option value="frutas">Frutas tropicales</option>
+                  <option value="hortalizas">Hortalizas</option>
+                  <option value="cereal">Cereales</option>
+                  <option value="viñedo">Viñedo</option>
+                  <option value="olivar">Olivar</option>
+                </select>
+              </div>
+              <div class="form-group full-width">
+                <label for="city">Dirección completa</label>
+                <input id="city" type="text" name="city"
+                  [(ngModel)]="perfil.city" (ngModelChange)="onFormChange()"
+                  class="highlight-input"
+                  placeholder="Calle, número, municipio, provincia"
+                  autocomplete="street-address" />
+              </div>
+              <div class="form-group">
+                <label for="area">Superficie (hectáreas)</label>
+                <input id="area" type="number" name="area"
+                  min="0" step="0.1" (change)="onFormChange()" placeholder="Ej: 12.5" />
+              </div>
+              <div class="form-group">
+                <label for="certifications">Certificaciones</label>
+                <input id="certifications" type="text" name="certifications"
+                  (input)="onFormChange()" placeholder="Ej: Orgánico, Fair Trade..." />
+              </div>
+              <div class="form-group full-width">
+                <label for="bio">Descripción de la finca</label>
+                <textarea id="bio" name="bio"
+                  [(ngModel)]="perfil.bio" (ngModelChange)="onFormChange()"
+                  rows="4" placeholder="Cuéntanos qué hace especial tu finca..."></textarea>
+              </div>
+            </div>
+          </section>
+
+          <div class="actions-card">
+            <div class="form-actions">
+              <button type="button" class="btn-cancel"
+                (click)="cancelarCambios()" [disabled]="!formDirty">Cancelar</button>
+              <button type="submit" class="btn-save"
+                [disabled]="!formDirty || configForm.invalid || loading"
+                [attr.aria-busy]="loading">
+                <span class="material-symbols-rounded" aria-hidden="true">
+                  {{ loading ? 'progress_activity' : 'save' }}
+                </span>
+                {{ loading ? 'Guardando...' : 'Guardar cambios' }}
+              </button>
+            </div>
+          </div>
+
+        </form>
+      </div>
+
+      <!-- =====================
+           SECCIÓN: MIS FINCAS
+      ===================== -->
+      <div class="config-forms" *ngIf="isSectionActive('fincas')">
+        <section class="content-card" aria-labelledby="fincas-title">
+          <div class="card-header">
+            <div class="header-icon green-icon" aria-hidden="true">
+              <span class="material-symbols-rounded">agriculture</span>
+            </div>
+            <div class="header-text">
+              <h2 id="fincas-title">Mis Fincas</h2>
+              <p>Administra y gestiona todas tus fincas registradas</p>
+            </div>
+          </div>
+          <div class="coming-soon">
+            <span class="material-symbols-rounded coming-soon-icon">yard</span>
+            <h3>Gestión de fincas</h3>
+            <p>Próximamente podrás añadir, editar y gestionar todas tus fincas desde aquí.</p>
+            <span class="coming-soon-badge">Próximamente</span>
+          </div>
+        </section>
+      </div>
+
+      <!-- =====================
+           SECCIÓN: PRODUCTOS
+      ===================== -->
+      <div class="config-forms" *ngIf="isSectionActive('productos')">
+        <section class="content-card" aria-labelledby="productos-title">
+          <div class="card-header">
+            <div class="header-icon orange-icon" aria-hidden="true">
+              <span class="material-symbols-rounded">storefront</span>
+            </div>
+            <div class="header-text">
+              <h2 id="productos-title">Configuración de Productos</h2>
+              <p>Gestión de categorías y precios</p>
+            </div>
+          </div>
+          <div class="coming-soon">
+            <span class="material-symbols-rounded coming-soon-icon">inventory</span>
+            <h3>Gestión de productos</h3>
+            <p>Aquí podrás configurar categorías, precios base y disponibilidad de tus productos.</p>
+            <span class="coming-soon-badge">Próximamente</span>
+          </div>
+        </section>
+      </div>
+
+      <!-- =====================
+           SECCIÓN: NOTIFICACIONES
+      ===================== -->
+      <div class="config-forms" *ngIf="isSectionActive('notificaciones')">
+        <section class="content-card" aria-labelledby="notif-title">
+          <div class="card-header">
+            <div class="header-icon blue-icon" aria-hidden="true">
+              <span class="material-symbols-rounded">notifications</span>
+            </div>
+            <div class="header-text">
+              <h2 id="notif-title">Notificaciones</h2>
+              <p>Personaliza cuándo y cómo recibes alertas</p>
+            </div>
+          </div>
+
+          <div class="toggle-list">
+
+            <div class="toggle-item">
+              <div class="toggle-info">
+                <span class="toggle-title">Nuevos pedidos</span>
+                <span class="toggle-desc">Recibe una alerta cuando llegue un nuevo pedido</span>
+              </div>
+              <label class="toggle-switch" aria-label="Activar notificaciones de nuevos pedidos">
+                <input type="checkbox" checked />
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+
+            <div class="toggle-item">
+              <div class="toggle-info">
+                <span class="toggle-title">Mensajes de compradores</span>
+                <span class="toggle-desc">Notificaciones cuando un comprador te escribe</span>
+              </div>
+              <label class="toggle-switch" aria-label="Activar notificaciones de mensajes">
+                <input type="checkbox" checked />
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+
+            <div class="toggle-item">
+              <div class="toggle-info">
+                <span class="toggle-title">Actualizaciones de la plataforma</span>
+                <span class="toggle-desc">Novedades y mejoras de AgroConecta</span>
+              </div>
+              <label class="toggle-switch" aria-label="Activar notificaciones de plataforma">
+                <input type="checkbox" />
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+
+            <div class="toggle-item">
+              <div class="toggle-info">
+                <span class="toggle-title">Recordatorios de cosecha</span>
+                <span class="toggle-desc">Alertas basadas en tus temporadas de cultivo</span>
+              </div>
+              <label class="toggle-switch" aria-label="Activar recordatorios de cosecha">
+                <input type="checkbox" checked />
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+
+            <div class="toggle-item">
+              <div class="toggle-info">
+                <span class="toggle-title">Resumen semanal por email</span>
+                <span class="toggle-desc">Un resumen de tu actividad cada semana</span>
+              </div>
+              <label class="toggle-switch" aria-label="Activar resumen semanal">
+                <input type="checkbox" />
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+
+          </div>
+        </section>
+
+        <div class="actions-card">
+          <div class="form-actions">
+            <button type="button" class="btn-save">
+              <span class="material-symbols-rounded" aria-hidden="true">save</span>
+              Guardar preferencias
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- =====================
+           SECCIÓN: PAGOS
+      ===================== -->
+      <div class="config-forms" *ngIf="isSectionActive('pagos')">
+        <section class="content-card" aria-labelledby="pagos-title">
+          <div class="card-header">
+            <div class="header-icon green-icon" aria-hidden="true">
+              <span class="material-symbols-rounded">payments</span>
+            </div>
+            <div class="header-text">
+              <h2 id="pagos-title">Métodos de Pago</h2>
+              <p>Configura cómo recibes los cobros de tus ventas</p>
+            </div>
+          </div>
+          <div class="coming-soon">
+            <span class="material-symbols-rounded coming-soon-icon">account_balance</span>
+            <h3>Configuración de cobros</h3>
+            <p>Próximamente podrás vincular tu cuenta bancaria y configurar tus métodos de cobro preferidos.</p>
+            <span class="coming-soon-badge">Próximamente</span>
+          </div>
+        </section>
+      </div>
+
+      <!-- =====================
+           SECCIÓN: SEGURIDAD
+      ===================== -->
+      <div class="config-forms" *ngIf="isSectionActive('seguridad')">
+        <section class="content-card" aria-labelledby="seguridad-title">
+          <div class="card-header">
+            <div class="header-icon blue-icon" aria-hidden="true">
+              <span class="material-symbols-rounded">lock</span>
+            </div>
+            <div class="header-text">
+              <h2 id="seguridad-title">Seguridad</h2>
+              <p>Gestiona tu contraseña y acceso a la cuenta</p>
+            </div>
+          </div>
+
+          <form class="form-grid">
+            <div class="form-group full-width">
+              <label for="current_password">Contraseña actual</label>
+              <input id="current_password" type="password" name="current_password"
+                placeholder="Introduce tu contraseña actual"
+                autocomplete="current-password" />
+            </div>
+            <div class="form-group">
+              <label for="new_password">Nueva contraseña</label>
+              <input id="new_password" type="password" name="new_password"
+                placeholder="Mínimo 8 caracteres"
+                autocomplete="new-password" />
+            </div>
+            <div class="form-group">
+              <label for="confirm_password">Confirmar nueva contraseña</label>
+              <input id="confirm_password" type="password" name="confirm_password"
+                placeholder="Repite la nueva contraseña"
+                autocomplete="new-password" />
+            </div>
+          </form>
+
+          <div class="security-info">
+            <span class="material-symbols-rounded" aria-hidden="true">info</span>
+            <p>La contraseña debe tener al menos 8 caracteres, una mayúscula y un número.</p>
+          </div>
+        </section>
+
+        <div class="actions-card">
+          <div class="form-actions">
+            <button type="button" class="btn-cancel">Cancelar</button>
+            <button type="button" class="btn-save">
+              <span class="material-symbols-rounded" aria-hidden="true">lock_reset</span>
+              Cambiar contraseña
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- =====================
+           SECCIÓN: INTEGRACIONES
+      ===================== -->
+      <div class="config-forms" *ngIf="isSectionActive('integraciones')">
+        <section class="content-card" aria-labelledby="integ-title">
+          <div class="card-header">
+            <div class="header-icon orange-icon" aria-hidden="true">
+              <span class="material-symbols-rounded">hub</span>
+            </div>
+            <div class="header-text">
+              <h2 id="integ-title">Integraciones</h2>
+              <p>Conecta AgroConecta con otras plataformas</p>
+            </div>
+          </div>
+
+          <div class="integration-list">
+
+            <div class="integration-item">
+              <div class="integration-logo">
+                <span class="material-symbols-rounded">shopping_cart</span>
+              </div>
+              <div class="integration-info">
+                <span class="integration-name">Tienda Online propia</span>
+                <span class="integration-desc">Sincroniza tu catálogo con tu tienda externa</span>
+              </div>
+              <span class="integration-badge badge-soon">Próximamente</span>
+            </div>
+
+            <div class="integration-item">
+              <div class="integration-logo">
+                <span class="material-symbols-rounded">local_shipping</span>
+              </div>
+              <div class="integration-info">
+                <span class="integration-name">Logística y envíos</span>
+                <span class="integration-desc">Conecta con servicios de transporte y reparto</span>
+              </div>
+              <span class="integration-badge badge-soon">Próximamente</span>
+            </div>
+
+            <div class="integration-item">
+              <div class="integration-logo">
+                <span class="material-symbols-rounded">bar_chart</span>
+              </div>
+              <div class="integration-info">
+                <span class="integration-name">Herramientas de análisis</span>
+                <span class="integration-desc">Exporta datos de ventas a tu plataforma de BI</span>
+              </div>
+              <span class="integration-badge badge-soon">Próximamente</span>
+            </div>
+
+            <div class="integration-item">
+              <div class="integration-logo">
+                <span class="material-symbols-rounded">mail</span>
+              </div>
+              <div class="integration-info">
+                <span class="integration-name">Email marketing</span>
+                <span class="integration-desc">Conecta con Mailchimp, Brevo u otras plataformas</span>
+              </div>
+              <span class="integration-badge badge-soon">Próximamente</span>
+            </div>
+
+          </div>
+        </section>
+      </div>
+
+    </div>
+
+    <!-- TOAST -->
+    <div *ngIf="toast" class="toast"
+      [class.toast-success]="toast.type === 'success'"
+      [class.toast-error]="toast.type === 'error'"
+      role="alert" aria-live="polite">
+      <span class="material-symbols-rounded toast-icon" aria-hidden="true">
+        {{ toast.type === 'success' ? 'check_circle' : 'error' }}
+      </span>
+      <span class="toast-message">{{ toast.message }}</span>
+      <button class="toast-close" (click)="dismissToast()" aria-label="Cerrar notificación">
+        <span class="material-symbols-rounded" aria-hidden="true">close</span>
+      </button>
+    </div>
+
+  </main>
+</div>

@@ -2,59 +2,61 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use App\Models\Product;
+use App\Models\User;
+use App\Models\Category;
+use App\Models\Farmer;
 
 class ProductSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
-        // 1. Creamos una categoría por defecto si no existe
-        $categoria = \App\Models\Category::firstOrCreate(
-            ['id' => 1],
-            ['name' => 'Verduras', 'description' => 'Productos frescos de la huerta']
-        );
+        // 1. Obtener el usuario agricultor
+        $user = User::where('email', 'manolo@campo.com')->first();
 
-        // 2. Creamos un usuario agricultor por defecto si no existe
-        $farmer = \App\Models\User::firstOrCreate(
-            ['id' => 1],
+        // 2. Crear su farmer_profile
+        $farmer = Farmer::firstOrCreate(
+            ['user_id' => $user->id],
             [
-                'name' => 'Jose Javier',
-                'email' => 'jose@agroconecta.com',
-                'password' => bcrypt('password123'),
-                'role' => 'farmer' // O el campo de rol que uses
+                'farm_name'   => 'Huerta de Manolo',
+                'bio'         => 'Agricultor local con productos frescos de La Rioja.',
+                'city'        => 'Logroño',
+                'is_verified' => true,
             ]
         );
 
+        // 3. Productos variados por categoría
         $productos = [
-            ['name' => 'Lechuga Fresca', 'description' => 'Textura perfecta, sabor ideal.', 'price' => 1.50, 'unit' => 'ud'],
-            ['name' => 'Tomate de Huerta', 'description' => 'Rojos, jugosos y dulces.', 'price' => 3.20, 'unit' => 'kg'],
-            ['name' => 'Zanahoria Eco', 'description' => 'Directas de la tierra de Logroño.', 'price' => 1.20, 'unit' => 'manojo'],
-            ['name' => 'Patata Riojana', 'description' => 'Especial para freír o asar.', 'price' => 0.90, 'unit' => 'kg'],
-            ['name' => 'Pimiento Rojo', 'description' => 'Carnosos y de temporada.', 'price' => 2.50, 'unit' => 'kg'],
-            ['name' => 'Cebolla Dulce', 'description' => 'Sabor suave, no pica.', 'price' => 1.10, 'unit' => 'kg'],
-            ['name' => 'Cebolla Dulce', 'description' => 'Sabor suave, no pica.', 'price' => 1.10, 'unit' => 'kg'],
-            ['name' => 'Cebolla Dulce', 'description' => 'Sabor suave, no pica.', 'price' => 1.10, 'unit' => 'kg'],
-            ['name' => 'Cebolla Dulce', 'description' => 'Sabor suave, no pica.', 'price' => 1.10, 'unit' => 'kg'],
-            ['name' => 'Cebolla Dulce', 'description' => 'Sabor suave, no pica.', 'price' => 1.10, 'unit' => 'kg'],
-            ['name' => 'Cebolla Dulce', 'description' => 'Sabor suave, no pica.', 'price' => 1.10, 'unit' => 'kg'],
-            ['name' => 'Cebolla Dulce', 'description' => 'Sabor suave, no pica.', 'price' => 1.10, 'unit' => 'kg'],
+            ['name' => 'Manzanas Fuji',     'category' => 'frutas',     'price' => 2.50, 'unit' => 'kg',     'description' => 'Dulces y crujientes, recién cogidas.'],
+            ['name' => 'Naranjas Valencia',  'category' => 'frutas',     'price' => 1.80, 'unit' => 'kg',     'description' => 'Perfectas para zumo o postre.'],
+            ['name' => 'Peras Conferencia', 'category' => 'frutas',     'price' => 2.20, 'unit' => 'kg',     'description' => 'Jugosas y de temporada.'],
+            ['name' => 'Lechuga Romana',    'category' => 'verduras',   'price' => 1.20, 'unit' => 'unidad', 'description' => 'Fresca y crujiente del día.'],
+            ['name' => 'Espinacas Frescas', 'category' => 'verduras',   'price' => 1.80, 'unit' => 'bolsa',  'description' => 'Tiernas y recién cortadas.'],
+            ['name' => 'Acelgas de Huerta', 'category' => 'verduras',   'price' => 1.30, 'unit' => 'manojo', 'description' => 'Hojas grandes y muy nutritivas.'],
+            ['name' => 'Tomates Cherry',    'category' => 'hortalizas', 'price' => 3.20, 'unit' => 'kg',     'description' => 'Dulces y perfectos para ensalada.'],
+            ['name' => 'Pimiento Rojo',     'category' => 'hortalizas', 'price' => 2.50, 'unit' => 'kg',     'description' => 'Carnosos y de temporada.'],
+            ['name' => 'Zanahorias Eco',    'category' => 'hortalizas', 'price' => 1.20, 'unit' => 'manojo', 'description' => 'Directas de la tierra riojana.'],
+            ['name' => 'Calabacín Verde',   'category' => 'hortalizas', 'price' => 1.40, 'unit' => 'kg',     'description' => 'Ideal para plancha o guisos.'],
+            ['name' => 'Queso Fresco',      'category' => 'lacteos',    'price' => 4.00, 'unit' => 'unidad', 'description' => 'Elaborado de forma artesanal.'],
+            ['name' => 'Yogur Natural',     'category' => 'lacteos',    'price' => 0.90, 'unit' => 'unidad', 'description' => 'Cremoso y sin azúcares añadidos.'],
         ];
 
         foreach ($productos as $p) {
-            \App\Models\Product::create([
-                'farmer_id' => $farmer->id,   // Usamos la ID del que acabamos de crear
-                'category_id' => $categoria->id, // Usamos la ID de la que acabamos de crear
-                'name' => $p['name'],
-                'description' => $p['description'],
-                'price' => $p['price'],
-                'unit' => $p['unit'],
-                'stock_quantity' => 100,
-                'moderation_status' => 'approved'
+            $category = Category::where('slug', $p['category'])->first();
+
+            Product::create([
+                'farmer_id'         => $farmer->id,
+                'category_id'       => $category->id,
+                'name'              => $p['name'],
+                'description'       => $p['description'],
+                'price'             => $p['price'],
+                'unit'              => $p['unit'],
+                'stock_quantity'    => rand(10, 100),
+                'moderation_status' => 'approved',
             ]);
         }
+
+        $this->command->info('✅ Productos creados correctamente.');
     }
 }

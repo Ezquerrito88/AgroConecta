@@ -1,0 +1,215 @@
+<section class="cart-hero">
+  <div class="cart-hero-inner">
+    <h1>Tu cesta</h1>
+    
+    <nav class="breadcrumb" aria-label="Ruta de navegación">
+      <a routerLink="/">Inicio</a>
+      <span class="separator" aria-hidden="true">›</span>
+      <span>Cesta</span>
+    </nav>
+
+    @if (items.length > 0) {
+      <div class="hero-stats" aria-label="Resumen rápido de la cesta">
+        <span class="hero-chip">
+          <span class="material-symbols-rounded" aria-hidden="true">shopping_basket</span>
+          {{ totalItems }} artículos
+        </span>
+        <span class="hero-chip">
+          <span class="material-symbols-rounded" aria-hidden="true">storefront</span>
+          {{ items.length }} productos
+        </span>
+        <span class="hero-chip strong-chip">
+          <span class="material-symbols-rounded" aria-hidden="true">payments</span>
+          {{ total | currency:'EUR':'symbol':'1.2-2' }}
+        </span>
+      </div>
+    }
+  </div>
+</section>
+
+<main class="cart-layout">
+  <section class="cart-items" aria-label="Productos en la cesta">
+    @if (items.length > 0) {
+      <header class="cart-items-header">
+        <h2>Productos en tu cesta</h2>
+        <button class="clear-cart-btn" (click)="clearCart()">
+          <span class="material-symbols-rounded" aria-hidden="true">delete_sweep</span>
+          Vaciar cesta
+        </button>
+      </header>
+    }
+
+    @if (items.length === 0) {
+      <div class="empty-cart">
+        <div class="empty-cart-icon-wrap">
+          <span class="material-symbols-rounded empty-icon">shopping_basket</span>
+        </div>
+        <h2>Tu cesta está vacía</h2>
+        <p>Añade productos frescos y de temporada para empezar tu pedido.</p>
+        <a class="btn-primary" routerLink="/productos">
+          <span class="material-symbols-rounded" aria-hidden="true">storefront</span>
+          Explorar productos
+        </a>
+      </div>
+    }
+
+    @for (item of items; track item.id) {
+      <article class="cart-card">
+        <div class="cart-item-main">
+          <div class="cart-img-wrap">
+            @if (item.image) {
+              <img [src]="item.image" [alt]="item.name" class="cart-img" />
+            } @else {
+              <div class="cart-img-placeholder">
+                <span class="material-symbols-rounded" aria-hidden="true">eco</span>
+              </div>
+            }
+          </div>
+
+          <div class="cart-info">
+            <h3 class="cart-item-name">{{ item.name }}</h3>
+
+            <span class="cart-farmer">
+              <span class="material-symbols-rounded" aria-hidden="true">agriculture</span>
+              {{ item.farmer }}
+            </span>
+
+            <div class="cart-meta-row">
+              <span class="cart-unit-price">
+                {{ item.price | currency:'EUR':'symbol':'1.2-2' }}/{{ item.unit }}
+              </span>
+              <span class="cart-inline-dot" aria-hidden="true"></span>
+              <span class="cart-stock-note">Disponible</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="cart-item-actions">
+          <div class="cart-qty" role="group" [attr.aria-label]="'Cantidad de ' + item.name">
+            <button class="qty-btn" (click)="decrease(item)" [disabled]="item.quantity <= 1" aria-label="Reducir cantidad">
+              <span class="material-symbols-rounded" aria-hidden="true">remove</span>
+            </button>
+            <span class="qty-value">{{ item.quantity }}</span>
+            <button class="qty-btn" (click)="increase(item)" aria-label="Aumentar cantidad">
+              <span class="material-symbols-rounded" aria-hidden="true">add</span>
+            </button>
+          </div>
+
+          <div class="line-total-wrap">
+            <span class="line-total-label">Subtotal</span>
+            <span class="cart-line-total">{{ item.price * item.quantity | currency:'EUR':'symbol':'1.2-2' }}</span>
+          </div>
+
+          <button class="cart-remove" (click)="remove(item)" [attr.aria-label]="'Eliminar ' + item.name">
+            <span class="material-symbols-rounded" aria-hidden="true">delete</span>
+          </button>
+        </div>
+      </article>
+    }
+  </section>
+
+  @if (items.length > 0) {
+    <aside class="cart-summary" aria-label="Resumen del pedido">
+      <h2 class="summary-title">
+        <span class="material-symbols-rounded" aria-hidden="true">receipt_long</span>
+        Resumen del pedido
+      </h2>
+
+      <div class="summary-row">
+        <span>Subtotal ({{ totalItems }} art.)</span>
+        <span>{{ subtotal | currency:'EUR':'symbol':'1.2-2' }}</span>
+      </div>
+
+      <div class="summary-row">
+        <span>Envío</span>
+        <span class="shipping-cost">{{ shipping | currency:'EUR':'symbol':'1.2-2' }}</span>
+      </div>
+
+      @if (discountApplied) {
+        <div class="summary-row discount-row">
+          <span>Descuento ({{ discountPct }}%)</span>
+          <span class="discount-amount">-{{ discount | currency:'EUR':'symbol':'1.2-2' }}</span>
+        </div>
+      }
+
+      @if (missingForFreeShipping > 0) {
+        <p class="free-shipping-note">
+          <span class="material-symbols-rounded" aria-hidden="true">local_shipping</span>
+          Te faltan {{ missingForFreeShipping | currency:'EUR':'symbol':'1.2-2' }} para envío gratis.
+        </p>
+      } @else {
+        <p class="free-shipping-note success-note">
+          <span class="material-symbols-rounded" aria-hidden="true">verified</span>
+          Ya tienes envío gratis.
+        </p>
+      }
+
+      <div class="discount-section">
+        <label for="discountInput" class="discount-label">
+          <span class="material-symbols-rounded" aria-hidden="true">sell</span>
+          Código de descuento
+        </label>
+        @if (!discountApplied) {
+          <div class="discount-input-row">
+            <input
+              id="discountInput"
+              type="text"
+              class="discount-input"
+              [(ngModel)]="discountCode"
+              placeholder="Ej: AGRO10"
+              (keyup.enter)="applyDiscount()"
+              [class.input-error]="discountError"
+            />
+            <button class="btn-apply" (click)="applyDiscount()">Aplicar</button>
+          </div>
+          @if (discountError) {
+            <p class="discount-error" role="alert">
+              <span class="material-symbols-rounded" aria-hidden="true">error</span>
+              {{ discountError }}
+            </p>
+          }
+        } @else {
+          <div class="discount-applied">
+            <span class="material-symbols-rounded" aria-hidden="true">check_circle</span>
+            {{ discountCode.toUpperCase() }} - {{ discountPct }}% aplicado
+            <button class="btn-remove-discount" (click)="removeDiscount()" aria-label="Eliminar descuento">
+              <span class="material-symbols-rounded" aria-hidden="true">close</span>
+            </button>
+          </div>
+        }
+      </div>
+
+      <div class="summary-divider"></div>
+
+      <div class="summary-total-row">
+        <span>Total <small>(IVA inc.)</small></span>
+        <span class="total-amount">{{ total | currency:'EUR':'symbol':'1.2-2' }}</span>
+      </div>
+
+      <button class="btn-checkout" (click)="checkout()">
+        <span class="material-symbols-rounded" aria-hidden="true">shopping_cart_checkout</span>
+        Ir al pago
+      </button>
+
+      <a routerLink="/productos" class="btn-continue">
+        <span class="material-symbols-rounded" aria-hidden="true">arrow_back</span>
+        Seguir comprando
+      </a>
+
+      <ul class="trust-list" aria-label="Ventajas de compra">
+        <li>
+          <span class="material-symbols-rounded" aria-hidden="true">shield</span>
+          Pago seguro
+        </li>
+        <li>
+          <span class="material-symbols-rounded" aria-hidden="true">schedule</span>
+          Entrega estimada 24-48h
+        </li>
+        <li>
+          <span class="material-symbols-rounded" aria-hidden="true">verified_user</span>
+          Productores verificados
+        </li>
+      </ul>
+    </aside>
+  }
+</main>

@@ -1,6 +1,29 @@
 version: '3.8'
 
 services:
+  # Base de datos MySQL
+  db:
+    image: mysql:8.0
+    container_name: agroconecta-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: secret
+      MYSQL_DATABASE: agroconecta_db
+      MYSQL_USER: agroconecta
+      MYSQL_PASSWORD: secret
+    ports:
+      - "3306:3306"
+    volumes:
+      - db-data:/var/lib/mysql
+    networks:
+      - agroconecta-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-psecret"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
   # Backend Laravel
   backend:
     build:
@@ -17,20 +40,21 @@ services:
       - APP_KEY=base64:axxGuLe2bj0yVFAVwM+yBPIX9w9bIoofolXuzY9HTks=
       - APP_URL=http://localhost:8000
       - DB_CONNECTION=mysql
-      - DB_HOST=agroconecta-db.mysql.database.azure.com
+      - DB_HOST=db
       - DB_PORT=3306
       - DB_DATABASE=agroconecta_db
-      - DB_USERNAME=aezquerro
-      - DB_PASSWORD=Adrianez_2006
-      - MYSQL_ATTR_SSL_CA=/etc/ssl/certs/ca-certificates.crt
-      - MYSQL_ATTR_SSL_MODE=REQUIRED
+      - DB_USERNAME=agroconecta
+      - DB_PASSWORD=secret
       - SESSION_DRIVER=cookie
       - CACHE_STORE=database
       - QUEUE_CONNECTION=database
-      - RUN_MIGRATIONS=false
+      - RUN_MIGRATIONS=true
       - RUN_SEEDERS=false
     volumes:
       - backend-storage:/var/www/html/storage
+    depends_on:
+      db:
+        condition: service_healthy
     networks:
       - agroconecta-network
     healthcheck:
@@ -64,6 +88,8 @@ services:
 
 volumes:
   backend-storage:
+    driver: local
+  db-data:
     driver: local
 
 networks:

@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-// ⚠️ IMPORTANTE: No olvides estas líneas arriba
 use Illuminate\Database\Seeder;
 use App\Models\Category;
 use App\Models\User;
@@ -12,37 +11,37 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        // 1. AQUÍ CREAS LAS CATEGORÍAS FIJAS 🍎🥦
-        // Se crean solas cada vez que reinicies la base de datos
+        // 1. Categorías
         $categories = [
-            ['name' => 'Frutas', 'slug' => 'frutas', 'icon' => '🍎'],
-            ['name' => 'Verduras', 'slug' => 'verduras', 'icon' => '🥦'],
+            ['name' => 'Frutas',     'slug' => 'frutas',     'icon' => '🍎'],
+            ['name' => 'Verduras',   'slug' => 'verduras',   'icon' => '🥦'],
             ['name' => 'Hortalizas', 'slug' => 'hortalizas', 'icon' => '🥕'],
-            ['name' => 'Lácteos', 'slug' => 'lacteos', 'icon' => '🧀'],
+            ['name' => 'Lácteos',    'slug' => 'lacteos',    'icon' => '🧀'],
         ];
 
         foreach ($categories as $cat) {
             Category::create($cat);
         }
 
-        // 2. CREA TAMBIÉN UN AGRICULTOR PARA PRUEBAS (Opcional pero recomendado)
+        // 2. Usuario agricultor
         User::create([
-            'name' => 'Manolo Agricultor',
-            'email' => 'manolo@campo.com',
+            'name'     => 'Manolo Agricultor',
+            'email'    => 'manolo@campo.com',
             'password' => Hash::make('password'),
-            'role' => 'farmer'
+            'role'     => 'farmer'
         ]);
 
+        // 3. Admin
         User::create([
-            'name' => 'Admin AgroConecta',
-            'email' => 'admin@admin.com',
-            'password' => Hash::make('admin123'), // No olvides el Hash
-            'role' => 'admin',
+            'name'     => 'Admin AgroConecta',
+            'email'    => 'admin@admin.com',
+            'password' => Hash::make('admin123'),
+            'role'     => 'admin',
         ]);
 
+        // 4. Productos
+        $this->call(ProductSeeder::class);
 
-        
-        // Mensaje para avisar en la terminal
-        $this->command->info('✅ Categorías y Usuario Manolo creados correctamente.');
+        $this->command->info('✅ Categorías, usuarios y productos creados correctamente.');
     }
 }

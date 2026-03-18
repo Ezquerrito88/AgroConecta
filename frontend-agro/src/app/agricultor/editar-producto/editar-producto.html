@@ -1,0 +1,214 @@
+<div class="dashboard-layout">
+  <app-sidebar></app-sidebar>
+
+  <main class="main-content">
+
+    <!-- Topbar -->
+    <div class="topbar">
+      <div class="topbar-left">
+        <button class="btn-back" [routerLink]="['/agricultor/mis-productos']">
+          <span class="material-symbols-rounded">arrow_back</span>
+        </button>
+        <div>
+          <h1 class="page-title">Editar Producto</h1>
+          <p class="page-subtitle">Modifica los datos de tu producto</p>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <div class="search-box">
+          <span class="material-symbols-rounded">search</span>
+          <input type="text" placeholder="Buscar..." />
+        </div>
+        <button class="icon-btn">
+          <span class="material-symbols-rounded">notifications</span>
+        </button>
+        <button class="icon-btn">
+          <span class="material-symbols-rounded">help</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Loading -->
+    <div *ngIf="loading" class="loading-state">
+      <span class="material-symbols-rounded loading-icon">autorenew</span>
+      <p>Cargando producto...</p>
+    </div>
+
+    <!-- Formulario -->
+    <div class="form-layout" *ngIf="!loading">
+
+      <!-- Columna izquierda -->
+      <div class="form-main">
+
+        <!-- Info básica -->
+        <div class="form-card">
+          <div class="card-header green">
+            <span class="material-symbols-rounded">storefront</span>
+            <h2>Información básica</h2>
+          </div>
+          <div class="card-body">
+            <div class="form-group">
+              <label>Nombre del producto</label>
+              <input type="text" class="form-input" [(ngModel)]="producto.name"
+                placeholder="Ej: Manzanas Fuji" />
+            </div>
+            <div class="form-group">
+              <label>Descripción completa</label>
+              <textarea class="form-input form-textarea" [(ngModel)]="producto.description"
+                placeholder="Describe el origen, sabor, usos recomendados..."></textarea>
+            </div>
+            <div class="form-group">
+              <label>Descripción corta <span class="label-hint">— para listados y tarjetas</span></label>
+              <input type="text" class="form-input" [(ngModel)]="producto.short_description"
+                placeholder="Ej: Dulces y crujientes, recién cogidas." />
+            </div>
+          </div>
+        </div>
+
+        <!-- Precio y Stock -->
+        <div class="form-card">
+          <div class="card-header orange">
+            <span class="material-symbols-rounded">payments</span>
+            <h2>Precio y Stock</h2>
+          </div>
+          <div class="card-body">
+            <div class="form-row">
+              <div class="form-group">
+                <label>Precio</label>
+                <div class="input-with-suffix">
+                  <input type="number" class="form-input" [(ngModel)]="producto.price"
+                    placeholder="0.00" min="0" step="0.01" />
+                  <span class="input-suffix">€</span>
+                </div>
+              </div>
+              <div class="form-group">
+                <label>Unidad de venta</label>
+                <mat-form-field class="custom-select" appearance="outline" subscriptSizing="dynamic">
+                  <mat-select [(ngModel)]="producto.unit" panelClass="panel-edit">
+                    <mat-option *ngFor="let u of unidades" [value]="u">{{ u }}</mat-option>
+                  </mat-select>
+                </mat-form-field>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Stock disponible</label>
+                <div class="input-with-suffix">
+                  <input type="number" class="form-input" [(ngModel)]="producto.stock_quantity"
+                    placeholder="0" min="0" />
+                  <span class="input-suffix">ud</span>
+                </div>
+              </div>
+              <div class="form-group">
+                <label>Fin de temporada</label>
+                <input type="date" class="form-input" [(ngModel)]="producto.season_end" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Clasificación -->
+        <div class="form-card">
+          <div class="card-header blue">
+            <span class="material-symbols-rounded">category</span>
+            <h2>Clasificación</h2>
+          </div>
+          <div class="card-body">
+            <div class="form-group">
+              <label>Categoría</label>
+              <mat-form-field class="custom-select" appearance="outline" subscriptSizing="dynamic">
+                <mat-select [(ngModel)]="producto.category_id" panelClass="panel-edit">
+                  <mat-option *ngFor="let c of categorias" [value]="c.id">{{ c.name }}</mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Columna derecha -->
+      <div class="form-side">
+
+        <!-- Imágenes -->
+        <div class="form-card">
+          <div class="card-header purple">
+            <span class="material-symbols-rounded">photo_library</span>
+            <h2>Imágenes</h2>
+          </div>
+          <div class="card-body">
+            <div class="images-grid" *ngIf="producto.images?.length > 0">
+              <div class="image-thumb" *ngFor="let img of producto.images">
+                <img [src]="img.url" [alt]="producto.name" />
+                <button class="img-delete-btn" (click)="deleteImage(img.id)">
+                  <span class="material-symbols-rounded">close</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="upload-area" (click)="fileInput.click()"
+              [class.upload-area--active]="producto.images?.length === 0">
+              <span class="material-symbols-rounded upload-icon">cloud_upload</span>
+              <p>Arrastra o haz clic para subir</p>
+              <span class="upload-hint">JPG, PNG o WEBP · Máx. 2MB por imagen</span>
+              <input #fileInput type="file" accept="image/*" multiple hidden
+                (change)="onImageSelected($event)" />
+            </div>
+
+            <div *ngIf="newImagePreviews.length > 0">
+              <p class="new-images-label">
+                <span class="material-symbols-rounded">add_photo_alternate</span>
+                {{ newImagePreviews.length }} imagen(es) nueva(s)
+              </p>
+              <div class="images-grid">
+                <div class="image-thumb image-thumb--new"
+                  *ngFor="let prev of newImagePreviews; let i = index">
+                  <img [src]="prev" alt="Nueva imagen" />
+                  <button class="img-delete-btn" (click)="removeNewImage(i)">
+                    <span class="material-symbols-rounded">close</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Estado moderación -->
+        <div class="form-card">
+          <div class="mod-row">
+            <span class="material-symbols-rounded mod-icon">verified</span>
+            <div>
+              <p class="mod-label">Estado de moderación</p>
+              <span class="badge" [ngClass]="{
+                'badge-approved': producto.moderation_status === 'approved',
+                'badge-pending':  producto.moderation_status === 'pending',
+                'badge-rejected': producto.moderation_status === 'rejected'
+              }">
+                <span class="badge-dot"></span>
+                {{ producto.moderation_status }}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Acciones -->
+        <div class="form-card form-actions-card">
+          <button class="btn-save" (click)="guardar()" [disabled]="saving">
+            <span class="material-symbols-rounded">save</span>
+            {{ saving ? 'Guardando...' : 'Guardar Cambios' }}
+          </button>
+          <button class="btn-cancel" [routerLink]="['/agricultor/mis-productos']">
+            Cancelar
+          </button>
+          <div class="divider"></div>
+          <button class="btn-delete" (click)="eliminar()">
+            <span class="material-symbols-rounded">delete</span>
+            Eliminar Producto
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+  </main>
+</div>

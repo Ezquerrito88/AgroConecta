@@ -1,14 +1,16 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule, ActivatedRoute, Router } from '@angular/router'; // ✅ Router añadido
+import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { MatSliderModule } from '@angular/material/slider';
 import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
-import { ProductoService } from '../../services/producto.service';
-import { Producto } from '../../models/producto';
+import { ProductoService } from '../../core/services/producto.service';
+import { Producto } from '../../core/models/producto';
+import { environment } from '../../../environments/environment';
+import { CartService } from '../../core/services/cart.service';
 
 @Component({
   selector: 'app-catalogo',
@@ -23,7 +25,7 @@ import { Producto } from '../../models/producto';
 })
 export class Catalogo implements OnInit {
 
-  private readonly API_URL = 'https://agroconecta-backend-v2-bxbxfudaatbmgxdg.spaincentral-01.azurewebsites.net';
+  private readonly API_URL = environment.apiUrl;
 
   productos: Producto[] = [];
 
@@ -43,9 +45,10 @@ export class Catalogo implements OnInit {
 
   constructor(
     private productoService: ProductoService,
+    private cartService: CartService,
     private cdr: ChangeDetectorRef,
     private route: ActivatedRoute,
-    private router: Router  // ✅ añadido
+    private router: Router
   ) {}
 
   ngOnInit(): void {
@@ -56,15 +59,16 @@ export class Catalogo implements OnInit {
   }
 
   getImagenUrl(prod: any): string {
-    if (prod?.images?.length > 0) {
-      const path = prod.images[0].image_path;
-      if (path.startsWith('http')) {
-        return path.replace(/http:\/\/127\.0\.0\.1:8000/g, this.API_URL);
-      }
-      return `${this.API_URL}/storage/${path}`;
+  if (prod?.images?.length > 0) {
+    const path = prod.images[0].image_path;
+    if (path.startsWith('http')) {
+      return path.replace(/http:\/\/127\.0\.0\.1:8000/g, 'http://localhost:8000');
     }
-    return 'assets/placeholder.png';
+    return `http://localhost:8000/storage/${path}`;
   }
+  return 'assets/placeholder.png';
+}
+
 
   cargarProductos(page: number): void {
     this.isLoading = true;
@@ -155,7 +159,23 @@ export class Catalogo implements OnInit {
   }
 
   agregarAlCarrito(prod: Producto): void {
-    console.log('🛒 Añadir al carrito:', prod.name);
-    // TODO: conectar con CartService
+    this.cartService.addToCart({
+      id: prod.id,
+      name: prod.name,
+      farmer: prod.farmer?.full_name || prod.farmer?.name || 'Agricultor local',
+      farmerId: this.getFarmerUserId(prod) ?? 0,
+      price: Number(prod.price),
+      unit: prod.unit,
+      quantity: 1,
+      image: this.getImagenUrl(prod)
+    });
+  }
+
+  private getFarmerUserId(prod: Producto): number | null {
+    const rawFarmerUserId = (prod as any)?.farmer?.user_id;
+    const rawFarmerId = (prod as any)?.farmer?.id;
+
+    const id = Number(rawFarmerUserId ?? rawFarmerId);
+    return Number.isFinite(id) && id > 0 ? id : null;
   }
 }

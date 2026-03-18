@@ -1,8 +1,9 @@
-import { Component, OnInit } from '@angular/core'; // <--- Añade OnInit
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink, ActivatedRoute } from '@angular/router';
-import { AuthService } from '../../services/auth';
+import { AuthService } from '../../core/services/auth';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-register',
@@ -11,30 +12,28 @@ import { AuthService } from '../../services/auth';
   templateUrl: './register.html',
   styleUrls: ['./register.css']
 })
-export class Register implements OnInit { // <--- Añade implements OnInit
+export class Register implements OnInit {
+  private readonly PENDING_CHECKOUT_KEY = 'pending_checkout';
 
   userData = {
     name: '',
     email: '',
     password: '',
     password_confirmation: '',
-    role: 'buyer' // Por defecto
+    role: 'buyer'
   };
 
   showPassword = false;
   errorMessage = '';
 
-  // Inyectamos ActivatedRoute para leer la URL
   constructor(
     private authService: AuthService, 
     private router: Router,
     private route: ActivatedRoute 
   ) {}
 
-  // 👇 ESTA ES LA FUNCIÓN MÁGICA
   ngOnInit() {
     this.route.queryParams.subscribe(params => {
-      // Si en la URL viene ?role=farmer, cambiamos el rol
       if (params['role']) {
         this.userData.role = params['role'];
       }
@@ -47,11 +46,17 @@ export class Register implements OnInit { // <--- Añade implements OnInit
       next: (res: any) => {
         localStorage.setItem('token', res.token);
         localStorage.setItem('user', JSON.stringify(res.user));
+
+        const hasPendingCheckout = sessionStorage.getItem(this.PENDING_CHECKOUT_KEY) === '1';
+        if (hasPendingCheckout) {
+          this.router.navigate(['/checkout']);
+          return;
+        }
         
         if (res.user.role === 'farmer') {
           this.router.navigate(['/agricultor/dashboard']);
         } else {
-          this.router.navigate(['/perfil']); // O a la home
+          this.router.navigate(['/perfil']);
         }
       },
       error: (err) => {
@@ -62,6 +67,6 @@ export class Register implements OnInit { // <--- Añade implements OnInit
 
   registerWithGoogle() {
     sessionStorage.setItem('google_role_intent', this.userData.role);
-    window.location.href = 'https://agroconecta-backend-v2-bxbxfudaatbmgxdg.spaincentral-01.azurewebsites.net/api/auth/google';
+    window.location.href = `${environment.apiUrl}/auth/google`;
   }
 }

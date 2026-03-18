@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-login',
@@ -12,8 +13,9 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
   styleUrls: ['./login.css'],
 })
 export class Login implements OnInit {
+  private readonly PENDING_CHECKOUT_KEY = 'pending_checkout';
 
-  private apiUrl = 'https://agroconecta-backend-v2-bxbxfudaatbmgxdg.spaincentral-01.azurewebsites.net/api';
+  private apiUrl = environment.apiUrl;
 
   loginData = {
     email: '',
@@ -84,10 +86,19 @@ export class Login implements OnInit {
       localStorage.setItem('user', JSON.stringify(user));
     }
 
-    if (user && (user.role === 'farmer' || user.role === 'agricultor')) {
-      this.router.navigate(['/']);
-    } else {
-      this.router.navigate(['/']);
+    const redirectTo = this.route.snapshot.queryParamMap.get('redirectTo');
+    const hasPendingCheckout = sessionStorage.getItem(this.PENDING_CHECKOUT_KEY) === '1';
+
+    if (hasPendingCheckout) {
+      this.router.navigate(['/checkout']);
+      return;
     }
+
+    if (redirectTo) {
+      this.router.navigateByUrl(redirectTo);
+      return;
+    }
+
+    this.router.navigate(['/']);
   }
 }
