@@ -7,6 +7,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { Sidebar } from '../sidebar/sidebar';
 import { ProductoService } from '../../core/services/producto.service';
 import { CategoryService } from '../../core/services/category';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-editar-producto',
@@ -49,7 +50,7 @@ export class EditarProducto implements OnInit {
           ...data,
           images: data.images?.map((img: any) => ({
             id: img.id,
-            url: `http://localhost:8000/storage/${img.image_path}`
+            url: `${environment.storageUrl}/${img.image_path}`
           })) ?? []
         };
         this.loading = false;

@@ -19,7 +19,7 @@ export class CartDrawer implements OnInit {
   private readonly API_URL = environment.apiUrl;
   private readonly STORAGE_URL = environment.storageUrl;
 
-  constructor(private cartService: CartService, private router: Router) {}
+  constructor(private cartService: CartService, private router: Router) { }
 
   ngOnInit() {
     this.cartService.items$.subscribe(items => {
@@ -34,30 +34,25 @@ export class CartDrawer implements OnInit {
 
   getImageUrl(item: any): string {
     if (item?.image) {
-      return String(item.image).replace(/127\.0\.0\.1:8000/g, 'localhost:8000');
-    }
-
-    if (item?.images?.length > 0 && item.images[0]?.image_path) {
-      const path = item.images[0].image_path;
-      if (path.startsWith('http')) {
-        return path.replace(/127\.0\.0\.1:8000/g, 'localhost:8000');
+      const imgStr = String(item.image);
+      if (imgStr.includes('localhost:8000') || imgStr.includes('127.0.0.1:8000')) {
+        return imgStr.replace(/http:\/\/(127\.0\.0\.1|localhost):8000\/storage/g, this.STORAGE_URL);
       }
-      return `${this.STORAGE_URL}/${path}`;
+      return imgStr;
     }
 
-    if (item?.images?.length > 0 && typeof item.images[0] === 'string') {
-      const path = item.images[0];
-      if (path.startsWith('http')) {
-        return path.replace(/127\.0\.0\.1:8000/g, 'localhost:8000');
+    if (item?.images?.length > 0) {
+      const firstImage = item.images[0];
+      const path = typeof firstImage === 'string' ? firstImage : firstImage.image_path;
+
+      if (path) {
+        if (path.startsWith('http')) {
+          return path.replace(/http:\/\/(127\.0\.0\.1|localhost):8000\/storage/g, this.STORAGE_URL);
+        }
+        return `${this.STORAGE_URL}/${path}`;
       }
-      return `${this.STORAGE_URL}/${path}`;
     }
 
-    if (item.images && item.images.length > 0) {
-      const path = item.images[0].image_path;
-      if (path.startsWith('http')) return path;
-      return `${this.STORAGE_URL}/${path}`;
-    }
     return 'assets/placeholder.png';
   }
 

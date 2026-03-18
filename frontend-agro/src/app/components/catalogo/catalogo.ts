@@ -29,19 +29,19 @@ export class Catalogo implements OnInit {
 
   productos: Producto[] = [];
 
-  paginaActual    = 1;
-  totalPaginas    = 1;
-  totalProductos  = 0;
-  desde           = 0;
-  hasta           = 0;
-  isLoading       = false;
+  paginaActual = 1;
+  totalPaginas = 1;
+  totalProductos = 0;
+  desde = 0;
+  hasta = 0;
+  isLoading = false;
 
-  textoBusqueda   = '';
+  textoBusqueda = '';
   filtroCategoria = '';
   filtroUbicacion = '';
-  filtroOrden     = 'novedad';
-  minPrice        = 0;
-  maxPrice        = 100;
+  filtroOrden = 'novedad';
+  minPrice = 0;
+  maxPrice = 100;
 
   constructor(
     private productoService: ProductoService,
@@ -49,7 +49,7 @@ export class Catalogo implements OnInit {
     private cdr: ChangeDetectorRef,
     private route: ActivatedRoute,
     private router: Router
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.route.queryParams.subscribe(params => {
@@ -59,15 +59,17 @@ export class Catalogo implements OnInit {
   }
 
   getImagenUrl(prod: any): string {
-  if (prod?.images?.length > 0) {
-    const path = prod.images[0].image_path;
-    if (path.startsWith('http')) {
-      return path.replace(/http:\/\/127\.0\.0\.1:8000/g, 'http://localhost:8000');
+    if (prod?.images?.length > 0) {
+      const path = prod.images[0].image_path;
+
+      if (path.startsWith('http')) {
+        return path.replace(/http:\/\/(127\.0\.0\.1|localhost):8000/g, environment.storageUrl.replace('/storage', ''));
+      }
+
+      return `${environment.storageUrl}/${path}`;
     }
-    return `http://localhost:8000/storage/${path}`;
+    return 'assets/placeholder.png';
   }
-  return 'assets/placeholder.png';
-}
 
 
   cargarProductos(page: number): void {
@@ -76,23 +78,23 @@ export class Catalogo implements OnInit {
     const filtros = {
       page,
       per_page: 12,
-      ...(this.textoBusqueda   && { search:   this.textoBusqueda }),
+      ...(this.textoBusqueda && { search: this.textoBusqueda }),
       ...(this.filtroCategoria && { category: this.filtroCategoria }),
       ...(this.filtroUbicacion && { location: this.filtroUbicacion }),
-      ...(this.filtroOrden     && { orden:    this.filtroOrden }),
+      ...(this.filtroOrden && { orden: this.filtroOrden }),
       min_price: this.minPrice,
       max_price: this.maxPrice,
     };
 
     this.productoService.getCatalogo(filtros).subscribe({
       next: (res: any) => {
-        this.productos      = res.data ?? [];
-        this.paginaActual   = res.current_page;
-        this.totalPaginas   = res.last_page;
+        this.productos = res.data ?? [];
+        this.paginaActual = res.current_page;
+        this.totalPaginas = res.last_page;
         this.totalProductos = res.total;
-        this.desde          = res.from;
-        this.hasta          = res.to;
-        this.isLoading      = false;
+        this.desde = res.from;
+        this.hasta = res.to;
+        this.isLoading = false;
         this.cdr.detectChanges();
         window.scrollTo({ top: 0, behavior: 'smooth' });
       },
@@ -106,12 +108,12 @@ export class Catalogo implements OnInit {
   }
 
   limpiarFiltros(): void {
-    this.textoBusqueda   = '';
+    this.textoBusqueda = '';
     this.filtroCategoria = '';
     this.filtroUbicacion = '';
-    this.filtroOrden     = 'novedad';
-    this.minPrice        = 0;
-    this.maxPrice        = 100;
+    this.filtroOrden = 'novedad';
+    this.minPrice = 0;
+    this.maxPrice = 100;
     this.cargarProductos(1);
   }
 
@@ -127,7 +129,7 @@ export class Catalogo implements OnInit {
       return Array.from({ length: this.totalPaginas }, (_, i) => i + 1);
     }
     let start = this.paginaActual - 2;
-    let end   = this.paginaActual + 2;
+    let end = this.paginaActual + 2;
     if (start < 1) { start = 1; end = maxVisible; }
     if (end > this.totalPaginas) { end = this.totalPaginas; start = end - maxVisible + 1; }
     const pages: number[] = [];

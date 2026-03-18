@@ -6,6 +6,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { Sidebar } from '../sidebar/sidebar';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-nuevo-producto',
@@ -34,7 +35,7 @@ export class NuevoProducto implements OnInit {
   newImages: File[] = [];
   newImagePreviews: string[] = [];
 
-  private apiUrl = 'http://localhost:8000/api';
+  private apiUrl = environment.apiUrl;
 
   constructor(private http: HttpClient, private router: Router) {}
 
