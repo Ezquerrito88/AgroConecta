@@ -38,7 +38,16 @@ export class CheckoutConfirmation implements OnInit {
       this.data = JSON.parse(raw) as ConfirmationData;
     } catch {
       this.router.navigate(['/']);
-      return;
+    }
+  }
+
+  getFirstName(): string {
+    try {
+      const user = JSON.parse(localStorage.getItem('user') ?? 'null');
+      const name = user?.name ?? '';
+      return name.split(' ')[0] ?? '';
+    } catch {
+      return '';
     }
   }
 

@@ -44,6 +44,7 @@ return [
     'stripe' => [
         'key' => env('STRIPE_KEY'),
         'secret' => env('STRIPE_SECRET'),
+        'webhook_secret' => env('STRIPE_WEBHOOK_SECRET'),
     ],
 
     'paypal' => [
@@ -52,6 +53,7 @@ return [
         'sandbox_secret' => env('PAYPAL_SANDBOX_SECRET'),
         'live_client_id' => env('PAYPAL_LIVE_CLIENT_ID'),
         'live_secret' => env('PAYPAL_LIVE_SECRET'),
+        'webhook_id' => env('PAYPAL_WEBHOOK_ID'),
     ],
 
 ];

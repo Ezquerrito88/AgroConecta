@@ -1,6 +1,14 @@
-import { Component, OnInit, AfterViewChecked } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  AfterViewChecked,
+  DestroyRef,
+  inject,
+} from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule, CurrencyPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { HttpClient } from '@angular/common/http';
 import { Router, RouterModule } from '@angular/router';
 import { firstValueFrom, forkJoin } from 'rxjs';
 import { loadScript } from '@paypal/paypal-js';
@@ -10,6 +18,10 @@ import { CreateOrderPayload, OrderService } from '../../core/services/order';
 import { PaymentService } from '../../core/services/payment';
 import { environment } from '../../../environments/environment';
 
+
+// ─────────────────────────────────────────────
+// Types
+// ─────────────────────────────────────────────
 interface CheckoutForm {
   fullName: string;
   email: string;
@@ -29,18 +41,125 @@ interface CheckoutForm {
   paypalEmail: string;
 }
 
+interface SavedUserData {
+  fullName?: string;
+  email?: string;
+  phone?: string;
+  address?: string;
+  city?: string;
+  postalCode?: string;
+}
+
+interface ZippopotamResponse {
+  'post code': string;
+  country: string;
+  places: Array<{
+    'place name': string;
+    state: string;
+    'state abbreviation': string;
+    latitude: string;
+    longitude: string;
+  }>;
+}
+
+
+// ─────────────────────────────────────────────
+// Static fallback map — built once
+// ─────────────────────────────────────────────
+const POSTAL_CITY = new Map<string, string>([
+  // Madrid 28001–28050
+  ...Array.from({ length: 50 }, (_, i) => [
+    `28${String(i + 1).padStart(3, '0')}`, 'Madrid',
+  ] as [string, string]),
+  // Barcelona 08001–08044
+  ...Array.from({ length: 44 }, (_, i) => [
+    `08${String(i + 1).padStart(3, '0')}`, 'Barcelona',
+  ] as [string, string]),
+  // Valencia 46001–46027
+  ...Array.from({ length: 27 }, (_, i) => [
+    `46${String(i + 1).padStart(3, '0')}`, 'Valencia',
+  ] as [string, string]),
+  // Sevilla 41001–41025
+  ...Array.from({ length: 25 }, (_, i) => [
+    `41${String(i + 1).padStart(3, '0')}`, 'Sevilla',
+  ] as [string, string]),
+  // Córdoba 14001–14014
+  ...Array.from({ length: 14 }, (_, i) => [
+    `14${String(i + 1).padStart(3, '0')}`, 'Córdoba',
+  ] as [string, string]),
+  // Granada 18001–18019
+  ...Array.from({ length: 19 }, (_, i) => [
+    `18${String(i + 1).padStart(3, '0')}`, 'Granada',
+  ] as [string, string]),
+  // Málaga 29001–29021
+  ...Array.from({ length: 21 }, (_, i) => [
+    `29${String(i + 1).padStart(3, '0')}`, 'Málaga',
+  ] as [string, string]),
+  // Almería 04001–04007
+  ...Array.from({ length: 7 }, (_, i) => [
+    `04${String(i + 1).padStart(3, '0')}`, 'Almería',
+  ] as [string, string]),
+  // Logroño 26001–26006
+  ...Array.from({ length: 6 }, (_, i) => [
+    `26${String(i + 1).padStart(3, '0')}`, 'Logroño',
+  ] as [string, string]),
+  // Zaragoza 50001–50018
+  ...Array.from({ length: 18 }, (_, i) => [
+    `50${String(i + 1).padStart(3, '0')}`, 'Zaragoza',
+  ] as [string, string]),
+  // Bilbao 48001–48015
+  ...Array.from({ length: 15 }, (_, i) => [
+    `48${String(i + 1).padStart(3, '0')}`, 'Bilbao',
+  ] as [string, string]),
+  // Valladolid 47001–47014
+  ...Array.from({ length: 14 }, (_, i) => [
+    `47${String(i + 1).padStart(3, '0')}`, 'Valladolid',
+  ] as [string, string]),
+  // Alicante 03001–03016
+  ...Array.from({ length: 16 }, (_, i) => [
+    `03${String(i + 1).padStart(3, '0')}`, 'Alicante',
+  ] as [string, string]),
+  // Murcia 30001–30009
+  ...Array.from({ length: 9 }, (_, i) => [
+    `30${String(i + 1).padStart(3, '0')}`, 'Murcia',
+  ] as [string, string]),
+  // Palma 07001–07015
+  ...Array.from({ length: 15 }, (_, i) => [
+    `07${String(i + 1).padStart(3, '0')}`, 'Palma',
+  ] as [string, string]),
+  // Las Palmas 35001–35014
+  ...Array.from({ length: 14 }, (_, i) => [
+    `35${String(i + 1).padStart(3, '0')}`, 'Las Palmas de Gran Canaria',
+  ] as [string, string]),
+  // Santa Cruz de Tenerife 38001–38010
+  ...Array.from({ length: 10 }, (_, i) => [
+    `38${String(i + 1).padStart(3, '0')}`, 'Santa Cruz de Tenerife',
+  ] as [string, string]),
+]);
+
+
+// ─────────────────────────────────────────────
+// Component
+// ─────────────────────────────────────────────
 @Component({
   selector: 'app-checkout',
   standalone: true,
   imports: [CommonModule, FormsModule, RouterModule, CurrencyPipe],
   templateUrl: './checkout.html',
-  styleUrls: ['./checkout.css']
+  styleUrls: ['./checkout.css'],
 })
-export class Checkout implements OnInit {
+export class Checkout implements OnInit, AfterViewChecked {
+
+  // ── Storage keys ──────────────────────────
   private readonly PENDING_CHECKOUT_KEY = 'pending_checkout';
   private readonly CART_DISCOUNT_KEY = 'cart_discount';
   private readonly LAST_ORDER_CONFIRMATION_KEY = 'last_order_confirmation';
+  private readonly SAVED_USER_DATA_KEY = 'checkout_saved_data';
 
+  // ── DI ────────────────────────────────────
+  private readonly destroyRef = inject(DestroyRef);
+
+  // ── Public state ──────────────────────────
   items = [] as ReturnType<CarritoService['getItems']>;
   loading = false;
   errorMessage = '';
@@ -49,14 +168,24 @@ export class Checkout implements OnInit {
   currentStep = 1;
   paypalApproved = false;
 
+  // ── Postal code autocomplete state ────────
+  postalCodeLoading = false;
+  postalCodeError = false;
+  postalCodeResolved = false;
+
+  // ── Private Stripe/PayPal state ───────────
   private stripe: Stripe | null = null;
   private stripeElements: StripeElements | null = null;
   private stripeElementMounted = false;
   private paypalButtonsRendered = false;
   private step3InitPending = false;
+  private paymentIntentId: string | null = null;
+  private paypalCaptureId: string | null = null;
 
+  // ── Constants ─────────────────────────────
   readonly freeShippingThreshold = 20;
 
+  // ── Form model ────────────────────────────
   form: CheckoutForm = {
     fullName: '',
     email: '',
@@ -73,15 +202,21 @@ export class Checkout implements OnInit {
     cardExpiry: '',
     cardCVV: '',
     bizumPhone: '',
-    paypalEmail: ''
+    paypalEmail: '',
   };
 
   constructor(
     private carritoService: CarritoService,
     private orderService: OrderService,
     private paymentService: PaymentService,
-    private router: Router
-  ) {}
+    private router: Router,
+    private http: HttpClient,
+  ) { }
+
+
+  // ════════════════════════════════════════════
+  // Lifecycle
+  // ════════════════════════════════════════════
 
   ngOnInit(): void {
     if (!localStorage.getItem('token')) {
@@ -91,15 +226,20 @@ export class Checkout implements OnInit {
     }
 
     this.items = this.carritoService.getItems();
-    this.carritoService.items$.subscribe(items => {
-      this.items = items;
-      if (items.length === 0 && !this.loading) {
-        this.router.navigate(['/cesta']);
-      }
-    });
+
+    this.carritoService.items$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(items => {
+        this.items = items;
+        if (items.length === 0 && !this.loading) {
+          localStorage.removeItem(this.CART_DISCOUNT_KEY);
+          this.router.navigate(['/cesta']);
+        }
+      });
 
     this.prefillUserData();
     this.loadDiscountFromStorage();
+    this.preloadStripe();
   }
 
   ngAfterViewChecked(): void {
@@ -108,6 +248,11 @@ export class Checkout implements OnInit {
       this.initializeStep3PaymentUI();
     }
   }
+
+
+  // ════════════════════════════════════════════
+  // Computed getters
+  // ════════════════════════════════════════════
 
   get subtotal(): number {
     return this.items.reduce((acc, i) => acc + i.price * i.quantity, 0);
@@ -119,7 +264,9 @@ export class Checkout implements OnInit {
   }
 
   get discount(): number {
-    return this.discountPct > 0 ? +(this.subtotal * this.discountPct / 100).toFixed(2) : 0;
+    return this.discountPct > 0
+      ? +(this.subtotal * this.discountPct / 100).toFixed(2)
+      : 0;
   }
 
   get total(): number {
@@ -130,29 +277,32 @@ export class Checkout implements OnInit {
     return this.items.reduce((acc, i) => acc + i.quantity, 0);
   }
 
+
+  // ════════════════════════════════════════════
+  // Navigation
+  // ════════════════════════════════════════════
+
   nextStep(): void {
     this.errorMessage = '';
-    if (this.currentStep === 1 && !this.isStep1Valid()) {
-      this.errorMessage = 'Por favor completa todos los datos de entrega';
-      return;
-    }
+
     if (this.currentStep === 1) {
+      const validationError = this.getStep1ValidationError();
+      if (validationError) {
+        this.errorMessage = validationError;
+        return;
+      }
+      if (this.form.saveData) this.persistUserData();
       this.currentStep = 2;
       return;
     }
+
     if (this.currentStep === 2) {
       this.currentStep = 3;
       this.paypalApproved = false;
       this.stripeElementMounted = false;
       this.paypalButtonsRendered = false;
       this.step3InitPending = true;
-      return;
     }
-  }
-
-  onPaymentMethodChanged(): void {
-    this.errorMessage = '';
-    this.paypalApproved = false;
   }
 
   prevStep(): void {
@@ -162,93 +312,191 @@ export class Checkout implements OnInit {
     }
   }
 
-  private isStep1Valid(): boolean {
-    return !!(
-      this.form.fullName.trim() &&
-      this.form.email.trim() &&
-      this.form.phone.trim() &&
-      this.form.address.trim() &&
-      this.form.city.trim() &&
-      this.form.postalCode.trim()
-    );
+  onPaymentMethodChanged(): void {
+    this.errorMessage = '';
+    this.paypalApproved = false;
+  }
+
+
+  // ════════════════════════════════════════════
+  // Postal code autocomplete
+  // ════════════════════════════════════════════
+
+  onPostalCodeChange(postalCode: string): void {
+    // Solo dígitos, máx 5
+    const cleaned = postalCode.replace(/\D/g, '').substring(0, 5);
+    this.form.postalCode = cleaned;
+
+    // Resetear estados al editar
+    this.postalCodeError = false;
+    this.postalCodeResolved = false;
+
+    if (cleaned.length !== 5) {
+      this.postalCodeLoading = false;
+      return;
+    }
+
+    this.postalCodeLoading = true;
+    this.form.city = '';
+
+    this.http
+      .get<ZippopotamResponse>(`https://api.zippopotam.us/es/${cleaned}`)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (data) => {
+          this.postalCodeLoading = false;
+          if (data?.places?.length > 0) {
+            this.form.city = data.places[0]['place name'];
+            this.postalCodeError = false;
+            this.postalCodeResolved = true;
+          } else {
+            this.postalCodeError = true;
+            this.postalCodeResolved = false;
+          }
+        },
+        error: () => {
+          this.postalCodeLoading = false;
+          // Fallback al Map estático
+          const city = POSTAL_CITY.get(cleaned);
+          if (city) {
+            this.form.city = city;
+            this.postalCodeError = false;
+            this.postalCodeResolved = true;
+          } else {
+            this.postalCodeError = true;
+            this.postalCodeResolved = false;
+          }
+        },
+      });
+  }
+
+
+  // ════════════════════════════════════════════
+  // Validation
+  // ════════════════════════════════════════════
+
+  private getStep1ValidationError(): string | null {
+    const f = this.form;
+    if (!f.fullName.trim()) return 'El nombre completo es obligatorio.';
+    if (!this.isValidEmail(f.email)) return 'Introduce un email válido.';
+    if (!this.isValidSpanishPhone(f.phone)) return 'Introduce un teléfono válido (9 dígitos).';
+    if (!f.address.trim()) return 'La dirección es obligatoria.';
+    if (!/^\d{5}$/.test(f.postalCode.trim())) return 'El código postal debe tener 5 dígitos.';
+    if (!f.city.trim()) return 'La ciudad es obligatoria.';
+    return null;
+  }
+
+  private isValidEmail(email: string): boolean {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
+  }
+
+  private isValidSpanishPhone(phone: string): boolean {
+    return /^[67]\d{8}$/.test(phone.replace(/\s/g, ''));
   }
 
   private isPaymentDataValid(): boolean {
     switch (this.form.paymentMethod) {
-      case 'card':
-        return this.stripeElementMounted;
-      case 'bizum':
-        return /^\d{9}$/.test(this.form.bizumPhone.replace(/\s/g, ''));
-      case 'paypal':
-        return this.paypalApproved;
-      case 'cash_on_delivery':
-        return true;
-      default:
-        return false;
+      case 'card': return this.stripeElementMounted;
+      case 'bizum': return /^\d{9}$/.test(this.form.bizumPhone.replace(/\s/g, ''));
+      case 'paypal': return this.paypalApproved;
+      case 'cash_on_delivery': return true;
+      default: return false;
     }
   }
+
+  private isFormValid(): boolean {
+    return !!(
+      this.form.fullName.trim() &&
+      this.isValidEmail(this.form.email) &&
+      this.isValidSpanishPhone(this.form.phone) &&
+      this.form.address.trim() &&
+      this.form.city.trim() &&
+      /^\d{5}$/.test(this.form.postalCode.trim()) &&
+      this.form.paymentMethod &&
+      this.form.acceptTerms
+    );
+  }
+
+
+  // ════════════════════════════════════════════
+  // Submit flow
+  // ════════════════════════════════════════════
 
   submit(): void {
     this.errorMessage = '';
 
+    if (!this.form.acceptTerms) {
+      this.errorMessage = 'Debes aceptar los términos y la política de privacidad.';
+      return;
+    }
+
     if (!this.isFormValid()) {
-      this.errorMessage = 'Completa todos los datos obligatorios y acepta los terminos';
+      this.errorMessage = 'Completa todos los datos obligatorios.';
       return;
     }
 
     if (this.form.paymentMethod === 'paypal') {
-      this.errorMessage = 'Pulsa el botón de PayPal para completar el pago';
+      this.errorMessage = 'Pulsa el botón de PayPal para completar el pago.';
       return;
     }
 
     if (!this.isPaymentDataValid()) {
-      this.errorMessage = 'Por favor verifica los datos de pago';
+      this.errorMessage = 'Por favor verifica los datos de pago.';
       return;
     }
 
-    this.processGatewayPaymentIfNeeded();
+    this.form.paymentMethod === 'card'
+      ? this.confirmStripePayment()
+      : this.createOrders();
   }
 
-  private processGatewayPaymentIfNeeded(): void {
-    if (this.form.paymentMethod === 'card') {
-      this.confirmStripePayment();
-      return;
-    }
 
-    this.createOrders();
-  }
+  // ════════════════════════════════════════════
+  // Stripe
+  // ════════════════════════════════════════════
 
-  private async initializeStep3PaymentUI(): Promise<void> {
-    if (this.form.paymentMethod === 'card') {
-      await this.initStripePaymentElement();
-      return;
-    }
-
-    if (this.form.paymentMethod === 'paypal') {
-      await this.initPaypalButtons();
+  private preloadStripe(): void {
+    const key = environment.stripePublicKey;
+    if (key && !key.includes('replace_me')) {
+      loadStripe(key)
+        .then(s => { this.stripe = s; })
+        .catch(() => { });
     }
   }
 
   private async initStripePaymentElement(): Promise<void> {
-    if (!environment.stripePublicKey || environment.stripePublicKey.includes('replace_me')) {
-      this.errorMessage = 'Falta configurar stripePublicKey en frontend.';
+    const key = environment.stripePublicKey;
+    if (!key || key.includes('replace_me')) {
+      this.errorMessage = 'Falta configurar stripePublicKey en el entorno.';
       return;
     }
 
     try {
-      this.stripe = this.stripe ?? await loadStripe(environment.stripePublicKey);
+      this.stripe ??= await loadStripe(key);
 
       if (!this.stripe) {
         this.errorMessage = 'No se pudo inicializar Stripe.';
         return;
       }
 
-      const intent = await firstValueFrom(this.paymentService.createStripeIntent(this.total));
+      const intent = await firstValueFrom(
+        this.paymentService.createStripeIntent(this.total),
+      );
+
+      this.paymentIntentId = intent.payment_intent_id;
+
       this.stripeElements = this.stripe.elements({
         clientSecret: intent.client_secret,
+        appearance: {
+          theme: 'stripe',
+          variables: { colorPrimary: '#16a34a', borderRadius: '12px' },
+        },
       });
 
-      const paymentElement = this.stripeElements.create('payment');
+      const paymentElement = this.stripeElements.create('payment', {
+        layout: 'tabs',
+      });
+
       const host = document.getElementById('stripe-payment-element');
       if (!host) {
         this.errorMessage = 'No se encontró el contenedor de Stripe.';
@@ -271,34 +519,80 @@ export class Checkout implements OnInit {
 
     this.loading = true;
 
-    const { error } = await this.stripe.confirmPayment({
-      elements: this.stripeElements,
-      redirect: 'if_required',
-      confirmParams: {
-        payment_method_data: {
-          billing_details: {
-            name: this.form.fullName,
-            email: this.form.email,
-            phone: this.form.phone,
+    try {
+      const { error, paymentIntent } = await this.stripe.confirmPayment({
+        elements: this.stripeElements,
+        redirect: 'if_required',
+        confirmParams: {
+          payment_method_data: {
+            billing_details: {
+              name: this.form.fullName,
+              email: this.form.email,
+              phone: this.form.phone,
+            },
           },
         },
-      },
-    });
+      });
 
-    if (error) {
+      if (error) {
+        this.loading = false;
+        this.errorMessage = this.getStripeErrorMessage(error);
+        return;
+      }
+
+      if (paymentIntent) this.paymentIntentId = paymentIntent.id;
+      this.createOrders();
+
+    } catch {
       this.loading = false;
-      this.errorMessage = error.message || 'No se pudo confirmar el pago con tarjeta.';
-      return;
+      this.errorMessage = 'Error al procesar el pago. Inténtalo de nuevo.';
+    }
+  }
+
+  private getStripeErrorMessage(error: any): string {
+    const decline = error.decline_code as string | undefined;
+
+    if (error.code === 'card_declined') {
+      const hint = this.isTestMode() ? ' En modo TEST usa: 4242 4242 4242 4242' : '';
+      const reasons: Record<string, string> = {
+        fraudulent: `Tarjeta rechazada por sospecha de fraude.${hint}`,
+        insufficient_funds: `Fondos insuficientes.${hint}`,
+        lost_card: `Tarjeta reportada como perdida.${hint}`,
+        stolen_card: `Tarjeta reportada como robada.${hint}`,
+        generic_decline: `Tarjeta rechazada.${hint}`,
+      };
+      return `❌ ${reasons[decline ?? ''] ?? `Tarjeta rechazada (${decline}).${hint}`}`;
     }
 
-    this.createOrders();
+    const messages: Record<string, string> = {
+      incomplete_number: '❌ Número de tarjeta incompleto.',
+      invalid_number: '❌ Número de tarjeta inválido.',
+      incomplete_expiry: '❌ Fecha de expiración incompleta.',
+      invalid_expiry_month: '❌ Mes de expiración inválido.',
+      invalid_expiry_year: '❌ Año de expiración inválido.',
+      expired_card: '❌ La tarjeta está caducada.',
+      incomplete_cvc: '❌ CVC incompleto.',
+      invalid_cvc: '❌ CVC inválido.',
+      processing_error: '❌ Error al procesar. Inténtalo de nuevo.',
+      incorrect_zip: '❌ Código postal incorrecto.',
+    };
+
+    return messages[error.code] ??
+      error.message ??
+      '❌ No se pudo confirmar el pago. Verifica los datos de tu tarjeta.';
   }
+
+
+  // ════════════════════════════════════════════
+  // PayPal
+  // ════════════════════════════════════════════
 
   private async initPaypalButtons(): Promise<void> {
     if (this.paypalButtonsRendered) return;
 
-    if (!environment.paypalClientId || environment.paypalClientId.includes('replace_me')) {
-      this.errorMessage = 'Falta configurar paypalClientId en frontend.';
+    const clientId = environment.paypalClientId;
+    if (!clientId || clientId.includes('replace_me')) {
+      this.errorMessage = 'Falta configurar paypalClientId en el entorno.';
       return;
     }
 
@@ -312,46 +606,60 @@ export class Checkout implements OnInit {
 
     try {
       const paypal = await loadScript({
-        clientId: environment.paypalClientId,
+        clientId,
         currency: 'EUR',
         intent: 'capture',
       });
 
-      if (!paypal) {
+      if (!paypal?.Buttons) {
         this.errorMessage = 'No se pudo cargar PayPal.';
         return;
       }
 
-      if (!paypal.Buttons) {
-        this.errorMessage = 'No se pudo inicializar el botón de PayPal.';
-        return;
-      }
-
       await paypal.Buttons({
+        style: { layout: 'vertical', shape: 'rect' },
+
         createOrder: async () => {
-          const response = await firstValueFrom(this.paymentService.createPaypalOrder(this.total));
+          const response = await firstValueFrom(
+            this.paymentService.createPaypalOrder(this.total),
+          );
           return response.paypal_order_id;
         },
+
         onApprove: async (data: { orderID: string }) => {
           this.loading = true;
-          await firstValueFrom(this.paymentService.capturePaypalOrder(data.orderID));
-          this.paypalApproved = true;
-          this.createOrders();
+          try {
+            const capture = await firstValueFrom(
+              this.paymentService.capturePaypalOrder(data.orderID),
+            );
+            this.paypalCaptureId = capture.paypal_capture_id ?? null;
+            this.paypalApproved = true;
+            this.createOrders();
+          } catch {
+            this.loading = false;
+            this.errorMessage = 'Error al capturar el pago de PayPal.';
+          }
         },
-        onError: () => {
+
+        onError: (err: any) => {
           this.loading = false;
           this.errorMessage = 'No se pudo completar el pago con PayPal.';
+          console.error('PayPal error:', err);
         },
       }).render('#paypal-button-container');
 
       this.paypalButtonsRendered = true;
     } catch {
-      this.errorMessage = 'Error cargando el popup de PayPal.';
+      this.errorMessage = 'Error cargando PayPal.';
     }
   }
 
-  private createOrders(): void {
 
+  // ════════════════════════════════════════════
+  // Order creation
+  // ════════════════════════════════════════════
+
+  private createOrders(): void {
     if (this.items.length === 0) {
       this.router.navigate(['/cesta']);
       return;
@@ -361,106 +669,132 @@ export class Checkout implements OnInit {
 
     for (const item of this.items) {
       if (!item.farmerId) {
-        this.errorMessage = 'No se pudo validar el agricultor para ' + item.name;
+        this.errorMessage = `No se pudo validar el agricultor para "${item.name}".`;
+        this.loading = false;
         return;
       }
 
-      const existing = ordersByFarmer.get(item.farmerId) ?? {
-        farmer_id: item.farmerId,
-        items: [],
-        shipping_address: this.composeShippingAddress(),
-        discount_code: this.discountCode || undefined,
-        discount_pct: this.discountPct || undefined
-      };
+      if (!ordersByFarmer.has(item.farmerId)) {
+        ordersByFarmer.set(item.farmerId, {
+          farmer_id: item.farmerId,
+          items: [],
+          shipping_address: this.composeShippingAddress(),
+          discount_code: this.discountCode || undefined,
+          discount_pct: this.discountPct || undefined,
+          payment_method: this.form.paymentMethod,
+          payment_intent_id: this.paymentIntentId || undefined,
+          payment_transaction_id: this.paypalCaptureId || undefined,
+        });
+      }
 
-      existing.items.push({
+      ordersByFarmer.get(item.farmerId)!.items.push({
         product_id: item.id,
         quantity: item.quantity,
       });
-
-      ordersByFarmer.set(item.farmerId, existing);
     }
 
-    const requests = Array.from(ordersByFarmer.values()).map(payload =>
-      this.orderService.createOrder(payload)
-    );
-
     this.loading = true;
-    forkJoin(requests).subscribe({
-      next: (orders) => {
-        sessionStorage.removeItem(this.PENDING_CHECKOUT_KEY);
+    this.errorMessage = '';
 
-        localStorage.setItem(this.LAST_ORDER_CONFIRMATION_KEY, JSON.stringify({
-          orderIds: orders.map(order => order.id),
-          total: this.total,
-          totalItems: this.totalItems,
-          paymentMethod: this.getPaymentLabel(this.form.paymentMethod),
-          discountCode: this.discountCode,
-          discountPct: this.discountPct,
-          createdAt: new Date().toISOString()
-        }));
+    const snapshotTotal = this.total;
+    const snapshotTotalItems = this.totalItems;
+    const snapshotDiscount = this.discountCode;
+    const snapshotDiscountPct = this.discountPct;
+
+    forkJoin(
+      Array.from(ordersByFarmer.values()).map(p => this.orderService.createOrder(p)),
+    ).subscribe({
+      next: orders => {
+        localStorage.setItem(
+          this.LAST_ORDER_CONFIRMATION_KEY,
+          JSON.stringify({
+            orderIds: orders.map(o => o.id),
+            total: snapshotTotal,
+            totalItems: snapshotTotalItems,
+            paymentMethod: this.getPaymentLabel(this.form.paymentMethod),
+            discountCode: snapshotDiscount,
+            discountPct: snapshotDiscountPct,
+            createdAt: new Date().toISOString(),
+          }),
+        );
 
         this.carritoService.clear();
+        sessionStorage.removeItem(this.PENDING_CHECKOUT_KEY);
+        localStorage.removeItem(this.CART_DISCOUNT_KEY);
+
         this.loading = false;
         this.router.navigate(['/checkout/confirmacion']);
       },
-      error: (error) => {
+      error: err => {
         this.loading = false;
-        this.errorMessage = error?.error?.message || 'No se pudo tramitar el pedido';
-      }
+        this.errorMessage = err?.error?.message ?? 'No se pudo tramitar el pedido. Inténtalo de nuevo.';
+      },
     });
   }
 
-  private isFormValid(): boolean {
-    return !!(
-      this.form.fullName.trim() &&
-      this.form.email.trim() &&
-      this.form.phone.trim() &&
-      this.form.address.trim() &&
-      this.form.city.trim() &&
-      this.form.postalCode.trim() &&
-      this.form.paymentMethod &&
-      this.form.acceptTerms
-    );
-  }
 
-  private composeShippingAddress(): string {
-    const lines = [
-      this.form.fullName,
-      this.form.address + ', ' + this.form.postalCode + ' ' + this.form.city,
-      'Tel: ' + this.form.phone,
-      'Pago: ' + this.getPaymentLabel(this.form.paymentMethod),
-      this.form.notes ? 'Notas: ' + this.form.notes : ''
-    ].filter(Boolean);
 
-    return lines.join(' | ');
-  }
+  // ════════════════════════════════════════════
+  // Step 3 UI init dispatcher
+  // ════════════════════════════════════════════
 
-  private prefillUserData(): void {
-    const rawUser = localStorage.getItem('user');
-    if (!rawUser) return;
-
-    try {
-      const user = JSON.parse(rawUser);
-      this.form.fullName = user?.name ?? '';
-      this.form.email = user?.email ?? '';
-    } catch {
-      // No-op
+  private async initializeStep3PaymentUI(): Promise<void> {
+    if (this.form.paymentMethod === 'card') {
+      await this.initStripePaymentElement();
+    } else if (this.form.paymentMethod === 'paypal') {
+      await this.initPaypalButtons();
     }
   }
 
-  private loadDiscountFromStorage(): void {
-    const raw = localStorage.getItem(this.CART_DISCOUNT_KEY);
-    if (!raw) return;
+
+  // ════════════════════════════════════════════
+  // Data persistence
+  // ════════════════════════════════════════════
+
+  private prefillUserData(): void {
+    try {
+      const user = JSON.parse(localStorage.getItem('user') ?? 'null');
+      if (user) {
+        this.form.fullName = user.name ?? '';
+        this.form.email = user.email ?? '';
+      }
+    } catch { /* no-op */ }
 
     try {
-      const saved = JSON.parse(raw);
-      this.discountCode = String(saved?.code ?? '').toUpperCase();
-      this.discountPct = Number(saved?.pct ?? 0);
+      const saved: SavedUserData = JSON.parse(
+        localStorage.getItem(this.SAVED_USER_DATA_KEY) ?? 'null',
+      );
+      if (saved) {
+        if (saved.fullName) this.form.fullName = saved.fullName;
+        if (saved.email) this.form.email = saved.email;
+        if (saved.phone) this.form.phone = saved.phone;
+        if (saved.address) this.form.address = saved.address;
+        if (saved.city) this.form.city = saved.city;
+        if (saved.postalCode) this.form.postalCode = saved.postalCode;
+      }
+    } catch { /* no-op */ }
+  }
 
-      if (!this.discountCode || this.discountPct <= 0) {
-        this.discountCode = '';
-        this.discountPct = 0;
+  private persistUserData(): void {
+    const data: SavedUserData = {
+      fullName: this.form.fullName,
+      email: this.form.email,
+      phone: this.form.phone,
+      address: this.form.address,
+      city: this.form.city,
+      postalCode: this.form.postalCode,
+    };
+    localStorage.setItem(this.SAVED_USER_DATA_KEY, JSON.stringify(data));
+  }
+
+  private loadDiscountFromStorage(): void {
+    try {
+      const saved = JSON.parse(localStorage.getItem(this.CART_DISCOUNT_KEY) ?? 'null');
+      const code = String(saved?.code ?? '').toUpperCase();
+      const pct = Number(saved?.pct ?? 0);
+      if (code && pct > 0) {
+        this.discountCode = code;
+        this.discountPct = pct;
       }
     } catch {
       this.discountCode = '';
@@ -468,29 +802,17 @@ export class Checkout implements OnInit {
     }
   }
 
-  getPaymentLabel(method: CheckoutForm['paymentMethod']): string {
-    switch (method) {
-      case 'card': return 'Tarjeta';
-      case 'paypal': return 'PayPal';
-      case 'bizum': return 'Bizum';
-      case 'cash_on_delivery': return 'Contra reembolso';
-      default: return 'Tarjeta';
-    }
-  }
 
-  getPaymentHint(method: CheckoutForm['paymentMethod']): string {
-    switch (method) {
-      case 'card':
-        return 'Introduciras los datos de tu tarjeta en el siguiente paso seguro';
-      case 'paypal':
-        return 'Te redirigiremos a PayPal para completar el pago';
-      case 'bizum':
-        return 'Recibiras la solicitud de pago en tu movil';
-      case 'cash_on_delivery':
-        return 'Pagaras cuando recibas el pedido en tu domicilio';
-      default:
-        return '';
-    }
+  // ════════════════════════════════════════════
+  // Helpers / formatters
+  // ════════════════════════════════════════════
+
+  formatBizumPhone(value: string): string {
+    const d = value.replace(/\D/g, '').substring(0, 9);
+    if (d.length <= 3) return d;
+    if (d.length <= 5) return `${d.slice(0, 3)} ${d.slice(3)}`;
+    if (d.length <= 7) return `${d.slice(0, 3)} ${d.slice(3, 5)} ${d.slice(5)}`;
+    return `${d.slice(0, 3)} ${d.slice(3, 5)} ${d.slice(5, 7)} ${d.slice(7)}`;
   }
 
   formatCardNumber(value: string): string {
@@ -498,82 +820,47 @@ export class Checkout implements OnInit {
   }
 
   formatCardExpiry(value: string): string {
-    const cleaned = value.replace(/\D/g, '').substring(0, 4);
-    if (cleaned.length >= 2) {
-      return cleaned.substring(0, 2) + '/' + cleaned.substring(2);
-    }
-    return cleaned;
-  }
-
-  formatBizumPhone(value: string): string {
-    const cleaned = value.replace(/\D/g, '').substring(0, 9);
-    if (cleaned.length === 0) return '';
-    if (cleaned.length <= 3) return cleaned;
-    if (cleaned.length <= 5) return cleaned.substring(0, 3) + ' ' + cleaned.substring(3);
-    return cleaned.substring(0, 3) + ' ' + cleaned.substring(3, 5) + ' ' + cleaned.substring(5, 7) + ' ' + cleaned.substring(7);
+    const d = value.replace(/\D/g, '').substring(0, 4);
+    return d.length >= 2 ? `${d.slice(0, 2)}/${d.slice(2)}` : d;
   }
 
   formatCVV(value: string): string {
     return value.replace(/\D/g, '').substring(0, 4);
   }
 
-  onPostalCodeChange(postalCode: string): void {
-    postalCode = postalCode.trim();
-    if (postalCode.length < 5) return;
-    
-    const cityByPostal: { [key: string]: string } = {
-      '28001': 'Madrid', '28002': 'Madrid', '28003': 'Madrid', '28004': 'Madrid', '28005': 'Madrid',
-      '28006': 'Madrid', '28007': 'Madrid', '28008': 'Madrid', '28009': 'Madrid', '28010': 'Madrid',
-      '28011': 'Madrid', '28012': 'Madrid', '28013': 'Madrid', '28014': 'Madrid', '28015': 'Madrid',
-      '28016': 'Madrid', '28017': 'Madrid', '28018': 'Madrid', '28019': 'Madrid', '28020': 'Madrid',
-      '28021': 'Madrid', '28022': 'Madrid', '28023': 'Madrid', '28024': 'Madrid', '28025': 'Madrid',
-      '28026': 'Madrid', '28027': 'Madrid', '28028': 'Madrid', '28029': 'Madrid', '28030': 'Madrid',
-      '28031': 'Madrid', '28032': 'Madrid', '28033': 'Madrid', '28034': 'Madrid', '28035': 'Madrid',
-      '28036': 'Madrid', '28037': 'Madrid', '28038': 'Madrid', '28039': 'Madrid', '28040': 'Madrid',
-      '28041': 'Madrid', '28042': 'Madrid', '28043': 'Madrid', '28044': 'Madrid', '28045': 'Madrid',
-      '28046': 'Madrid', '28047': 'Madrid', '28048': 'Madrid', '28049': 'Madrid', '28050': 'Madrid',
-      '08001': 'Barcelona', '08002': 'Barcelona', '08003': 'Barcelona', '08004': 'Barcelona', '08005': 'Barcelona',
-      '08006': 'Barcelona', '08007': 'Barcelona', '08008': 'Barcelona', '08009': 'Barcelona', '08010': 'Barcelona',
-      '08011': 'Barcelona', '08012': 'Barcelona', '08013': 'Barcelona', '08014': 'Barcelona', '08015': 'Barcelona',
-      '08016': 'Barcelona', '08017': 'Barcelona', '08018': 'Barcelona', '08019': 'Barcelona', '08020': 'Barcelona',
-      '08021': 'Barcelona', '08022': 'Barcelona', '08023': 'Barcelona', '08024': 'Barcelona', '08025': 'Barcelona',
-      '08026': 'Barcelona', '08027': 'Barcelona', '08028': 'Barcelona', '08029': 'Barcelona', '08030': 'Barcelona',
-      '08031': 'Barcelona', '08032': 'Barcelona', '08033': 'Barcelona', '08034': 'Barcelona', '08035': 'Barcelona',
-      '08036': 'Barcelona', '08037': 'Barcelona', '08038': 'Barcelona', '08039': 'Barcelona', '08040': 'Barcelona',
-      '08041': 'Barcelona', '08042': 'Barcelona', '08043': 'Barcelona', '08044': 'Barcelona',
-      '46001': 'Valencia', '46002': 'Valencia', '46003': 'Valencia', '46004': 'Valencia', '46005': 'Valencia',
-      '46006': 'Valencia', '46007': 'Valencia', '46008': 'Valencia', '46009': 'Valencia', '46010': 'Valencia',
-      '46011': 'Valencia', '46012': 'Valencia', '46013': 'Valencia', '46014': 'Valencia', '46015': 'Valencia',
-      '46016': 'Valencia', '46017': 'Valencia', '46018': 'Valencia', '46019': 'Valencia', '46020': 'Valencia',
-      '46021': 'Valencia', '46022': 'Valencia', '46023': 'Valencia', '46024': 'Valencia', '46025': 'Valencia',
-      '46026': 'Valencia', '46027': 'Valencia',
-      '41001': 'Sevilla', '41002': 'Sevilla', '41003': 'Sevilla', '41004': 'Sevilla', '41005': 'Sevilla',
-      '41006': 'Sevilla', '41007': 'Sevilla', '41008': 'Sevilla', '41009': 'Sevilla', '41010': 'Sevilla',
-      '41011': 'Sevilla', '41012': 'Sevilla', '41013': 'Sevilla', '41014': 'Sevilla', '41015': 'Sevilla',
-      '41016': 'Sevilla', '41017': 'Sevilla', '41018': 'Sevilla', '41019': 'Sevilla', '41020': 'Sevilla',
-      '41021': 'Sevilla', '41022': 'Sevilla', '41023': 'Sevilla', '41024': 'Sevilla', '41025': 'Sevilla',
-      '14001': 'Córdoba', '14002': 'Córdoba', '14003': 'Córdoba', '14004': 'Córdoba', '14005': 'Córdoba',
-      '14006': 'Córdoba', '14007': 'Córdoba', '14008': 'Córdoba', '14009': 'Córdoba', '14010': 'Córdoba',
-      '14011': 'Córdoba', '14012': 'Córdoba', '14013': 'Córdoba', '14014': 'Córdoba',
-      '18001': 'Granada', '18002': 'Granada', '18003': 'Granada', '18004': 'Granada', '18005': 'Granada',
-      '18006': 'Granada', '18007': 'Granada', '18008': 'Granada', '18009': 'Granada', '18010': 'Granada',
-      '18011': 'Granada', '18012': 'Granada', '18013': 'Granada', '18014': 'Granada', '18015': 'Granada',
-      '18016': 'Granada', '18017': 'Granada', '18018': 'Granada', '18019': 'Granada',
-      '29001': 'Málaga', '29002': 'Málaga', '29003': 'Málaga', '29004': 'Málaga', '29005': 'Málaga',
-      '29006': 'Málaga', '29007': 'Málaga', '29008': 'Málaga', '29009': 'Málaga', '29010': 'Málaga',
-      '29011': 'Málaga', '29012': 'Málaga', '29013': 'Málaga', '29014': 'Málaga', '29015': 'Málaga',
-      '29016': 'Málaga', '29017': 'Málaga', '29018': 'Málaga', '29019': 'Málaga', '29020': 'Málaga',
-      '29021': 'Málaga',
-      '04001': 'Almería', '04002': 'Almería', '04003': 'Almería', '04004': 'Almería', '04005': 'Almería',
-      '04006': 'Almería', '04007': 'Almería'
+  getPaymentLabel(method: CheckoutForm['paymentMethod']): string {
+    const labels: Record<CheckoutForm['paymentMethod'], string> = {
+      card: 'Tarjeta',
+      paypal: 'PayPal',
+      bizum: 'Bizum',
+      cash_on_delivery: 'Contra reembolso',
     };
-    
-    const city = cityByPostal[postalCode];
-    if (city) {
-      this.form.city = city;
-    }
+    return labels[method] ?? 'Tarjeta';
   }
 
+  getPaymentHint(method: CheckoutForm['paymentMethod']): string {
+    const hints: Record<CheckoutForm['paymentMethod'], string> = {
+      card: 'Introducirás los datos de tu tarjeta en el paso seguro de Stripe.',
+      paypal: 'Se abrirá el popup oficial de PayPal para completar el pago.',
+      bizum: 'Recibirás la solicitud de pago en tu móvil.',
+      cash_on_delivery: 'Pagarás en efectivo cuando recibas el pedido en tu domicilio.',
+    };
+    return hints[method] ?? '';
+  }
+
+  isTestMode(): boolean {
+    return environment.stripePublicKey?.startsWith('pk_test') ?? false;
+  }
+
+  private composeShippingAddress(): string {
+    return [
+      this.form.fullName,
+      `${this.form.address}, ${this.form.postalCode} ${this.form.city}`,
+      `Tel: ${this.form.phone}`,
+      `Pago: ${this.getPaymentLabel(this.form.paymentMethod)}`,
+      this.form.notes ? `Notas: ${this.form.notes}` : '',
+    ]
+      .filter(Boolean)
+      .join(' | ');
+  }
 }
-
-

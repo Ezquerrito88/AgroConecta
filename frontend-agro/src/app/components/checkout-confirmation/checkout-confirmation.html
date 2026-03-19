@@ -1,62 +1,172 @@
+<!-- HERO -->
 <section class="confirmation-hero">
   <div class="confirmation-hero-inner">
-    <h1>Pedido confirmado</h1>
-    <p>Tu compra se ha registrado correctamente.</p>
+    <nav class="breadcrumb" aria-label="Ruta de navegación">
+      <a routerLink="/">Inicio</a>
+      <span class="separator" aria-hidden="true">›</span>
+      <a routerLink="/productos">Tienda</a>
+      <span class="separator" aria-hidden="true">›</span>
+      <span>Confirmación</span>
+    </nav>
 
-    <div class="checkout-steps" aria-label="Pasos del pago">
-      <div class="step active-step"><span class="step-number">1</span><span class="step-text">Cesta</span></div>
-      <div class="step active-step"><span class="step-number">2</span><span class="step-text">Datos y pago</span></div>
-      <div class="step active-step"><span class="step-number">3</span><span class="step-text">Confirmación</span></div>
+    <h1>¡Pedido confirmado!</h1>
+    <p>Tu compra se ha registrado correctamente. Recibirás actualizaciones del estado.</p>
+
+    <div class="checkout-steps" aria-label="Pasos del pago" role="list">
+      <div class="step completed-step" role="listitem">
+        <div class="step-bubble">
+          <span class="material-symbols-rounded">check</span>
+        </div>
+        <span class="step-text">Entrega</span>
+      </div>
+      <div class="step-connector connector-active"></div>
+
+      <div class="step completed-step" role="listitem">
+        <div class="step-bubble">
+          <span class="material-symbols-rounded">check</span>
+        </div>
+        <span class="step-text">Pago</span>
+      </div>
+      <div class="step-connector connector-active"></div>
+
+      <div class="step active-step" role="listitem">
+        <div class="step-bubble">
+          <span class="material-symbols-rounded">verified</span>
+        </div>
+        <span class="step-text">Confirmación</span>
+      </div>
+    </div>
+
+    <div class="progress-bar-track" aria-hidden="true">
+      <div class="progress-bar-fill" style="width: 100%"></div>
     </div>
   </div>
 </section>
 
+
 <main class="confirmation-layout" *ngIf="data as summary">
-  <section class="confirmation-card">
+
+  <section class="confirmation-card" aria-label="Resumen del pedido">
+
+    <!-- Badge de éxito animado -->
+    <div class="success-animation">
+      <div class="success-circle">
+        <span class="material-symbols-rounded">check_circle</span>
+      </div>
+    </div>
+
     <div class="ok-badge">
-      <span class="material-symbols-rounded">check_circle</span>
-      Pedido realizado con exito
+      <span class="material-symbols-rounded">verified</span>
+      Pedido realizado con éxito
     </div>
 
-    <h2>Gracias por tu compra</h2>
-    <p class="subtitle">Hemos enviado la confirmación y empezaremos a preparar tu pedido.</p>
+    <h2>¡Gracias por tu compra, {{ getFirstName() }}!</h2>
+    <p class="subtitle">
+      Hemos recibido tu pedido y empezaremos a prepararlo enseguida.
+      <span *ngIf="summary.orderIds.length === 1">
+        Tu número de pedido es <strong>#{{ summary.orderIds[0] }}</strong>.
+      </span>
+    </p>
 
+    <!-- Detalles del pedido -->
     <div class="details-grid">
-      <article>
-        <span class="label">Numero de pedido</span>
-        <strong *ngIf="summary.orderIds.length === 1">#{{ summary.orderIds[0] }}</strong>
-        <strong *ngIf="summary.orderIds.length > 1">{{ summary.orderIds.length }} pedidos: #{{ summary.orderIds.join(', #') }}</strong>
+
+      <article class="detail-card">
+        <div class="detail-icon">
+          <span class="material-symbols-rounded">receipt_long</span>
+        </div>
+        <div class="detail-body">
+          <span class="label">Número de pedido</span>
+          <strong *ngIf="summary.orderIds.length === 1">#{{ summary.orderIds[0] }}</strong>
+          <strong *ngIf="summary.orderIds.length > 1">
+            {{ summary.orderIds.length }} pedidos:
+            <span *ngFor="let id of summary.orderIds; let last = last">
+              #{{ id }}<span *ngIf="!last">, </span>
+            </span>
+          </strong>
+        </div>
       </article>
 
-      <article>
-        <span class="label">Fecha</span>
-        <strong>{{ summary.createdAt | date:'dd/MM/yyyy HH:mm' }}</strong>
+      <article class="detail-card">
+        <div class="detail-icon">
+          <span class="material-symbols-rounded">calendar_today</span>
+        </div>
+        <div class="detail-body">
+          <span class="label">Fecha del pedido</span>
+          <strong>{{ summary.createdAt | date:'dd/MM/yyyy · HH:mm' }}</strong>
+        </div>
       </article>
 
-      <article>
-        <span class="label">Metodo de pago</span>
-        <strong>{{ summary.paymentMethod }}</strong>
+      <article class="detail-card">
+        <div class="detail-icon">
+          <span class="material-symbols-rounded">payments</span>
+        </div>
+        <div class="detail-body">
+          <span class="label">Método de pago</span>
+          <strong>{{ summary.paymentMethod }}</strong>
+        </div>
       </article>
 
-      <article>
-        <span class="label">Productos</span>
-        <strong>{{ summary.totalItems }} articulos</strong>
+      <article class="detail-card">
+        <div class="detail-icon">
+          <span class="material-symbols-rounded">shopping_bag</span>
+        </div>
+        <div class="detail-body">
+          <span class="label">Artículos</span>
+          <strong>{{ summary.totalItems }} artículo{{ summary.totalItems !== 1 ? 's' : '' }}</strong>
+        </div>
       </article>
 
-      <article>
-        <span class="label">Total pagado</span>
-        <strong>{{ summary.total | currency:'EUR':'symbol':'1.2-2' }}</strong>
+      <article class="detail-card highlight-card" [class.full-width]="!summary.discountPct">
+        <div class="detail-icon green">
+          <span class="material-symbols-rounded">euro</span>
+        </div>
+        <div class="detail-body">
+          <span class="label">Total pagado</span>
+          <strong class="total-amount">{{ summary.total | currency:'EUR':'symbol':'1.2-2' }}</strong>
+        </div>
       </article>
 
-      <article *ngIf="summary.discountPct && summary.discountCode">
-        <span class="label">Descuento aplicado</span>
-        <strong>{{ summary.discountCode }} ({{ summary.discountPct }}%)</strong>
+      <article class="detail-card discount-card" *ngIf="summary.discountPct && summary.discountCode">
+        <div class="detail-icon orange">
+          <span class="material-symbols-rounded">local_offer</span>
+        </div>
+        <div class="detail-body">
+          <span class="label">Descuento aplicado</span>
+          <strong>
+            <span class="discount-chip">{{ summary.discountCode }}</span>
+            −{{ summary.discountPct }}%
+          </strong>
+        </div>
       </article>
+
     </div>
 
+    <!-- Info de seguimiento -->
+    <div class="info-banner">
+      <span class="material-symbols-rounded">local_shipping</span>
+      <div>
+        <strong>Tu pedido está en preparación</strong>
+        <p>Recibirás un email con el seguimiento cuando sea enviado.</p>
+      </div>
+    </div>
+
+    <!-- Acciones -->
     <div class="actions">
-      <a routerLink="/productos" class="btn-secondary">Seguir comprando</a>
-      <button class="btn-primary" (click)="finish()">Ir al inicio</button>
+      <a routerLink="/productos" class="btn-secondary">
+        <span class="material-symbols-rounded">storefront</span>
+        Seguir comprando
+      </a>
+      <a routerLink="/mis-pedidos" class="btn-outline">
+        <span class="material-symbols-rounded">list_alt</span>
+        Ver mis pedidos
+      </a>
+      <button class="btn-primary" (click)="finish()">
+        <span class="material-symbols-rounded">home</span>
+        Ir al inicio
+      </button>
     </div>
+
   </section>
+
 </main>

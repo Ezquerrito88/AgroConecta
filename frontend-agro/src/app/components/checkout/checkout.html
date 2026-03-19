@@ -1,8 +1,6 @@
+<!-- HERO -->
 <section class="checkout-hero">
   <div class="checkout-hero-inner">
-    <h1>Finalizar compra</h1>
-    <p>Te guiamos paso a paso para terminar tu pedido sin complicaciones.</p>
-
     <nav class="breadcrumb" aria-label="Ruta de navegación">
       <a routerLink="/">Inicio</a>
       <span class="separator" aria-hidden="true">›</span>
@@ -11,89 +9,224 @@
       <span>Pago</span>
     </nav>
 
-    <div class="checkout-steps" aria-label="Pasos del pago">
-      <div class="step" [class.active-step]="currentStep >= 1">
-        <span class="step-number">1</span>
+    <h1>Finalizar compra</h1>
+    <p>Te guiamos paso a paso para terminar tu pedido sin complicaciones.</p>
+
+    <div class="checkout-steps" aria-label="Pasos del pago" role="list">
+      <div class="step" [class.active-step]="currentStep >= 1" [class.completed-step]="currentStep > 1" role="listitem">
+        <div class="step-bubble">
+          <span class="material-symbols-rounded check-icon" *ngIf="currentStep > 1">check</span>
+          <span class="step-number" *ngIf="currentStep <= 1">1</span>
+        </div>
         <span class="step-text">Entrega</span>
       </div>
-      <div class="step" [class.active-step]="currentStep >= 2">
-        <span class="step-number">2</span>
+      <div class="step-connector" [class.connector-active]="currentStep >= 2"></div>
+
+      <div class="step" [class.active-step]="currentStep >= 2" [class.completed-step]="currentStep > 2" role="listitem">
+        <div class="step-bubble">
+          <span class="material-symbols-rounded check-icon" *ngIf="currentStep > 2">check</span>
+          <span class="step-number" *ngIf="currentStep <= 2">2</span>
+        </div>
         <span class="step-text">Pago</span>
       </div>
-      <div class="step" [class.active-step]="currentStep >= 3">
-        <span class="step-number">3</span>
+      <div class="step-connector" [class.connector-active]="currentStep >= 3"></div>
+
+      <div class="step" [class.active-step]="currentStep >= 3" role="listitem">
+        <div class="step-bubble">
+          <span class="step-number">3</span>
+        </div>
         <span class="step-text">Confirmación</span>
       </div>
+    </div>
+
+    <div class="progress-bar-track" aria-hidden="true">
+      <div class="progress-bar-fill" [style.width.%]="((currentStep - 1) / 2) * 100"></div>
     </div>
   </div>
 </section>
 
+
 <main class="checkout-layout" *ngIf="items.length > 0">
-  <!-- PASO 1: DATOS DE ENTREGA -->
+
+  <!-- ══════════════════════════════════════════
+       PASO 1 – DATOS DE ENTREGA
+  ══════════════════════════════════════════ -->
   <section class="checkout-form-card" *ngIf="currentStep === 1" aria-label="Paso 1: Datos de entrega">
     <div class="section-header">
-      <span class="section-pill">Paso 1 de 3</span>
+      <span class="section-pill">
+        <span class="material-symbols-rounded">local_shipping</span>
+        Paso 1 de 3
+      </span>
       <h2>Datos de entrega</h2>
-      <p>Rellena estos datos para que podamos enviar tu pedido correctamente.</p>
+      <p>Completa esta información para recibir tu pedido sin problemas.</p>
+    </div>
+
+    <div class="form-section-title">
+      <span class="material-symbols-rounded">person</span>
+      <h3>Información personal</h3>
     </div>
 
     <div class="form-grid">
-      <label>
-        Nombre completo <strong>*</strong>
-        <input type="text" [(ngModel)]="form.fullName" placeholder="Nombre y apellidos" />
-      </label>
 
-      <label>
-        Email <strong>*</strong>
-        <input type="email" [(ngModel)]="form.email" placeholder="tu@email.com" />
-      </label>
+      <!-- Nombre -->
+      <div class="field-group" [class.has-value]="form.fullName.length > 0">
+        <label for="fullName" class="label-text">
+          Nombre completo <strong aria-hidden="true">*</strong>
+        </label>
+        <div class="input-wrapper">
+          <span class="input-icon material-symbols-rounded">badge</span>
+          <input id="fullName" type="text" [(ngModel)]="form.fullName" placeholder="Juan García López"
+            autocomplete="name" />
+          <span class="valid-icon material-symbols-rounded" *ngIf="form.fullName.length > 2">check_circle</span>
+        </div>
+      </div>
 
-      <label>
-        Teléfono <strong>*</strong>
-        <input type="tel" [(ngModel)]="form.phone" placeholder="600 123 123" />
-      </label>
+      <!-- Email -->
+      <div class="field-group" [class.has-value]="form.email.length > 0">
+        <label for="email" class="label-text">
+          Email <strong aria-hidden="true">*</strong>
+        </label>
+        <div class="input-wrapper">
+          <span class="input-icon material-symbols-rounded">mail</span>
+          <input id="email" type="email" [(ngModel)]="form.email" placeholder="tu@email.com" autocomplete="email" />
+          <span class="valid-icon material-symbols-rounded" *ngIf="form.email.includes('@')">check_circle</span>
+        </div>
+      </div>
 
-      <label>
-        Código postal <strong>*</strong>
-        <input type="text" [(ngModel)]="form.postalCode" (ngModelChange)="onPostalCodeChange($event)" placeholder="28001" />
-      </label>
+      <!-- Teléfono -->
+      <div class="field-group full-width" [class.has-value]="form.phone.length > 0">
+        <label for="phone" class="label-text">
+          Teléfono <strong aria-hidden="true">*</strong>
+        </label>
+        <div class="input-wrapper">
+          <span class="input-icon material-symbols-rounded">phone</span>
+          <input id="phone" type="tel" [(ngModel)]="form.phone" placeholder="600 123 456" maxlength="15"
+            autocomplete="tel" inputmode="tel" />
+          <span class="valid-icon material-symbols-rounded" *ngIf="form.phone.length >= 9">check_circle</span>
+        </div>
+      </div>
 
-      <label class="full-width">
-        Dirección <strong>*</strong>
-        <input type="text" [(ngModel)]="form.address" placeholder="Calle, número, piso..." />
-      </label>
-
-      <label class="full-width">
-        Ciudad <strong>*</strong>
-        <input type="text" [(ngModel)]="form.city" placeholder="Madrid" />
-      </label>
-
-      <label class="full-width">
-        Notas para el repartidor
-        <textarea rows="3" [(ngModel)]="form.notes" placeholder="Ej: llamar al llegar"></textarea>
-      </label>
     </div>
 
-    <p class="error-message" *ngIf="errorMessage">{{ errorMessage }}</p>
+    <div class="form-section-title">
+      <span class="material-symbols-rounded">home</span>
+      <h3>Dirección de envío</h3>
+    </div>
+
+    <div class="form-grid">
+
+      <!-- Dirección -->
+      <div class="field-group full-width" [class.has-value]="form.address.length > 0">
+        <label for="address" class="label-text">
+          Dirección completa <strong aria-hidden="true">*</strong>
+        </label>
+        <div class="input-wrapper">
+          <span class="input-icon material-symbols-rounded">location_on</span>
+          <input id="address" type="text" [(ngModel)]="form.address" placeholder="Calle Mayor, 123, 2º A"
+            autocomplete="street-address" />
+          <span class="valid-icon material-symbols-rounded" *ngIf="form.address.length > 5">check_circle</span>
+        </div>
+      </div>
+
+      <!-- Código postal -->
+      <div class="field-group" [class.has-value]="form.postalCode.length > 0">
+        <label for="postalCode" class="label-text">
+          Código postal <strong aria-hidden="true">*</strong>
+        </label>
+        <div class="input-wrapper">
+          <span class="input-icon material-symbols-rounded">local_post_office</span>
+          <input id="postalCode" type="text" [(ngModel)]="form.postalCode" (ngModelChange)="onPostalCodeChange($event)"
+            placeholder="26001" maxlength="5" inputmode="numeric" pattern="[0-9]*" autocomplete="postal-code" />
+          <!-- Spinner mientras carga -->
+          <span class="postal-spinner" *ngIf="postalCodeLoading" aria-label="Buscando ciudad..."></span>
+          <!-- Check si encontró ciudad -->
+          <span class="valid-icon material-symbols-rounded"
+            *ngIf="!postalCodeLoading && form.postalCode.length === 5 && form.city.length > 0 && !postalCodeError">
+            check_circle
+          </span>
+          <!-- Error si no encontró -->
+          <span class="invalid-icon material-symbols-rounded" *ngIf="!postalCodeLoading && postalCodeError">
+            error
+          </span>
+        </div>
+        <!-- Mensaje de error bajo el input -->
+        <small class="postal-error-text" *ngIf="postalCodeError">
+          Código postal no encontrado. Introduce la ciudad manualmente.
+        </small>
+      </div>
+
+      <!-- Ciudad — se rellena sola pero sigue siendo editable -->
+      <div class="field-group" [class.has-value]="form.city.length > 0">
+        <label for="city" class="label-text">
+          Ciudad <strong aria-hidden="true">*</strong>
+          <span class="city-auto-badge"
+            *ngIf="form.city.length > 0 && form.postalCode.length === 5 && !postalCodeError">
+            <span class="material-symbols-rounded">auto_fix_high</span>
+            Autocompletado
+          </span>
+        </label>
+        <div class="input-wrapper">
+          <span class="input-icon material-symbols-rounded">location_city</span>
+          <input id="city" type="text" [(ngModel)]="form.city" placeholder="Se rellena automáticamente"
+            autocomplete="address-level2" />
+          <span class="valid-icon material-symbols-rounded" *ngIf="form.city.length > 2">check_circle</span>
+        </div>
+      </div>
+
+
+      <!-- Notas -->
+      <div class="field-group full-width">
+        <label for="notes" class="label-text">
+          Notas para el repartidor <span class="optional-tag">opcional</span>
+        </label>
+        <div class="input-wrapper">
+          <span class="input-icon material-symbols-rounded" style="top:1rem; align-self:flex-start;">note</span>
+          <textarea id="notes" rows="3" [(ngModel)]="form.notes"
+            placeholder="Ej: Llamar al llegar, portal sin portero automático..."></textarea>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="error-message" role="alert" *ngIf="errorMessage">
+      <span class="material-symbols-rounded">error</span>
+      {{ errorMessage }}
+    </div>
 
     <div class="form-actions">
-      <button class="btn-secondary" routerLink="/cesta">Volver a la cesta</button>
-      <button class="btn-primary" (click)="nextStep()">Siguiente paso</button>
+      <button class="btn-secondary" routerLink="/cesta">
+        <span class="material-symbols-rounded">arrow_back</span>
+        Volver a la cesta
+      </button>
+      <button class="btn-primary" (click)="nextStep()">
+        Continuar al pago
+        <span class="material-symbols-rounded">arrow_forward</span>
+      </button>
     </div>
   </section>
 
-  <!-- PASO 2: MÉTODO DE PAGO -->
+
+  <!-- ══════════════════════════════════════════
+       PASO 2 – MÉTODO DE PAGO
+  ══════════════════════════════════════════ -->
   <section class="checkout-form-card" *ngIf="currentStep === 2" aria-label="Paso 2: Método de pago">
     <div class="section-header">
-      <span class="section-pill">Paso 2 de 3</span>
+      <span class="section-pill">
+        <span class="material-symbols-rounded">payments</span>
+        Paso 2 de 3
+      </span>
       <h2>Método de pago</h2>
-      <p>Elige cómo quieres pagar. Puedes cambiarlo en cualquier momento.</p>
+      <p>Elige cómo quieres pagar. Tu transacción está protegida con cifrado SSL.</p>
     </div>
 
     <div class="payment-grid" role="radiogroup" aria-label="Método de pago">
+
       <label class="payment-option" [class.active]="form.paymentMethod === 'card'">
-        <input class="payment-radio" type="radio" name="paymentMethod" [(ngModel)]="form.paymentMethod" (ngModelChange)="onPaymentMethodChanged()" value="card" />
-        <span class="material-symbols-rounded payment-icon">credit_card</span>
+        <input class="payment-radio" type="radio" name="paymentMethod" [(ngModel)]="form.paymentMethod"
+          (ngModelChange)="onPaymentMethodChanged()" value="card" />
+        <div class="payment-icon-wrap">
+          <span class="material-symbols-rounded">credit_card</span>
+        </div>
         <div class="payment-text">
           <span>Tarjeta</span>
           <small>Visa, Mastercard</small>
@@ -102,8 +235,11 @@
       </label>
 
       <label class="payment-option" [class.active]="form.paymentMethod === 'paypal'">
-        <input class="payment-radio" type="radio" name="paymentMethod" [(ngModel)]="form.paymentMethod" (ngModelChange)="onPaymentMethodChanged()" value="paypal" />
-        <span class="material-symbols-rounded payment-icon">account_balance_wallet</span>
+        <input class="payment-radio" type="radio" name="paymentMethod" [(ngModel)]="form.paymentMethod"
+          (ngModelChange)="onPaymentMethodChanged()" value="paypal" />
+        <div class="payment-icon-wrap">
+          <span class="material-symbols-rounded">account_balance_wallet</span>
+        </div>
         <div class="payment-text">
           <span>PayPal</span>
           <small>Pago online seguro</small>
@@ -112,8 +248,11 @@
       </label>
 
       <label class="payment-option" [class.active]="form.paymentMethod === 'bizum'">
-        <input class="payment-radio" type="radio" name="paymentMethod" [(ngModel)]="form.paymentMethod" (ngModelChange)="onPaymentMethodChanged()" value="bizum" />
-        <span class="material-symbols-rounded payment-icon">smartphone</span>
+        <input class="payment-radio" type="radio" name="paymentMethod" [(ngModel)]="form.paymentMethod"
+          (ngModelChange)="onPaymentMethodChanged()" value="bizum" />
+        <div class="payment-icon-wrap">
+          <span class="material-symbols-rounded">smartphone</span>
+        </div>
         <div class="payment-text">
           <span>Bizum</span>
           <small>Pago al móvil</small>
@@ -122,139 +261,223 @@
       </label>
 
       <label class="payment-option" [class.active]="form.paymentMethod === 'cash_on_delivery'">
-        <input class="payment-radio" type="radio" name="paymentMethod" [(ngModel)]="form.paymentMethod" (ngModelChange)="onPaymentMethodChanged()" value="cash_on_delivery" />
-        <span class="material-symbols-rounded payment-icon">payments</span>
+        <input class="payment-radio" type="radio" name="paymentMethod" [(ngModel)]="form.paymentMethod"
+          (ngModelChange)="onPaymentMethodChanged()" value="cash_on_delivery" />
+        <div class="payment-icon-wrap">
+          <span class="material-symbols-rounded">payments</span>
+        </div>
         <div class="payment-text">
           <span>Contra reembolso</span>
           <small>Pagas al recibir</small>
         </div>
         <span class="material-symbols-rounded payment-check" aria-hidden="true">check_circle</span>
       </label>
+
     </div>
 
-    <p class="payment-help">{{ getPaymentHint(form.paymentMethod) }}</p>
+    <div class="payment-help" *ngIf="form.paymentMethod">
+      <span class="material-symbols-rounded">info</span>
+      {{ getPaymentHint(form.paymentMethod) }}
+    </div>
 
-    <p class="error-message" *ngIf="errorMessage">{{ errorMessage }}</p>
+    <div class="security-badge">
+      <span class="material-symbols-rounded">lock</span>
+      <span>Pago 100% seguro · Cifrado SSL · Datos protegidos</span>
+    </div>
+
+    <div class="error-message" role="alert" *ngIf="errorMessage">
+      <span class="material-symbols-rounded">error</span>
+      {{ errorMessage }}
+    </div>
 
     <div class="form-actions">
-      <button class="btn-secondary" (click)="prevStep()">Volver atrás</button>
-      <button class="btn-primary" (click)="nextStep()">Siguiente paso</button>
+      <button class="btn-secondary" (click)="prevStep()">
+        <span class="material-symbols-rounded">arrow_back</span>
+        Volver atrás
+      </button>
+      <button class="btn-primary" (click)="nextStep()">
+        Revisar pedido
+        <span class="material-symbols-rounded">arrow_forward</span>
+      </button>
     </div>
   </section>
 
-  <!-- PASO 3: DETALLES DE PAGO -->
-  <section class="checkout-form-card" *ngIf="currentStep === 3" aria-label="Paso 3: Detalles de pago">
+
+  <!-- ══════════════════════════════════════════
+       PASO 3 – CONFIRMAR Y PAGAR
+  ══════════════════════════════════════════ -->
+  <section class="checkout-form-card" *ngIf="currentStep === 3" aria-label="Paso 3: Confirmar pedido">
     <div class="section-header">
-      <span class="section-pill">Paso 3 de 3</span>
-      <h2>Detalles de {{ getPaymentLabel(form.paymentMethod) }}</h2>
-      <p>Completa los datos para confirmar tu pago.</p>
+      <span class="section-pill">
+        <span class="material-symbols-rounded">verified</span>
+        Último paso
+      </span>
+      <h2>Confirmar y pagar</h2>
+      <p>Revisa tu pedido antes de confirmar el pago.</p>
     </div>
 
-    <!-- TARJETA DE CRÉDITO -->
-    <div class="payment-details" *ngIf="form.paymentMethod === 'card'">
-      <p class="gateway-note">Introduce tu tarjeta en el formulario seguro de Stripe.</p>
-      <div id="stripe-payment-element" class="gateway-host"></div>
-    </div>
+    <!-- Resumen de entrega colapsable -->
+    <details class="delivery-summary-box" open>
+      <summary>
+        <span class="material-symbols-rounded">local_shipping</span>
+        <strong>Dirección de entrega</strong>
+        <span class="material-symbols-rounded expand-icon">expand_more</span>
+      </summary>
+      <div class="delivery-summary-content">
+        <p>{{ form.fullName }}</p>
+        <p>{{ form.address }}, {{ form.postalCode }} {{ form.city }}</p>
+        <p>{{ form.phone }}</p>
+        <button type="button" class="btn-edit-link" (click)="currentStep = 1">
+          <span class="material-symbols-rounded">edit</span> Modificar dirección
+        </button>
+      </div>
+    </details>
 
-    <!-- BIZUM -->
-    <div class="payment-details" *ngIf="form.paymentMethod === 'bizum'">
-      <label class="full-width">
-        Número de teléfono <strong>*</strong>
-        <input 
-          type="tel" 
-          [(ngModel)]="form.bizumPhone"
-          (ngModelChange)="form.bizumPhone = formatBizumPhone($event)"
-          placeholder="644 97 42 59"
-          maxlength="12"
-          inputmode="numeric"
-        />
-        <small>Número donde recibirás la solicitud de Bizum</small>
-      </label>
-    </div>
+    <!-- Detalles del método de pago -->
+    <div class="payment-details">
 
-    <!-- PAYPAL -->
-    <div class="payment-details" *ngIf="form.paymentMethod === 'paypal'">
-      <p class="gateway-note">Pulsa el botón para abrir el popup oficial de PayPal.</p>
-      <div id="paypal-button-container" class="gateway-host"></div>
-    </div>
-
-    <!-- CONTRA REEMBOLSO -->
-    <div class="payment-details" *ngIf="form.paymentMethod === 'cash_on_delivery'">
-      <div class="info-box">
-        <span class="material-symbols-rounded">info</span>
-        <div>
-          <strong>Pago contra reembolso</strong>
-          <p>Pagarás en efectivo cuando recibas tu pedido en la dirección indicada.</p>
+      <!-- Tarjeta (Stripe) -->
+      <ng-container *ngIf="form.paymentMethod === 'card'">
+        <div class="test-mode-banner" *ngIf="isTestMode()">
+          <span class="material-symbols-rounded">science</span>
+          <div>
+            <strong>🧪 Modo Test activo</strong>
+            <p>Usa la tarjeta <code>4242 4242 4242 4242</code> · Fecha futura · CVC: 3 dígitos cualesquiera</p>
+          </div>
         </div>
+        <p class="gateway-note">Introduce tu tarjeta en el formulario seguro de Stripe.</p>
+        <div id="stripe-payment-element" class="gateway-host"></div>
+      </ng-container>
+
+      <!-- Bizum -->
+      <ng-container *ngIf="form.paymentMethod === 'bizum'">
+        <div class="field-group full-width">
+          <label for="bizumPhone" class="label-text">
+            Número de teléfono <strong>*</strong>
+          </label>
+          <div class="input-wrapper">
+            <span class="input-icon material-symbols-rounded">smartphone</span>
+            <input id="bizumPhone" type="tel" [(ngModel)]="form.bizumPhone"
+              (ngModelChange)="form.bizumPhone = formatBizumPhone($event)" placeholder="644 97 42 59" maxlength="12"
+              inputmode="numeric" />
+          </div>
+          <small>Número donde recibirás la solicitud de Bizum</small>
+        </div>
+      </ng-container>
+
+      <!-- PayPal -->
+      <ng-container *ngIf="form.paymentMethod === 'paypal'">
+        <p class="gateway-note">Pulsa el botón para abrir el popup oficial de PayPal.</p>
+        <div id="paypal-button-container" class="gateway-host"></div>
+      </ng-container>
+
+      <!-- Contra reembolso -->
+      <ng-container *ngIf="form.paymentMethod === 'cash_on_delivery'">
+        <div class="info-box">
+          <span class="material-symbols-rounded">payments</span>
+          <div>
+            <strong>Pago contra reembolso</strong>
+            <p>Pagarás en efectivo cuando recibas tu pedido en la dirección indicada.</p>
+          </div>
+        </div>
+      </ng-container>
+
+    </div>
+
+    <!-- Términos y condiciones -->
+    <div class="form-section">
+      <div class="check-row">
+        <input id="saveData" type="checkbox" [(ngModel)]="form.saveData" />
+        <label for="saveData">Guardar mis datos para próximas compras</label>
+      </div>
+      <div class="check-row required-check">
+        <input id="acceptTerms" type="checkbox" [(ngModel)]="form.acceptTerms" />
+        <label for="acceptTerms">
+          Acepto los <a href="/terminos" target="_blank">términos de compra</a>
+          y la <a href="/privacidad" target="_blank">política de privacidad</a>
+          <strong>*</strong>
+        </label>
       </div>
     </div>
 
-    <!-- TÉRMINOS Y CONDICIONES -->
-    <div class="form-section">
-      <label class="check-row">
-        <input type="checkbox" [(ngModel)]="form.saveData" />
-        Guardar estos datos para próximas compras
-      </label>
-
-      <label class="check-row required-check">
-        <input type="checkbox" [(ngModel)]="form.acceptTerms" />
-        Acepto los términos de compra y política de privacidad <strong>*</strong>
-      </label>
+    <div class="error-message" role="alert" *ngIf="errorMessage">
+      <span class="material-symbols-rounded">error</span>
+      {{ errorMessage }}
     </div>
 
-    <p class="error-message" *ngIf="errorMessage">{{ errorMessage }}</p>
-
     <div class="form-actions">
-      <button class="btn-secondary" (click)="prevStep()">Volver atrás</button>
-      <button class="btn-primary" *ngIf="form.paymentMethod !== 'paypal'" (click)="submit()" [disabled]="loading">
-        <span *ngIf="!loading">{{ 'Confirmar y pagar' }}</span>
-        <span *ngIf="loading">Procesando...</span>
+      <button class="btn-secondary" (click)="prevStep()">
+        <span class="material-symbols-rounded">arrow_back</span>
+        Volver atrás
       </button>
-      <p class="paypal-submit-note" *ngIf="form.paymentMethod === 'paypal'">El pedido se confirmará automáticamente cuando completes el popup de PayPal.</p>
+      <button class="btn-primary btn-confirm" *ngIf="form.paymentMethod !== 'paypal'" (click)="submit()"
+        [disabled]="loading">
+        <span class="material-symbols-rounded" *ngIf="!loading">lock</span>
+        <span *ngIf="!loading">Confirmar y pagar</span>
+        <span class="loading-dots" *ngIf="loading">
+          Procesando<span>.</span><span>.</span><span>.</span>
+        </span>
+      </button>
+      <p class="paypal-submit-note" *ngIf="form.paymentMethod === 'paypal'">
+        El pedido se confirmará automáticamente cuando completes el popup de PayPal.
+      </p>
     </div>
   </section>
 
-  <!-- RESUMEN LATERAL -->
+
+  <!-- ══════════════════════════════════════════
+       ASIDE – RESUMEN DEL PEDIDO
+  ══════════════════════════════════════════ -->
   <aside class="checkout-summary" aria-label="Resumen del pedido">
-    <h3>Tu resumen</h3>
+    <div class="summary-header">
+      <h3>Tu pedido</h3>
+      <span class="summary-items-count">{{ totalItems }} artículo{{ totalItems !== 1 ? 's' : '' }}</span>
+    </div>
 
     <div class="summary-items">
       <article class="summary-item" *ngFor="let item of items">
         <span class="summary-name">{{ item.name }}</span>
-        <span class="summary-qty">x{{ item.quantity }}</span>
+        <span class="summary-qty">×{{ item.quantity }}</span>
         <span class="summary-price">{{ item.price * item.quantity | currency:'EUR':'symbol':'1.2-2' }}</span>
       </article>
     </div>
 
-    <div class="summary-row">
-      <span>Artículos</span>
-      <span>{{ totalItems }}</span>
-    </div>
+    <div class="summary-divider"></div>
 
     <div class="summary-row">
       <span>Subtotal</span>
       <span>{{ subtotal | currency:'EUR':'symbol':'1.2-2' }}</span>
     </div>
-
     <div class="summary-row">
       <span>Envío</span>
-      <span>{{ shipping | currency:'EUR':'symbol':'1.2-2' }}</span>
+      <span [class.free-shipping]="shipping === 0">
+        {{ shipping === 0 ? 'Gratis' : (shipping | currency:'EUR':'symbol':'1.2-2') }}
+      </span>
+    </div>
+    <div class="summary-row discount-row" *ngIf="discountPct > 0">
+      <span>
+        <span class="discount-chip">{{ discountCode }}</span>
+        Descuento ({{ discountPct }}%)
+      </span>
+      <span class="discount-value">−{{ discount | currency:'EUR':'symbol':'1.2-2' }}</span>
     </div>
 
-    <div class="summary-row" *ngIf="discountPct > 0">
-      <span>Descuento ({{ discountPct }}%)</span>
-      <span class="discount-value">-{{ discount | currency:'EUR':'symbol':'1.2-2' }}</span>
-    </div>
+    <div class="summary-divider"></div>
 
     <div class="summary-row total-row">
       <span>Total</span>
       <span>{{ total | currency:'EUR':'symbol':'1.2-2' }}</span>
     </div>
 
-    <p class="payment-preview">
-      <strong>Paso {{ currentStep }} de 3</strong>
-      <span class="discount-chip" *ngIf="discountCode">Cupón {{ discountCode }}</span>
-    </p>
+    <div class="summary-step-indicator">
+      <span class="material-symbols-rounded">
+        {{ currentStep === 1 ? 'local_shipping' : currentStep === 2 ? 'payments' : 'verified' }}
+      </span>
+      <span>
+        {{ currentStep === 1 ? 'Completando entrega' : currentStep === 2 ? 'Eligiendo método de pago' : 'Confirmando
+        pedido' }}
+      </span>
+    </div>
   </aside>
-</main>
 
+</main>

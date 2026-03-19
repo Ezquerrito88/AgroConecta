@@ -10,6 +10,7 @@ use App\Http\Controllers\ProductImageController;
 use App\Http\Controllers\FavoriteController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\WebhookController;
 use App\Http\Controllers\ConversationController;
 use App\Http\Controllers\Api\FarmerProfileController;
 
@@ -32,6 +33,10 @@ Route::get('/products/{id}', [ProductController::class, 'show']);
 
 Route::get('/categories', [CategoryController::class, 'index']);
 Route::get('/categories/{id}', [CategoryController::class, 'show']);
+
+// Webhooks (no requieren autenticación, pero validan firma)
+Route::post('/webhooks/stripe', [WebhookController::class, 'handleStripe']);
+Route::post('/webhooks/paypal', [WebhookController::class, 'handlePaypal']);
 
 /*
 |--------------------------------------------------------------------------

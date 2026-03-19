@@ -142,7 +142,7 @@ class ProductController extends Controller
 
         if ($request->hasFile('images')) {
             foreach ($request->file('images') as $file) {
-                $path = $file->store('public', 'public');
+                $path = $file->store('products', 'public');
 
                 ProductImage::create([
                     'product_id'   => $product->id,

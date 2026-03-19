@@ -23,25 +23,28 @@ class PaymentController extends Controller
             'amount' => 'required|numeric|min:0.50',
         ]);
 
-        if (!config('services.stripe.secret')) {
-            return response()->json([
-                'message' => 'Stripe no está configurado en el servidor.'
-            ], 422);
+        $stripeSecret = config('services.stripe.secret');
+        if (!$stripeSecret) {
+            return response()->json(['message' => 'Stripe no está configurado.'], 422);
         }
 
-        Stripe::setApiKey(config('services.stripe.secret'));
+        Stripe::setApiKey($stripeSecret);
 
-        $intent = PaymentIntent::create([
-            'amount'                    => (int) round((float) $request->amount * 100), // euros → cents
-            'currency'                  => 'eur',
-            'automatic_payment_methods' => ['enabled' => true],
-            'metadata'                  => ['user_id' => Auth::id()],
-        ]);
+        try {
+            $intent = PaymentIntent::create([
+                'amount'                    => (int) round((float) $request->amount * 100),
+                'currency'                  => 'eur',
+                'automatic_payment_methods' => ['enabled' => true],
+                'metadata'                  => ['user_id' => Auth::id()],
+            ]);
 
-        return response()->json([
-            'client_secret'     => $intent->client_secret,
-            'payment_intent_id' => $intent->id,
-        ]);
+            return response()->json([
+                'client_secret'     => $intent->client_secret,
+                'payment_intent_id' => $intent->id,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Error al crear PaymentIntent.'], 500);
+        }
     }
 
     // ─── PAYPAL ───────────────────────────────────────────────────────────
@@ -57,35 +60,36 @@ class PaymentController extends Controller
         ]);
 
         $mode = config('services.paypal.mode', 'sandbox');
-        if (!config("services.paypal.{$mode}_client_id") || !config("services.paypal.{$mode}_secret")) {
-            return response()->json([
-                'message' => 'PayPal no está configurado en el servidor.'
-            ], 422);
+        $clientId = config("services.paypal.{$mode}_client_id");
+        $secret = config("services.paypal.{$mode}_secret");
+
+        if (!$clientId || !$secret) {
+            return response()->json(['message' => 'PayPal no está configurado.'], 422);
         }
 
-        $token = $this->getPaypalToken();
+        try {
+            $token = $this->getPaypalToken();
 
-        /** @var Response $response */
-        $response = Http::withToken($token)
-            ->post($this->paypalBaseUrl() . '/v2/checkout/orders', [
-                'intent'         => 'CAPTURE',
-                'purchase_units' => [[
-                    'amount' => [
-                        'currency_code' => 'EUR',
-                        'value'         => number_format((float) $request->amount, 2, '.', ''),
-                    ],
-                ]],
-            ]);
+            $response = Http::timeout(10)
+                ->withToken($token)
+                ->post($this->paypalBaseUrl() . '/v2/checkout/orders', [
+                    'intent'         => 'CAPTURE',
+                    'purchase_units' => [[
+                        'amount' => [
+                            'currency_code' => 'EUR',
+                            'value'         => number_format((float) $request->amount, 2, '.', ''),
+                        ],
+                    ]],
+                ]);
 
-        if (!$response->successful()) {
-            return response()->json([
-                'message' => 'Error al crear el pedido PayPal: ' . $response->body(),
-            ], 422);
+            if (!$response->successful()) {
+                return response()->json(['message' => 'Error al crear orden PayPal.'], 422);
+            }
+
+            return response()->json(['paypal_order_id' => $response->json('id')]);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Error de conexión con PayPal.'], 500);
         }
-
-        return response()->json([
-            'paypal_order_id' => $response->json('id'),
-        ]);
     }
 
     /**
@@ -93,25 +97,27 @@ class PaymentController extends Controller
      */
     public function capturePaypalOrder(Request $request, string $paypalOrderId)
     {
-        $token = $this->getPaypalToken();
+        try {
+            $token = $this->getPaypalToken();
 
-        /** @var Response $response */
-        $response = Http::withToken($token)
-            ->post($this->paypalBaseUrl() . "/v2/checkout/orders/{$paypalOrderId}/capture");
+            $response = Http::timeout(10)
+                ->withToken($token)
+                ->post($this->paypalBaseUrl() . "/v2/checkout/orders/{$paypalOrderId}/capture");
 
-        if (!$response->successful()) {
+            if (!$response->successful()) {
+                return response()->json(['message' => 'Error al confirmar el pago PayPal.'], 422);
+            }
+
+            $capture = $response->json('purchase_units.0.payments.captures.0');
+
             return response()->json([
-                'message' => 'Error al confirmar el pago PayPal.',
-            ], 422);
+                'status'            => $response->json('status'),
+                'paypal_capture_id' => $capture['id'] ?? null,
+                'amount'            => $capture['amount']['value'] ?? null,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Error al capturar pago PayPal.'], 500);
         }
-
-        $capture = $response->json('purchase_units.0.payments.captures.0');
-
-        return response()->json([
-            'status'            => $response->json('status'),
-            'paypal_capture_id' => $capture['id'] ?? null,
-            'amount'            => $capture['amount']['value'] ?? null,
-        ]);
     }
 
     // ─── HELPERS ──────────────────────────────────────────────────────────

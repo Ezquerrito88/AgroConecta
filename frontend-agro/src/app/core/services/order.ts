@@ -35,6 +35,9 @@ export interface CreateOrderPayload {
   shipping_address?: string;
   discount_code?: string;
   discount_pct?: number;
+  payment_method?: 'card' | 'paypal' | 'bizum' | 'cash_on_delivery';
+  payment_intent_id?: string;
+  payment_transaction_id?: string;
 }
 
 @Injectable({ providedIn: 'root' })

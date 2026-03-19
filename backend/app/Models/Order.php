@@ -7,7 +7,12 @@ use Illuminate\Database\Eloquent\Model;
 class Order extends Model
 {
     protected $fillable = [
-        'buyer_id', 'farmer_id', 'status', 'total', 'shipping_address', 'notes'
+        'buyer_id', 'farmer_id', 'status', 'total', 'shipping_address', 'notes',
+        'payment_status', 'payment_method', 'payment_intent_id', 'payment_transaction_id', 'payment_completed_at'
+    ];
+
+    protected $casts = [
+        'payment_completed_at' => 'datetime',
     ];
 
     public function buyer()

@@ -44,7 +44,7 @@ class OrderController extends Controller
     // El comprador crea un pedido
     public function store(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'items'           => 'required|array|min:1',
             'items.*.product_id' => 'required|exists:products,id',
             'items.*.quantity'   => 'required|integer|min:1',
@@ -52,57 +52,46 @@ class OrderController extends Controller
             'shipping_address'=> 'nullable|string',
             'discount_code'   => 'nullable|string|max:40',
             'discount_pct'    => 'nullable|numeric|min:0|max:100',
+            'payment_method'  => 'nullable|in:card,paypal,bizum,cash_on_delivery',
+            'payment_intent_id' => 'nullable|string|max:255',
+            'payment_transaction_id' => 'nullable|string|max:255',
         ]);
 
-        $items = collect($request->items);
-        $productIds = $items->pluck('product_id')->unique()->values();
+        $items = collect($validated['items']);
+        $productIds = $items->pluck('product_id')->unique();
 
-        $products = Product::with('farmer')
+        // Single query with eager loading
+        $products = Product::with('farmer:id,user_id')
             ->whereIn('id', $productIds)
             ->get()
             ->keyBy('id');
 
         if ($products->count() !== $productIds->count()) {
-            return response()->json([
-                'message' => 'Uno o más productos no existen.'
-            ], 422);
+            return response()->json(['message' => 'Uno o más productos no existen.'], 422);
         }
 
-        $farmerUserIds = $items->map(function ($item) use ($products) {
-            $product = $products->get($item['product_id']);
-            return $product?->farmer?->user_id;
-        })->filter()->unique()->values();
+        // Check all products belong to same farmer
+        $farmerUserIds = $products->pluck('farmer.user_id')->filter()->unique();
 
         if ($farmerUserIds->count() !== 1) {
-            return response()->json([
-                'message' => 'Todos los productos del pedido deben pertenecer al mismo agricultor.'
-            ], 422);
+            return response()->json(['message' => 'Todos los productos deben ser del mismo agricultor.'], 422);
         }
 
         $farmerUserId = (int) $farmerUserIds->first();
 
-        if ($request->filled('farmer_id') && (int) $request->farmer_id !== $farmerUserId) {
-            return response()->json([
-                'message' => 'El agricultor indicado no coincide con los productos del pedido.'
-            ], 422);
+        if (isset($validated['farmer_id']) && (int) $validated['farmer_id'] !== $farmerUserId) {
+            return response()->json(['message' => 'El agricultor no coincide con los productos.'], 422);
         }
 
+        // Validate stock and calculate totals
         $lineItems = [];
         $total = 0;
 
         foreach ($items as $item) {
             $product = $products->get($item['product_id']);
 
-            if (!$product || !$product->farmer) {
-                return response()->json([
-                    'message' => 'Producto inválido en el pedido.'
-                ], 422);
-            }
-
-            if ($product->stock_quantity < (int) $item['quantity']) {
-                return response()->json([
-                    'message' => "Stock insuficiente para {$product->name}."
-                ], 422);
+            if ($product->stock_quantity < $item['quantity']) {
+                return response()->json(['message' => "Stock insuficiente para {$product->name}."], 422);
             }
 
             $price = (float) $product->price;
@@ -119,30 +108,39 @@ class OrderController extends Controller
             $total += $subtotal;
         }
 
-        $discountPct = (float) ($request->discount_pct ?? 0);
-        $discountPct = max(0, min(100, $discountPct));
+        // Apply discount
+        $discountPct = min(100, max(0, (float) ($validated['discount_pct'] ?? 0)));
         $discountAmount = round($total * ($discountPct / 100), 2);
-        $finalTotal = max(0, round($total - $discountAmount, 2));
+        $finalTotal = $total - $discountAmount;
 
-        $order = DB::transaction(function () use ($request, $lineItems, $finalTotal, $farmerUserId, $products, $discountPct, $discountAmount) {
-            $shippingAddress = $request->shipping_address;
+        // Create order and items in transaction
+        $order = DB::transaction(function () use ($validated, $lineItems, $finalTotal, $farmerUserId, $products, $discountPct, $discountAmount, $request) {
+            $shippingAddress = $validated['shipping_address'] ?? '';
 
-            if ($discountPct > 0 && $request->filled('discount_code')) {
-                $discountNote = sprintf('Descuento aplicado: %s (%.0f%%, -%.2f EUR)', $request->discount_code, $discountPct, $discountAmount);
+            if ($discountPct > 0 && !empty($validated['discount_code'])) {
+                $discountNote = sprintf('Descuento: %s (%.0f%%, -%.2f EUR)', $validated['discount_code'], $discountPct, $discountAmount);
                 $shippingAddress = trim(($shippingAddress ? $shippingAddress . ' | ' : '') . $discountNote);
             }
+
+            $paymentMethod = $validated['payment_method'] ?? 'cash_on_delivery';
+            $paymentStatus = in_array($paymentMethod, ['cash_on_delivery', 'bizum']) ? 'processing' : 'pending';
 
             $order = Order::create([
                 'buyer_id' => $request->user()->id,
                 'farmer_id' => $farmerUserId,
                 'total' => $finalTotal,
                 'shipping_address' => $shippingAddress,
+                'payment_status' => $paymentStatus,
+                'payment_method' => $paymentMethod,
+                'payment_intent_id' => $validated['payment_intent_id'] ?? null,
+                'payment_transaction_id' => $validated['payment_transaction_id'] ?? null,
             ]);
 
+            // Bulk insert items and update stock
+            $order->items()->createMany($lineItems);
+            
             foreach ($lineItems as $item) {
-                $order->items()->create($item);
-                $product = $products->get($item['product_id']);
-                $product->decrement('stock_quantity', $item['quantity']);
+                Product::where('id', $item['product_id'])->decrement('stock_quantity', $item['quantity']);
             }
 
             return $order;
