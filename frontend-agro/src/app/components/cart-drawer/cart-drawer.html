@@ -1,66 +1,115 @@
 <div class="cart-backdrop" *ngIf="isOpen" (click)="close()"></div>
 
-<div class="cart-drawer" [class.open]="isOpen">
+<div class="cart-drawer" [class.open]="isOpen" role="dialog" aria-label="Tu cesta">
 
+  <!-- HEADER -->
   <div class="drawer-header">
-    <h3>
-      Tu Cesta
-      <span class="count-badge" *ngIf="items.length > 0">{{ items.length }}</span>
-    </h3>
-    <button class="close-btn" (click)="close()">
-      <i class="fa-solid fa-xmark"></i>
+    <div class="drawer-header-left">
+      <span class="material-symbols-rounded drawer-icon">shopping_basket</span>
+      <div>
+        <h3>Tu Cesta</h3>
+        <span class="drawer-subtitle" *ngIf="items.length > 0">
+          {{ items.length }} producto{{ items.length !== 1 ? 's' : '' }}
+        </span>
+        <span class="drawer-subtitle" *ngIf="items.length === 0">Vacía</span>
+      </div>
+    </div>
+    <button class="close-btn" (click)="close()" aria-label="Cerrar cesta">
+      <span class="material-symbols-rounded">close</span>
     </button>
   </div>
 
+  <!-- BODY -->
   <div class="drawer-body">
 
+    <!-- Estado vacío -->
     <div *ngIf="items.length === 0" class="empty-cart">
-      <i class="fa-solid fa-basket-shopping"></i>
-      <p>Tu cesta está vacía.<br>¡Añade algo fresco!</p>
+      <div class="empty-icon-wrap">
+        <span class="material-symbols-rounded">shopping_basket</span>
+      </div>
+      <h4>Tu cesta está vacía</h4>
+      <p>Añade productos frescos del campo directamente a tu cesta.</p>
+      <button class="btn-go-shop" (click)="close()">
+        <span class="material-symbols-rounded">storefront</span>
+        Ver productos
+      </button>
     </div>
 
-    <div class="cart-item" *ngFor="let item of items">
+    <!-- Lista de items -->
+    <div class="cart-items-list" *ngIf="items.length > 0">
+      <div class="cart-item" *ngFor="let item of items">
 
-      <img class="item-img"
-        [src]="getImageUrl(item)"
-        alt="{{ item.name }}">
+        <div class="item-img-wrap">
+          <img class="item-img" [src]="getImageUrl(item)" [alt]="item.name"
+               (error)="onImgError($event)">
+        </div>
 
-      <div class="item-details">
-        <h4>{{ item.name }}</h4>
+        <div class="item-details">
+          <h4 class="item-name">{{ item.name }}</h4>
+          <span class="item-farmer">
+            <span class="material-symbols-rounded">person</span>
+            {{ item.farmer || 'Agricultor local' }}
+          </span>
 
-        <div class="item-meta">
-          <span class="price-highlight">{{ item.price }}€ / {{ item.unit || 'un' }}</span>
+          <div class="item-bottom">
+            <div class="qty-selector">
+              <button class="qty-btn" (click)="updateQuantity(item.id, -1)"
+                      [disabled]="item.quantity <= 1" aria-label="Reducir cantidad">
+                <span class="material-symbols-rounded">remove</span>
+              </button>
+              <span class="qty-number">{{ item.quantity }}</span>
+              <button class="qty-btn plus" (click)="updateQuantity(item.id, 1)"
+                      aria-label="Aumentar cantidad">
+                <span class="material-symbols-rounded">add</span>
+              </button>
+            </div>
 
-          <div class="qty-selector">
-            <button class="qty-btn minus" (click)="updateQuantity(item.id, -1)" [disabled]="item.quantity <= 1">
-              <i class="fa-solid fa-minus"></i>
-            </button>
-
-            <span class="qty-number">{{ item.quantity }}</span>
-
-            <button class="qty-btn plus" (click)="updateQuantity(item.id, 1)">
-              <i class="fa-solid fa-plus"></i>
-            </button>
+            <span class="item-price">
+              {{ (item.price * item.quantity) | number:'1.2-2' }}€
+            </span>
           </div>
         </div>
+
+        <button class="remove-btn" (click)="removeItem(item.id)" aria-label="Eliminar producto">
+          <span class="material-symbols-rounded">delete</span>
+        </button>
+
       </div>
-
-      <button class="remove-btn" (click)="removeItem(item.id)" title="Eliminar">
-        <i class="fa-regular fa-trash-can"></i>
-      </button>
-
     </div>
+
   </div>
 
+  <!-- FOOTER -->
   <div class="drawer-footer" *ngIf="items.length > 0">
-    <div class="total-row">
-      <span class="total-label">Total a pagar:</span>
-      <span class="total-amount">{{ total | number:'1.2-2' }}€</span>
+
+    <div class="summary-rows">
+      <div class="summary-row">
+        <span>Subtotal</span>
+        <span>{{ total | number:'1.2-2' }}€</span>
+      </div>
+      <div class="summary-row shipping-row">
+        <span>Envío</span>
+        <span class="free-tag" *ngIf="total >= 20">Gratis</span>
+        <span *ngIf="total < 20">3,99€</span>
+      </div>
+      <div class="summary-divider"></div>
+      <div class="summary-row total-row">
+        <span>Total</span>
+        <strong>{{ (total < 20 ? total + 3.99 : total) | number:'1.2-2' }}€</strong>
+      </div>
     </div>
 
     <button class="checkout-btn" (click)="goToCart()">
-      <i class="fa-solid fa-lock"></i> Tramitar Pedido
+      <span class="material-symbols-rounded">lock</span>
+      Tramitar pedido
+      <span class="btn-arrow material-symbols-rounded">arrow_forward</span>
     </button>
+
+    <p class="secure-note">
+      <span class="material-symbols-rounded">verified_user</span>
+      Pago 100% seguro con cifrado SSL
+    </p>
+
   </div>
 
 </div>

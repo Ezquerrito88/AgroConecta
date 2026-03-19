@@ -28,7 +28,7 @@ export class DetalleProducto implements OnInit, AfterViewInit {
     private http: HttpClient,
     private cd: ChangeDetectorRef,
     private cartService: CartService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.route.paramMap.subscribe(params => {
@@ -55,7 +55,7 @@ export class DetalleProducto implements OnInit, AfterViewInit {
     const indicator = document.querySelector<HTMLElement>('.tab-indicator');
     if (!activeBtn || !indicator) return;
     indicator.style.width = `${activeBtn.offsetWidth}px`;
-    indicator.style.left  = `${activeBtn.offsetLeft}px`;
+    indicator.style.left = `${activeBtn.offsetLeft}px`;
   }
 
   getImagenUrl(product: any): string {
@@ -106,7 +106,7 @@ export class DetalleProducto implements OnInit, AfterViewInit {
     this.cartService.addToCart({
       id: this.product.id,
       name: this.product.name,
-      farmer: this.product?.farmer?.full_name || this.product?.farmer?.name || 'Agricultor local',
+      farmer: this.product?.farmer?.user?.name || 'Agricultor local',
       farmerId,
       price: Number(this.product.price),
       unit: this.product.unit,

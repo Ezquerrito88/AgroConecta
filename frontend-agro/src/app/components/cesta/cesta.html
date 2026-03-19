@@ -1,12 +1,13 @@
 <section class="cart-hero">
   <div class="cart-hero-inner">
-    <h1>Tu cesta</h1>
-    
     <nav class="breadcrumb" aria-label="Ruta de navegación">
       <a routerLink="/">Inicio</a>
       <span class="separator" aria-hidden="true">›</span>
       <span>Cesta</span>
     </nav>
+
+    <h1>Tu cesta</h1>
+    <p class="cart-hero-subtitle">Revisa tus productos antes de finalizar el pedido.</p>
 
     @if (items.length > 0) {
       <div class="hero-stats" aria-label="Resumen rápido de la cesta">
@@ -26,6 +27,7 @@
     }
   </div>
 </section>
+
 
 <main class="cart-layout">
   <section class="cart-items" aria-label="Productos en la cesta">

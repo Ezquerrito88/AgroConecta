@@ -3,8 +3,9 @@
    ===================== */
 .catalog-hero {
   width: 100%;
-  padding: 5dvh 5%;
-  background: url('/img/header/header.png') center / cover no-repeat;
+  background: url('/img/header/header.png') center -110px / cover no-repeat;
+  padding: 28px 5% 20px;
+  margin-top: -20px;
 }
 
 .hero-container {
@@ -14,33 +15,50 @@
 }
 
 .hero-title {
-  font-family: 'Geist', sans-serif;
-  font-size: 3rem;
+  font-family: var(--fuente-principal);
+  font-size: clamp(1.5rem, 3vw, 2rem);
   font-weight: 900;
   color: #1f2937;
-  margin: 0 0 10px;
+  margin: 0.25rem 0 0;
   letter-spacing: -1px;
+  line-height: 1.1;
+}
+
+.hero-subtitle {
+  margin: 0.25rem 0 0;
+  color: #374151;
+  font-size: 0.95rem;
+  font-weight: 500;
+  max-width: 620px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .breadcrumb {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 1rem;
-  font-weight: 500;
+  gap: 6px;
+  font-size: 0.88rem;
+  font-weight: 600;
   color: #6b7280;
+  margin-bottom: 0.1rem;
 }
 
-.separator { font-size: 0.9rem; color: #9ca3af; margin: 0 5px; }
+.separator { font-size: 0.8rem; color: #9ca3af; margin: 0 2px; }
 .current   { color: #374151; font-weight: 700; }
 
 .link-inicio {
   text-decoration: none;
-  color: #4b5563;
-  transition: color 0.3s;
+  color: #16a34a;
+  transition: color 0.2s;
 }
 
-.link-inicio:hover { color: #2ecc71; font-weight: 600; }
+.link-inicio:hover {
+  color: #15803d;
+  text-decoration: underline;
+}
+
 
 /* =====================
    LAYOUT PRINCIPAL

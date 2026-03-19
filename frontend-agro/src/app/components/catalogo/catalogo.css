@@ -4,40 +4,57 @@
 .catalog-hero {
   width: 100%;
   background: url('/img/header/header.png') center -110px / cover no-repeat;
-  padding: 80px 5% 40px;
+  padding: 28px 5% 20px;
   margin-top: -20px;
 }
 
-.hero-container { max-width: 1400px; margin: 0 auto; }
+.hero-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
 
 .hero-title {
   font-family: var(--fuente-principal);
-  font-size: 3rem;
+  font-size: clamp(1.5rem, 3vw, 2rem);
   font-weight: 900;
   color: var(--gray-dark);
-  margin: 0 0 10px;
+  margin: 0.25rem 0 0.25rem;
   letter-spacing: -1px;
+  line-height: 1.1;
 }
 
 .breadcrumb {
-  font-size: 1rem;
+  font-size: 0.88rem;
   color: #6b7280;
   font-weight: 600;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
+  margin-bottom: 0;
 }
 
-.separator { font-size: 0.8rem; color: #9ca3af; margin: 0 5px; }
+.separator { font-size: 0.8rem; color: #9ca3af; margin: 0 2px; }
 .current   { color: #374151; font-weight: 700; }
 
 .link-inicio {
   text-decoration: none;
-  color: #666;
-  transition: color 0.3s;
+  color: #16a34a;
+  transition: color 0.2s;
 }
 
+.link-inicio:hover { color: #15803d; text-decoration: underline; }
+
+
 .link-inicio:hover { color: var(--green-primary); font-weight: bold; }
+
+.hero-subtitle {
+  margin: 0.25rem 0 0;
+  color: #374151;
+  font-size: 0.95rem;
+  max-width: 560px;
+}
+
 
 /* =====================
    LAYOUT

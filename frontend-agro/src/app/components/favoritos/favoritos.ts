@@ -25,8 +25,8 @@ export class Favoritos implements OnInit {
 
   private readonly API_URL = environment.apiUrl;
 
-  productos: any[] = [];           // todos los favoritos de la BD
-  productosFiltrados: any[] = [];  // los que se muestran tras filtrar
+  productos: any[] = [];
+  productosFiltrados: any[] = [];
   isLoading = true;
 
   filtros = { categoria: 'todas', orden: 'novedad' };
@@ -38,7 +38,7 @@ export class Favoritos implements OnInit {
     private cartService: CartService,
     private router: Router,
     private cdr: ChangeDetectorRef
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     Promise.resolve().then(() => this.cargarFavoritos());
@@ -46,14 +46,24 @@ export class Favoritos implements OnInit {
 
   getImagenUrl(prod: any): string {
     if (prod?.images?.length > 0) {
-      const path = prod.images[0].image_path;
+      const path = prod.images[0]?.image_path;
+      if (!path) return 'assets/placeholder.png';
+
       if (path.startsWith('http')) {
         return path.replace(/http:\/\/127\.0\.0\.1:8000/g, this.API_URL);
       }
-      return `${this.API_URL}/storage/${path}`;
+
+      // Quitar el prefijo "public/" que Laravel añade internamente
+      const cleanPath = path.replace(/^public\//, '');
+
+      // Construir URL de storage sin /api
+      const storageBase = this.API_URL.replace(/\/api$/, '');
+      return `${storageBase}/storage/${cleanPath}`;
     }
     return 'assets/placeholder.png';
   }
+
+
 
   cargarFavoritos(): void {
     this.isLoading = true;
@@ -90,9 +100,9 @@ export class Favoritos implements OnInit {
     );
 
     // Orden
-    if (this.filtros.orden === 'precio_asc')  result.sort((a, b) => +a.price - +b.price);
+    if (this.filtros.orden === 'precio_asc') result.sort((a, b) => +a.price - +b.price);
     if (this.filtros.orden === 'precio_desc') result.sort((a, b) => +b.price - +a.price);
-    if (this.filtros.orden === 'novedad')     result.sort((a, b) =>
+    if (this.filtros.orden === 'novedad') result.sort((a, b) =>
       new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
     );
 
@@ -101,9 +111,9 @@ export class Favoritos implements OnInit {
   }
 
   limpiarFiltros(): void {
-    this.filtros   = { categoria: 'todas', orden: 'novedad' };
-    this.minPrice  = 0;
-    this.maxPrice  = 100;
+    this.filtros = { categoria: 'todas', orden: 'novedad' };
+    this.minPrice = 0;
+    this.maxPrice = 100;
     this.aplicarFiltros();
   }
 
@@ -112,7 +122,7 @@ export class Favoritos implements OnInit {
     if (!token) { this.router.navigate(['/login']); return; }
 
     const index = this.productos.indexOf(prod);
-    this.productos          = this.productos.filter(p => p.id !== prod.id);
+    this.productos = this.productos.filter(p => p.id !== prod.id);
     this.productosFiltrados = this.productosFiltrados.filter(p => p.id !== prod.id);
 
     this.productoService.toggleFavorite(prod.id).subscribe({

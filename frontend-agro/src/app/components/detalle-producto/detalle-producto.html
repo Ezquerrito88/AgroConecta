@@ -1,19 +1,21 @@
 <header class="catalog-hero" *ngIf="product">
   <div class="hero-container">
-    <h1 class="hero-title">{{ product.name }}</h1>
-    <div class="breadcrumb">
+    <nav class="breadcrumb" aria-label="Ruta de navegación">
       <a routerLink="/" class="link-inicio">Inicio</a>
-      <span class="separator"> > </span>
+      <span class="separator" aria-hidden="true">›</span>
       <a routerLink="/productos" class="link-inicio">Productos</a>
-      <span class="separator"> > </span>
+      <span class="separator" aria-hidden="true">›</span>
       <a [routerLink]="['/productos']" [queryParams]="{ category: product.category.name }" class="link-inicio">
         {{ product.category.name }}
       </a>
-      <span class="separator"> > </span>
+      <span class="separator" aria-hidden="true">›</span>
       <span class="current">{{ product.name }}</span>
-    </div>
+    </nav>
+    <h1 class="hero-title">{{ product.name }}</h1>
+    <p class="hero-subtitle">{{ product.short_description || product.description }}</p>
   </div>
 </header>
+
 
 <div class="container main-content" *ngIf="product">
   <div class="product-grid">
@@ -21,9 +23,7 @@
     <!-- Imagen -->
     <div class="image-column">
       <div class="image-placeholder">
-        <img *ngIf="product.images?.length > 0"
-             [src]="getImagenUrl(product)"
-             [alt]="product.name">
+        <img *ngIf="product.images?.length > 0" [src]="getImagenUrl(product)" [alt]="product.name">
         <div *ngIf="!product.images?.length" class="icon-placeholder">
           <i class="fa-regular fa-image"></i>
         </div>
@@ -49,20 +49,21 @@
 
         <div class="farmer-card">
           <div class="farmer-avatar">
-            <img *ngIf="product.farmer?.image_path"
-                 [src]="'assets/' + product.farmer.image_path"
-                 alt="Agricultor">
-            <i *ngIf="!product.farmer?.image_path" class="fa-solid fa-user-straw-hat"></i>
+            <i class="fa-solid fa-user"></i>
           </div>
           <div class="farmer-info">
             <span class="label">Cultivado por</span>
-            <strong class="name">{{ product.farmer?.full_name || 'Huerta Valenciana' }}</strong>
+            <strong class="name">
+              {{ product.farmer?.user?.name || 'Agricultor Local' }}
+            </strong>
             <span class="location">
               <i class="fa-solid fa-location-dot"></i>
-              Logroño
+              {{ product.farmer?.city || 'España' }}
             </span>
           </div>
         </div>
+
+
 
         <div class="price-box">
           <span class="price">{{ product.price }}€</span>
@@ -72,9 +73,7 @@
         <div class="actions-row">
           <div class="qty-selector">
             <button (click)="cambiarCantidad(-1)" [disabled]="cantidad <= 1">−</button>
-            <input type="text"
-                   [value]="cantidad + ' ' + (product.unit === 'unidad' ? 'ud' : 'kg')"
-                   readonly>
+            <input type="text" [value]="cantidad + ' ' + (product.unit === 'unidad' ? 'ud' : 'kg')" readonly>
             <button class="plus" (click)="cambiarCantidad(1)">+</button>
           </div>
           <button class="add-cart-btn" (click)="agregarAlCarrito()">
@@ -89,12 +88,9 @@
   <!-- Pestañas -->
   <div class="tabs-container">
     <div class="tabs-header">
-      <button [class.active]="activeTab === 'descripcion'"
-              (click)="setTab('descripcion')">Descripción</button>
-      <button [class.active]="activeTab === 'origen'"
-              (click)="setTab('origen')">Origen</button>
-      <button [class.active]="activeTab === 'valoraciones'"
-              (click)="setTab('valoraciones')">Valoraciones</button>
+      <button [class.active]="activeTab === 'descripcion'" (click)="setTab('descripcion')">Descripción</button>
+      <button [class.active]="activeTab === 'origen'" (click)="setTab('origen')">Origen</button>
+      <button [class.active]="activeTab === 'valoraciones'" (click)="setTab('valoraciones')">Valoraciones</button>
       <span class="tab-indicator"></span>
     </div>
 
@@ -111,7 +107,7 @@
         <p class="origin-intro">
           Este producto ha sido cultivado de forma sostenible y con mucho cariño en
           <strong class="location-highlight">
-            {{ product.farmer?.farmer?.city || 'nuestros campos locales' }}
+            {{ product.farmer?.city || 'nuestros campos locales' }}
           </strong>.
         </p>
         <div class="origin-card">
@@ -121,13 +117,14 @@
           <div class="origin-info">
             <span class="origin-label">Procedencia Certificada</span>
             <span class="origin-value">
-              <span *ngIf="product.farmer?.farmer?.farm_name">
-                {{ product.farmer?.farmer?.farm_name }},
+              <span *ngIf="product.farmer?.farm_name">
+                {{ product.farmer.farm_name }},
               </span>
-              {{ product.farmer?.farmer?.city || 'España' }}
+              {{ product.farmer?.city || 'España' }}
             </span>
           </div>
         </div>
+
         <p class="origin-desc">
           Al comprar este producto, estás apoyando directamente a la economía local
           y reduciendo la huella de carbono del transporte.
@@ -154,9 +151,7 @@
               </div>
             </div>
             <div class="review-stars">
-              <i class="fa-solid fa-star"
-                 *ngFor="let s of [1,2,3,4,5]"
-                 [class.active]="s <= review.rating"></i>
+              <i class="fa-solid fa-star" *ngFor="let s of [1,2,3,4,5]" [class.active]="s <= review.rating"></i>
             </div>
             <p class="review-text">{{ review.comment }}</p>
           </div>

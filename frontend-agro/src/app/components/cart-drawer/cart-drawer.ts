@@ -16,12 +16,12 @@ export class CartDrawer implements OnInit {
   isOpen: boolean = false;
   total: number = 0;
 
-  private readonly API_URL = environment.apiUrl;
+  private readonly API_URL    = environment.apiUrl;
   private readonly STORAGE_URL = environment.storageUrl;
 
-  constructor(private cartService: CartService, private router: Router) { }
+  constructor(private cartService: CartService, private router: Router) {}
 
-  ngOnInit() {
+  ngOnInit(): void {
     this.cartService.items$.subscribe(items => {
       this.items = items;
       this.total = this.cartService.getTotalPrice();
@@ -36,7 +36,10 @@ export class CartDrawer implements OnInit {
     if (item?.image) {
       const imgStr = String(item.image);
       if (imgStr.includes('localhost:8000') || imgStr.includes('127.0.0.1:8000')) {
-        return imgStr.replace(/http:\/\/(127\.0\.0\.1|localhost):8000\/storage/g, this.STORAGE_URL);
+        return imgStr.replace(
+          /http:\/\/(127\.0\.0\.1|localhost):8000\/storage/g,
+          this.STORAGE_URL
+        );
       }
       return imgStr;
     }
@@ -44,10 +47,12 @@ export class CartDrawer implements OnInit {
     if (item?.images?.length > 0) {
       const firstImage = item.images[0];
       const path = typeof firstImage === 'string' ? firstImage : firstImage.image_path;
-
       if (path) {
         if (path.startsWith('http')) {
-          return path.replace(/http:\/\/(127\.0\.0\.1|localhost):8000\/storage/g, this.STORAGE_URL);
+          return path.replace(
+            /http:\/\/(127\.0\.0\.1|localhost):8000\/storage/g,
+            this.STORAGE_URL
+          );
         }
         return `${this.STORAGE_URL}/${path}`;
       }
@@ -56,9 +61,13 @@ export class CartDrawer implements OnInit {
     return 'assets/placeholder.png';
   }
 
-  close() { this.cartService.closeCart(); }
-  removeItem(id: number) { this.cartService.removeFromCart(id); }
-  updateQuantity(id: number, change: number) { this.cartService.updateQuantity(id, change); }
+  onImgError(event: Event): void {
+    (event.target as HTMLImageElement).src = 'assets/placeholder.png';
+  }
+
+  close(): void                             { this.cartService.closeCart(); }
+  removeItem(id: number): void              { this.cartService.removeFromCart(id); }
+  updateQuantity(id: number, change: number): void { this.cartService.updateQuantity(id, change); }
 
   goToCart(): void {
     this.cartService.closeCart();

@@ -25,34 +25,59 @@
 .catalog-hero {
   width: 100%;
   background: url('/img/header/header.png') center -110px / cover no-repeat;
-  padding: 80px 5% 40px;
+  padding: 28px 5% 20px;
   margin-top: -20px;
 }
 
-.hero-container { max-width: 1400px; margin: 0 auto; }
+.hero-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
 
 .hero-title {
-  font-family: 'Geist', sans-serif;
-  font-size: 3rem;
+  font-family: var(--fuente-principal);
+  font-size: clamp(1.5rem, 3vw, 2rem);
   font-weight: 900;
   color: var(--color-gray-900);
-  margin: 0 0 10px;
+  margin: 0.25rem 0 0;
   letter-spacing: -1px;
+  line-height: 1.1;
+}
+
+.hero-subtitle {
+  margin: 0.25rem 0 0;
+  color: #374151;
+  font-size: 0.95rem;
+  font-weight: 500;
+  max-width: 560px;
 }
 
 .breadcrumb {
-  font-size: 1rem;
+  font-size: 0.88rem;
   color: var(--color-gray-500);
   font-weight: 600;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
+  margin-bottom: 0.1rem;
 }
-.separator { font-size: .8rem; color: var(--color-gray-400); margin: 0 5px; }
+
+.separator { font-size: 0.8rem; color: var(--color-gray-400); margin: 0 2px; }
 .current   { color: var(--color-gray-700); font-weight: 700; }
 
-.link-inicio { text-decoration: none; color: #666; transition: color .3s; }
-.link-inicio:hover { color: #2ecc71; font-weight: bold; }
+.link-inicio {
+  text-decoration: none;
+  color: #16a34a;
+  transition: color 0.2s;
+}
+
+.link-inicio:hover {
+  color: #15803d;
+  text-decoration: underline;
+  font-weight: bold;
+}
+
 
 /* =====================
    LAYOUT

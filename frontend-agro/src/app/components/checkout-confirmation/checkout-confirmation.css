@@ -4,29 +4,31 @@
 .confirmation-hero {
   width: 100%;
   background: url('/img/header/header.png') center -110px / cover no-repeat;
-  padding: 82px 5% 40px;
+  padding: 28px 5% 20px;
   margin-top: -20px;
 }
 
 .confirmation-hero-inner {
-  max-width: 1200px;
+  max-width: 900px;   /* igual que .confirmation-layout */
   margin: 0 auto;
+  padding: 0 20px;
 }
 
 .confirmation-hero h1 {
-  margin: 0.5rem 0 0;
-  font-size: clamp(2.1rem, 4vw, 3rem);
+  margin: 0.25rem 0 0;
+  font-size: clamp(1.5rem, 3vw, 2rem);
   font-weight: 900;
   color: #1f2937;
   letter-spacing: -1px;
+  line-height: 1.1;
 }
 
-.confirmation-hero > .confirmation-hero-inner > p,
 .confirmation-hero-inner > p {
-  margin: 0.5rem 0 1.2rem;
+  margin: 0.25rem 0 0.75rem;
   color: #4b5563;
-  font-size: 1.05rem;
+  font-size: 0.95rem;
 }
+
 
 
 /* ==========================================
