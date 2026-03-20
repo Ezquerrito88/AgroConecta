@@ -1,3 +1,4 @@
+<!-- TU HEADER ORIGINAL — sin cambios -->
 <header class="catalog-hero" *ngIf="product">
   <div class="hero-container">
     <nav class="breadcrumb" aria-label="Ruta de navegación">
@@ -16,148 +17,226 @@
   </div>
 </header>
 
+<!-- SKELETON LOADER -->
+<div class="skeleton-layout" *ngIf="isLoading" aria-busy="true" aria-label="Cargando producto">
+  <div class="skeleton-img"></div>
+  <div class="skeleton-info">
+    <div class="skeleton-line w-60"></div>
+    <div class="skeleton-line w-40"></div>
+    <div class="skeleton-line w-80"></div>
+    <div class="skeleton-line w-50"></div>
+  </div>
+</div>
 
-<div class="container main-content" *ngIf="product">
+<!-- CONTENIDO PRINCIPAL -->
+<main class="main-content" *ngIf="product && !isLoading">
   <div class="product-grid">
 
-    <!-- Imagen -->
+    <!-- ====== COLUMNA IMAGEN ====== -->
     <div class="image-column">
-      <div class="image-placeholder">
-        <img *ngIf="product.images?.length > 0" [src]="getImagenUrl(product)" [alt]="product.name">
-        <div *ngIf="!product.images?.length" class="icon-placeholder">
+      <div class="image-wrapper">
+        <span class="stock-badge" *ngIf="product.stock_quantity > 0">
+          <i class="fa-solid fa-circle-check"></i> En stock
+        </span>
+        <span class="stock-badge out" *ngIf="product.stock_quantity <= 0">
+          <i class="fa-solid fa-circle-xmark"></i> Agotado
+        </span>
+        <img
+          *ngIf="product.images?.length > 0"
+          [src]="getImagenUrl(product)"
+          [alt]="product.name"
+          class="main-image"
+        />
+        <div *ngIf="!product.images?.length" class="image-empty">
           <i class="fa-regular fa-image"></i>
+          <span>Sin imagen</span>
         </div>
+      </div>
+
+      <!-- Thumbnails -->
+      <div class="thumbnail-row" *ngIf="product.images?.length > 1">
+        <button
+          class="thumb"
+          *ngFor="let img of product.images; let i = index"
+          [class.active]="selectedImageIndex === i"
+          (click)="selectedImageIndex = i"
+          [attr.aria-label]="'Ver imagen ' + (i + 1)"
+          [attr.aria-pressed]="selectedImageIndex === i"
+        >
+          <img [src]="getImagenUrlByIndex(i)" [alt]="product.name + ' ' + (i + 1)"/>
+        </button>
       </div>
     </div>
 
-    <!-- Info -->
+    <!-- ====== COLUMNA INFO ====== -->
     <div class="info-column">
-      <div class="dynamic-group">
 
-        <h2 class="product-name-title">{{ product.name }}</h2>
+      <span class="category-badge">{{ product.category.name }}</span>
+      <h2 class="product-name-title">{{ product.name }}</h2>
+      <p class="product-short-desc">{{ product.short_description || product.description }}</p>
 
-        <div class="rating-box">
-          <div class="stars">
-            <i class="fa-solid fa-star"></i>
-            <i class="fa-solid fa-star"></i>
-            <i class="fa-solid fa-star"></i>
-            <i class="fa-solid fa-star"></i>
-            <i class="fa-solid fa-star-half-stroke"></i>
-          </div>
-          <span class="rating-text">4.9 / 32 valoraciones</span>
+      <!-- Rating -->
+      <div class="rating-box" aria-label="4.9 de 5 estrellas, 32 valoraciones">
+        <div class="stars" aria-hidden="true">
+          <i class="fa-solid fa-star"></i>
+          <i class="fa-solid fa-star"></i>
+          <i class="fa-solid fa-star"></i>
+          <i class="fa-solid fa-star"></i>
+          <i class="fa-solid fa-star-half-stroke"></i>
         </div>
-
-        <div class="farmer-card">
-          <div class="farmer-avatar">
-            <i class="fa-solid fa-user"></i>
-          </div>
-          <div class="farmer-info">
-            <span class="label">Cultivado por</span>
-            <strong class="name">
-              {{ product.farmer?.user?.name || 'Agricultor Local' }}
-            </strong>
-            <span class="location">
-              <i class="fa-solid fa-location-dot"></i>
-              {{ product.farmer?.city || 'España' }}
-            </span>
-          </div>
-        </div>
-
-
-
-        <div class="price-box">
-          <span class="price">{{ product.price }}€</span>
-          <span class="unit">/{{ product.unit }}</span>
-        </div>
-
-        <div class="actions-row">
-          <div class="qty-selector">
-            <button (click)="cambiarCantidad(-1)" [disabled]="cantidad <= 1">−</button>
-            <input type="text" [value]="cantidad + ' ' + (product.unit === 'unidad' ? 'ud' : 'kg')" readonly>
-            <button class="plus" (click)="cambiarCantidad(1)">+</button>
-          </div>
-          <button class="add-cart-btn" (click)="agregarAlCarrito()">
-            + Añadir a la cesta
-          </button>
-        </div>
-
+        <strong class="rating-num">4.9</strong>
+        <span class="rating-text">(32 valoraciones)</span>
       </div>
+
+      <!-- Agricultor -->
+      <div class="farmer-card">
+        <div class="farmer-avatar" aria-hidden="true">
+          <i class="fa-solid fa-seedling"></i>
+        </div>
+        <div class="farmer-info">
+          <span class="label">Cultivado por</span>
+          <strong class="name">{{ product.farmer?.user?.name || 'Agricultor Local' }}</strong>
+          <span class="location">
+            <i class="fa-solid fa-location-dot" aria-hidden="true"></i>
+            {{ product.farmer?.city || 'España' }}
+          </span>
+        </div>
+        <span class="eco-badge"><i class="fa-solid fa-leaf"></i> Eco</span>
+      </div>
+
+      <!-- Precio -->
+      <div class="price-box">
+        <span class="price">{{ product.price | number:'1.2-2' }}€</span>
+        <span class="unit">/ {{ product.unit }}</span>
+        <span class="stock-count" *ngIf="product.stock_quantity > 0">
+          {{ product.stock_quantity }} disponibles
+        </span>
+      </div>
+
+      <!-- Cantidad + CTA -->
+      <div class="actions-row">
+        <div class="qty-selector" role="group" aria-label="Seleccionar cantidad">
+          <button (click)="cambiarCantidad(-1)" [disabled]="cantidad <= 1" aria-label="Reducir cantidad">−</button>
+          <span class="qty-value" aria-live="polite">
+            {{ cantidad }} {{ product.unit === 'unidad' ? 'ud' : 'kg' }}
+          </span>
+          <button
+            class="plus"
+            (click)="cambiarCantidad(1)"
+            [disabled]="cantidad >= (product.stock_quantity || 100)"
+            aria-label="Aumentar cantidad"
+          >+</button>
+        </div>
+        <button
+          class="add-cart-btn"
+          (click)="agregarAlCarrito()"
+          [disabled]="product.stock_quantity <= 0"
+        >
+          <i class="fa-solid fa-basket-shopping"></i> Añadir a la cesta
+        </button>
+      </div>
+
+      <!-- Trust row -->
+      <div class="trust-row">
+        <div class="trust-item"><i class="fa-solid fa-truck-fast"></i><span>Envío 24–48h</span></div>
+        <div class="trust-item"><i class="fa-solid fa-rotate-left"></i><span>Devolución fácil</span></div>
+        <div class="trust-item"><i class="fa-solid fa-lock"></i><span>Pago seguro</span></div>
+      </div>
+
     </div>
   </div>
 
-  <!-- Pestañas -->
-  <div class="tabs-container">
-    <div class="tabs-header">
-      <button [class.active]="activeTab === 'descripcion'" (click)="setTab('descripcion')">Descripción</button>
-      <button [class.active]="activeTab === 'origen'" (click)="setTab('origen')">Origen</button>
-      <button [class.active]="activeTab === 'valoraciones'" (click)="setTab('valoraciones')">Valoraciones</button>
+  <!-- ====== PESTAÑAS ====== -->
+  <section class="tabs-container" aria-label="Información del producto">
+    <div class="tabs-header" role="tablist">
+      <button
+        role="tab"
+        [attr.aria-selected]="activeTab === 'descripcion'"
+        [class.active]="activeTab === 'descripcion'"
+        (click)="setTab('descripcion')"
+      >
+        <i class="fa-regular fa-file-lines"></i> Descripción
+      </button>
+      <button
+        role="tab"
+        [attr.aria-selected]="activeTab === 'origen'"
+        [class.active]="activeTab === 'origen'"
+        (click)="setTab('origen')"
+      >
+        <i class="fa-solid fa-map-location-dot"></i> Origen
+      </button>
+      <button
+        role="tab"
+        [attr.aria-selected]="activeTab === 'valoraciones'"
+        [class.active]="activeTab === 'valoraciones'"
+        (click)="setTab('valoraciones')"
+      >
+        <i class="fa-regular fa-star"></i> Valoraciones
+        <span class="tab-count" *ngIf="product.reviews?.length">{{ product.reviews.length }}</span>
+      </button>
       <span class="tab-indicator"></span>
     </div>
 
     <div class="tab-content">
 
-      <!-- Descripción -->
-      <div *ngIf="activeTab === 'descripcion'" class="text-content description-tab">
+      <!-- DESCRIPCIÓN -->
+      <div *ngIf="activeTab === 'descripcion'" class="text-content description-tab" role="tabpanel">
         <h3 class="desc-title">Detalles del producto</h3>
         <p class="desc-text">{{ product.description }}</p>
       </div>
 
-      <!-- Origen -->
-      <div *ngIf="activeTab === 'origen'" class="text-content origin-tab">
+      <!-- ORIGEN -->
+      <div *ngIf="activeTab === 'origen'" class="text-content origin-tab" role="tabpanel">
         <p class="origin-intro">
-          Este producto ha sido cultivado de forma sostenible y con mucho cariño en
-          <strong class="location-highlight">
-            {{ product.farmer?.city || 'nuestros campos locales' }}
-          </strong>.
+          Cultivado de forma sostenible en
+          <strong class="location-highlight">{{ product.farmer?.city || 'nuestros campos locales' }}</strong>.
         </p>
         <div class="origin-card">
-          <div class="origin-icon">
-            <i class="fa-solid fa-map-location-dot"></i>
-          </div>
+          <div class="origin-icon"><i class="fa-solid fa-map-location-dot"></i></div>
           <div class="origin-info">
             <span class="origin-label">Procedencia Certificada</span>
             <span class="origin-value">
-              <span *ngIf="product.farmer?.farm_name">
-                {{ product.farmer.farm_name }},
-              </span>
+              <span *ngIf="product.farmer?.farm_name">{{ product.farmer.farm_name }}, </span>
               {{ product.farmer?.city || 'España' }}
             </span>
           </div>
         </div>
-
-        <p class="origin-desc">
-          Al comprar este producto, estás apoyando directamente a la economía local
-          y reduciendo la huella de carbono del transporte.
-        </p>
+        <div class="origin-impact">
+          <div class="impact-item"><i class="fa-solid fa-hand-holding-heart"></i><span>Apoyas la economía local</span></div>
+          <div class="impact-item"><i class="fa-solid fa-wind"></i><span>Menor huella de carbono</span></div>
+          <div class="impact-item"><i class="fa-solid fa-leaf"></i><span>Agricultura sostenible</span></div>
+        </div>
       </div>
 
-      <!-- Valoraciones -->
-      <div *ngIf="activeTab === 'valoraciones'" class="text-content reviews-tab">
+      <!-- VALORACIONES -->
+      <div *ngIf="activeTab === 'valoraciones'" class="text-content reviews-tab" role="tabpanel">
+
         <div class="no-reviews" *ngIf="!product.reviews?.length">
-          <i class="fa-regular fa-comment-dots"></i>
+          <div class="no-reviews-icon"><i class="fa-regular fa-comment-dots"></i></div>
           <p>Este producto aún no tiene valoraciones.</p>
-          <button class="btn-write-review">Sé el primero en opinar</button>
+          <button class="btn-write-review">
+            <i class="fa-solid fa-pen-to-square"></i> Sé el primero en opinar
+          </button>
         </div>
-        <div class="reviews-list" *ngIf="product.reviews?.length > 0">
+
+        <div *ngIf="product.reviews?.length > 0">
           <h3 class="reviews-title">Opiniones de clientes ({{ product.reviews.length }})</h3>
           <div class="review-card" *ngFor="let review of product.reviews">
             <div class="review-header">
-              <div class="reviewer-avatar">
-                {{ review.user?.name?.charAt(0) || 'U' }}
-              </div>
+              <div class="reviewer-avatar">{{ review.user?.name?.charAt(0) || 'U' }}</div>
               <div class="review-meta">
                 <span class="reviewer-name">{{ review.user?.name || 'Usuario' }}</span>
                 <span class="review-date">{{ review.created_at | date:'mediumDate' }}</span>
               </div>
-            </div>
-            <div class="review-stars">
-              <i class="fa-solid fa-star" *ngFor="let s of [1,2,3,4,5]" [class.active]="s <= review.rating"></i>
+              <div class="review-stars" [attr.aria-label]="review.rating + ' de 5 estrellas'">
+                <i *ngFor="let s of [1,2,3,4,5]" class="fa-solid fa-star" [class.active]="s <= review.rating"></i>
+              </div>
             </div>
             <p class="review-text">{{ review.comment }}</p>
           </div>
         </div>
-      </div>
 
+      </div>
     </div>
-  </div>
-</div>
+  </section>
+</main>

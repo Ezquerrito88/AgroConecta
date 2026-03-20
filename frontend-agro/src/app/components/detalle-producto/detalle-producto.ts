@@ -22,6 +22,7 @@ export class DetalleProducto implements OnInit, AfterViewInit {
   cantidad: number = 1;
   isLoading: boolean = true;
   activeTab: string = 'descripcion';
+  selectedImageIndex: number = 0;
 
   constructor(
     private route: ActivatedRoute,
@@ -60,7 +61,17 @@ export class DetalleProducto implements OnInit, AfterViewInit {
 
   getImagenUrl(product: any): string {
     if (product?.images?.length > 0) {
-      const path = product.images[0].image_path;
+      const path = product.images[this.selectedImageIndex]?.image_path
+        ?? product.images[0].image_path;
+      if (path.startsWith('http')) return path;
+      return `${this.STORAGE_URL}/${path}`;
+    }
+    return 'assets/placeholder.png';
+  }
+
+  getImagenUrlByIndex(index: number): string {
+    if (this.product?.images?.length > index) {
+      const path = this.product.images[index].image_path;
       if (path.startsWith('http')) return path;
       return `${this.STORAGE_URL}/${path}`;
     }

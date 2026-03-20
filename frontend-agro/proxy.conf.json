@@ -1,7 +1,7 @@
 {
   "/api": {
-    "target": "https://agroconecta-backend-v2-bxbxfudaatbmgxdg.spaincentral-01.azurewebsites.net",
-    "secure": true,
+    "target": "http://localhost:8000",
+    "secure": false,
     "changeOrigin": true,
     "logLevel": "debug"
   }

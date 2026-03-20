@@ -119,26 +119,28 @@ class ProductController extends Controller
         $validated = $request->validate([
             'category_id'        => 'required|exists:categories,id',
             'name'               => 'required|string|max:255',
-            'description'        => 'required|string|max:255',
+            'description'        => 'required|string',
+            'short_description'  => 'nullable|string|max:160',
             'price'              => 'required|numeric|min:0',
             'unit'               => 'required|in:kg,g,l,ml,ud,docena,manojo,caja,bandeja,saco,pack',
             'stock_quantity'     => 'required|integer|min:0',
             'season_end'         => 'nullable|date',
-            'images'             => 'nullable|array',
-            'images.*'           => 'image|mimes:jpeg,png,jpg,webp|max:2048'
+            'images'             => 'nullable|array|max:6',
+            'images.*'           => 'image|mimes:jpeg,png,jpg,webp|max:2048',
         ]);
 
         $product = Product::create([
-            'farmer_id'          => $request->user()->farmer->id,
-            'category_id'        => $validated['category_id'],
-            'name'               => $validated['name'],
-            'description'        => $validated['description'],
-            'price'              => $validated['price'],
-            'unit'               => $validated['unit'],
-            'stock_quantity'     => $validated['stock_quantity'],
-            'season_end'         => $validated['season_end'] ?? null,
-            'moderation_status' => 'approved'
-        ]);
+            'farmer_id'         => $request->user()->farmer->id,
+            'category_id'       => $validated['category_id'],
+            'name'              => $validated['name'],
+            'description'       => $validated['description'],
+            'short_description' => $validated['short_description'] ?? null,
+            'price'             => $validated['price'],
+            'unit'              => $validated['unit'],
+            'stock_quantity'    => $validated['stock_quantity'],
+            'season_end'        => $validated['season_end'] ?? null,
+            'moderation_status' => 'approved',
+        ]);;
 
         if ($request->hasFile('images')) {
             foreach ($request->file('images') as $file) {
@@ -175,43 +177,52 @@ class ProductController extends Controller
             return response()->json(['message' => 'Producto no encontrado'], 404);
         }
 
-        if ($request->user()->id !== $product->farmer_id) {
+        if ($request->user()->farmer?->id !== $product->farmer_id) {
             return response()->json(['message' => 'No tienes permisos para editar este producto'], 403);
         }
 
         $validated = $request->validate([
-            'category_id'        => 'sometimes|exists:categories,id',
-            'name'               => 'sometimes|string|max:255',
-            'description'        => 'sometimes|string|max:255',
-            'price'              => 'sometimes|numeric|min:0',
-            'unit'               => 'sometimes|in:kg,g,l,ml,ud,docena,manojo,caja,bandeja,saco,pack',
-            'stock_quantity'     => 'sometimes|integer|min:0',
-            'season_end'         => 'sometimes|date',
-            'images'             => 'sometimes|array',
-            'images.*'           => 'image|mimes:jpeg,png,jpg,webp|max:2048'
+            'category_id'    => 'sometimes|exists:categories,id',
+            'name'           => 'sometimes|string|max:255',
+            'description'    => 'sometimes|string|max:255',
+            'price'          => 'sometimes|numeric|min:0',
+            'unit'           => 'sometimes|in:kg,g,l,ml,ud,docena,manojo,caja,bandeja,saco,pack',
+            'stock_quantity' => 'sometimes|integer|min:0',
+            'season_end'     => 'sometimes|date',
+            'images'         => 'sometimes|array|max:6',
+            'images.*'       => 'image|mimes:jpeg,png,jpg,webp|max:2048',
+            'replace_images' => 'sometimes|boolean', // ← nuevo
         ]);
 
-        $dataToUpdate = collect($validated)->except('images')->toArray();
-        $product->update($dataToUpdate);
+        $product->update(collect($validated)->except(['images', 'replace_images'])->toArray());
 
         if ($request->hasFile('images')) {
-            foreach ($request->file('images') as $image) {
-                // 1. Guardar archivo en disco
-                $path = $image->store('products', 'public');
 
-                // 2. Crear registro en BD
+            // Si replace_images=true, borra las anteriores primero
+            if ($request->boolean('replace_images', false)) {
+                foreach ($product->images as $oldImage) {
+                    if (Storage::disk('public')->exists($oldImage->image_path)) {
+                        Storage::disk('public')->delete($oldImage->image_path);
+                    }
+                }
+                $product->images()->delete();
+            }
+
+            foreach ($request->file('images') as $file) {
+                $path = $file->store('products', 'public');
                 ProductImage::create([
                     'product_id' => $product->id,
-                    'image_path' => $path
+                    'image_path' => $path,
                 ]);
             }
         }
 
         return response()->json([
             'message' => 'Producto actualizado correctamente',
-            'product' => $product->load('images')
+            'product' => $product->load('images'),
         ]);
     }
+
 
     //Eliminar producto
     public function destroy(Request $request, $id)
@@ -284,5 +295,24 @@ class ProductController extends Controller
             'kpis'      => $kpis,
             'productos' => $productos,
         ]);
+    }
+
+    public function destroyImage(Request $request, $productId, $imageId)
+    {
+        $image = ProductImage::where('id', $imageId)
+            ->where('product_id', $productId)
+            ->firstOrFail();
+
+        if ($request->user()->farmer?->id !== $image->product->farmer_id) {
+            return response()->json(['message' => 'Sin permisos'], 403);
+        }
+
+        if (Storage::disk('public')->exists($image->image_path)) {
+            Storage::disk('public')->delete($image->image_path);
+        }
+
+        $image->delete();
+
+        return response()->json(['message' => 'Imagen eliminada correctamente']);
     }
 }

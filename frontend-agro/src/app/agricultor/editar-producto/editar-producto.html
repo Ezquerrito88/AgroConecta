@@ -37,7 +37,7 @@
     <!-- Formulario -->
     <div class="form-layout" *ngIf="!loading">
 
-      <!-- Columna izquierda -->
+      <!-- ══ COLUMNA IZQUIERDA ══ -->
       <div class="form-main">
 
         <!-- Info básica -->
@@ -58,7 +58,9 @@
                 placeholder="Describe el origen, sabor, usos recomendados..."></textarea>
             </div>
             <div class="form-group">
-              <label>Descripción corta <span class="label-hint">— para listados y tarjetas</span></label>
+              <label>Descripción corta
+                <span class="label-hint">— para listados y tarjetas</span>
+              </label>
               <input type="text" class="form-input" [(ngModel)]="producto.short_description"
                 placeholder="Ej: Dulces y crujientes, recién cogidas." />
             </div>
@@ -127,7 +129,7 @@
 
       </div>
 
-      <!-- Columna derecha -->
+      <!-- ══ COLUMNA DERECHA ══ -->
       <div class="form-side">
 
         <!-- Imágenes -->
@@ -135,41 +137,108 @@
           <div class="card-header purple">
             <span class="material-symbols-rounded">photo_library</span>
             <h2>Imágenes</h2>
+            <span class="img-counter">
+              {{ (producto.images?.length || 0) + newImages.length }} / 6
+            </span>
           </div>
           <div class="card-body">
-            <div class="images-grid" *ngIf="producto.images?.length > 0">
-              <div class="image-thumb" *ngFor="let img of producto.images">
-                <img [src]="img.url" [alt]="producto.name" />
-                <button class="img-delete-btn" (click)="deleteImage(img.id)">
-                  <span class="material-symbols-rounded">close</span>
-                </button>
+
+            <!-- Grid imágenes existentes + nuevas -->
+            <div
+              class="images-grid"
+              *ngIf="(producto.images?.length || 0) + newImagePreviews.length > 0"
+            >
+              <!-- Existentes -->
+              <div
+                class="image-thumb"
+                [class.image-thumb--main]="i === 0"
+                *ngFor="let img of producto.images; let i = index"
+              >
+                <img [src]="img.url" [alt]="producto.name" loading="lazy" />
+                <span class="main-badge" *ngIf="i === 0">
+                  <span class="material-symbols-rounded">star</span> Principal
+                </span>
+                <div class="thumb-overlay">
+                  <button
+                    class="img-action-btn img-delete-btn"
+                    (click)="deleteImage(img.id)"
+                    title="Eliminar imagen"
+                    type="button"
+                  >
+                    <span class="material-symbols-rounded">delete</span>
+                  </button>
+                </div>
               </div>
-            </div>
 
-            <div class="upload-area" (click)="fileInput.click()"
-              [class.upload-area--active]="producto.images?.length === 0">
-              <span class="material-symbols-rounded upload-icon">cloud_upload</span>
-              <p>Arrastra o haz clic para subir</p>
-              <span class="upload-hint">JPG, PNG o WEBP · Máx. 2MB por imagen</span>
-              <input #fileInput type="file" accept="image/*" multiple hidden
-                (change)="onImageSelected($event)" />
-            </div>
-
-            <div *ngIf="newImagePreviews.length > 0">
-              <p class="new-images-label">
-                <span class="material-symbols-rounded">add_photo_alternate</span>
-                {{ newImagePreviews.length }} imagen(es) nueva(s)
-              </p>
-              <div class="images-grid">
-                <div class="image-thumb image-thumb--new"
-                  *ngFor="let prev of newImagePreviews; let i = index">
-                  <img [src]="prev" alt="Nueva imagen" />
-                  <button class="img-delete-btn" (click)="removeNewImage(i)">
+              <!-- Nuevas (pendientes de guardar) -->
+              <div
+                class="image-thumb image-thumb--new"
+                *ngFor="let prev of newImagePreviews; let i = index"
+              >
+                <img [src]="prev" alt="Nueva imagen" />
+                <span class="new-badge">Nueva</span>
+                <div class="thumb-overlay">
+                  <button
+                    class="img-action-btn img-delete-btn"
+                    (click)="removeNewImage(i)"
+                    title="Quitar imagen"
+                    type="button"
+                  >
                     <span class="material-symbols-rounded">close</span>
                   </button>
                 </div>
               </div>
+
+              <!-- Slot vacío para añadir -->
+              <div
+                class="image-thumb image-thumb--add"
+                *ngIf="(producto.images?.length || 0) + newImages.length < 6"
+                (click)="fileInput.click()"
+                title="Añadir imagen"
+              >
+                <span class="material-symbols-rounded">add_photo_alternate</span>
+                <span>Añadir</span>
+              </div>
             </div>
+
+            <!-- Zona de drag & drop -->
+            <div
+              class="upload-zone"
+              [class.upload-zone--drag]="isDragging"
+              [class.upload-zone--full]="(producto.images?.length || 0) + newImages.length >= 6"
+              (click)="fileInput.click()"
+              (dragover)="onDragOver($event)"
+              (dragleave)="onDragLeave()"
+              (drop)="onDrop($event)"
+            >
+              <div class="upload-zone-inner">
+                <span class="material-symbols-rounded upload-zone-icon">cloud_upload</span>
+                <p class="upload-zone-title">
+                  {{ isDragging ? 'Suelta las imágenes aquí' : 'Arrastra imágenes o haz clic' }}
+                </p>
+                <span class="upload-zone-hint">
+                  JPG, PNG o WEBP · Máx. 2 MB · Hasta 6 imágenes
+                </span>
+              </div>
+              <input
+                #fileInput
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                multiple
+                hidden
+                (change)="onImageSelected($event)"
+              />
+            </div>
+
+            <!-- Aviso límite alcanzado -->
+            <p
+              class="limit-warning"
+              *ngIf="(producto.images?.length || 0) + newImages.length >= 6"
+            >
+              <span class="material-symbols-rounded">info</span>
+              Has alcanzado el límite de 6 imágenes. Elimina alguna para añadir nuevas.
+            </p>
+
           </div>
         </div>
 
@@ -193,15 +262,15 @@
 
         <!-- Acciones -->
         <div class="form-card form-actions-card">
-          <button class="btn-save" (click)="guardar()" [disabled]="saving">
+          <button class="btn-save" (click)="guardar()" [disabled]="saving" type="button">
             <span class="material-symbols-rounded">save</span>
             {{ saving ? 'Guardando...' : 'Guardar Cambios' }}
           </button>
-          <button class="btn-cancel" [routerLink]="['/agricultor/mis-productos']">
+          <button class="btn-cancel" [routerLink]="['/agricultor/mis-productos']" type="button">
             Cancelar
           </button>
           <div class="divider"></div>
-          <button class="btn-delete" (click)="eliminar()">
+          <button class="btn-delete" (click)="eliminar()" type="button">
             <span class="material-symbols-rounded">delete</span>
             Eliminar Producto
           </button>

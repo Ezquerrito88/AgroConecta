@@ -6,13 +6,12 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ProductController;
-use App\Http\Controllers\ProductImageController;
 use App\Http\Controllers\FavoriteController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\WebhookController;
 use App\Http\Controllers\ConversationController;
-use App\Http\Controllers\Api\FarmerProfileController;
+use App\Http\Controllers\FarmerProfileController;
 
 /*
 |--------------------------------------------------------------------------
@@ -20,76 +19,101 @@ use App\Http\Controllers\Api\FarmerProfileController;
 |--------------------------------------------------------------------------
 */
 
-Route::get('/health', function () {
-    return response()->json(['status' => 'ok', 'service' => 'agroconecta-api']);
+Route::get('/health', fn() => response()->json([
+    'status'  => 'ok',
+    'service' => 'agroconecta-api',
+    'version' => '1.0.0',
+]));
+
+// Auth pública
+Route::post('/register', [AuthController::class, 'register']);
+Route::post('/login',    [AuthController::class, 'login']);
+
+// Productos públicos
+Route::prefix('products')->group(function () {
+    Route::get('/latest',  [ProductController::class, 'getLatest']);
+    Route::get('/',        [ProductController::class, 'index']);
+    Route::get('/{id}',    [ProductController::class, 'show']);
 });
 
-Route::post('/register', [AuthController::class, 'register']);
-Route::post('/login', [AuthController::class, 'login']);
-
-Route::get('/products/latest', [ProductController::class, 'getLatest']);
-Route::get('/products', [ProductController::class, 'index']);
-Route::get('/products/{id}', [ProductController::class, 'show']);
-
-Route::get('/categories', [CategoryController::class, 'index']);
+// Categorías públicas
+Route::get('/categories',      [CategoryController::class, 'index']);
 Route::get('/categories/{id}', [CategoryController::class, 'show']);
 
-// Webhooks (no requieren autenticación, pero validan firma)
+// Webhooks (sin auth, validan firma internamente)
 Route::post('/webhooks/stripe', [WebhookController::class, 'handleStripe']);
 Route::post('/webhooks/paypal', [WebhookController::class, 'handlePaypal']);
 
 /*
 |--------------------------------------------------------------------------
-| RUTAS PROTEGIDAS
+| RUTAS PROTEGIDAS — cualquier usuario autenticado
 |--------------------------------------------------------------------------
 */
 Route::middleware('auth:sanctum')->group(function () {
 
     // Auth
-    Route::post('/logout', [AuthController::class, 'logout']);
-    Route::get('/user', function (Request $request) { return $request->user(); });
+    Route::post('/logout',  [AuthController::class, 'logout']);
+    Route::post('/refresh', [AuthController::class, 'refresh']);
+    Route::get('/user',     fn(Request $r) => $r->user()->load('farmer'));
 
-    // Agricultor - Perfil
+    /*
+    |----------------------------------------------------------------------
+    | AGRICULTOR
+    |----------------------------------------------------------------------
+    */
     Route::prefix('farmer')->group(function () {
-        Route::get('/profile', [FarmerProfileController::class, 'show']);
-        Route::put('/profile', [FarmerProfileController::class, 'update']);
+
+        // Perfil
+        Route::get('/profile',  [FarmerProfileController::class, 'show']);
+        Route::put('/profile',  [FarmerProfileController::class, 'update']);
+
+        // Productos del agricultor autenticado
+        Route::get('/products', [ProductController::class, 'misProductos']);
+
+        // Pedidos recibidos
+        Route::get('/orders',             [OrderController::class, 'farmerOrders']);
+        Route::get('/orders/{id}',        [OrderController::class, 'show']);
+        Route::put('/orders/{id}/status', [OrderController::class, 'updateStatus']);
     });
 
-    // Productos del agricultor
-    Route::get('/farmer/products', [ProductController::class, 'misProductos']);
-    Route::post('/products', [ProductController::class, 'store']);
-    Route::put('/products/{id}', [ProductController::class, 'update']);
+    // CRUD productos (solo el agricultor dueño puede editar/borrar — validado en controller)
+    Route::post('/products',        [ProductController::class, 'store']);
+    Route::put('/products/{id}',    [ProductController::class, 'update']);
     Route::delete('/products/{id}', [ProductController::class, 'destroy']);
+    Route::delete('/products/{productId}/images/{imageId}', [ProductController::class, 'destroyImage']);
 
-    // Imágenes
-    Route::delete('/product-images/{id}', [ProductImageController::class, 'destroy']);
-
-    // Categorías
-    Route::post('/categories', [CategoryController::class, 'store']);
-    Route::put('/categories/{id}', [CategoryController::class, 'update']);
-    Route::delete('/categories/{id}', [CategoryController::class, 'destroy']);
+    /*
+    |----------------------------------------------------------------------
+    | COMPRADOR
+    |----------------------------------------------------------------------
+    */
+    Route::post('/orders',       [OrderController::class, 'store']);
+    Route::get('/buyer/orders',  [OrderController::class, 'buyerOrders']);
 
     // Favoritos
-    Route::post('/favorites/{id}', [FavoriteController::class, 'toggle']);
-    Route::get('/favorites', [FavoriteController::class, 'index']);
+    Route::get('/favorites',        [FavoriteController::class, 'index']);
+    Route::post('/favorites/{id}',  [FavoriteController::class, 'toggle']);
 
-    // Pedidos - Agricultor
-    Route::get('/farmer/orders', [OrderController::class, 'farmerOrders']);
-    Route::get('/farmer/orders/{id}', [OrderController::class, 'show']);
-    Route::put('/farmer/orders/{id}/status', [OrderController::class, 'updateStatus']);
+    /*
+    |----------------------------------------------------------------------
+    | PAGOS
+    |----------------------------------------------------------------------
+    */
+    Route::prefix('payments')->group(function () {
+        Route::post('/stripe/intent',                        [PaymentController::class, 'createStripeIntent']);
+        Route::post('/paypal/orders',                        [PaymentController::class, 'createPaypalOrder']);
+        Route::post('/paypal/orders/{paypalOrderId}/capture', [PaymentController::class, 'capturePaypalOrder']);
+    });
 
-    // Pedidos - Comprador
-    Route::post('/orders', [OrderController::class, 'store']);
-    Route::get('/buyer/orders', [OrderController::class, 'buyerOrders']);
-
-    // Pagos
-    Route::post('/payments/stripe/intent', [PaymentController::class, 'createStripeIntent']);
-    Route::post('/payments/paypal/orders', [PaymentController::class, 'createPaypalOrder']);
-    Route::post('/payments/paypal/orders/{paypalOrderId}/capture', [PaymentController::class, 'capturePaypalOrder']);
-
-    // Mensajería
-    Route::get('/conversations', [ConversationController::class, 'index']);
-    Route::post('/conversations', [ConversationController::class, 'store']);
-    Route::get('/conversations/{id}/messages', [ConversationController::class, 'messages']);
-    Route::post('/conversations/{id}/messages', [ConversationController::class, 'sendMessage']);
+    /*
+    |----------------------------------------------------------------------
+    | MENSAJERÍA
+    |----------------------------------------------------------------------
+    */
+    Route::prefix('conversations')->group(function () {
+        Route::get('/',                    [ConversationController::class, 'index']);
+        Route::post('/',                   [ConversationController::class, 'store']);
+        Route::get('/{id}/messages',       [ConversationController::class, 'messages']);
+        Route::post('/{id}/messages',      [ConversationController::class, 'sendMessage']);
+    });
 });

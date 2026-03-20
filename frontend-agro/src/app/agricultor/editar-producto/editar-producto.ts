@@ -21,8 +21,9 @@ export class EditarProducto implements OnInit {
 
   producto: any = {};
   categorias: any[] = [];
-  loading = true;
-  saving = false;
+  loading  = true;
+  saving   = false;
+  isDragging = false;
 
   newImages: File[] = [];
   newImagePreviews: string[] = [];
@@ -35,7 +36,7 @@ export class EditarProducto implements OnInit {
     private productoService: ProductoService,
     private categoryService: CategoryService,
     private cdr: ChangeDetectorRef
-  ) { }
+  ) {}
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
@@ -63,20 +64,51 @@ export class EditarProducto implements OnInit {
   loadCategorias(): void {
     this.categoryService.getCategorias().subscribe({
       next: (data: any[]) => this.categorias = data,
-      error: () => { }
+      error: () => {}
     });
   }
 
+  // ── Drag & Drop ──────────────────────────────────────
+
+  onDragOver(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    if (this.totalImages < 6) this.isDragging = true;
+  }
+
+  onDragLeave(): void {
+    this.isDragging = false;
+  }
+
+  onDrop(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isDragging = false;
+    const files = event.dataTransfer?.files;
+    if (files) this.processFiles(files);
+  }
+
   onImageSelected(event: any): void {
-    const files: FileList = event.target.files;
-    for (let i = 0; i < files.length; i++) {
-      this.newImages.push(files[i]);
+    this.processFiles(event.target.files);
+    event.target.value = ''; // permite reseleccionar el mismo archivo
+  }
+
+  private processFiles(files: FileList): void {
+    const disponibles = 6 - this.totalImages;
+    const toProcess   = Math.min(files.length, disponibles);
+
+    for (let i = 0; i < toProcess; i++) {
+      const file = files[i];
+      if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) continue;
+      if (file.size > 2 * 1024 * 1024) continue; // > 2MB ignorado
+
+      this.newImages.push(file);
       const reader = new FileReader();
       reader.onload = (e: any) => {
         this.newImagePreviews.push(e.target.result);
         this.cdr.detectChanges();
       };
-      reader.readAsDataURL(files[i]);
+      reader.readAsDataURL(file);
     }
   }
 
@@ -86,7 +118,7 @@ export class EditarProducto implements OnInit {
   }
 
   deleteImage(imageId: number): void {
-    this.productoService.deleteImage(imageId).subscribe({
+    this.productoService.deleteImage(this.producto.id, imageId).subscribe({
       next: () => {
         this.producto.images = this.producto.images.filter((img: any) => img.id !== imageId);
         this.cdr.detectChanges();
@@ -94,17 +126,26 @@ export class EditarProducto implements OnInit {
     });
   }
 
+  // ── Getters útiles ───────────────────────────────────
+
+  get totalImages(): number {
+    return (this.producto.images?.length || 0) + this.newImages.length;
+  }
+
+  // ── Guardar / Eliminar ───────────────────────────────
+
   guardar(): void {
     this.saving = true;
     const formData = new FormData();
-    formData.append('_method', 'PUT');
-    formData.append('name', this.producto.name);
-    formData.append('description', this.producto.description);
+    formData.append('_method',           'PUT');
+    formData.append('name',              this.producto.name ?? '');
+    formData.append('description',       this.producto.description ?? '');
     formData.append('short_description', this.producto.short_description ?? '');
-    formData.append('price', this.producto.price);
-    formData.append('unit', this.producto.unit);
-    formData.append('stock_quantity', this.producto.stock_quantity);
-    formData.append('category_id', this.producto.category_id);
+    formData.append('price',             this.producto.price);
+    formData.append('unit',              this.producto.unit);
+    formData.append('stock_quantity',    this.producto.stock_quantity);
+    formData.append('category_id',       this.producto.category_id);
+
     this.newImages.forEach(img => formData.append('images[]', img));
 
     this.productoService.updateProducto(this.producto.id, formData).subscribe({
@@ -117,7 +158,7 @@ export class EditarProducto implements OnInit {
   }
 
   eliminar(): void {
-    if (!confirm('¿Seguro que quieres eliminar este producto?')) return;
+    if (!confirm('¿Seguro que quieres eliminar este producto? Esta acción no se puede deshacer.')) return;
     this.productoService.deleteProducto(this.producto.id).subscribe({
       next: () => this.router.navigate(['/agricultor/mis-productos'])
     });
