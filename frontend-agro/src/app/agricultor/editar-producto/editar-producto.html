@@ -148,16 +148,31 @@
               class="images-grid"
               *ngIf="(producto.images?.length || 0) + newImagePreviews.length > 0"
             >
-              <!-- Existentes -->
+              <!-- ✅ Existentes — con reordenación drag -->
               <div
                 class="image-thumb"
                 [class.image-thumb--main]="i === 0"
+                [class.image-thumb--dragging]="dragIndex === i"
+                [class.image-thumb--dragover]="dragOverIndex === i && dragIndex !== i"
                 *ngFor="let img of producto.images; let i = index"
+                draggable="true"
+                (dragstart)="onThumbDragStart(i)"
+                (dragover)="onThumbDragOver($event, i)"
+                (dragleave)="onThumbDragLeave()"
+                (drop)="onThumbDrop(i)"
+                (dragend)="onThumbDragEnd()"
               >
                 <img [src]="img.url" [alt]="producto.name" loading="lazy" />
+
+                <!-- Handle de arrastre -->
+                <span class="drag-handle">
+                  <span class="material-symbols-rounded">drag_indicator</span>
+                </span>
+
                 <span class="main-badge" *ngIf="i === 0">
                   <span class="material-symbols-rounded">star</span> Principal
                 </span>
+
                 <div class="thumb-overlay">
                   <button
                     class="img-action-btn img-delete-btn"
@@ -170,7 +185,7 @@
                 </div>
               </div>
 
-              <!-- Nuevas (pendientes de guardar) -->
+              <!-- Nuevas (pendientes de guardar) — sin reordenación -->
               <div
                 class="image-thumb image-thumb--new"
                 *ngFor="let prev of newImagePreviews; let i = index"
@@ -201,7 +216,7 @@
               </div>
             </div>
 
-            <!-- Zona de drag & drop -->
+            <!-- Zona de drag & drop subida -->
             <div
               class="upload-zone"
               [class.upload-zone--drag]="isDragging"
@@ -280,4 +295,36 @@
     </div>
 
   </main>
+</div>
+
+<!-- ══ MODAL CONFIRMAR ELIMINAR ══ -->
+<div class="modal-backdrop" *ngIf="showDeleteModal" (click)="cancelarEliminar()">
+  <div class="modal-card" (click)="$event.stopPropagation()">
+
+    <div class="modal-icon-wrap">
+      <span class="material-symbols-rounded">delete_forever</span>
+    </div>
+
+    <h2 class="modal-title">¿Eliminar producto?</h2>
+    <p class="modal-desc">
+      Vas a eliminar <strong>{{ producto.name }}</strong> de forma permanente.
+      Esta acción no se puede deshacer.
+    </p>
+
+    <div class="modal-actions">
+      <button class="modal-btn-cancel" (click)="cancelarEliminar()" type="button">
+        Cancelar
+      </button>
+      <button
+        class="modal-btn-confirm"
+        (click)="confirmarEliminar()"
+        [disabled]="deleting"
+        type="button"
+      >
+        <span class="material-symbols-rounded">delete</span>
+        {{ deleting ? 'Eliminando...' : 'Sí, eliminar' }}
+      </button>
+    </div>
+
+  </div>
 </div>

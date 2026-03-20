@@ -191,37 +191,39 @@ class ProductController extends Controller
             'season_end'     => 'sometimes|date',
             'images'         => 'sometimes|array|max:6',
             'images.*'       => 'image|mimes:jpeg,png,jpg,webp|max:2048',
-            'replace_images' => 'sometimes|boolean', // ← nuevo
+            'image_order'    => 'sometimes|array',
+            'image_order.*'  => 'integer', 
         ]);
 
-        $product->update(collect($validated)->except(['images', 'replace_images'])->toArray());
+        $product->update(collect($validated)->except(['images', 'image_order'])->toArray());
 
-        if ($request->hasFile('images')) {
-
-            // Si replace_images=true, borra las anteriores primero
-            if ($request->boolean('replace_images', false)) {
-                foreach ($product->images as $oldImage) {
-                    if (Storage::disk('public')->exists($oldImage->image_path)) {
-                        Storage::disk('public')->delete($oldImage->image_path);
-                    }
-                }
-                $product->images()->delete();
+        if ($request->has('image_order')) {
+            foreach ($request->image_order as $position => $imageId) {
+                ProductImage::where('id', $imageId)
+                    ->where('product_id', $product->id)
+                    ->update(['order' => (int) $position]);
             }
+        }
 
-            foreach ($request->file('images') as $file) {
-                $path = $file->store('products', 'public');
+        // Subir nuevas imágenes (se añaden al final del orden)
+        if ($request->hasFile('images')) {
+            $nextOrder = $product->images()->max('order') + 1;
+            foreach ($request->file('images') as $image) {
+                $path = $image->store('products', 'public');
                 ProductImage::create([
                     'product_id' => $product->id,
                     'image_path' => $path,
+                    'order'      => $nextOrder++, 
                 ]);
             }
         }
 
         return response()->json([
             'message' => 'Producto actualizado correctamente',
-            'product' => $product->load('images'),
+            'product' => $product->load('images')
         ]);
     }
+
 
 
     //Eliminar producto

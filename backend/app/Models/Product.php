@@ -59,7 +59,7 @@ class Product extends Model
     // Relacion 3: Tiene muchas imágenes
     public function images()
     {
-        return $this->hasMany(ProductImage::class);
+        return $this->hasMany(ProductImage::class)->orderBy('order');
     }
 
     public function reviews()
