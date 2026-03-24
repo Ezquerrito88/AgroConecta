@@ -1,6 +1,6 @@
-import { Component, OnInit, AfterViewInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, AfterViewInit, ChangeDetectorRef, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute, RouterModule } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { environment } from '../../../environments/environment';
@@ -22,27 +22,45 @@ export class DetalleProducto implements OnInit, AfterViewInit {
   isLoading: boolean = true;
   activeTab: string = 'descripcion';
   selectedImageIndex: number = 0;
+  isFarmer: boolean = false;
+
+  lightboxOpen: boolean = false;
+  lightboxIndex: number = 0;
 
   constructor(
     private route: ActivatedRoute,
+    private router: Router,
     private http: HttpClient,
     private cd: ChangeDetectorRef,
     private cartService: CartService
-  ) { }
+  ) {}
 
   ngOnInit(): void {
+    const user = JSON.parse(localStorage.getItem('user') ?? 'null');
+    const role = user?.role?.toLowerCase();
+    this.isFarmer = role === 'agricultor' || role === 'farmer';
+
     this.route.paramMap.subscribe(params => {
       const id = params.get('id');
-      if (id) {
-        this.cargarProducto(id);
-      } else {
-        this.isLoading = false;
-      }
+      if (id) this.cargarProducto(id);
+      else this.isLoading = false;
     });
   }
 
   ngAfterViewInit(): void {
     setTimeout(() => this.moveIndicator(), 0);
+  }
+
+  @HostListener('document:keydown', ['$event'])
+  onKeyDown(event: KeyboardEvent): void {
+    if (!this.lightboxOpen) return;
+    if (event.key === 'Escape') {
+      this.closeLightbox();
+    } else if (event.key === 'ArrowLeft') {
+      this.lightboxIndex = (this.lightboxIndex - 1 + this.product.images.length) % this.product.images.length;
+    } else if (event.key === 'ArrowRight') {
+      this.lightboxIndex = (this.lightboxIndex + 1) % this.product.images.length;
+    }
   }
 
   setTab(tab: string): void {
@@ -55,10 +73,21 @@ export class DetalleProducto implements OnInit, AfterViewInit {
     const indicator = document.querySelector<HTMLElement>('.tab-indicator');
     if (!activeBtn || !indicator) return;
     indicator.style.width = `${activeBtn.offsetWidth}px`;
-    indicator.style.left = `${activeBtn.offsetLeft}px`;
+    indicator.style.left  = `${activeBtn.offsetLeft}px`;
   }
 
-  // ✅ Usa image_url del backend (Azure), fallback a image_path
+  openLightbox(index: number): void {
+    this.lightboxIndex = index;
+    this.lightboxOpen = true;
+    this.selectedImageIndex = index;
+    document.body.style.overflow = 'hidden';
+  }
+
+  closeLightbox(): void {
+    this.lightboxOpen = false;
+    document.body.style.overflow = '';
+  }
+
   getImagenUrl(product: any): string {
     if (product?.images?.length > 0) {
       const img = product.images[this.selectedImageIndex] ?? product.images[0];
@@ -70,7 +99,6 @@ export class DetalleProducto implements OnInit, AfterViewInit {
     return 'assets/placeholder.png';
   }
 
-  // ✅ Usa image_url del backend (Azure), fallback a image_path
   getImagenUrlByIndex(index: number): string {
     if (this.product?.images?.length > index) {
       const img = this.product.images[index];
@@ -92,26 +120,46 @@ export class DetalleProducto implements OnInit, AfterViewInit {
         setTimeout(() => this.moveIndicator(), 0);
       },
       error: (err) => {
-        console.error('❌ ERROR de carga:', err);
+        console.error('❌ Error al cargar producto:', err);
         this.isLoading = false;
       }
     });
   }
 
   cambiarCantidad(valor: number): void {
-    const nuevaCantidad = this.cantidad + valor;
-    const maxStock = this.product?.stock_quantity || 100;
-    if (nuevaCantidad >= 1 && nuevaCantidad <= maxStock) {
-      this.cantidad = nuevaCantidad;
+    const nueva = this.cantidad + valor;
+    const max = this.product?.stock_quantity || 100;
+    if (nueva >= 1 && nueva <= max) {
+      this.cantidad = nueva;
     }
   }
 
+  validarCantidad(): void {
+    const max = this.product?.stock_quantity || 100;
+    if (!this.cantidad || this.cantidad < 1) this.cantidad = 1;
+    if (this.cantidad > max) this.cantidad = max;
+    this.cantidad = Math.floor(this.cantidad);
+  }
+
+  contactarFarmer(): void {
+    const farmerId = this.product?.farmer?.user_id ?? this.product?.farmer?.id;
+    if (!farmerId) {
+      console.warn('No se encontró el ID del agricultor');
+      return;
+    }
+    // Navega al chat/mensajes con el farmer
+    // Ajusta la ruta según tengas configurado el módulo de mensajes
+    this.router.navigate(['/mensajes'], {
+      queryParams: { to: farmerId, nombre: this.product?.farmer?.user?.name }
+    });
+  }
+
   agregarAlCarrito(): void {
-    if (!this.product) return;
+    if (!this.product || this.isFarmer) return;
 
     const rawFarmerUserId = this.product?.farmer?.user_id;
-    const rawFarmerId = this.product?.farmer?.id;
-    const farmerId = Number(rawFarmerUserId ?? rawFarmerId);
+    const rawFarmerId     = this.product?.farmer?.id;
+    const farmerId        = Number(rawFarmerUserId ?? rawFarmerId);
 
     if (!Number.isFinite(farmerId) || farmerId <= 0) {
       console.error('No se pudo determinar el agricultor del producto', this.product);
@@ -119,14 +167,14 @@ export class DetalleProducto implements OnInit, AfterViewInit {
     }
 
     this.cartService.addToCart({
-      id: this.product.id,
-      name: this.product.name,
-      farmer: this.product?.farmer?.user?.name || 'Agricultor local',
+      id:       this.product.id,
+      name:     this.product.name,
+      farmer:   this.product?.farmer?.user?.name || 'Agricultor local',
       farmerId,
-      price: Number(this.product.price),
-      unit: this.product.unit,
+      price:    Number(this.product.price),
+      unit:     this.product.unit,
       quantity: this.cantidad,
-      image: this.getImagenUrl(this.product)
+      image:    this.getImagenUrl(this.product)
     });
   }
 }

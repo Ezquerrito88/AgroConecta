@@ -1,4 +1,4 @@
-<!-- TU HEADER ORIGINAL — sin cambios -->
+<!-- HEADER -->
 <header class="catalog-hero" *ngIf="product">
   <div class="hero-container">
     <nav class="breadcrumb" aria-label="Ruta de navegación">
@@ -17,7 +17,7 @@
   </div>
 </header>
 
-<!-- SKELETON LOADER -->
+<!-- SKELETON -->
 <div class="skeleton-layout" *ngIf="isLoading" aria-busy="true" aria-label="Cargando producto">
   <div class="skeleton-img"></div>
   <div class="skeleton-info">
@@ -34,38 +34,77 @@
 
     <!-- ====== COLUMNA IMAGEN ====== -->
     <div class="image-column">
-      <div class="image-wrapper">
-        <span class="stock-badge" *ngIf="product.stock_quantity > 0">
-          <i class="fa-solid fa-circle-check"></i> En stock
-        </span>
-        <span class="stock-badge out" *ngIf="product.stock_quantity <= 0">
-          <i class="fa-solid fa-circle-xmark"></i> Agotado
-        </span>
-        <img
-          *ngIf="product.images?.length > 0"
-          [src]="getImagenUrl(product)"
-          [alt]="product.name"
-          class="main-image"
-        />
-        <div *ngIf="!product.images?.length" class="image-empty">
-          <i class="fa-regular fa-image"></i>
-          <span>Sin imagen</span>
+
+      <div class="gallery-wrap">
+        <div class="vinted-gallery" [ngClass]="'count-' + (product.images?.length > 2 ? '3plus' : (product.images?.length || 1))">
+
+          <div
+            class="vgal-main"
+            (click)="openLightbox(0)"
+            role="button"
+            tabindex="0"
+            [attr.aria-label]="'Ver imagen principal de ' + product.name"
+          >
+            <span class="stock-badge" *ngIf="product.stock_quantity > 0">
+              <i class="fa-solid fa-circle-check"></i> En stock
+            </span>
+            <span class="stock-badge out" *ngIf="product.stock_quantity <= 0">
+              <i class="fa-solid fa-circle-xmark"></i> Agotado
+            </span>
+            <img *ngIf="product.images?.length > 0" [src]="getImagenUrlByIndex(0)" [alt]="product.name" class="vgal-img"/>
+            <div *ngIf="!product.images?.length" class="image-empty">
+              <i class="fa-regular fa-image"></i>
+              <span>Sin imagen</span>
+            </div>
+          </div>
+
+          <div class="vgal-thumbs" *ngIf="product.images?.length > 1">
+            <div class="vgal-thumb" (click)="openLightbox(1)" role="button" tabindex="0" aria-label="Ver imagen 2">
+              <img [src]="getImagenUrlByIndex(1)" [alt]="product.name + ' 2'" class="vgal-img" loading="lazy"/>
+            </div>
+            <div class="vgal-thumb" *ngIf="product.images?.length >= 3" (click)="openLightbox(2)" role="button" tabindex="0" aria-label="Ver imagen 3">
+              <img [src]="getImagenUrlByIndex(2)" [alt]="product.name + ' 3'" class="vgal-img" loading="lazy"/>
+              <div class="more-overlay" *ngIf="product.images?.length > 3">
+                <span>+{{ product.images.length - 3 }}</span>
+                <small>más fotos</small>
+              </div>
+            </div>
+          </div>
         </div>
+
+        <!-- Botón favorito -->
+        <button *ngIf="!isFarmer" class="fav-btn" aria-label="Guardar en favoritos" (click)="$event.stopPropagation()">
+          <i class="fa-regular fa-heart"></i>
+        </button>
       </div>
 
-      <!-- Thumbnails -->
-      <div class="thumbnail-row" *ngIf="product.images?.length > 1">
-        <button
-          class="thumb"
+      <!-- Dots móvil -->
+      <div class="dots-row" *ngIf="product.images?.length > 1" aria-hidden="true">
+        <span
+          class="dot"
           *ngFor="let img of product.images; let i = index"
           [class.active]="selectedImageIndex === i"
           (click)="selectedImageIndex = i"
-          [attr.aria-label]="'Ver imagen ' + (i + 1)"
-          [attr.aria-pressed]="selectedImageIndex === i"
-        >
-          <img [src]="getImagenUrlByIndex(i)" [alt]="product.name + ' ' + (i + 1)"/>
-        </button>
+        ></span>
       </div>
+
+      <!-- Lightbox -->
+      <div class="lightbox" *ngIf="lightboxOpen" (click)="closeLightbox()" role="dialog" aria-modal="true" aria-label="Galería de imágenes">
+        <button class="lb-close" (click)="closeLightbox()" aria-label="Cerrar lightbox">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+        <button class="lb-arrow prev" (click)="$event.stopPropagation(); lightboxIndex = (lightboxIndex - 1 + product.images.length) % product.images.length" aria-label="Imagen anterior">
+          <i class="fa-solid fa-chevron-left"></i>
+        </button>
+        <div class="lb-img-wrap" (click)="$event.stopPropagation()">
+          <img [src]="getImagenUrlByIndex(lightboxIndex)" [alt]="product.name" class="lb-img"/>
+        </div>
+        <button class="lb-arrow next" (click)="$event.stopPropagation(); lightboxIndex = (lightboxIndex + 1) % product.images.length" aria-label="Imagen siguiente">
+          <i class="fa-solid fa-chevron-right"></i>
+        </button>
+        <div class="lb-counter">{{ lightboxIndex + 1 }} / {{ product.images.length }}</div>
+      </div>
+
     </div>
 
     <!-- ====== COLUMNA INFO ====== -->
@@ -88,7 +127,7 @@
         <span class="rating-text">(32 valoraciones)</span>
       </div>
 
-      <!-- Agricultor -->
+      <!-- Farmer card -->
       <div class="farmer-card">
         <div class="farmer-avatar" aria-hidden="true">
           <i class="fa-solid fa-seedling"></i>
@@ -101,7 +140,19 @@
             {{ product.farmer?.city || 'España' }}
           </span>
         </div>
-        <span class="eco-badge"><i class="fa-solid fa-leaf"></i> Eco</span>
+        <div class="farmer-actions">
+          <span class="eco-badge"><i class="fa-solid fa-leaf"></i> Eco</span>
+          <!-- Botón contactar farmer -->
+          <button
+            class="contact-farmer-btn"
+            (click)="contactarFarmer()"
+            aria-label="Enviar mensaje al agricultor"
+            *ngIf="!isFarmer"
+          >
+            <i class="fa-regular fa-comment-dots"></i>
+            <span>Contactar</span>
+          </button>
+        </div>
       </div>
 
       <!-- Precio -->
@@ -113,31 +164,29 @@
         </span>
       </div>
 
-      <!-- Cantidad + CTA -->
-      <div class="actions-row">
+      <!-- Cantidad + CTA — solo para no agricultores -->
+      <div class="actions-row" *ngIf="!isFarmer">
         <div class="qty-selector" role="group" aria-label="Seleccionar cantidad">
           <button (click)="cambiarCantidad(-1)" [disabled]="cantidad <= 1" aria-label="Reducir cantidad">−</button>
-          <span class="qty-value" aria-live="polite">
-            {{ cantidad }} {{ product.unit === 'unidad' ? 'ud' : 'kg' }}
-          </span>
-          <button
-            class="plus"
-            (click)="cambiarCantidad(1)"
-            [disabled]="cantidad >= (product.stock_quantity || 100)"
-            aria-label="Aumentar cantidad"
-          >+</button>
+          <input
+            type="number"
+            class="qty-input"
+            [(ngModel)]="cantidad"
+            [min]="1"
+            [max]="product.stock_quantity || 100"
+            (change)="validarCantidad()"
+            aria-label="Cantidad"
+          />
+          <span class="qty-unit">{{ product.unit === 'unidad' ? 'ud' : 'kg' }}</span>
+          <button class="plus" (click)="cambiarCantidad(1)" [disabled]="cantidad >= (product.stock_quantity || 100)" aria-label="Aumentar cantidad">+</button>
         </div>
-        <button
-          class="add-cart-btn"
-          (click)="agregarAlCarrito()"
-          [disabled]="product.stock_quantity <= 0"
-        >
+        <button class="add-cart-btn" (click)="agregarAlCarrito()" [disabled]="product.stock_quantity <= 0">
           <i class="fa-solid fa-basket-shopping"></i> Añadir a la cesta
         </button>
       </div>
 
-      <!-- Trust row -->
-      <div class="trust-row">
+      <!-- Trust row — solo para no agricultores -->
+      <div class="trust-row" *ngIf="!isFarmer">
         <div class="trust-item"><i class="fa-solid fa-truck-fast"></i><span>Envío 24–48h</span></div>
         <div class="trust-item"><i class="fa-solid fa-rotate-left"></i><span>Devolución fácil</span></div>
         <div class="trust-item"><i class="fa-solid fa-lock"></i><span>Pago seguro</span></div>
@@ -149,28 +198,13 @@
   <!-- ====== PESTAÑAS ====== -->
   <section class="tabs-container" aria-label="Información del producto">
     <div class="tabs-header" role="tablist">
-      <button
-        role="tab"
-        [attr.aria-selected]="activeTab === 'descripcion'"
-        [class.active]="activeTab === 'descripcion'"
-        (click)="setTab('descripcion')"
-      >
+      <button role="tab" [attr.aria-selected]="activeTab === 'descripcion'" [class.active]="activeTab === 'descripcion'" (click)="setTab('descripcion')">
         <i class="fa-regular fa-file-lines"></i> Descripción
       </button>
-      <button
-        role="tab"
-        [attr.aria-selected]="activeTab === 'origen'"
-        [class.active]="activeTab === 'origen'"
-        (click)="setTab('origen')"
-      >
+      <button role="tab" [attr.aria-selected]="activeTab === 'origen'" [class.active]="activeTab === 'origen'" (click)="setTab('origen')">
         <i class="fa-solid fa-map-location-dot"></i> Origen
       </button>
-      <button
-        role="tab"
-        [attr.aria-selected]="activeTab === 'valoraciones'"
-        [class.active]="activeTab === 'valoraciones'"
-        (click)="setTab('valoraciones')"
-      >
+      <button role="tab" [attr.aria-selected]="activeTab === 'valoraciones'" [class.active]="activeTab === 'valoraciones'" (click)="setTab('valoraciones')">
         <i class="fa-regular fa-star"></i> Valoraciones
         <span class="tab-count" *ngIf="product.reviews?.length">{{ product.reviews.length }}</span>
       </button>
@@ -210,7 +244,6 @@
 
       <!-- VALORACIONES -->
       <div *ngIf="activeTab === 'valoraciones'" class="text-content reviews-tab" role="tabpanel">
-
         <div class="no-reviews" *ngIf="!product.reviews?.length">
           <div class="no-reviews-icon"><i class="fa-regular fa-comment-dots"></i></div>
           <p>Este producto aún no tiene valoraciones.</p>
@@ -218,7 +251,6 @@
             <i class="fa-solid fa-pen-to-square"></i> Sé el primero en opinar
           </button>
         </div>
-
         <div *ngIf="product.reviews?.length > 0">
           <h3 class="reviews-title">Opiniones de clientes ({{ product.reviews.length }})</h3>
           <div class="review-card" *ngFor="let review of product.reviews">
@@ -235,8 +267,8 @@
             <p class="review-text">{{ review.comment }}</p>
           </div>
         </div>
-
       </div>
+
     </div>
   </section>
 </main>
