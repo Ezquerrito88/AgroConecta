@@ -22,23 +22,21 @@ import { environment } from '../../../environments/environment';
 })
 export class Dashboard implements OnInit {
 
-  private readonly API_URL = environment.apiUrl.split('/api')[0];
-
-  productos: any[]       = [];
-  paginaActual           = 1;
-  totalPaginas           = 1;
-  itemsPorPagina         = 6;
-  totalProductos         = 0;
+  productos: any[] = [];
+  paginaActual = 1;
+  totalPaginas = 1;
+  itemsPorPagina = 6;
+  totalProductos = 0;
   paginasArray: number[] = [];
 
-  isFarmer               = false;
-  currentUser: any       = null;
-  isLoading              = false;
+  isFarmer = false;
+  currentUser: any = null;
+  isLoading = false;
 
-  minPrice               = 0;
-  maxPrice               = 100;
-  categoriasRapidas      = ['Todas', 'Frutas', 'Verduras', 'Granos', 'Lácteos', 'Especias'];
-  filtros                = { categoria: 'todas', orden: 'novedad' };
+  minPrice = 0;
+  maxPrice = 100;
+  categoriasRapidas = ['Todas', 'Frutas', 'Verduras', 'Granos', 'Lácteos', 'Especias'];
+  filtros = { categoria: 'todas', orden: 'novedad' };
 
   constructor(
     private router: Router,
@@ -63,20 +61,17 @@ export class Dashboard implements OnInit {
     }
   }
 
-  // ✅ Igual que catalogo.ts — corrige URLs de localhost
+  // ✅ Usa image_url del backend, fallback a construcción manual
   getImagenUrl(prod: any): string {
     if (prod?.images?.length > 0) {
-      const path = prod.images[0].image_path;
-      if (path.startsWith('http')) {
-        return path.replace(/http:\/\/127\.0\.0\.1:8000/g, this.API_URL);
-      }
-      return `${this.API_URL}/storage/${path}`;
+      return prod.images[0].image_url
+        ?? `${environment.storageUrl}/${prod.images[0].image_path}`;
     }
     return 'assets/placeholder.png';
   }
 
   cargarProductos(page: number): void {
-    this.isLoading    = true;
+    this.isLoading = true;
     this.paginaActual = page;
 
     const filtrosActivos: any = {};
@@ -87,12 +82,12 @@ export class Dashboard implements OnInit {
 
     this.productoService.getDestacados(page, this.itemsPorPagina, filtrosActivos).subscribe({
       next: (res: any) => {
-        this.productos      = Array.isArray(res.data) ? res.data : [];
+        this.productos = Array.isArray(res.data) ? res.data : [];
         this.totalProductos = res.total || 0;
         const paginasServer = res.last_page || 1;
-        this.totalPaginas   = paginasServer > 2 ? 2 : paginasServer;
-        this.paginasArray   = Array.from({ length: this.totalPaginas }, (_, i) => i + 1);
-        this.isLoading      = false;
+        this.totalPaginas = paginasServer > 2 ? 2 : paginasServer;
+        this.paginasArray = Array.from({ length: this.totalPaginas }, (_, i) => i + 1);
+        this.isLoading = false;
         this.cdr.detectChanges();
       },
       error: (err: any) => {
@@ -112,7 +107,7 @@ export class Dashboard implements OnInit {
   filtrarPorPrecio(): void { this.cargarProductos(1); }
 
   limpiarFiltros(): void {
-    this.filtros  = { categoria: 'todas', orden: 'novedad' };
+    this.filtros = { categoria: 'todas', orden: 'novedad' };
     this.minPrice = 0;
     this.maxPrice = 100;
     this.cargarProductos(1);
@@ -151,6 +146,7 @@ export class Dashboard implements OnInit {
       image: this.getImagenUrl(producto)
     });
   }
+
   irAlCatalogoCompleto(): void       { this.router.navigate(['/productos']); }
   formatLabel(value: number): string { return `${value}€`; }
 }

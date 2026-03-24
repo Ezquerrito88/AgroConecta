@@ -30,7 +30,6 @@ export class EditarProducto implements OnInit {
   newImages: File[] = [];
   newImagePreviews: string[] = [];
 
-  // ── Reordenación ──
   dragIndex = -1;
   dragOverIndex = -1;
 
@@ -57,7 +56,7 @@ export class EditarProducto implements OnInit {
           ...data,
           images: data.images?.map((img: any) => ({
             id: img.id,
-            url: `${environment.storageUrl}/${img.image_path}`
+            url: img.image_url ?? `${environment.storageUrl}/${img.image_path}`
           })) ?? []
         };
         this.loading = false;
@@ -74,12 +73,10 @@ export class EditarProducto implements OnInit {
     });
   }
 
-  // ── Getter ──────────────────────────────────────────
   get totalImages(): number {
     return (this.producto.images?.length || 0) + this.newImages.length;
   }
 
-  // ── Drag & Drop subida de archivos ──────────────────
   onDragOver(event: DragEvent): void {
     event.preventDefault();
     event.stopPropagation();
@@ -134,19 +131,14 @@ export class EditarProducto implements OnInit {
     });
   }
 
-  // ── Reordenación drag & drop entre thumbs ───────────
-  onThumbDragStart(index: number): void {
-    this.dragIndex = index;
-  }
+  onThumbDragStart(index: number): void { this.dragIndex = index; }
 
   onThumbDragOver(event: DragEvent, index: number): void {
     event.preventDefault();
     this.dragOverIndex = index;
   }
 
-  onThumbDragLeave(): void {
-    this.dragOverIndex = -1;
-  }
+  onThumbDragLeave(): void { this.dragOverIndex = -1; }
 
   onThumbDrop(targetIndex: number): void {
     if (this.dragIndex === -1 || this.dragIndex === targetIndex) return;
@@ -166,7 +158,6 @@ export class EditarProducto implements OnInit {
     this.dragOverIndex = -1;
   }
 
-  // ── Guardar ─────────────────────────────────────────
   guardar(): void {
     this.saving = true;
     const formData = new FormData();
@@ -179,7 +170,6 @@ export class EditarProducto implements OnInit {
     formData.append('stock_quantity', this.producto.stock_quantity);
     formData.append('category_id', this.producto.category_id);
 
-    // ✅ Envía el orden actual de imágenes existentes al backend
     this.producto.images.forEach((img: any, i: number) => {
       formData.append(`image_order[${i}]`, img.id);
     });
@@ -195,14 +185,8 @@ export class EditarProducto implements OnInit {
     });
   }
 
-  // ── Eliminar con modal ───────────────────────────────
-  eliminar(): void {
-    this.showDeleteModal = true;
-  }
-
-  cancelarEliminar(): void {
-    this.showDeleteModal = false;
-  }
+  eliminar(): void { this.showDeleteModal = true; }
+  cancelarEliminar(): void { this.showDeleteModal = false; }
 
   confirmarEliminar(): void {
     this.deleting = true;

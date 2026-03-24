@@ -25,8 +25,6 @@ import { CartService } from '../../core/services/cart.service';
 })
 export class Catalogo implements OnInit {
 
-  private readonly API_URL = environment.apiUrl;
-
   productos: Producto[] = [];
 
   paginaActual = 1;
@@ -60,17 +58,11 @@ export class Catalogo implements OnInit {
 
   getImagenUrl(prod: any): string {
     if (prod?.images?.length > 0) {
-      const path = prod.images[0].image_path;
-
-      if (path.startsWith('http')) {
-        return path.replace(/http:\/\/(127\.0\.0\.1|localhost):8000/g, environment.storageUrl.replace('/storage', ''));
-      }
-
-      return `${environment.storageUrl}/${path}`;
+      return prod.images[0].image_url
+        ?? `${environment.storageUrl}/${prod.images[0].image_path}`;
     }
     return 'assets/placeholder.png';
   }
-
 
   cargarProductos(page: number): void {
     this.isLoading = true;
@@ -102,7 +94,6 @@ export class Catalogo implements OnInit {
         console.error('Error loading products:', err);
         this.isLoading = false;
         this.cdr.detectChanges();
-        window.scrollTo({ top: 0, behavior: 'smooth' });
       }
     });
   }
@@ -142,21 +133,13 @@ export class Catalogo implements OnInit {
   }
 
   toggleFavorite(prod: Producto): void {
-    const token = localStorage.getItem('token');
-
-    // ✅ Sin sesión → login
-    if (!token) {
+    if (!localStorage.getItem('token')) {
       this.router.navigate(['/login']);
       return;
     }
-
-    // ✅ Con sesión → optimistic update inmediato
     prod.is_favorite = !prod.is_favorite;
-
     this.productoService.toggleFavorite(prod.id).subscribe({
-      error: () => {
-        prod.is_favorite = !prod.is_favorite; // revierte si falla la API
-      }
+      error: () => { prod.is_favorite = !prod.is_favorite; }
     });
   }
 
@@ -176,7 +159,6 @@ export class Catalogo implements OnInit {
   private getFarmerUserId(prod: Producto): number | null {
     const rawFarmerUserId = (prod as any)?.farmer?.user_id;
     const rawFarmerId = (prod as any)?.farmer?.id;
-
     const id = Number(rawFarmerUserId ?? rawFarmerId);
     return Number.isFinite(id) && id > 0 ? id : null;
   }

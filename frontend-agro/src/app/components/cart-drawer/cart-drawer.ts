@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CartService } from '../../core/services/cart.service';
-import { environment } from '../../../environments/environment';
 import { Router } from '@angular/router';
 
 @Component({
@@ -15,9 +14,6 @@ export class CartDrawer implements OnInit {
   items: any[] = [];
   isOpen: boolean = false;
   total: number = 0;
-
-  private readonly API_URL = environment.apiUrl;
-  private readonly STORAGE_URL = environment.storageUrl;
 
   constructor(private cartService: CartService, private router: Router) { }
 
@@ -33,29 +29,19 @@ export class CartDrawer implements OnInit {
   }
 
   getImageUrl(item: any): string {
+    // ✅ Usa image_url directo del backend si existe
+    if (item?.image_url) return item.image_url;
+
     if (item?.image) {
       const imgStr = String(item.image);
-      if (imgStr.includes('localhost:8000') || imgStr.includes('127.0.0.1:8000')) {
-        return imgStr.replace(
-          /http:\/\/(127\.0\.0\.1|localhost):8000\/storage/g,
-          this.STORAGE_URL
-        );
-      }
-      return imgStr;
+      if (imgStr.startsWith('http')) return imgStr;
     }
 
     if (item?.images?.length > 0) {
       const firstImage = item.images[0];
+      if (firstImage.image_url) return firstImage.image_url;
       const path = typeof firstImage === 'string' ? firstImage : firstImage.image_path;
-      if (path) {
-        if (path.startsWith('http')) {
-          return path.replace(
-            /http:\/\/(127\.0\.0\.1|localhost):8000\/storage/g,
-            this.STORAGE_URL
-          );
-        }
-        return `${this.STORAGE_URL}/${path}`;
-      }
+      if (path?.startsWith('http')) return path;
     }
 
     return 'assets/placeholder.png';
@@ -66,7 +52,6 @@ export class CartDrawer implements OnInit {
     img.src = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400' viewBox='0 0 400 400'%3E%3Crect width='400' height='400' fill='%23f3f4f6'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-size='14' fill='%239ca3af'%3ESin imagen%3C/text%3E%3C/svg%3E`;
     img.onerror = null;
   }
-
 
   close(): void { this.cartService.closeCart(); }
   removeItem(id: number): void { this.cartService.removeFromCart(id); }

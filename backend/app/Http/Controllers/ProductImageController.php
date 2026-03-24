@@ -20,8 +20,8 @@ class ProductImageController extends Controller
             return response()->json(['message' => 'No tienes permisos para eliminar esta imagen'], 403);
         }
 
-        if (Storage::disk('public')->exists($productImage->image_path)) {
-            Storage::disk('public')->delete($productImage->image_path);
+        if (Storage::disk('azure')->exists($productImage->image_path)) {
+            Storage::disk('azure')->delete($productImage->image_path);
         }
 
         $productImage->delete();

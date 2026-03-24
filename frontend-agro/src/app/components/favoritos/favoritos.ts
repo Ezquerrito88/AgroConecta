@@ -23,8 +23,6 @@ import { environment } from '../../../environments/environment';
 })
 export class Favoritos implements OnInit {
 
-  private readonly API_URL = environment.apiUrl;
-
   productos: any[] = [];
   productosFiltrados: any[] = [];
   isLoading = true;
@@ -44,26 +42,18 @@ export class Favoritos implements OnInit {
     Promise.resolve().then(() => this.cargarFavoritos());
   }
 
+  // ✅ Usa image_url del backend (Azure), fallback limpio
   getImagenUrl(prod: any): string {
     if (prod?.images?.length > 0) {
-      const path = prod.images[0]?.image_path;
+      const img = prod.images[0];
+      if (img.image_url) return img.image_url;
+      const path = img.image_path;
       if (!path) return 'assets/placeholder.png';
-
-      if (path.startsWith('http')) {
-        return path.replace(/http:\/\/127\.0\.0\.1:8000/g, this.API_URL);
-      }
-
-      // Quitar el prefijo "public/" que Laravel añade internamente
-      const cleanPath = path.replace(/^public\//, '');
-
-      // Construir URL de storage sin /api
-      const storageBase = this.API_URL.replace(/\/api$/, '');
-      return `${storageBase}/storage/${cleanPath}`;
+      if (path.startsWith('http')) return path;
+      return `${environment.storageUrl}/${path}`;
     }
     return 'assets/placeholder.png';
   }
-
-
 
   cargarFavoritos(): void {
     this.isLoading = true;
@@ -82,11 +72,9 @@ export class Favoritos implements OnInit {
     });
   }
 
-  // ✅ Filtra en cliente — sin llamadas extra a la API
   aplicarFiltros(): void {
     let result = [...this.productos];
 
-    // Categoría
     if (this.filtros.categoria !== 'todas') {
       result = result.filter(p =>
         p.category?.name?.toLowerCase() === this.filtros.categoria ||
@@ -94,12 +82,10 @@ export class Favoritos implements OnInit {
       );
     }
 
-    // Precio
     result = result.filter(p =>
       +p.price >= this.minPrice && +p.price <= this.maxPrice
     );
 
-    // Orden
     if (this.filtros.orden === 'precio_asc') result.sort((a, b) => +a.price - +b.price);
     if (this.filtros.orden === 'precio_desc') result.sort((a, b) => +b.price - +a.price);
     if (this.filtros.orden === 'novedad') result.sort((a, b) =>

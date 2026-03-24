@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 
 class ProductImage extends Model
 {
@@ -11,11 +12,18 @@ class ProductImage extends Model
 
     protected $fillable = [
         'product_id',
-        'image_path', 
+        'image_path',
         'order'
     ];
 
-    //Relacion: Pertenece a un Producto
+    protected $appends = ['image_url'];
+
+    public function getImageUrlAttribute(): ?string
+    {
+        if (!$this->image_path) return null;
+        return Storage::disk('azure')->url($this->image_path);
+    }
+
     public function product()
     {
         return $this->belongsTo(Product::class);

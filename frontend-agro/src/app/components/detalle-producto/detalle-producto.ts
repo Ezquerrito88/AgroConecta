@@ -16,7 +16,6 @@ import { CartService } from '../../core/services/cart.service';
 export class DetalleProducto implements OnInit, AfterViewInit {
 
   private readonly API_URL = environment.apiUrl;
-  private readonly STORAGE_URL = environment.storageUrl;
 
   product: any = null;
   cantidad: number = 1;
@@ -59,21 +58,26 @@ export class DetalleProducto implements OnInit, AfterViewInit {
     indicator.style.left = `${activeBtn.offsetLeft}px`;
   }
 
+  // ✅ Usa image_url del backend (Azure), fallback a image_path
   getImagenUrl(product: any): string {
     if (product?.images?.length > 0) {
-      const path = product.images[this.selectedImageIndex]?.image_path
-        ?? product.images[0].image_path;
-      if (path.startsWith('http')) return path;
-      return `${this.STORAGE_URL}/${path}`;
+      const img = product.images[this.selectedImageIndex] ?? product.images[0];
+      if (img.image_url) return img.image_url;
+      const path = img.image_path;
+      if (path?.startsWith('http')) return path;
+      return `${environment.storageUrl}/${path}`;
     }
     return 'assets/placeholder.png';
   }
 
+  // ✅ Usa image_url del backend (Azure), fallback a image_path
   getImagenUrlByIndex(index: number): string {
     if (this.product?.images?.length > index) {
-      const path = this.product.images[index].image_path;
-      if (path.startsWith('http')) return path;
-      return `${this.STORAGE_URL}/${path}`;
+      const img = this.product.images[index];
+      if (img.image_url) return img.image_url;
+      const path = img.image_path;
+      if (path?.startsWith('http')) return path;
+      return `${environment.storageUrl}/${path}`;
     }
     return 'assets/placeholder.png';
   }

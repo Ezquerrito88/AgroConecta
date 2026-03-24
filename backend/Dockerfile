@@ -60,6 +60,21 @@ set -e\n\
 echo "Starting SSH..."\n\
 /usr/sbin/sshd\n\
 \n\
+echo "Generating .env from environment variables..."\n\
+cp .env.example .env\n\
+sed -i "s|APP_URL=.*|APP_URL=${APP_URL}|" .env\n\
+sed -i "s|DB_HOST=.*|DB_HOST=${DB_HOST}|" .env\n\
+sed -i "s|DB_PORT=.*|DB_PORT=${DB_PORT}|" .env\n\
+sed -i "s|DB_DATABASE=.*|DB_DATABASE=${DB_DATABASE}|" .env\n\
+sed -i "s|DB_USERNAME=.*|DB_USERNAME=${DB_USERNAME}|" .env\n\
+sed -i "s|DB_PASSWORD=.*|DB_PASSWORD=${DB_PASSWORD}|" .env\n\
+sed -i "s|FILESYSTEM_DISK=.*|FILESYSTEM_DISK=${FILESYSTEM_DISK}|" .env\n\
+sed -i "s|AZURE_STORAGE_ACCOUNT=.*|AZURE_STORAGE_ACCOUNT=${AZURE_STORAGE_ACCOUNT}|" .env\n\
+sed -i "s|AZURE_STORAGE_KEY=.*|AZURE_STORAGE_KEY=${AZURE_STORAGE_KEY}|" .env\n\
+sed -i "s|AZURE_STORAGE_CONTAINER=.*|AZURE_STORAGE_CONTAINER=${AZURE_STORAGE_CONTAINER}|" .env\n\
+sed -i "s|AZURE_STORAGE_URL=.*|AZURE_STORAGE_URL=${AZURE_STORAGE_URL}|" .env\n\
+php artisan key:generate --force\n\
+\n\
 echo "Linking storage..."\n\
 php artisan storage:link --force || true\n\
 \n\
