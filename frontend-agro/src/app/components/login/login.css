@@ -10,7 +10,7 @@
   padding-top: 80px;
   background:
     linear-gradient(rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.6)),
-    url('/img/login/fondo.png') center / cover fixed;
+    url('/img/login/fondo.webp');
 }
 
 /* =====================
