@@ -9,6 +9,15 @@ use Illuminate\Support\Facades\Storage;
 
 class ProductController extends Controller
 {
+    // ✅ Helper centralizado — evita usar Storage::disk('azure')->url() que no soporta URLs
+    private function azureUrl(?string $path): ?string
+    {
+        if (!$path) return null;
+        $account   = config('filesystems.disks.azure.name');
+        $container = config('filesystems.disks.azure.container');
+        return "https://{$account}.blob.core.windows.net/{$container}/{$path}";
+    }
+
     public function index(Request $request)
     {
         $perPage = $request->query('per_page', 12);
@@ -132,7 +141,6 @@ class ProductController extends Controller
         if ($request->hasFile('images')) {
             foreach ($request->file('images') as $file) {
                 $path = $file->store('products', 'azure');
-
                 ProductImage::create([
                     'product_id' => $product->id,
                     'image_path' => $path,
@@ -221,6 +229,7 @@ class ProductController extends Controller
         }
 
         foreach ($product->images as $image) {
+            // ✅ exists() y delete() sí están soportados, solo url() fallaba
             if (Storage::disk('azure')->exists($image->image_path)) {
                 Storage::disk('azure')->delete($image->image_path);
             }
@@ -264,9 +273,8 @@ class ProductController extends Controller
                     'sold'        => 0,
                     'rating'      => 4.9,
                     'category'    => $product->category?->name,
-                    'image'       => $product->images->first()
-                        ? Storage::disk('azure')->url($product->images->first()->image_path)
-                        : null,
+                    // ✅ Usa helper en vez de Storage::disk('azure')->url()
+                    'image'       => $this->azureUrl($product->images->first()?->image_path),
                     'created_at'  => $product->created_at,
                 ];
             });

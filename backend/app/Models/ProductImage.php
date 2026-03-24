@@ -4,7 +4,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Storage;
 
 class ProductImage extends Model
 {
@@ -21,7 +20,15 @@ class ProductImage extends Model
     public function getImageUrlAttribute(): ?string
     {
         if (!$this->image_path) return null;
-        return Storage::disk('azure')->url($this->image_path);
+
+        $account   = config('filesystems.disks.azure.name');
+        $container = config('filesystems.disks.azure.container');
+
+        if (!$account || !$container) {
+            return asset('storage/' . $this->image_path);
+        }
+
+        return "https://{$account}.blob.core.windows.net/{$container}/{$this->image_path}";
     }
 
     public function product()
