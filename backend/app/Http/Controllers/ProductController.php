@@ -9,7 +9,6 @@ use Illuminate\Support\Facades\Storage;
 
 class ProductController extends Controller
 {
-    //Listar todos los productos
     public function index(Request $request)
     {
         $perPage = $request->query('per_page', 12);
@@ -39,7 +38,7 @@ class ProductController extends Controller
 
         $query->orderBy(
             'created_at',
-            $request->orden === 'precio_asc'  ? 'asc'  : ($request->orden === 'precio_desc' ? 'desc' : 'desc')
+            $request->orden === 'precio_asc' ? 'asc' : ($request->orden === 'precio_desc' ? 'desc' : 'desc')
         );
 
         if (in_array($request->orden, ['precio_asc', 'precio_desc'])) {
@@ -52,13 +51,10 @@ class ProductController extends Controller
         return response()->json($query->paginate($perPage));
     }
 
-
-
-    // Crear una función específica para destacados
     public function getLatest(Request $request)
     {
-        $perPage  = $request->query('per_page', 6);
-        $page     = $request->query('page', 1);
+        $perPage   = $request->query('per_page', 6);
+        $page      = $request->query('page', 1);
         $categoria = $request->query('categoria');
         $orden     = $request->query('orden', 'novedad');
         $precioMin = $request->query('precio_min');
@@ -67,27 +63,22 @@ class ProductController extends Controller
         $query = Product::with(['images', 'farmer', 'category'])
             ->where('moderation_status', 'approved');
 
-        // Filtro categoría
         if ($categoria && $categoria !== 'todas') {
             $query->whereHas('category', function ($q) use ($categoria) {
                 $q->whereRaw('LOWER(name) = ?', [strtolower($categoria)]);
             });
         }
 
-        // Filtro precio
         if (!is_null($precioMin)) $query->where('price', '>=', (float) $precioMin);
         if (!is_null($precioMax)) $query->where('price', '<=', (float) $precioMax);
 
-        // Ordenación
         match ($orden) {
             'precio_asc'  => $query->orderBy('price', 'asc'),
             'precio_desc' => $query->orderBy('price', 'desc'),
             default       => $query->orderBy('created_at', 'desc'),
         };
 
-        $products = $query->paginate($perPage, ['*'], 'page', $page);
-
-        // Sin filtros activos mantenemos el límite de 12
+        $products   = $query->paginate($perPage, ['*'], 'page', $page);
         $hayFiltros = $categoria || $precioMin || $precioMax || $orden !== 'novedad';
 
         if (!$hayFiltros) {
@@ -101,7 +92,6 @@ class ProductController extends Controller
             ]);
         }
 
-        // Con filtros devolvemos todo sin límite artificial
         return response()->json([
             'data'         => $products->getCollection()->values(),
             'total'        => $products->total(),
@@ -111,22 +101,19 @@ class ProductController extends Controller
         ]);
     }
 
-
-
-    //Crear productos
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'category_id'        => 'required|exists:categories,id',
-            'name'               => 'required|string|max:255',
-            'description'        => 'required|string',
-            'short_description'  => 'nullable|string|max:160',
-            'price'              => 'required|numeric|min:0',
-            'unit'               => 'required|in:kg,g,l,ml,ud,docena,manojo,caja,bandeja,saco,pack',
-            'stock_quantity'     => 'required|integer|min:0',
-            'season_end'         => 'nullable|date',
-            'images'             => 'nullable|array|max:6',
-            'images.*'           => 'image|mimes:jpeg,png,jpg,webp|max:2048',
+            'category_id'       => 'required|exists:categories,id',
+            'name'              => 'required|string|max:255',
+            'description'       => 'required|string',
+            'short_description' => 'nullable|string|max:160',
+            'price'             => 'required|numeric|min:0',
+            'unit'              => 'required|in:kg,g,l,ml,ud,docena,manojo,caja,bandeja,saco,pack',
+            'stock_quantity'    => 'required|integer|min:0',
+            'season_end'        => 'nullable|date',
+            'images'            => 'nullable|array|max:6',
+            'images.*'          => 'image|mimes:jpeg,png,jpg,webp|max:2048',
         ]);
 
         $product = Product::create([
@@ -140,15 +127,15 @@ class ProductController extends Controller
             'stock_quantity'    => $validated['stock_quantity'],
             'season_end'        => $validated['season_end'] ?? null,
             'moderation_status' => 'approved',
-        ]);;
+        ]);
 
         if ($request->hasFile('images')) {
             foreach ($request->file('images') as $file) {
-                $path = $file->store('products', 'public');
+                $path = $file->store('products', 'azure');
 
                 ProductImage::create([
-                    'product_id'   => $product->id,
-                    'image_path'   => $path
+                    'product_id' => $product->id,
+                    'image_path' => $path,
                 ]);
             }
         }
@@ -156,7 +143,6 @@ class ProductController extends Controller
         return response()->json($product->load('images'), 201);
     }
 
-    //Mostrar producto
     public function show($id)
     {
         $product = Product::with(['category', 'images', 'farmer.user', 'reviews.user'])->find($id);
@@ -168,7 +154,6 @@ class ProductController extends Controller
         return response()->json($product);
     }
 
-    //Actualizar producto
     public function update(Request $request, $id)
     {
         $product = Product::find($id);
@@ -192,7 +177,7 @@ class ProductController extends Controller
             'images'         => 'sometimes|array|max:6',
             'images.*'       => 'image|mimes:jpeg,png,jpg,webp|max:2048',
             'image_order'    => 'sometimes|array',
-            'image_order.*'  => 'integer', 
+            'image_order.*'  => 'integer',
         ]);
 
         $product->update(collect($validated)->except(['images', 'image_order'])->toArray());
@@ -205,28 +190,24 @@ class ProductController extends Controller
             }
         }
 
-        // Subir nuevas imágenes (se añaden al final del orden)
         if ($request->hasFile('images')) {
             $nextOrder = $product->images()->max('order') + 1;
             foreach ($request->file('images') as $image) {
-                $path = $image->store('products', 'public');
+                $path = $image->store('products', 'azure');
                 ProductImage::create([
                     'product_id' => $product->id,
                     'image_path' => $path,
-                    'order'      => $nextOrder++, 
+                    'order'      => $nextOrder++,
                 ]);
             }
         }
 
         return response()->json([
             'message' => 'Producto actualizado correctamente',
-            'product' => $product->load('images')
+            'product' => $product->load('images'),
         ]);
     }
 
-
-
-    //Eliminar producto
     public function destroy(Request $request, $id)
     {
         $product = Product::find($id);
@@ -240,8 +221,8 @@ class ProductController extends Controller
         }
 
         foreach ($product->images as $image) {
-            if (Storage::disk('public')->exists($image->image_path)) {
-                Storage::disk('public')->delete($image->image_path);
+            if (Storage::disk('azure')->exists($image->image_path)) {
+                Storage::disk('azure')->delete($image->image_path);
             }
         }
 
@@ -250,7 +231,6 @@ class ProductController extends Controller
         return response()->json(['message' => 'Producto eliminado correctamente']);
     }
 
-    // Productos del agricultor autenticado
     public function misProductos(Request $request)
     {
         $farmer = $request->user()->farmer;
@@ -261,16 +241,14 @@ class ProductController extends Controller
 
         $perPage = $request->query('per_page', 12);
 
-        // KPIs globales (todos los productos, sin paginar)
         $todos = Product::where('farmer_id', $farmer->id)->get();
-        $kpis = [
-            'total'     => $todos->count(),
-            'agotados'  => $todos->where('stock_quantity', 0)->count(),
-            'pocoStock' => $todos->where('stock_quantity', '>', 0)->filter(fn($p) => $p->stock_quantity <= 10)->count(),
+        $kpis  = [
+            'total'       => $todos->count(),
+            'agotados'    => $todos->where('stock_quantity', 0)->count(),
+            'pocoStock'   => $todos->where('stock_quantity', '>', 0)->filter(fn($p) => $p->stock_quantity <= 10)->count(),
             'disponibles' => $todos->where('stock_quantity', '>', 0)->count(),
         ];
 
-        // Productos paginados
         $productos = Product::with(['category', 'images'])
             ->where('farmer_id', $farmer->id)
             ->paginate($perPage)
@@ -287,7 +265,7 @@ class ProductController extends Controller
                     'rating'      => 4.9,
                     'category'    => $product->category?->name,
                     'image'       => $product->images->first()
-                        ? asset('storage/' . $product->images->first()->image_path)
+                        ? Storage::disk('azure')->url($product->images->first()->image_path)
                         : null,
                     'created_at'  => $product->created_at,
                 ];
@@ -309,8 +287,8 @@ class ProductController extends Controller
             return response()->json(['message' => 'Sin permisos'], 403);
         }
 
-        if (Storage::disk('public')->exists($image->image_path)) {
-            Storage::disk('public')->delete($image->image_path);
+        if (Storage::disk('azure')->exists($image->image_path)) {
+            Storage::disk('azure')->delete($image->image_path);
         }
 
         $image->delete();
