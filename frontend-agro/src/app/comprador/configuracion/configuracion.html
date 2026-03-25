@@ -1,0 +1,303 @@
+<div class="dashboard-layout">
+  <app-sidebar-comprador />
+
+  <main class="main-content">
+    <div class="topbar">
+      <h1 class="page-title">Configuración</h1>
+    </div>
+
+    <!-- Layout principal -->
+    <div class="config-layout">
+
+      <!-- ── Menú lateral de secciones ── -->
+      <nav class="sections-menu">
+        <p class="menu-title">Ajustes</p>
+        <ul class="menu-list">
+          <li
+            *ngFor="let item of menuItems"
+            [class.active]="section === item.id"
+            [class.menu-item-disabled]="item.disabled"
+            (click)="!item.disabled && setSection(item.id)">
+            <span class="material-symbols-rounded">{{ item.icon }}</span>
+            <div class="menu-text">
+              <span class="title">{{ item.title }}</span>
+              <span class="subtitle">{{ item.subtitle }}</span>
+            </div>
+          </li>
+        </ul>
+      </nav>
+
+      <!-- ── Contenido derecho ── -->
+      <div class="config-forms">
+
+        <!-- ════ PERFIL ════ -->
+        <ng-container *ngIf="section === 'perfil'">
+          <div class="content-card">
+
+            <!-- Cabecera -->
+            <div class="card-header">
+              <div class="header-icon green-icon">
+                <span class="material-symbols-rounded">person</span>
+              </div>
+              <div class="header-text">
+                <h2>Mi perfil</h2>
+                <p>Actualiza tu información personal y de contacto</p>
+              </div>
+            </div>
+
+            <!-- Avatar + info -->
+            <div class="avatar-section">
+              <div class="avatar-img">
+                <img [src]="avatarSrc" [alt]="user.name" />
+              </div>
+              <div class="avatar-info">
+                <h3>{{ form.value.name || user.name }}</h3>
+                <p class="avatar-farm">Comprador en AgroConecta</p>
+                <span class="avatar-since" *ngIf="memberSince !== '—'">
+                  Miembro desde {{ memberSince }}
+                </span>
+              </div>
+            </div>
+
+            <!-- Formulario -->
+            <form [formGroup]="form" (ngSubmit)="guardar()">
+              <div class="form-grid">
+
+                <div class="form-group">
+                  <label>Nombre completo</label>
+                  <input type="text" formControlName="name" placeholder="Tu nombre completo" />
+                  <span class="field-error"
+                        *ngIf="form.get('name')?.invalid && form.get('name')?.touched">
+                    Mínimo 2 caracteres
+                  </span>
+                </div>
+
+                <div class="form-group">
+                  <label>Correo electrónico</label>
+                  <input type="email" formControlName="email" placeholder="tu@email.com" />
+                  <span class="field-error"
+                        *ngIf="form.get('email')?.invalid && form.get('email')?.touched">
+                    Email no válido
+                  </span>
+                </div>
+
+                <div class="form-group">
+                  <label>Teléfono</label>
+                  <input type="tel" formControlName="phone" placeholder="+34 600 000 000" />
+                </div>
+
+                <div class="form-group">
+                  <label>Ciudad</label>
+                  <input type="text" formControlName="address" placeholder="Madrid, Barcelona..." />
+                </div>
+
+              </div>
+
+              <div class="form-actions">
+                <button type="button" class="btn-cancel"
+                        *ngIf="formDirty" (click)="cancelar()">
+                  Cancelar
+                </button>
+                <button type="submit" class="btn-save" [disabled]="form.invalid || loading || !formDirty">
+                  <span class="material-symbols-rounded">save</span>
+                  {{ loading ? 'Guardando...' : 'Guardar cambios' }}
+                </button>
+              </div>
+            </form>
+
+          </div>
+        </ng-container>
+
+        <!-- ════ SEGURIDAD ════ -->
+        <ng-container *ngIf="section === 'seguridad'">
+          <div class="content-card">
+            <div class="card-header">
+              <div class="header-icon orange-icon">
+                <span class="material-symbols-rounded">lock</span>
+              </div>
+              <div class="header-text">
+                <h2>Seguridad</h2>
+                <p>Gestiona tu contraseña y acceso a la cuenta</p>
+              </div>
+            </div>
+
+            <form [formGroup]="form" (ngSubmit)="guardar()">
+              <div class="form-grid">
+
+                <div class="form-group">
+                  <label>Nueva contraseña</label>
+                  <div class="input-password">
+                    <input [type]="showPassword ? 'text' : 'password'"
+                           formControlName="password"
+                           placeholder="Mínimo 8 caracteres" />
+                    <button type="button" class="toggle-pw" (click)="showPassword = !showPassword">
+                      <span class="material-symbols-rounded">
+                        {{ showPassword ? 'visibility_off' : 'visibility' }}
+                      </span>
+                    </button>
+                  </div>
+                  <div class="strength-bar" *ngIf="form.value.password">
+                    <div class="strength-track">
+                      <div class="strength-fill"
+                           [style.width.%]="passwordStrength.level * 25"
+                           [style.background]="passwordStrength.color">
+                      </div>
+                    </div>
+                    <span class="strength-label" [style.color]="passwordStrength.color">
+                      {{ passwordStrength.label }}
+                    </span>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label>Confirmar contraseña</label>
+                  <div class="input-password">
+                    <input [type]="showPasswordConfirm ? 'text' : 'password'"
+                           formControlName="password_confirmation"
+                           placeholder="Repite la contraseña" />
+                    <button type="button" class="toggle-pw" (click)="showPasswordConfirm = !showPasswordConfirm">
+                      <span class="material-symbols-rounded">
+                        {{ showPasswordConfirm ? 'visibility_off' : 'visibility' }}
+                      </span>
+                    </button>
+                  </div>
+                </div>
+
+              </div>
+
+              <!-- Info box -->
+              <div class="security-info">
+                <span class="material-symbols-rounded">info</span>
+                La contraseña debe tener al menos 8 caracteres, una mayúscula y un número.
+              </div>
+
+              <div class="form-actions">
+                <button type="submit" class="btn-save"
+                        [disabled]="!form.value.password || form.get('password')?.invalid || loading">
+                  <span class="material-symbols-rounded">lock_reset</span>
+                  {{ loading ? 'Guardando...' : 'Actualizar contraseña' }}
+                </button>
+              </div>
+            </form>
+          </div>
+        </ng-container>
+
+        <!-- ════ NOTIFICACIONES ════ -->
+        <ng-container *ngIf="section === 'notificaciones'">
+          <div class="content-card">
+            <div class="card-header">
+              <div class="header-icon blue-icon">
+                <span class="material-symbols-rounded">notifications</span>
+              </div>
+              <div class="header-text">
+                <h2>Notificaciones</h2>
+                <p>Personaliza cuándo y cómo recibes alertas</p>
+              </div>
+            </div>
+
+            <div class="toggle-list">
+
+              <div class="toggle-item">
+                <div class="toggle-info">
+                  <span class="toggle-title">Actualizaciones de pedidos</span>
+                  <span class="toggle-desc">Cambios de estado, envío y entrega</span>
+                </div>
+                <label class="toggle-switch">
+                  <input type="checkbox" [(ngModel)]="notifications.pedidos"
+                         [ngModelOptions]="{standalone: true}" />
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+
+              <div class="toggle-item">
+                <div class="toggle-info">
+                  <span class="toggle-title">Mensajes de agricultores</span>
+                  <span class="toggle-desc">Respuestas y consultas nuevas</span>
+                </div>
+                <label class="toggle-switch">
+                  <input type="checkbox" [(ngModel)]="notifications.mensajes"
+                         [ngModelOptions]="{standalone: true}" />
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+
+              <div class="toggle-item">
+                <div class="toggle-info">
+                  <span class="toggle-title">Ofertas y promociones</span>
+                  <span class="toggle-desc">Descuentos y productos en temporada</span>
+                </div>
+                <label class="toggle-switch">
+                  <input type="checkbox" [(ngModel)]="notifications.ofertas"
+                         [ngModelOptions]="{standalone: true}" />
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+
+              <div class="toggle-item">
+                <div class="toggle-info">
+                  <span class="toggle-title">Novedades de AgroConecta</span>
+                  <span class="toggle-desc">Nuevas funcionalidades y mejoras</span>
+                </div>
+                <label class="toggle-switch">
+                  <input type="checkbox" [(ngModel)]="notifications.novedades"
+                         [ngModelOptions]="{standalone: true}" />
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+
+              <div class="toggle-item">
+                <div class="toggle-info">
+                  <span class="toggle-title">Resumen semanal por email</span>
+                  <span class="toggle-desc">Un resumen de tu actividad cada semana</span>
+                </div>
+                <label class="toggle-switch">
+                  <input type="checkbox" [(ngModel)]="notifications.resumen"
+                         [ngModelOptions]="{standalone: true}" />
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+
+            </div>
+          </div>
+        </ng-container>
+
+        <!-- ════ PRIVACIDAD (coming soon) ════ -->
+        <ng-container *ngIf="section === 'privacidad'">
+          <div class="content-card">
+            <div class="card-header">
+              <div class="header-icon green-icon">
+                <span class="material-symbols-rounded">shield</span>
+              </div>
+              <div class="header-text">
+                <h2>Privacidad</h2>
+                <p>Gestión de datos y preferencias de privacidad</p>
+              </div>
+            </div>
+            <div class="coming-soon">
+              <span class="material-symbols-rounded coming-soon-icon">shield_lock</span>
+              <h3>Próximamente</h3>
+              <p>Aquí podrás gestionar tus datos personales, descargar tu información y controlar quién puede ver tu perfil.</p>
+              <span class="coming-soon-badge">En desarrollo</span>
+            </div>
+          </div>
+        </ng-container>
+
+      </div>
+    </div>
+
+    <!-- ── Toast flotante ── -->
+    <div class="toast"
+         *ngIf="toast"
+         [class.toast-success]="toast.type === 'success'"
+         [class.toast-error]="toast.type === 'error'">
+      <span class="material-symbols-rounded toast-icon">
+        {{ toast.type === 'success' ? 'check_circle' : 'error' }}
+      </span>
+      <span class="toast-message">{{ toast.message }}</span>
+      <button class="toast-close" (click)="dismissToast()">
+        <span class="material-symbols-rounded">close</span>
+      </button>
+    </div>
+
+  </main>
+</div>

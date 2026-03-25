@@ -1,0 +1,208 @@
+<div class="dashboard-layout">
+  <app-sidebar-comprador />
+
+  <main class="main-content">
+
+    <!-- Topbar -->
+    <div class="topbar">
+      <div>
+        <h1 class="page-title">{{ greeting }}<span *ngIf="firstName">, {{ firstName }}</span> </h1>
+        <p class="page-subtitle">Aquí tienes el resumen de tu actividad</p>
+      </div>
+      <div class="topbar-right">
+        <div class="search-box">
+          <span class="material-symbols-rounded">search</span>
+          <input type="text" placeholder="Buscar productos..." />
+        </div>
+        <button class="icon-btn" routerLink="/comprador/favoritos" title="Favoritos">
+          <span class="material-symbols-rounded">favorite</span>
+        </button>
+        <button class="icon-btn" title="Notificaciones">
+          <span class="material-symbols-rounded">notifications</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- KPIs -->
+    <div class="kpi-grid">
+
+      <!-- Skeleton KPIs -->
+      <ng-container *ngIf="loadingOrders || loadingFavoritos">
+        <div class="kpi-card sk-kpi" *ngFor="let s of [1,2,3,4]">
+          <div class="sk-kpi-icon"></div>
+          <div class="sk-kpi-value"></div>
+          <div class="sk-kpi-label"></div>
+        </div>
+      </ng-container>
+
+      <!-- KPIs reales -->
+      <ng-container *ngIf="!loadingOrders && !loadingFavoritos">
+        <div class="kpi-card">
+          <div class="kpi-header">
+            <div class="kpi-icon green">
+              <span class="material-symbols-rounded">receipt_long</span>
+            </div>
+            <span class="kpi-badge positive">total</span>
+          </div>
+          <span class="kpi-value">{{ kpis.pedidos }}</span>
+          <span class="kpi-label">Pedidos realizados</span>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-header">
+            <div class="kpi-icon orange">
+              <span class="material-symbols-rounded">payments</span>
+            </div>
+            <span class="kpi-badge positive">acumulado</span>
+          </div>
+          <span class="kpi-value">{{ kpis.gastado | currency:'EUR':'symbol':'1.0-0' }}</span>
+          <span class="kpi-label">Total gastado</span>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-header">
+            <div class="kpi-icon blue">
+              <span class="material-symbols-rounded">local_shipping</span>
+            </div>
+            <span class="kpi-badge neutral">en tránsito</span>
+          </div>
+          <span class="kpi-value">{{ kpis.enCamino }}</span>
+          <span class="kpi-label">Pedidos en camino</span>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-header">
+            <div class="kpi-icon purple">
+              <span class="material-symbols-rounded">favorite</span>
+            </div>
+            <span class="kpi-badge positive">guardados</span>
+          </div>
+          <span class="kpi-value">{{ kpis.favoritos }}</span>
+          <span class="kpi-label">Favoritos</span>
+        </div>
+      </ng-container>
+
+    </div>
+
+    <!-- Accesos rápidos -->
+    <div class="section-card quick-actions-card">
+      <div class="section-header">
+        <h2>Accesos Rápidos</h2>
+      </div>
+      <div class="quick-actions-grid">
+        <a
+          *ngFor="let a of quickActions"
+          [routerLink]="a.route"
+          class="quick-action-btn">
+          <span class="material-symbols-rounded">{{ a.icon }}</span>
+          {{ a.label }}
+        </a>
+      </div>
+    </div>
+
+    <!-- Pedidos Recientes -->
+    <div class="section-card">
+      <div class="section-header">
+        <h2>Pedidos Recientes</h2>
+        <a routerLink="/comprador/mis-pedidos" class="ver-todos">Ver todos →</a>
+      </div>
+
+      <!-- Skeleton tabla -->
+      <div *ngIf="loadingOrders" class="skeleton-list">
+        <div class="skeleton-row" *ngFor="let s of skeletons">
+          <div class="skeleton-cell" style="width:32px; height:32px; border-radius:50%;"></div>
+          <div class="skeleton-cell medium"></div>
+          <div class="skeleton-cell long"></div>
+          <div class="skeleton-cell short"></div>
+          <div class="skeleton-cell medium"></div>
+        </div>
+      </div>
+
+      <!-- Empty state -->
+      <div *ngIf="!loadingOrders && recentOrders.length === 0" class="empty-state-cta">
+        <span class="material-symbols-rounded">receipt_long</span>
+        <p>Aún no has realizado ningún pedido.</p>
+        <a routerLink="/productos" class="btn-cta-sm">Explorar productos</a>
+      </div>
+
+      <table class="orders-table" *ngIf="!loadingOrders && recentOrders.length > 0">
+        <thead>
+          <tr>
+            <th>AGRICULTOR</th>
+            <th>PEDIDO</th>
+            <th>PRODUCTOS</th>
+            <th>TOTAL</th>
+            <th>ESTADO</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let order of recentOrders">
+            <td>
+              <div class="client-cell">
+                <div class="client-avatar-initial">
+                  {{ getFarmerName(order).charAt(0).toUpperCase() }}
+                </div>
+                {{ getFarmerName(order) }}
+              </div>
+            </td>
+            <td><strong>ORD-{{ order.id }}</strong></td>
+            <td class="td-products">{{ getProductosLabel(order) }}</td>
+            <td><strong>{{ order.total | currency:'EUR':'symbol':'1.2-2' }}</strong></td>
+            <td>
+              <span class="status-badge" [ngClass]="statusClasses[order.status]">
+                <span class="material-symbols-rounded status-icon">{{ statusIcons[order.status] }}</span>
+                {{ statusLabels[order.status] }}
+              </span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Favoritos -->
+    <div class="section-card">
+      <div class="section-header">
+        <h2>Mis Favoritos</h2>
+        <a routerLink="/comprador/favoritos" class="ver-todos">Ver todos →</a>
+      </div>
+
+      <!-- Skeleton favoritos -->
+      <div class="top-products-grid" *ngIf="loadingFavoritos">
+        <div class="product-card sk-product" *ngFor="let s of [1,2,3,4]">
+          <div class="sk-prod-img"></div>
+          <div class="sk-prod-body">
+            <div class="sk-prod-line long"></div>
+            <div class="sk-prod-line short"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Empty state -->
+      <div *ngIf="!loadingFavoritos && favProducts.length === 0" class="empty-state-cta">
+        <span class="material-symbols-rounded">favorite_border</span>
+        <p>No tienes productos en favoritos todavía.</p>
+        <a routerLink="/productos" class="btn-cta-sm">Descubrir productos</a>
+      </div>
+
+      <div class="top-products-grid" *ngIf="!loadingFavoritos && favProducts.length > 0">
+        <div class="product-card" *ngFor="let p of favProducts"
+             [routerLink]="['/producto', p.id]" style="cursor:pointer;">
+          <img [src]="getImagen(p)" [alt]="p.name" class="product-img"
+               onerror="this.src='img/logo/logo.png'" />
+          <div class="product-info">
+            <p class="product-name">{{ p.name }}</p>
+            <p class="product-price">
+              {{ p.price | currency:'EUR':'symbol':'1.2-2' }}<span>/{{ p.unit }}</span>
+            </p>
+            <div class="product-meta">
+              <span class="material-symbols-rounded">storefront</span>
+              {{ p.farmer?.name ?? 'Agricultor' }}
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+</div>

@@ -62,6 +62,11 @@ class Product extends Model
         return $this->hasMany(ProductImage::class)->orderBy('order');
     }
 
+    public function orderItems()
+    {
+        return $this->hasMany(\App\Models\OrderItem::class);
+    }
+
     public function reviews()
     {
         return $this->hasMany(Review::class);

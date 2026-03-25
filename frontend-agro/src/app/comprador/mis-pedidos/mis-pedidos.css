@@ -1,0 +1,136 @@
+/* ── Filter tabs (ahora dentro de section-card, sin margen lateral propio) ── */
+.filter-tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;    /* solo separación inferior hacia la tabla */
+  flex-wrap: wrap;
+}
+
+.filter-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 20px;
+  border-radius: 999px;
+  border: 1.5px solid var(--gray-border);
+  background: var(--white);
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #6b7280;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+  outline: none;
+  font-family: var(--fuente-principal);
+  line-height: 1;
+}
+
+.filter-tab:hover {
+  border-color: var(--green-primary);
+  color: var(--green-primary);
+  background: #f0fdf6;
+}
+
+.filter-tab.active {
+  background: var(--green-primary);
+  color: var(--white);
+  border-color: var(--green-primary);
+  font-weight: 600;
+  box-shadow: 0 2px 8px var(--green-shadow);
+}
+
+/* ── Contador ── */
+.filter-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 18px;
+  padding: 0 6px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1;
+  background: #f3f4f6;
+  color: #374151;
+  transition: all 0.15s ease;
+}
+.filter-tab.active .filter-count {
+  background: rgba(255,255,255,0.28);
+  color: var(--white);
+}
+
+/* ── Skeleton loader ── */
+.skeleton-list { display: flex; flex-direction: column; gap: 12px; padding: 8px 0; }
+.skeleton-row  { display: flex; gap: 16px; align-items: center; }
+.skeleton-cell {
+  height: 14px; border-radius: 6px;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
+}
+.skeleton-cell.short  { width: 60px; }
+.skeleton-cell.medium { width: 120px; }
+.skeleton-cell.long   { flex: 1; }
+@keyframes shimmer { to { background-position: -200% 0; } }
+
+/* ── Empty state ── */
+.empty-state { text-align: center; padding: 48px 16px; color: #9ca3af; }
+.empty-state .material-symbols-rounded { font-size: 48px; display: block; margin-bottom: 8px; }
+.empty-state p { margin: 0 0 16px; font-size: 0.95rem; }
+.btn-cta {
+  display: inline-block; padding: 10px 24px;
+  background: var(--green-primary); color: var(--white);
+  border-radius: 20px; font-weight: 600;
+  text-decoration: none; font-size: 0.9rem;
+  transition: background var(--transition);
+}
+.btn-cta:hover { background: var(--green-dark); }
+
+/* ── Fila expandible ── */
+.order-row { cursor: pointer; transition: background 0.12s; }
+.order-row:hover { background: #f9fafb; }
+.order-row.expanded { background: #f0fdf6; }
+.td-expand { width: 36px; text-align: center; color: #9ca3af; }
+.expand-icon { font-size: 20px; vertical-align: middle; }
+
+/* ── Panel detalle ── */
+.detail-row td { padding: 0 !important; }
+.detail-panel {
+  padding: 12px 24px 16px 56px;
+  background: #f9fafb;
+  border-bottom: 1px solid var(--gray-border);
+  animation: fadeIn 0.18s ease;
+}
+@keyframes fadeIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; } }
+.detail-items { display: flex; flex-direction: column; gap: 8px; }
+.detail-item  { display: flex; align-items: center; gap: 10px; font-size: 0.9rem; color: #374151; }
+.detail-item .material-symbols-rounded { font-size: 18px; color: var(--green-primary); }
+.item-name  { flex: 1; font-weight: 500; }
+.item-qty   { color: #6b7280; }
+.item-price { font-weight: 600; color: var(--gray-dark); margin-left: auto; }
+.detail-note {
+  display: flex; align-items: center; gap: 6px;
+  margin-top: 10px; font-size: 0.85rem; color: #6b7280;
+}
+
+/* ── Tarjetas móvil ── */
+.orders-cards { display: none; flex-direction: column; gap: 12px; }
+.order-card {
+  border: 1px solid var(--gray-border); border-radius: 12px;
+  padding: 14px 16px; background: var(--white);
+  box-shadow: var(--shadow-sm);
+}
+.card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.card-body   { display: flex; flex-direction: column; gap: 4px; margin-bottom: 10px; }
+.card-footer {
+  display: flex; justify-content: space-between;
+  font-size: 0.85rem; color: #6b7280;
+  border-top: 1px solid #f3f4f6; padding-top: 10px;
+}
+
+/* ── Responsive ── */
+@media (max-width: 700px) {
+  .orders-table { display: none; }
+  .orders-cards { display: flex; }
+}

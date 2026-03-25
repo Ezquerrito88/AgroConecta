@@ -4,223 +4,202 @@
   <main class="main-content">
 
     <!-- Topbar -->
-    <header class="topbar">
-      <h1 class="page-title">Mis Productos</h1>
+    <div class="topbar">
+      <div class="topbar-left">
+        <h1 class="page-title">Mis Productos</h1>
+        <span class="page-subtitle">Gestiona tu catálogo e inventario</span>
+      </div>
       <div class="topbar-right">
         <div class="search-box">
-          <span class="material-symbols-rounded" aria-hidden="true">search</span>
-          <input type="search" placeholder="Buscar..." aria-label="Buscar productos" />
+          <span class="material-symbols-rounded">search</span>
+          <input type="text" placeholder="Buscar productos…" />
         </div>
-        <button class="icon-btn" aria-label="Notificaciones">
-          <span class="material-symbols-rounded" aria-hidden="true">notifications</span>
+        <button class="icon-btn notif-btn">
+          <span class="material-symbols-rounded">notifications</span>
+          <span class="notif-dot" *ngIf="agotados > 0"></span>
         </button>
-        <button class="icon-btn" aria-label="Ayuda">
-          <span class="material-symbols-rounded" aria-hidden="true">help</span>
+        <button class="icon-btn">
+          <span class="material-symbols-rounded">help</span>
         </button>
-      </div>
-    </header>
-
-    <!-- KPIs -->
-    <div class="kpi-grid">
-      <div class="kpi-card">
-        <div class="kpi-header">
-          <div class="kpi-icon green">
-            <span class="material-symbols-rounded" aria-hidden="true">inventory_2</span>
-          </div>
+        <div class="user-chip">
+          <div class="user-avatar">{{ user?.name?.charAt(0)?.toUpperCase() }}</div>
+          <span class="user-name">{{ user?.name?.split(' ')[0] }}</span>
         </div>
-        <span class="kpi-value">{{ totalProductos }}</span>
-        <span class="kpi-label">Productos totales</span>
-        <span class="kpi-sublabel green">{{ disponibles }} disponibles, {{ atencion }} requieren atención</span>
-      </div>
-      <div class="kpi-card">
-        <div class="kpi-header">
-          <div class="kpi-icon red">
-            <span class="material-symbols-rounded" aria-hidden="true">warning</span>
-          </div>
-        </div>
-        <span class="kpi-value">{{ agotados }}</span>
-        <span class="kpi-label">Producto(s) agotados</span>
-        <span class="kpi-sublabel red">Requieren reabastecimiento inmediato</span>
-      </div>
-      <div class="kpi-card">
-        <div class="kpi-header">
-          <div class="kpi-icon blue">
-            <span class="material-symbols-rounded" aria-hidden="true">schedule</span>
-          </div>
-        </div>
-        <span class="kpi-value">{{ pocoStock }}</span>
-        <span class="kpi-label">Producto con poco stock</span>
-        <span class="kpi-sublabel blue">Considerar reabastecimiento</span>
-      </div>
-      <div class="kpi-card">
-        <div class="kpi-header">
-          <div class="kpi-icon purple">
-            <span class="material-symbols-rounded" aria-hidden="true">bar_chart</span>
-          </div>
-        </div>
-        <span class="kpi-value">{{ unidadesVendidas }}</span>
-        <span class="kpi-label">Unidades vendidas este mes</span>
       </div>
     </div>
 
-    <!-- Filtros -->
-    <div class="filters-bar">
-      <div class="filters-left">
-        <button class="btn-primary" [routerLink]="['/agricultor/mis-productos/nuevo']">
-          <span class="material-symbols-rounded" aria-hidden="true">add</span>
+    <!-- Banner de bienvenida -->
+    <div class="welcome-banner">
+      <div class="welcome-text">
+        <h2 class="welcome-title">Tu catálogo</h2>
+        <p class="welcome-sub">Añade, edita y gestiona el stock de tus productos de temporada.</p>
+      </div>
+      <div class="welcome-actions">
+        <button class="btn-primary-white" [routerLink]="['/agricultor/mis-productos/nuevo']">
+          <span class="material-symbols-rounded">add_circle</span>
           Nuevo Producto
         </button>
-        <button class="btn-outline">
-          <span class="material-symbols-rounded" aria-hidden="true">filter_list</span>
+        <button class="btn-ghost-white">
+          <span class="material-symbols-rounded">filter_list</span>
           Filtros
         </button>
       </div>
-      <div class="filters-right">
-        <select class="filter-select" [(ngModel)]="sortOrder" (change)="onSortChange()">
+    </div>
+
+    <!-- Alerta de stock agotado -->
+    <div class="alert-banner" *ngIf="agotados > 0">
+      <span class="material-symbols-rounded alert-icon">warning</span>
+      <div class="alert-text">
+        <strong>{{ agotados }} producto{{ agotados > 1 ? 's' : '' }} sin stock.</strong>
+        Los compradores no pueden pedirlos hasta que actualices el inventario.
+      </div>
+      <a routerLink="/agricultor/mis-productos" class="btn-alert">Actualizar stock →</a>
+    </div>
+
+    <!-- KPIs -->
+    <div class="kpi-grid">
+      <div class="kpi-card kpi-featured">
+        <div class="kpi-header">
+          <div class="kpi-icon-wrap white-icon">
+            <span class="material-symbols-rounded">inventory_2</span>
+          </div>
+          <span class="kpi-badge kpi-badge-white">Catálogo total</span>
+        </div>
+        <span class="kpi-value">{{ totalProductos }}</span>
+        <span class="kpi-label">📦 Productos en tu granja</span>
+      </div>
+
+      <div class="kpi-card" [class.kpi-danger]="agotados > 0">
+        <div class="kpi-header">
+          <div class="kpi-icon-wrap" [class.red]="agotados > 0" [class.green]="agotados === 0">
+            <span class="material-symbols-rounded">{{ agotados > 0 ? 'warning' : 'check_circle' }}</span>
+          </div>
+          <span class="kpi-badge negative" *ngIf="agotados > 0">¡Atención!</span>
+          <span class="kpi-badge positive" *ngIf="agotados === 0">Todo OK</span>
+        </div>
+        <span class="kpi-value">{{ agotados }}</span>
+        <span class="kpi-label">⚠️ Productos sin stock</span>
+        <a routerLink="/agricultor/mis-productos" class="kpi-action-link" *ngIf="agotados > 0">
+          Actualizar ahora →
+        </a>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-header">
+          <div class="kpi-icon-wrap orange">
+            <span class="material-symbols-rounded">schedule</span>
+          </div>
+        </div>
+        <span class="kpi-value">{{ pocoStock }}</span>
+        <span class="kpi-label">🟠 Bajo inventario</span>
+        <span class="kpi-hint">Próximos a agotarse</span>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-header">
+          <div class="kpi-icon-wrap blue">
+            <span class="material-symbols-rounded">bar_chart</span>
+          </div>
+          <span class="kpi-badge positive">Este mes</span>
+        </div>
+        <span class="kpi-value">{{ unidadesVendidas }}</span>
+        <span class="kpi-label">📈 Unidades vendidas</span>
+        <span class="kpi-hint">Comparado con el mes pasado</span>
+      </div>
+    </div>
+
+    <!-- Catálogo de Productos -->
+    <div class="section-card">
+      <div class="section-header">
+        <div class="section-title-group">
+          <span class="material-symbols-rounded section-icon">storefront</span>
+          <h2>Tus Productos</h2>
+        </div>
+        <select class="filter-select-premium" [(ngModel)]="sortOrder" (change)="onSortChange()">
           <option value="recent">Más Recientes</option>
-          <option value="oldest">Más Antiguos</option>
           <option value="price_high">Mayor Precio</option>
           <option value="price_low">Menor Precio</option>
         </select>
       </div>
-    </div>
 
-    <!-- SKELETON LOADER -->
-    @if (loading) {
-      <div class="products-skeleton" aria-busy="true" aria-label="Cargando productos">
-        @for (item of skeletonItems; track $index) {
-          <div class="skeleton-card">
-            <div class="skeleton-img"></div>
-            <div class="skeleton-body">
-              <div class="skeleton-line wide"></div>
-              <div class="skeleton-line medium"></div>
-              <div class="skeleton-tags">
-                <div class="skeleton-tag"></div>
-                <div class="skeleton-tag short"></div>
-              </div>
-              <div class="skeleton-price-row">
-                <div class="skeleton-price"></div>
-              </div>
-              <div class="skeleton-bar-wrap">
-                <div class="skeleton-line short"></div>
-                <div class="skeleton-bar"></div>
-              </div>
-              <div class="skeleton-actions">
-                <div class="skeleton-btn"></div>
-                <div class="skeleton-btn"></div>
-              </div>
+      <!-- Skeleton loader -->
+      <div class="products-grid" *ngIf="loading">
+        <div class="skeleton-card-premium" *ngFor="let item of [1,2,3,4]">
+          <div class="sk-img"></div>
+          <div class="sk-content"></div>
+        </div>
+      </div>
+
+      <!-- Grid de productos -->
+      <div class="products-grid" *ngIf="!loading && productos.length > 0">
+        <div class="product-card-premium"
+             *ngFor="let p of productos; let i = index"
+             (click)="goToEdit(p.id)">
+
+          <!-- RANK - Esquina superior izquierda -->
+          <div class="product-rank"
+               [class.rank-gold]="i === 0"
+               [class.rank-silver]="i === 1"
+               [class.rank-bronze]="i === 2">
+            {{ i + 1 }}
+          </div>
+
+          <!-- Imagen con STATUS badge -->
+          <div class="p-img-box">
+            <img [src]="p.image || 'assets/img/placeholder.jpg'" [alt]="p.name" />
+            <!-- STATUS BADGE FIJO - ahora SÍ se ve -->
+            <div class="p-status-float" [ngClass]="getStatusClass(p.moderation_status)">
+              {{ getStatusLabel(p.moderation_status) }}
             </div>
           </div>
-        }
-      </div>
-    }
 
-    <!-- GRID DE PRODUCTOS -->
-    @if (!loading && productos.length > 0) {
-      <div class="products-grid">
-        @for (p of productos; track p.id) {
-          <div class="product-card-full"
-            [routerLink]="['/agricultor/mis-productos/editar', p.id]">
-
-            <div class="product-img-wrapper">
-              @if (p.image) {
-                <img [src]="p.image" [alt]="p.name" class="product-img-full" />
-              } @else {
-                <div class="product-img-placeholder">
-                  <div class="placeholder-inner">
-                    <span class="material-symbols-rounded placeholder-icon" aria-hidden="true">eco</span>
-                  </div>
-                </div>
-              }
+          <div class="p-content">
+            <div class="p-category">{{ p.category }}</div>
+            <h3 class="p-title">{{ p.name }}</h3>
+            <div class="p-price-box">
+              <span class="p-price">{{ p.price | currency:'EUR':'symbol':'1.2-2' }}</span>
+              <span class="p-unit">/{{ p.unit }}</span>
             </div>
-
-            <div class="product-body">
-              <h3 class="product-name">{{ p.name }}</h3>
-
-              <div class="product-tags">
-                <span class="tag">{{ p.category }}</span>
-                <span class="moderation-badge" [ngClass]="{
-                  'mod-approved': p.moderation_status === 'approved',
-                  'mod-pending':  p.moderation_status === 'pending',
-                  'mod-rejected': p.moderation_status === 'rejected'
-                }">
-                  <span class="mod-dot"></span>
-                  {{ p.moderation_status }}
-                </span>
-              </div>
-
-              <div class="product-price-row">
-                <span class="product-price-big">{{ p.price | currency:'EUR':'symbol':'1.2-2' }}</span>
-                <span class="product-price-unit">/{{ p.unit || 'ud' }}</span>
-                <span class="product-sold" [class.no-sales]="!p.sold">
-                  <span class="material-symbols-rounded" aria-hidden="true">inventory_2</span>
-                  {{ p.sold ? (p.sold + ' vendidos') : 'Sin ventas aún' }}
-                </span>
-              </div>
-
-              <div class="product-stock-row">
-                <span>Stock: {{ p.stock }}</span>
+            <div class="p-inventory">
+              <div class="p-inv-text">
+                <span>Stock: <strong>{{ p.stock }}</strong></span>
                 <span>{{ p.stockPct }}%</span>
               </div>
-              <div class="stock-bar">
-                <div class="stock-bar-fill"
-                  [style.width.%]="p.stockPct"
-                  [ngClass]="stockBarClass(p.stockPct)">
+              <div class="p-inv-bar">
+                <div class="p-inv-fill"
+                     [style.width.%]="p.stockPct"
+                     [ngClass]="stockBarClass(p.stockPct)">
                 </div>
               </div>
-
-              <div class="product-actions">
-                <button class="btn-ver" (click)="$event.stopPropagation()"
-                  [routerLink]="['/producto', p.id]">
-                  <span class="material-symbols-rounded" aria-hidden="true">storefront</span>
-                  Ver en tienda
-                </button>
-                <button class="btn-editar" (click)="$event.stopPropagation()"
-                  [routerLink]="['/agricultor/mis-productos/editar', p.id]">
-                  <span class="material-symbols-rounded" aria-hidden="true">edit</span>
-                  Editar
-                </button>
-              </div>
+            </div>
+            <div class="p-actions-row">
+              <button class="p-btn-icon"
+                      (click)="$event.stopPropagation()"
+                      [routerLink]="['/producto', p.id]">
+                <span class="material-symbols-rounded">visibility</span>
+              </button>
+              <button class="p-btn-edit"
+                      (click)="$event.stopPropagation()"
+                      [routerLink]="['/agricultor/mis-productos/editar', p.id]">
+                <span class="material-symbols-rounded">edit</span>
+                Editar
+              </button>
             </div>
           </div>
-        }
+        </div>
       </div>
-    }
 
-    <!-- EMPTY STATE -->
-    @if (!loading && productos.length === 0) {
-      <div class="empty-state">
-        <span class="material-symbols-rounded empty-icon" aria-hidden="true">eco</span>
-        <h3>Aún no tienes productos</h3>
-        <p>Empieza añadiendo tu primer producto para que los compradores puedan encontrarte.</p>
-        <button class="btn-primary" [routerLink]="['/agricultor/mis-productos/nuevo']">
-          <span class="material-symbols-rounded" aria-hidden="true">add</span>
-          Crear primer producto
+      <!-- Empty state -->
+      <div class="empty-state" *ngIf="!loading && productos.length === 0">
+        <span class="material-symbols-rounded empty-icon">inventory</span>
+        <p class="empty-title">Tu almacén está vacío</p>
+        <p class="empty-sub">Comienza publicando tus productos de temporada.</p>
+        <button class="btn-primary-green" routerLink="/agricultor/mis-productos/nuevo">
+          <span class="material-symbols-rounded">add_circle</span>
+          Añadir mi primer producto
         </button>
       </div>
-    }
-
-    <!-- PAGINACIÓN -->
-    @if (lastPage > 1) {
-      <nav class="pagination" aria-label="Paginación de productos">
-        <button class="page-btn" (click)="goToPage(currentPage - 1)"
-          [disabled]="currentPage === 1" aria-label="Página anterior">
-          <span class="material-symbols-rounded" aria-hidden="true">chevron_left</span>
-        </button>
-        @for (p of pageItems; track $index) {
-          <button class="page-btn"
-            [class.active]="currentPage === $index + 1"
-            (click)="goToPage($index + 1)"
-            [attr.aria-current]="currentPage === $index + 1 ? 'page' : null">
-            {{ $index + 1 }}
-          </button>
-        }
-        <button class="page-btn" (click)="goToPage(currentPage + 1)"
-          [disabled]="currentPage === lastPage" aria-label="Página siguiente">
-          <span class="material-symbols-rounded" aria-hidden="true">chevron_right</span>
-        </button>
-      </nav>
-    }
+    </div>
 
   </main>
 </div>

@@ -29,7 +29,7 @@ export class App implements OnInit {
     this.router.events.pipe(
       filter(event => event instanceof NavigationEnd)
     ).subscribe((event: NavigationEnd) => {
-      const rutasOcultas = ['/login', '/registro', '/agricultor'];
+      const rutasOcultas = ['/login', '/registro', '/agricultor', '/comprador'];
       this.mostrarLayout = !rutasOcultas.some(ruta => event.urlAfterRedirects.includes(ruta));
       this.isUserMenuOpen = false;
       this.checkLoginStatus();

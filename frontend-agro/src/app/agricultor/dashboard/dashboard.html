@@ -5,120 +5,186 @@
 
     <!-- Topbar -->
     <div class="topbar">
-      <h1 class="page-title">Panel Principal</h1>
+      <div class="topbar-left">
+        <h1 class="page-title">Mi Panel</h1>
+        <span class="page-subtitle">{{ today | date:"EEEE, d 'de' MMMM" : '' : 'es' }}</span>
+      </div>
       <div class="topbar-right">
         <div class="search-box">
           <span class="material-symbols-rounded">search</span>
-          <input type="text" placeholder="Buscar..." />
+          <input type="text" placeholder="Buscar pedidos, productos…" />
         </div>
-        <button class="icon-btn">
+        <button class="icon-btn notif-btn">
           <span class="material-symbols-rounded">notifications</span>
+          <span class="notif-dot" *ngIf="kpis.agotados > 0"></span>
         </button>
         <button class="icon-btn">
           <span class="material-symbols-rounded">help</span>
         </button>
+        <div class="user-chip">
+          <div class="user-avatar">{{ user?.name?.charAt(0)?.toUpperCase() }}</div>
+          <span class="user-name">{{ user?.name?.split(' ')[0] }}</span>
+        </div>
       </div>
+    </div>
+
+    <!-- Banner de bienvenida -->
+    <div class="welcome-banner">
+      <div class="welcome-text">
+        <h2 class="welcome-title">¡Hola, {{ user?.name?.split(' ')[0] }}!</h2>
+        <p class="welcome-sub">Aquí tienes un resumen de tu actividad. ¿Qué quieres hacer hoy?</p>
+      </div>
+      <div class="welcome-actions">
+        <button class="btn-primary-white" routerLink="/agricultor/mis-productos/nuevo">
+          <span class="material-symbols-rounded">add_circle</span>
+          Añadir Producto
+        </button>
+        <button class="btn-ghost-white" routerLink="/agricultor/pedidos">
+          <span class="material-symbols-rounded">list_alt</span>
+          Ver Pedidos
+        </button>
+      </div>
+    </div>
+
+    <!-- Alerta de stock (sólo si hay productos agotados) -->
+    <div class="alert-banner" *ngIf="kpis.agotados > 0">
+      <span class="material-symbols-rounded alert-icon">warning</span>
+      <div class="alert-text">
+        <strong>{{ kpis.agotados }} producto{{ kpis.agotados > 1 ? 's' : '' }} sin stock.</strong>
+        Los compradores no pueden pedirlos hasta que actualices el inventario.
+      </div>
+      <a routerLink="/agricultor/mis-productos" class="btn-alert">Actualizar stock →</a>
     </div>
 
     <!-- KPIs -->
     <div class="kpi-grid">
-      <div class="kpi-card">
+
+      <div class="kpi-card kpi-featured">
         <div class="kpi-header">
-          <div class="kpi-icon green">
-            <span class="material-symbols-rounded">check_circle</span>
+          <div class="kpi-icon-wrap white-icon">
+            <span class="material-symbols-rounded">euro</span>
           </div>
-          <span class="kpi-badge positive">+ 12%</span>
-        </div>
-        <span class="kpi-value">{{ kpis.pedidos }}</span>
-        <span class="kpi-label">Pedidos este mes</span>
-      </div>
-      <div class="kpi-card">
-        <div class="kpi-header">
-          <div class="kpi-icon orange">
-            <span class="material-symbols-rounded">bar_chart</span>
-          </div>
-          <span class="kpi-badge positive">+ 8%</span>
+          <span class="kpi-badge kpi-badge-white">+8% vs mes anterior</span>
         </div>
         <span class="kpi-value">{{ kpis.ventas | currency:'EUR':'symbol':'1.0-0' }}</span>
-        <span class="kpi-label">Ventas este mes</span>
+        <span class="kpi-label">💰 Lo que has ganado este mes</span>
       </div>
+
       <div class="kpi-card">
         <div class="kpi-header">
-          <div class="kpi-icon blue">
-            <span class="material-symbols-rounded">inventory_2</span>
+          <div class="kpi-icon-wrap green">
+            <span class="material-symbols-rounded">shopping_bag</span>
           </div>
-          <span class="kpi-badge negative">- 3%</span>
+          <span class="kpi-badge positive">+12%</span>
+        </div>
+        <span class="kpi-value">{{ kpis.pedidos }}</span>
+        <span class="kpi-label">📦 Pedidos este mes</span>
+        <span class="kpi-hint">Comparado con el mes pasado</span>
+      </div>
+
+      <div class="kpi-card" [class.kpi-danger]="kpis.agotados > 0">
+        <div class="kpi-header">
+          <div class="kpi-icon-wrap" [class.red]="kpis.agotados > 0" [class.green]="kpis.agotados === 0">
+            <span class="material-symbols-rounded">{{ kpis.agotados > 0 ? 'warning' : 'check_circle' }}</span>
+          </div>
+          <span class="kpi-badge negative" *ngIf="kpis.agotados > 0">¡Atención!</span>
+          <span class="kpi-badge positive" *ngIf="kpis.agotados === 0">Todo OK</span>
         </div>
         <span class="kpi-value">{{ kpis.agotados }}</span>
-        <span class="kpi-label">Productos Agotados</span>
+        <span class="kpi-label">⚠️ Productos sin stock</span>
+        <a routerLink="/agricultor/mis-productos" class="kpi-action-link" *ngIf="kpis.agotados > 0">
+          Actualizar ahora →
+        </a>
       </div>
+
       <div class="kpi-card">
         <div class="kpi-header">
-          <div class="kpi-icon purple">
+          <div class="kpi-icon-wrap purple">
             <span class="material-symbols-rounded">star</span>
           </div>
-          <span class="kpi-badge positive">+ 5%</span>
+          <span class="kpi-badge positive">+5%</span>
         </div>
-        <span class="kpi-value">{{ kpis.calificacion }}</span>
-        <span class="kpi-label">Calificación Promedio</span>
+        <div class="kpi-value-row">
+          <span class="kpi-value">{{ kpis.calificacion }}</span>
+          <div class="stars-mini">
+            <span class="material-symbols-rounded star-filled" *ngFor="let s of [1,2,3,4]">star</span>
+            <span class="material-symbols-rounded star-half">star_half</span>
+          </div>
+        </div>
+        <span class="kpi-label">⭐ Valoración de tus clientes</span>
+        <span class="kpi-hint">Basado en todas las reseñas</span>
       </div>
+
     </div>
 
     <!-- Pedidos Recientes -->
     <div class="section-card">
       <div class="section-header">
-        <h2>Pedidos Recientes</h2>
-        <a routerLink="/agricultor/pedidos" class="ver-todos">Ver Todos &gt;</a>
+        <div class="section-title-group">
+          <span class="material-symbols-rounded section-icon">receipt_long</span>
+          <h2>Últimos Pedidos</h2>
+        </div>
+        <a routerLink="/agricultor/pedidos" class="ver-todos">Ver todos →</a>
       </div>
 
       <div *ngIf="recentOrders.length === 0" class="empty-state">
-        Aún no tienes pedidos recientes.
+        <span class="material-symbols-rounded empty-icon">inbox</span>
+        <p class="empty-title">Aún no tienes pedidos</p>
+        <p class="empty-sub">Cuando alguien compre tus productos, aparecerán aquí.</p>
       </div>
 
-      <table class="orders-table" *ngIf="recentOrders.length > 0">
-        <thead>
-          <tr>
-            <th>CLIENTE</th>
-            <th>PEDIDO</th>
-            <th>FECHA</th>
-            <th>TOTAL</th>
-            <th>ESTADO</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let order of recentOrders">
-            <td>
-              <div class="client-cell">
-                <div class="client-avatar-initial">
-                  {{ order.buyer.name.charAt(0).toUpperCase() }}
-                </div>
-                {{ order.buyer.name }}
-              </div>
-            </td>
-            <td>ORD-{{ order.id }}</td>
-            <td>{{ order.created_at | smartDate }}</td>
-            <td><strong>{{ order.total | currency:'EUR':'symbol':'1.2-2' }}</strong></td>
-            <td>
-              <span class="status-badge" [ngClass]="statusClasses[order.status]">
-                <span class="material-symbols-rounded status-icon">
-                  {{ statusIcons[order.status] }}
-                </span>
-                {{ statusLabels[order.status] }}
-              </span>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      <!-- Lista de pedidos (más legible que tabla densa) -->
+      <div class="orders-list" *ngIf="recentOrders.length > 0">
+
+        <div class="orders-list-header">
+          <span>Cliente</span>
+          <span>Nº Pedido</span>
+          <span>Estado</span>
+          <span class="align-right">Total</span>
+        </div>
+
+        <div class="order-row" *ngFor="let order of recentOrders">
+          <div class="order-client">
+            <div class="client-avatar-initial">{{ order.buyer.name.charAt(0).toUpperCase() }}</div>
+            <div class="order-client-info">
+              <span class="order-client-name">{{ order.buyer.name }}</span>
+              <span class="order-date">{{ order.created_at | smartDate }}</span>
+            </div>
+          </div>
+          <div class="order-ref">
+            <span class="order-ref-num">#{{ order.id }}</span>
+          </div>
+          <div>
+            <span class="status-badge" [ngClass]="statusClasses[order.status]">
+              <span class="material-symbols-rounded status-icon">{{ statusIcons[order.status] }}</span>
+              {{ statusLabels[order.status] }}
+            </span>
+          </div>
+          <div class="order-total">
+            <strong class="order-total-value">{{ order.total | currency:'EUR':'symbol':'1.2-2' }}</strong>
+          </div>
+        </div>
+
+      </div>
     </div>
 
     <!-- Productos Más Vendidos -->
     <div class="section-card">
       <div class="section-header">
-        <h2>Productos Más Vendidos</h2>
-        <a routerLink="/agricultor/mis-productos" class="ver-todos">Ver Todos &gt;</a>
+        <div class="section-title-group">
+          <span class="material-symbols-rounded section-icon">trending_up</span>
+          <h2>Tus Productos Estrella</h2>
+        </div>
+        <a routerLink="/agricultor/mis-productos" class="ver-todos">Ver todos →</a>
       </div>
       <div class="top-products-grid">
-        <div class="product-card" *ngFor="let p of topProducts">
+        <div class="product-card" *ngFor="let p of topProducts; let i = index">
+          <div class="product-rank"
+               [class.rank-gold]="i === 0"
+               [class.rank-silver]="i === 1"
+               [class.rank-bronze]="i === 2">
+            {{ i + 1 }}
+          </div>
           <img [src]="p.image" [alt]="p.name" class="product-img" />
           <div class="product-info">
             <p class="product-name">{{ p.name }}</p>

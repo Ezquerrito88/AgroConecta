@@ -1,0 +1,167 @@
+:host {
+  --green: #11C267;
+  --green-dark: #0ea858;
+  --green-shadow: rgba(17, 194, 103, 0.22);
+  --text-dark: #111827;
+  --text-mid: #374151;
+  --text-light: #6b7280;
+  --border: #e5e7eb;
+  --hover-bg: #f3f4f6;
+  --status-green: #22c55e;
+  --red: #ef4444;
+  --red-light: #fef2f2;
+  --red-dark: #dc2626;
+}
+
+.sidebar {
+  width: 275px;
+  min-width: 275px;
+  height: 100vh;
+  background: #fff;
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  font-family: var(--fuente-principal);
+  letter-spacing: -0.01em;
+}
+
+.divider {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 0;
+}
+
+/* ── Header ── */
+.sidebar-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 22px 22px 20px;
+}
+.logo-img { width: 40px; height: 40px; object-fit: contain; flex-shrink: 0; }
+.brand-text h2 {
+  margin: 0;
+  font-size: 1.25rem; font-weight: 700;
+  color: var(--text-dark);
+  letter-spacing: -0.03em; line-height: 1.2;
+}
+.brand-text span { font-size: 0.8rem; color: var(--green); font-weight: 600; }
+
+/* ── User profile ── */
+.user-profile {
+  display: flex; align-items: center; gap: 14px;
+  padding: 18px 22px;
+  border-bottom: 1px solid var(--border);
+}
+.avatar {
+  position: relative;
+  width: 48px; height: 48px; border-radius: 14px;
+  background: linear-gradient(135deg, #fdba74, #f97316);
+  color: #fff; font-size: 1.1rem; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 4px 10px rgba(249,115,22,0.3);
+}
+.status-dot {
+  position: absolute; bottom: -3px; right: -3px;
+  width: 13px; height: 13px;
+  background: var(--status-green);
+  border: 2.5px solid #fff; border-radius: 50%;
+}
+.user-info h3 {
+  margin: 0; font-size: 0.95rem; font-weight: 700;
+  color: var(--text-dark); letter-spacing: -0.02em;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 150px;
+}
+.user-info span {
+  font-size: 0.75rem; color: var(--text-light); font-weight: 400;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  max-width: 150px; display: block;
+}
+
+/* ── Nav ── */
+.sidebar-nav { flex: 1; padding: 18px 14px; overflow-y: auto; }
+.sidebar-nav ul {
+  list-style: none; padding: 0; margin: 0;
+  display: flex; flex-direction: column; gap: 8px;
+}
+.sidebar-nav ul li a {
+  display: flex; align-items: center; gap: 16px;
+  padding: 13px 18px; border-radius: 12px;
+  text-decoration: none; color: var(--text-mid);
+  font-size: 1.05rem; font-weight: 500;
+  transition: all 0.15s ease;
+}
+.sidebar-nav ul li a .material-symbols-rounded {
+  font-size: 1.5rem; color: #4b5563;
+  transition: color 0.15s; width: 24px; text-align: center;
+  font-variation-settings: 'FILL' 0,'wght' 300,'GRAD' 0,'opsz' 24;
+}
+.sidebar-nav ul li a:hover { background: var(--hover-bg); color: var(--text-dark); }
+.sidebar-nav ul li a:hover .material-symbols-rounded { color: var(--text-dark); }
+.sidebar-nav ul li a.active {
+  background: var(--green); color: #fff;
+  font-weight: 600; box-shadow: 0 4px 14px var(--green-shadow);
+}
+.sidebar-nav ul li a.active .material-symbols-rounded {
+  color: #fff;
+  font-variation-settings: 'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24;
+}
+
+/* ── Badge ── */
+.badge-new {
+  margin-left: auto;
+  background: linear-gradient(135deg, #11C267, #02BA7A);
+  color: #fff; font-size: 0.62rem; font-weight: 700;
+  padding: 2px 8px; border-radius: 20px;
+  letter-spacing: 0.04em; text-transform: uppercase;
+}
+.active .badge-new { background: rgba(255,255,255,0.25); }
+
+/* ── Footer ── */
+.sidebar-footer {
+  padding-bottom: 12px;
+  display: flex; flex-direction: column; gap: 4px;
+}
+
+/* Botón ir a la web */
+.btn-web {
+  display: flex; align-items: center; gap: 12px;
+  padding: 13px 22px;
+  text-decoration: none;
+  color: var(--text-mid);
+  font-size: 0.95rem; font-weight: 500;
+  font-family: var(--fuente-principal);
+  transition: background 0.15s, color 0.15s;
+  border-radius: 0;
+}
+.btn-web .material-symbols-rounded {
+  font-size: 1.3rem; color: var(--green);
+  transition: color 0.15s;
+}
+.btn-web:hover {
+  background: #f0fdf4;
+  color: var(--green);
+}
+
+/* Botón cerrar sesión rojo */
+.logout-btn {
+  width: 100%;
+  display: flex; align-items: center; gap: 12px;
+  padding: 13px 22px;
+  background: none; border: none; cursor: pointer;
+  color: var(--red);
+  font-size: 0.95rem; font-weight: 500;
+  font-family: var(--fuente-principal);
+  transition: background 0.15s, color 0.15s;
+  text-align: left;
+}
+.logout-btn .material-symbols-rounded {
+  font-size: 1.3rem; color: var(--red);
+  transition: color 0.15s;
+}
+.logout-btn:hover {
+  background: var(--red-light);
+  color: var(--red-dark);
+}
+.logout-btn:hover .material-symbols-rounded { color: var(--red-dark); }

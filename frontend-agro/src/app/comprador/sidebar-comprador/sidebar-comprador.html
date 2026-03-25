@@ -1,0 +1,79 @@
+<aside class="sidebar">
+
+  <div class="sidebar-header">
+    <img src="img/logo/logo.png" alt="AgroConecta" class="logo-img">
+    <div class="brand-text">
+      <h2>AgroConecta</h2>
+      <span>Panel del Comprador</span>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <div class="user-profile">
+    <div class="avatar">
+      {{ initials }}
+      <span class="status-dot"></span>
+    </div>
+    <div class="user-info">
+      <h3>{{ user?.name }}</h3>
+      <span>{{ user?.email }}</span>
+    </div>
+  </div>
+
+  <nav class="sidebar-nav">
+    <ul>
+      <li>
+        <a routerLink="/comprador/dashboard" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}">
+          <span class="material-symbols-rounded">home</span>
+          <span>Inicio</span>
+        </a>
+      </li>
+      <li>
+        <a routerLink="/comprador/mis-pedidos" routerLinkActive="active">
+          <span class="material-symbols-rounded">receipt_long</span>
+          <span>Mis Pedidos</span>
+        </a>
+      </li>
+      <li>
+        <a routerLink="/comprador/favoritos" routerLinkActive="active">
+          <span class="material-symbols-rounded">favorite</span>
+          <span>Favoritos</span>
+        </a>
+      </li>
+      <li>
+        <a routerLink="/comprador/mensajes" routerLinkActive="active">
+          <span class="material-symbols-rounded">chat_bubble</span>
+          <span>Mensajes</span>
+        </a>
+      </li>
+      <li>
+        <a routerLink="/comprador/valoraciones" routerLinkActive="active">
+          <span class="material-symbols-rounded">star</span>
+          <span>Valoraciones</span>
+        </a>
+      </li>
+      <li>
+        <a routerLink="/comprador/configuracion" routerLinkActive="active">
+          <span class="material-symbols-rounded">settings</span>
+          <span>Configuración</span>
+        </a>
+      </li>
+    </ul>
+  </nav>
+
+  <div class="sidebar-footer">
+    <hr class="divider">
+
+    <a routerLink="/" class="btn-web">
+      <span class="material-symbols-rounded">open_in_new</span>
+      <span>Ir a la web</span>
+    </a>
+    <hr class="divider">
+    <button class="logout-btn" (click)="logout()">
+      <span class="material-symbols-rounded">logout</span>
+      <span>Cerrar Sesión</span>
+    </button>
+  </div>
+
+</aside>

@@ -1,0 +1,93 @@
+<div class="dashboard-layout">
+  <app-sidebar-comprador />
+
+  <main class="main-content">
+
+    <!-- Topbar usando las clases globales -->
+    <div class="topbar">
+      <div class="topbar-left">
+        <h1 class="page-title">Mis Favoritos</h1>
+        <span class="fav-count" *ngIf="!loading">{{ products.length }}</span>
+      </div>
+
+      <!-- topbar-right ya existe en el CSS global -->
+      <div class="topbar-right" *ngIf="!loading && products.length > 0">
+        <!-- search-box ya existe en el CSS global -->
+        <div class="search-box">
+          <span class="material-symbols-rounded">search</span>
+          <input
+            type="text"
+            placeholder="Buscar favorito..."
+            [(ngModel)]="searchQuery"
+            (ngModelChange)="applyFilters()" />
+          <button *ngIf="searchQuery" class="clear-search" (click)="searchQuery=''; applyFilters()">
+            <span class="material-symbols-rounded">close</span>
+          </button>
+        </div>
+        <!-- filter-select ya existe en el CSS global -->
+        <select class="filter-select" [(ngModel)]="sortBy" (ngModelChange)="applyFilters()">
+          <option *ngFor="let opt of sortOptions" [value]="opt.value">{{ opt.label }}</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Contenido con padding (igual que el resto del dashboard) -->
+    <div class="fav-content">
+
+      <!-- Skeleton loader -->
+      <div class="fav-grid" *ngIf="loading">
+        <div class="fav-card skeleton-card" *ngFor="let s of skeletons">
+          <div class="sk-img"></div>
+          <div class="sk-body">
+            <div class="sk-line long"></div>
+            <div class="sk-line short"></div>
+            <div class="sk-line medium"></div>
+          </div>
+          <div class="sk-btn"></div>
+        </div>
+      </div>
+
+      <!-- Sin favoritos -->
+      <div *ngIf="!loading && products.length === 0" class="empty-state-full">
+        <span class="material-symbols-rounded empty-icon">favorite_border</span>
+        <p>No tienes productos guardados en favoritos.</p>
+        <a routerLink="/productos" class="btn-explorar-empty">Explorar productos</a>
+      </div>
+
+      <!-- Sin resultados de búsqueda -->
+      <div *ngIf="!loading && products.length > 0 && filteredProducts.length === 0" class="empty-state-full">
+        <span class="material-symbols-rounded empty-icon">search_off</span>
+        <p>No hay favoritos que coincidan con "<strong>{{ searchQuery }}</strong>".</p>
+        <button class="btn-explorar-empty" (click)="searchQuery=''; applyFilters()">Limpiar búsqueda</button>
+      </div>
+
+      <!-- Grid -->
+      <div class="fav-grid" *ngIf="!loading && filteredProducts.length > 0">
+        <div
+          class="fav-card"
+          *ngFor="let p of filteredProducts"
+          [class.removing]="removingIds.has(p.id)">
+          <div class="fav-img-wrap">
+            <img [src]="getImagen(p)" [alt]="p.name" class="fav-img"
+                 onerror="this.src='img/logo/logo.png'" />
+            <button class="btn-remove-fav" (click)="toggleFavorito(p)" title="Quitar de favoritos">
+              <span class="material-symbols-rounded">favorite</span>
+            </button>
+          </div>
+          <div class="fav-info">
+            <p class="fav-name">{{ p.name }}</p>
+            <p class="fav-price">
+              {{ p.price | currency:'EUR':'symbol':'1.2-2' }}<span>/{{ p.unit }}</span>
+            </p>
+            <p class="fav-farmer">
+              <span class="material-symbols-rounded">storefront</span>
+              {{ p.farmer?.name ?? 'Agricultor' }}
+            </p>
+          </div>
+          <a [routerLink]="['/producto', p.id]" class="btn-ver-producto">Ver producto</a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>

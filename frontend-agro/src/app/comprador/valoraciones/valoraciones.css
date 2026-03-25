@@ -1,0 +1,8 @@
+.coming-soon {
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 80px 20px; text-align: center; gap: 14px;
+}
+.cs-icon { font-size: 3.5rem; color: #fbbf24; }
+.coming-soon h2 { margin: 0; font-size: 1.5rem; color: #111827; }
+.coming-soon p  { margin: 0; color: #6b7280; max-width: 360px; }

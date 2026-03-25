@@ -1,0 +1,129 @@
+/* ── Subtítulo topbar ── */
+.page-subtitle {
+  font-size: 0.82rem;
+  color: #9ca3af;
+  margin: 2px 0 0;
+  font-weight: 400;
+}
+
+/* ── KPI badge neutral ── */
+.kpi-badge.neutral {
+  background: #f1f5f9;
+  color: #64748b;
+}
+
+/* ── Skeleton KPI ── */
+.sk-kpi { gap: 12px; }
+.sk-kpi-icon {
+  width: 46px; height: 46px; border-radius: 12px;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e8e8e8 50%, #f0f0f0 75%);
+  background-size: 200% 100%; animation: shimmer-db 1.4s infinite;
+}
+.sk-kpi-value {
+  height: 32px; width: 60%; border-radius: 8px;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e8e8e8 50%, #f0f0f0 75%);
+  background-size: 200% 100%; animation: shimmer-db 1.4s infinite;
+}
+.sk-kpi-label {
+  height: 12px; width: 80%; border-radius: 6px;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e8e8e8 50%, #f0f0f0 75%);
+  background-size: 200% 100%; animation: shimmer-db 1.4s infinite;
+}
+
+/* ── Skeleton tabla ── */
+.skeleton-list { display: flex; flex-direction: column; gap: 14px; padding: 8px 0; }
+.skeleton-row  { display: flex; gap: 16px; align-items: center; }
+.skeleton-cell {
+  height: 14px; border-radius: 6px;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e8e8e8 50%, #f0f0f0 75%);
+  background-size: 200% 100%; animation: shimmer-db 1.4s infinite;
+}
+.skeleton-cell.short  { width: 60px; }
+.skeleton-cell.medium { width: 120px; }
+.skeleton-cell.long   { flex: 1; }
+
+/* ── Skeleton producto favorito ── */
+.sk-product { pointer-events: none; }
+.sk-prod-img {
+  width: 56px; height: 56px; border-radius: 10px; flex-shrink: 0;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e8e8e8 50%, #f0f0f0 75%);
+  background-size: 200% 100%; animation: shimmer-db 1.4s infinite;
+}
+.sk-prod-body { display: flex; flex-direction: column; gap: 8px; flex: 1; }
+.sk-prod-line {
+  height: 12px; border-radius: 6px;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e8e8e8 50%, #f0f0f0 75%);
+  background-size: 200% 100%; animation: shimmer-db 1.4s infinite;
+}
+.sk-prod-line.long  { width: 80%; }
+.sk-prod-line.short { width: 50%; }
+
+@keyframes shimmer-db { to { background-position: -200% 0; } }
+
+/* ── Accesos rápidos ── */
+.quick-actions-card { padding: 20px 24px; }
+.quick-actions-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+.quick-action-btn {
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 8px; padding: 18px 12px;
+  background: var(--color-bg-light);
+  border: 1.5px solid var(--gray-border);
+  border-radius: var(--radius-sm);
+  color: var(--gray-text);
+  font-size: 0.8rem; font-weight: 600;
+  text-decoration: none; text-align: center;
+  transition: all 0.15s ease;
+  font-family: var(--fuente-principal);
+}
+.quick-action-btn .material-symbols-rounded {
+  font-size: 1.5rem; color: var(--green-primary);
+  font-variation-settings: 'FILL' 0,'wght' 300,'GRAD' 0,'opsz' 24;
+}
+.quick-action-btn:hover {
+  border-color: var(--green-primary);
+  background: #f0fdf4;
+  color: var(--green-primary);
+}
+.quick-action-btn:hover .material-symbols-rounded {
+  font-variation-settings: 'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24;
+}
+
+/* ── Empty state con CTA ── */
+.empty-state-cta {
+  display: flex; flex-direction: column;
+  align-items: center; gap: 10px;
+  padding: 40px 16px; text-align: center;
+  color: #9ca3af;
+}
+.empty-state-cta .material-symbols-rounded {
+  font-size: 2.5rem; color: #d1d5db;
+}
+.empty-state-cta p { margin: 0; font-size: 0.88rem; }
+.btn-cta-sm {
+  display: inline-block; padding: 8px 20px;
+  background: var(--green-primary); color: #fff;
+  border-radius: 20px; font-weight: 600;
+  font-size: 0.82rem; text-decoration: none;
+  transition: background var(--transition);
+}
+.btn-cta-sm:hover { background: var(--green-dark); }
+
+/* ── Productos truncados ── */
+.td-products {
+  max-width: 200px; white-space: nowrap;
+  overflow: hidden; text-overflow: ellipsis;
+  color: #6b7280; font-size: 0.88rem;
+}
+
+/* ── Responsive accesos rápidos ── */
+@media (max-width: 900px) {
+  .quick-actions-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 600px) {
+  .quick-actions-grid { grid-template-columns: repeat(2, 1fr); }
+}

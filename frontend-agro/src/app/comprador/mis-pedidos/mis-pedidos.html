@@ -1,0 +1,135 @@
+<div class="dashboard-layout">
+  <app-sidebar-comprador />
+
+  <main class="main-content">
+    <div class="topbar">
+      <h1 class="page-title">Mis Pedidos</h1>
+    </div>
+
+    <div class="section-card">
+
+      <!-- Filtros DENTRO de section-card -->
+      <div class="filter-tabs">
+        <button
+          *ngFor="let f of filtros"
+          class="filter-tab"
+          [class.active]="filtroActivo === f.id"
+          (click)="setFiltro(f.id)">
+          {{ f.label }}
+          <span class="filter-count">{{ getCount(f.id) }}</span>
+        </button>
+      </div>
+
+      <!-- Skeleton loader -->
+      <div *ngIf="loading" class="skeleton-list">
+        <div class="skeleton-row" *ngFor="let i of [1,2,3,4]">
+          <div class="skeleton-cell short"></div>
+          <div class="skeleton-cell medium"></div>
+          <div class="skeleton-cell long"></div>
+          <div class="skeleton-cell short"></div>
+          <div class="skeleton-cell short"></div>
+          <div class="skeleton-cell medium"></div>
+        </div>
+      </div>
+
+      <!-- Estado vacío con CTA -->
+      <div *ngIf="!loading && filteredOrders.length === 0" class="empty-state">
+        <span class="material-symbols-rounded">inbox</span>
+        <p>No hay pedidos en esta categoría.</p>
+        <a routerLink="/catalogo" class="btn-cta">Explorar productos</a>
+      </div>
+
+      <!-- Tabla (desktop) -->
+      <table class="orders-table" *ngIf="!loading && filteredOrders.length > 0">
+        <thead>
+          <tr>
+            <th>PEDIDO</th>
+            <th>AGRICULTOR</th>
+            <th>PRODUCTOS</th>
+            <th>FECHA</th>
+            <th>TOTAL</th>
+            <th>ESTADO</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <ng-container *ngFor="let order of filteredOrders">
+            <tr
+              class="order-row"
+              [class.expanded]="expandedId === order.id"
+              (click)="toggleExpand(order.id)">
+              <td><strong>ORD-{{ order.id }}</strong></td>
+              <td>
+                <div class="client-cell">
+                  <div class="client-avatar-initial">
+                    {{ getFarmerName(order).charAt(0).toUpperCase() }}
+                  </div>
+                  {{ getFarmerName(order) }}
+                </div>
+              </td>
+              <td class="td-products">{{ getProductosLabel(order) }}</td>
+              <td>{{ order.created_at | date:'dd MMM yyyy' }}</td>
+              <td><strong>{{ order.total | currency:'EUR':'symbol':'1.2-2' }}</strong></td>
+              <td>
+                <span class="status-badge" [ngClass]="statusClasses[order.status]">
+                  <span class="material-symbols-rounded status-icon">{{ statusIcons[order.status] }}</span>
+                  {{ statusLabels[order.status] }}
+                </span>
+              </td>
+              <td class="td-expand">
+                <span class="material-symbols-rounded expand-icon">
+                  {{ expandedId === order.id ? 'expand_less' : 'expand_more' }}
+                </span>
+              </td>
+            </tr>
+
+            <tr *ngIf="expandedId === order.id" class="detail-row">
+              <td colspan="7">
+                <div class="detail-panel">
+                  <div class="detail-items">
+                    <div class="detail-item" *ngFor="let item of order.items">
+                      <span class="material-symbols-rounded">eco</span>
+                      <span class="item-name">{{ item.product?.name }}</span>
+                      <span class="item-qty">× {{ item.quantity }}</span>
+                      <span class="item-price">{{ item.price | currency:'EUR':'symbol':'1.2-2' }}</span>
+                    </div>
+                  </div>
+                  <p *ngIf="order.notes" class="detail-note">
+                    <span class="material-symbols-rounded">note</span> {{ order.notes }}
+                  </p>
+                </div>
+              </td>
+            </tr>
+          </ng-container>
+        </tbody>
+      </table>
+
+      <!-- Vista tarjetas (móvil) -->
+      <div class="orders-cards" *ngIf="!loading && filteredOrders.length > 0">
+        <div class="order-card" *ngFor="let order of filteredOrders">
+          <div class="card-header">
+            <strong>ORD-{{ order.id }}</strong>
+            <span class="status-badge" [ngClass]="statusClasses[order.status]">
+              <span class="material-symbols-rounded status-icon">{{ statusIcons[order.status] }}</span>
+              {{ statusLabels[order.status] }}
+            </span>
+          </div>
+          <div class="card-body">
+            <div class="client-cell">
+              <div class="client-avatar-initial">
+                {{ getFarmerName(order).charAt(0).toUpperCase() }}
+              </div>
+              {{ getFarmerName(order) }}
+            </div>
+            <p class="td-products">{{ getProductosLabel(order) }}</p>
+          </div>
+          <div class="card-footer">
+            <span>{{ order.created_at | date:'dd MMM yyyy' }}</span>
+            <strong>{{ order.total | currency:'EUR':'symbol':'1.2-2' }}</strong>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>

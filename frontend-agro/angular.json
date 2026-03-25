@@ -73,7 +73,7 @@
               "buildTarget": "frontend-agro:build:development"
             }
           },
-          "defaultConfiguration": "production"
+          "defaultConfiguration": "development"
         },
         "test": {
           "builder": "@angular/build:unit-test"
