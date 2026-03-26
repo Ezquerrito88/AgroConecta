@@ -6,12 +6,12 @@ import { Producto } from '../models/producto';
 
 @Injectable({ providedIn: 'root' })
 export class ProductoService {
-  private apiUrl        = `${environment.apiUrl}/products`;
-  private adminUrl      = `${environment.apiUrl}/admin`;
-  private favoritesUrl  = `${environment.apiUrl}/favorites`;
-  private farmerUrl     = `${environment.apiUrl}/farmer`;
+  private apiUrl = `${environment.apiUrl}/products`;
+  private adminUrl = `${environment.apiUrl}/admin`;
+  private favoritesUrl = `${environment.apiUrl}/favorites`;
+  private farmerUrl = `${environment.apiUrl}/farmer`;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   // ─── PÚBLICOS ───────────────────────────────────────────────
 
@@ -34,9 +34,13 @@ export class ProductoService {
 
   // ─── AGRICULTOR ─────────────────────────────────────────────
 
-  getMisProductos(page = 1, perPage = 12): Observable<any> {
+  getMisProductos(page: number = 1, perPage: number = 12, sort: string = 'recent'): Observable<any> {
     return this.http.get<any>(`${this.farmerUrl}/products`, {
-      params: { page, per_page: perPage }
+      params: {
+        page: page.toString(),
+        per_page: perPage.toString(),
+        sort: sort
+      }
     });
   }
 

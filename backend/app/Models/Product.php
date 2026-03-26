@@ -71,4 +71,9 @@ class Product extends Model
     {
         return $this->hasMany(Review::class);
     }
+
+    public function firstImage()
+    {
+        return $this->hasOne(ProductImage::class)->orderBy('order')->oldest('order')->limit(1);
+    }
 }

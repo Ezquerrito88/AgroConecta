@@ -15,6 +15,7 @@ export interface TopProduct {
   name:   string;
   price:  number;
   image:  string;
+  unit?:   string;
   rating: number;
   sold:   number;
 }

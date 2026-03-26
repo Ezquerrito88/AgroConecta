@@ -20,6 +20,7 @@ export class MisProductos implements OnInit {
   productos: any[] = [];
   loading = true;
 
+  // KPIs
   totalProductos = 0;
   disponibles = 0;
   atencion = 0;
@@ -27,10 +28,12 @@ export class MisProductos implements OnInit {
   pocoStock = 0;
   unidadesVendidas = 0;
 
+  // Paginación
   currentPage = 1;
   lastPage = 1;
   perPage = 12;
 
+  // Orden
   sortOrder = 'recent';
 
   constructor(
@@ -38,45 +41,72 @@ export class MisProductos implements OnInit {
     private authService: AuthService,
     private cdr: ChangeDetectorRef,
     private router: Router
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.user = this.authService.getCurrentUser();
     this.loadProductos();
   }
 
+  /**
+   * Carga los productos llamando al servicio con paginación y ordenamiento
+   */
   loadProductos(): void {
     this.loading = true;
-    this.productService.getMisProductos(this.currentPage, this.perPage).subscribe({
+
+    // Usamos las variables de clase para la petición
+    this.productService.getMisProductos(this.currentPage, this.perPage, this.sortOrder).subscribe({
       next: (res: any) => {
+        // Mapeo de KPIs desde la respuesta del Backend
         this.totalProductos = res.kpis.total;
-        this.agotados      = res.kpis.agotados;
-        this.pocoStock     = res.kpis.pocoStock;
-        this.disponibles   = res.kpis.disponibles;
-        this.atencion      = this.agotados + this.pocoStock;
+        this.agotados = res.kpis.agotados;
+        this.pocoStock = res.kpis.pocoStock;
+        this.disponibles = res.kpis.disponibles;
+        this.atencion = this.agotados + this.pocoStock;
         this.unidadesVendidas = 0;
 
-        this.productos = res.productos.data.map((p: any) => {
-          // ← FIX: BD usa 'stock_quantity', normalizamos a 'stock'
-          const stock    = p.stock ?? p.stock_quantity ?? 0;
+        // Procesamiento de productos paginados (res.productos.data)
+        const data = res.productos.data || [];
+
+        this.productos = data.map((p: any) => {
+          const stock = p.stock ?? p.stock_quantity ?? 0;
           const maxStock = p.max_stock ?? 100;
           return {
             ...p,
-            stock,   // ← garantiza que siempre exista p.stock en el template
+            stock,
             stockPct: stock > 0 ? Math.min(Math.round((stock / maxStock) * 100), 100) : 0
           };
         });
 
+        // Actualizamos info de paginación
+        this.currentPage = res.productos.current_page;
         this.lastPage = res.productos.last_page;
-        this.loading  = false;
+
+        this.loading = false;
         this.cdr.detectChanges();
       },
       error: (err) => {
-        console.error(err);
+        console.error('Error al cargar productos:', err);
         this.loading = false;
         this.cdr.detectChanges();
       }
     });
+  }
+
+  /**
+   * Gestiona el cambio de página
+   */
+  changePage(newPage: number): void {
+    if (newPage >= 1 && newPage <= this.lastPage) {
+      this.currentPage = newPage;
+      this.loadProductos();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }
+
+  onSortChange(): void {
+    this.currentPage = 1; // Al cambiar orden, volvemos a la página 1
+    this.loadProductos();
   }
 
   goToEdit(productId: number): void {
@@ -89,28 +119,11 @@ export class MisProductos implements OnInit {
     return 'high';
   }
 
-  onSortChange(): void {
-    switch (this.sortOrder) {
-      case 'recent':
-        this.productos.sort((a, b) =>
-          new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-        );
-        break;
-      case 'price_high':
-        this.productos.sort((a, b) => b.price - a.price);
-        break;
-      case 'price_low':
-        this.productos.sort((a, b) => a.price - b.price);
-        break;
-    }
-    this.cdr.detectChanges();
-  }
-
   getStatusClass(status: string): string {
     const n = status?.toLowerCase()?.trim();
     switch (n) {
-      case 'aprobado': case 'approved':  return 'approved';
-      case 'pendiente': case 'pending':  return 'pending';
+      case 'aprobado': case 'approved': return 'approved';
+      case 'pendiente': case 'pending': return 'pending';
       case 'rechazado': case 'rejected': return 'rejected';
       default: return 'pending';
     }

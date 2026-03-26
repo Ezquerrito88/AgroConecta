@@ -3,11 +3,10 @@
 
   <main class="main-content">
 
-    <!-- Topbar -->
     <div class="topbar">
       <div class="topbar-left">
         <h1 class="page-title">Mi Panel</h1>
-        <span class="page-subtitle">{{ today | date:"EEEE, d 'de' MMMM" : '' : 'es' }}</span>
+        <span class="page-subtitle">{{ today | date:"EEEE, d 'de' MMMM" : undefined : 'es' }}</span>
       </div>
       <div class="topbar-right">
         <div class="search-box">
@@ -22,13 +21,12 @@
           <span class="material-symbols-rounded">help</span>
         </button>
         <div class="user-chip">
-          <div class="user-avatar">{{ user?.name?.charAt(0)?.toUpperCase() }}</div>
-          <span class="user-name">{{ user?.name?.split(' ')[0] }}</span>
+          <div class="user-avatar">{{ user?.name?.charAt(0)?.toUpperCase() || '?' }}</div>
+          <span class="user-name">{{ user?.name?.split(' ')[0] || 'Usuario' }}</span>
         </div>
       </div>
     </div>
 
-    <!-- Banner de bienvenida -->
     <div class="welcome-banner">
       <div class="welcome-text">
         <h2 class="welcome-title">¡Hola, {{ user?.name?.split(' ')[0] }}!</h2>
@@ -46,19 +44,16 @@
       </div>
     </div>
 
-    <!-- Alerta de stock (sólo si hay productos agotados) -->
     <div class="alert-banner" *ngIf="kpis.agotados > 0">
       <span class="material-symbols-rounded alert-icon">warning</span>
       <div class="alert-text">
         <strong>{{ kpis.agotados }} producto{{ kpis.agotados > 1 ? 's' : '' }} sin stock.</strong>
-        Los compradores no pueden pedirlos hasta que actualices el inventario.
+        Actualiza tu inventario para que sigan visibles.
       </div>
       <a routerLink="/agricultor/mis-productos" class="btn-alert">Actualizar stock →</a>
     </div>
 
-    <!-- KPIs -->
     <div class="kpi-grid">
-
       <div class="kpi-card kpi-featured">
         <div class="kpi-header">
           <div class="kpi-icon-wrap white-icon">
@@ -66,8 +61,9 @@
           </div>
           <span class="kpi-badge kpi-badge-white">+8% vs mes anterior</span>
         </div>
-        <span class="kpi-value">{{ kpis.ventas | currency:'EUR':'symbol':'1.0-0' }}</span>
-        <span class="kpi-label">💰 Lo que has ganado este mes</span>
+        <span class="kpi-value" *ngIf="!isLoading">{{ kpis.ventas | currency:'EUR':'symbol':'1.0-0' }}</span>
+        <div class="sk-line medium sk-shimmer-bg" *ngIf="isLoading"></div>
+        <span class="kpi-label">💰 Ganancias del mes</span>
       </div>
 
       <div class="kpi-card">
@@ -77,9 +73,9 @@
           </div>
           <span class="kpi-badge positive">+12%</span>
         </div>
-        <span class="kpi-value">{{ kpis.pedidos }}</span>
-        <span class="kpi-label">📦 Pedidos este mes</span>
-        <span class="kpi-hint">Comparado con el mes pasado</span>
+        <span class="kpi-value" *ngIf="!isLoading">{{ kpis.pedidos }}</span>
+        <div class="sk-line short sk-shimmer-bg" *ngIf="isLoading"></div>
+        <span class="kpi-label">📦 Pedidos totales</span>
       </div>
 
       <div class="kpi-card" [class.kpi-danger]="kpis.agotados > 0">
@@ -87,14 +83,10 @@
           <div class="kpi-icon-wrap" [class.red]="kpis.agotados > 0" [class.green]="kpis.agotados === 0">
             <span class="material-symbols-rounded">{{ kpis.agotados > 0 ? 'warning' : 'check_circle' }}</span>
           </div>
-          <span class="kpi-badge negative" *ngIf="kpis.agotados > 0">¡Atención!</span>
-          <span class="kpi-badge positive" *ngIf="kpis.agotados === 0">Todo OK</span>
         </div>
-        <span class="kpi-value">{{ kpis.agotados }}</span>
-        <span class="kpi-label">⚠️ Productos sin stock</span>
-        <a routerLink="/agricultor/mis-productos" class="kpi-action-link" *ngIf="kpis.agotados > 0">
-          Actualizar ahora →
-        </a>
+        <span class="kpi-value" *ngIf="!isLoading">{{ kpis.agotados }}</span>
+        <div class="sk-line short sk-shimmer-bg" *ngIf="isLoading"></div>
+        <span class="kpi-label">⚠️ Sin stock</span>
       </div>
 
       <div class="kpi-card">
@@ -102,96 +94,98 @@
           <div class="kpi-icon-wrap purple">
             <span class="material-symbols-rounded">star</span>
           </div>
-          <span class="kpi-badge positive">+5%</span>
         </div>
-        <div class="kpi-value-row">
+        <div class="kpi-value-row" *ngIf="!isLoading">
           <span class="kpi-value">{{ kpis.calificacion }}</span>
           <div class="stars-mini">
-            <span class="material-symbols-rounded star-filled" *ngFor="let s of [1,2,3,4]">star</span>
+            <span class="material-symbols-rounded star-filled">star</span>
+            <span class="material-symbols-rounded star-filled">star</span>
+            <span class="material-symbols-rounded star-filled">star</span>
+            <span class="material-symbols-rounded star-filled">star</span>
             <span class="material-symbols-rounded star-half">star_half</span>
           </div>
         </div>
-        <span class="kpi-label">⭐ Valoración de tus clientes</span>
-        <span class="kpi-hint">Basado en todas las reseñas</span>
+        <div class="sk-line medium sk-shimmer-bg" *ngIf="isLoading"></div>
+        <span class="kpi-label">⭐ Valoración media</span>
       </div>
-
     </div>
 
-    <!-- Pedidos Recientes -->
     <div class="section-card">
       <div class="section-header">
         <div class="section-title-group">
           <span class="material-symbols-rounded section-icon">receipt_long</span>
           <h2>Últimos Pedidos</h2>
         </div>
-        <a routerLink="/agricultor/pedidos" class="ver-todos">Ver todos →</a>
+        <a *ngIf="!isLoading" routerLink="/agricultor/pedidos" class="ver-todos">Ver todos →</a>
       </div>
 
-      <div *ngIf="recentOrders.length === 0" class="empty-state">
-        <span class="material-symbols-rounded empty-icon">inbox</span>
-        <p class="empty-title">Aún no tienes pedidos</p>
-        <p class="empty-sub">Cuando alguien compre tus productos, aparecerán aquí.</p>
-      </div>
+      <ng-container *ngIf="isLoading">
+        </ng-container>
 
-      <!-- Lista de pedidos (más legible que tabla densa) -->
-      <div class="orders-list" *ngIf="recentOrders.length > 0">
-
-        <div class="orders-list-header">
-          <span>Cliente</span>
-          <span>Nº Pedido</span>
-          <span>Estado</span>
-          <span class="align-right">Total</span>
-        </div>
-
-        <div class="order-row" *ngFor="let order of recentOrders">
-          <div class="order-client">
-            <div class="client-avatar-initial">{{ order.buyer.name.charAt(0).toUpperCase() }}</div>
-            <div class="order-client-info">
-              <span class="order-client-name">{{ order.buyer.name }}</span>
-              <span class="order-date">{{ order.created_at | smartDate }}</span>
+      <ng-container *ngIf="!isLoading">
+        <div class="orders-list" *ngIf="recentOrders.length > 0">
+          <div class="orders-list-header">
+            <span>Cliente</span>
+            <span>Nº Pedido</span>
+            <span>Estado</span>
+            <span class="align-right">Total</span>
+          </div>
+          <div class="order-row" *ngFor="let order of recentOrders">
+            <div class="order-client">
+              <div class="client-avatar-initial">{{ order.buyer.name.charAt(0).toUpperCase() }}</div>
+              <div class="order-client-info">
+                <span class="order-client-name">{{ order.buyer.name }}</span>
+                <span class="order-date">{{ order.created_at | smartDate }}</span>
+              </div>
+            </div>
+            <div class="order-ref">
+              <span class="order-ref-num">#{{ order.id }}</span>
+            </div>
+            <div>
+              <span class="status-badge" [ngClass]="statusClasses[order.status]">
+                <span class="material-symbols-rounded status-icon">{{ statusIcons[order.status] }}</span>
+                {{ statusLabels[order.status] }}
+              </span>
+            </div>
+            <div class="order-total">
+              <strong class="order-total-value">{{ order.total | currency:'EUR':'symbol':'1.2-2' }}</strong>
             </div>
           </div>
-          <div class="order-ref">
-            <span class="order-ref-num">#{{ order.id }}</span>
-          </div>
-          <div>
-            <span class="status-badge" [ngClass]="statusClasses[order.status]">
-              <span class="material-symbols-rounded status-icon">{{ statusIcons[order.status] }}</span>
-              {{ statusLabels[order.status] }}
-            </span>
-          </div>
-          <div class="order-total">
-            <strong class="order-total-value">{{ order.total | currency:'EUR':'symbol':'1.2-2' }}</strong>
-          </div>
         </div>
 
-      </div>
+        <div *ngIf="recentOrders.length === 0" class="empty-state">
+          <span class="material-symbols-rounded empty-icon">inbox</span>
+          <p class="empty-title">Sin pedidos nuevos</p>
+        </div>
+      </ng-container>
     </div>
 
-    <!-- Productos Más Vendidos -->
     <div class="section-card">
       <div class="section-header">
         <div class="section-title-group">
           <span class="material-symbols-rounded section-icon">trending_up</span>
-          <h2>Tus Productos Estrella</h2>
+          <h2>Productos Más Vendidos</h2>
         </div>
-        <a routerLink="/agricultor/mis-productos" class="ver-todos">Ver todos →</a>
+        <a *ngIf="!isLoading" routerLink="/agricultor/mis-productos" class="ver-todos">Ver Todos ›</a>
       </div>
-      <div class="top-products-grid">
-        <div class="product-card" *ngFor="let p of topProducts; let i = index">
-          <div class="product-rank"
-               [class.rank-gold]="i === 0"
-               [class.rank-silver]="i === 1"
-               [class.rank-bronze]="i === 2">
-            {{ i + 1 }}
+
+      <div class="tpv-grid" *ngIf="!isLoading">
+        <div class="tpv-card" *ngFor="let p of topProducts; let i = index">
+          <div class="tpv-img-box">
+            <img [src]="getProductImage(p)" [alt]="p.name" class="tpv-img" (error)="onImgError($event)" />
           </div>
-          <img [src]="p.image" [alt]="p.name" class="product-img" />
-          <div class="product-info">
-            <p class="product-name">{{ p.name }}</p>
-            <p class="product-price">{{ p.price | currency:'EUR':'symbol':'1.2-2' }}<span>/kg</span></p>
-            <div class="product-meta">
-              <span class="material-symbols-rounded star-icon">star</span>
-              {{ p.rating }} · {{ p.sold }} vendidos
+
+          <div class="tpv-info">
+            <p class="tpv-name">{{ p.name }}</p>
+            <p class="tpv-price">
+              {{ p.price | currency:'EUR':'symbol':'1.2-2' }}
+              <span class="tpv-unit">/{{ p.unit || 'kg' }}</span>
+            </p>
+            <div class="tpv-meta">
+              <span class="material-symbols-rounded tpv-star">star</span>
+              <span>{{ p.rating }}</span>
+              <span class="tpv-dot">•</span>
+              <span>{{ p.sold }} vendidos</span>
             </div>
           </div>
         </div>

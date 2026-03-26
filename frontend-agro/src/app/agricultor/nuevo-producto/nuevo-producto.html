@@ -43,8 +43,7 @@
           <div class="card-body">
             <div class="form-group">
               <label>Nombre del producto <span class="required">*</span></label>
-              <input type="text" class="form-input" [(ngModel)]="producto.name"
-                placeholder="Ej: Manzanas Fuji" />
+              <input type="text" class="form-input" [(ngModel)]="producto.name" placeholder="Ej: Manzanas Fuji" />
             </div>
             <div class="form-group">
               <label>Descripción completa</label>
@@ -70,8 +69,8 @@
               <div class="form-group">
                 <label>Precio <span class="required">*</span></label>
                 <div class="input-with-suffix">
-                  <input type="number" class="form-input" [(ngModel)]="producto.price"
-                    placeholder="0.00" min="0" step="0.01" />
+                  <input type="number" class="form-input" [(ngModel)]="producto.price" placeholder="0.00" min="0"
+                    step="0.01" />
                   <span class="input-suffix">€</span>
                 </div>
               </div>
@@ -87,8 +86,7 @@
             <div class="form-group">
               <label>Stock disponible</label>
               <div class="input-with-suffix">
-                <input type="number" class="form-input" [(ngModel)]="producto.stock_quantity"
-                  placeholder="0" min="0" />
+                <input type="number" class="form-input" [(ngModel)]="producto.stock_quantity" placeholder="0" min="0" />
                 <span class="input-suffix">ud</span>
               </div>
             </div>
@@ -129,8 +127,7 @@
               <span class="material-symbols-rounded upload-icon">cloud_upload</span>
               <p>Arrastra o haz clic para subir</p>
               <span class="upload-hint">JPG, PNG o WEBP · Máx. 2MB por imagen</span>
-              <input #fileInput type="file" accept="image/*" multiple hidden
-                (change)="onImageSelected($event)" />
+              <input #fileInput type="file" accept="image/*" multiple hidden (change)="onImageSelected($event)" />
             </div>
 
             <div *ngIf="newImagePreviews.length > 0">
@@ -156,24 +153,29 @@
             <span class="material-symbols-rounded mod-icon">info</span>
             <div>
               <p class="mod-label">Tras publicar</p>
-              <p class="mod-info">Tu producto quedará en revisión hasta que sea aprobado por el equipo de AgroConecta.</p>
+              <p class="mod-info">Tu producto quedará en revisión hasta que sea aprobado por el equipo de AgroConecta.
+              </p>
             </div>
           </div>
         </div>
 
         <!-- Acciones -->
         <div class="form-card form-actions-card">
-          <button class="btn-save" (click)="guardar()" [disabled]="saving || !producto.name || !producto.price || !producto.category_id">
+          <button class="btn-save" (click)="guardar()" [disabled]="saving || !formularioValido()">
             <span class="material-symbols-rounded">rocket_launch</span>
             {{ saving ? 'Publicando...' : 'Publicar Producto' }}
           </button>
+
           <button class="btn-cancel" [routerLink]="['/agricultor/mis-productos']">
             Cancelar
           </button>
-        </div>
 
+          <p *ngIf="!formularioValido() && !saving"
+            style="color: #e53e3e; font-size: 0.75rem; margin-top: 10px; text-align: center; width: 100%;">
+            * Rellena todos los campos obligatorios y sube al menos una foto.
+          </p>
+        </div>
       </div>
     </div>
-
   </main>
 </div>

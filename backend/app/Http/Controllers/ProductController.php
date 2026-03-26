@@ -7,21 +7,15 @@ use App\Models\ProductImage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
+use Intervention\Image\Laravel\Facades\Image;
 
 class ProductController extends Controller
 {
-    /**
-     * Helper inteligente para generar URLs de imágenes.
-     * Soporta Local (public) y Azure Blob Storage.
-     */
     private function getImageUrl(?string $path): ?string
     {
         if (!$path) return asset('img/default-product.png');
-
-        // Si ya es una URL completa (ej. de una semilla o externa), la devolvemos tal cual
         if (filter_var($path, FILTER_VALIDATE_URL)) return $path;
 
-        // Detectamos el disco actual desde el .env
         $disk = config('filesystems.default', 'public');
 
         if ($disk === 'azure') {
@@ -30,17 +24,13 @@ class ProductController extends Controller
             return "https://{$account}.blob.core.windows.net/{$container}/{$path}";
         }
 
-        // Por defecto, asume almacenamiento local
         return asset('storage/' . $path);
     }
 
-    /**
-     * Catálogo general de productos (Frontend)
-     */
     public function index(Request $request)
     {
         $perPage = $request->query('per_page', 12);
-        
+
         $products = Product::with(['category', 'images'])
             ->where('moderation_status', 'approved')
             ->paginate($perPage)
@@ -52,45 +42,152 @@ class ProductController extends Controller
         return response()->json($products);
     }
 
-    /**
-     * Guardar un nuevo producto
-     */
+    public function getLatest(Request $request)
+    {
+        $perPage   = $request->query('per_page', 6);
+        $page      = $request->query('page', 1);
+        $categoria = $request->query('categoria');
+        $orden     = $request->query('orden', 'novedad');
+        $precioMin = $request->query('precio_min');
+        $precioMax = $request->query('precio_max');
+
+        $query = Product::with(['images', 'farmer', 'category'])
+            ->where('moderation_status', 'approved');
+
+        if ($categoria && $categoria !== 'todas') {
+            $query->whereHas('category', function ($q) use ($categoria) {
+                $q->whereRaw('LOWER(name) = ?', [strtolower($categoria)]);
+            });
+        }
+
+        if (!is_null($precioMin)) $query->where('price', '>=', (float) $precioMin);
+        if (!is_null($precioMax)) $query->where('price', '<=', (float) $precioMax);
+
+        match ($orden) {
+            'precio_asc'  => $query->orderBy('price', 'asc'),
+            'precio_desc' => $query->orderBy('price', 'desc'),
+            default       => $query->orderBy('created_at', 'desc'),
+        };
+
+        $products = $query->paginate($perPage, ['*'], 'page', $page);
+
+        $products->through(function ($product) {
+            $product->image_url = $this->getImageUrl($product->images->first()?->image_path);
+            return $product;
+        });
+
+        if (!($categoria || $precioMin || $precioMax || $orden !== 'novedad')) {
+            $data = $products->getCollection()->take(12 - (($page - 1) * $perPage));
+            return response()->json([
+                'data'         => $data->values(),
+                'total'        => min($products->total(), 12),
+                'per_page'     => (int) $perPage,
+                'current_page' => (int) $page,
+                'last_page'    => min($products->lastPage(), 2),
+            ]);
+        }
+
+        return response()->json($products);
+    }
+
+    public function show($id)
+    {
+        $product = Product::with(['category', 'images', 'farmer.user', 'reviews.user'])->find($id);
+
+        if (!$product) return response()->json(['message' => 'No encontrado'], 404);
+
+        $product->images->each(function ($img) {
+            $img->url = $this->getImageUrl($img->image_path);
+        });
+
+        $product->main_image_url = $this->getImageUrl($product->images->first()?->image_path);
+
+        return response()->json($product);
+    }
+
+    public function misProductos(Request $request)
+    {
+        $farmer = $request->user()->farmer;
+        if (!$farmer) return response()->json(['message' => 'No eres agricultor'], 403);
+
+        $perPage = $request->query('per_page', 12);
+        $sort = $request->query('sort', 'recent');
+
+        $todos = Product::where('farmer_id', $farmer->id)->get();
+        $kpis = [
+            'total'       => $todos->count(),
+            'agotados'    => $todos->where('stock_quantity', 0)->count(),
+            'pocoStock'   => $todos->where('stock_quantity', '>', 0)->filter(fn($p) => $p->stock_quantity <= 10)->count(),
+            'disponibles' => $todos->where('stock_quantity', '>', 0)->count(),
+        ];
+
+        $query = Product::with(['category', 'images'])->where('farmer_id', $farmer->id);
+
+        match ($sort) {
+            'price_high' => $query->orderBy('price', 'desc'),
+            'price_low'  => $query->orderBy('price', 'asc'),
+            default      => $query->latest(),
+        };
+
+        $productos = $query->paginate($perPage)->through(function ($product) {
+            return [
+                'id'                => $product->id,
+                'name'              => $product->name,
+                'description'       => $product->description,
+                'price'             => $product->price,
+                'unit'              => $product->unit,
+                'stock'             => $product->stock_quantity,
+                'max_stock'         => max($product->stock_quantity, 100),
+                'category'          => $product->category?->name,
+                'image'             => $this->getImageUrl($product->images->first()?->image_path),
+                'moderation_status' => $product->moderation_status,
+                'created_at'        => $product->created_at,
+            ];
+        });
+
+        return response()->json(['kpis' => $kpis, 'productos' => $productos]);
+    }
+
     public function store(Request $request)
     {
         $validated = $request->validate([
             'category_id'       => 'required|exists:categories,id',
             'name'              => 'required|string|max:255',
             'description'       => 'required|string',
-            'short_description' => 'nullable|string|max:50',
             'price'             => 'required|numeric|min:0',
             'unit'              => 'required|in:kg,g,l,ml,ud,docena,manojo,caja,bandeja,saco,pack',
             'stock_quantity'    => 'required|integer|min:0',
-            'season_end'        => 'nullable|date',
-            'images'            => 'nullable|array|max:6',
+            'images'            => 'required|array|min:1|max:6',
             'images.*'          => 'image|mimes:jpeg,png,jpg,webp|max:2048',
         ]);
 
         return DB::transaction(function () use ($request, $validated) {
+            $farmerId = $request->user()->farmer->id;
+
             $product = Product::create([
-                'farmer_id'         => $request->user()->farmer->id,
+                'farmer_id'         => $farmerId,
                 'category_id'       => $validated['category_id'],
                 'name'              => $validated['name'],
                 'description'       => $validated['description'],
-                'short_description' => $validated['short_description'] ?? null,
                 'price'             => $validated['price'],
                 'unit'              => $validated['unit'],
                 'stock_quantity'    => $validated['stock_quantity'],
-                'season_end'        => $validated['season_end'] ?? null,
                 'moderation_status' => 'approved',
             ]);
 
             if ($request->hasFile('images')) {
                 $disk = config('filesystems.default', 'public');
                 foreach ($request->file('images') as $file) {
-                    $path = $file->store('products', $disk);
+                    $filename = uniqid() . '.webp';
+                    $path = "products/farmer_{$farmerId}/{$filename}";
+                    
+                    $optimizedImage = Image::read($file)->scale(width: 800)->encodeByMediaType('image/webp', quality: 80);
+                    
+                    Storage::disk($disk)->put($path, $optimizedImage);
+
                     ProductImage::create([
                         'product_id' => $product->id,
-                        'image_path' => $path,
+                        'image_path' => $path
                     ]);
                 }
             }
@@ -99,83 +196,65 @@ class ProductController extends Controller
         });
     }
 
-    /**
-     * Detalle de un producto (Lo que Angular llamaba y fallaba)
-     */
-    public function show($id)
+    public function update(Request $request, $id)
     {
-        $product = Product::with(['category', 'images', 'farmer.user', 'reviews.user'])->find($id);
+        $product = Product::findOrFail($id);
+        $farmerId = $request->user()->farmer?->id;
 
-        if (!$product) {
-            return response()->json(['message' => 'Producto no encontrado'], 404);
+        if ($farmerId !== $product->farmer_id) {
+            return response()->json(['message' => 'Sin permisos'], 403);
         }
 
-        // Mapeamos las imágenes para incluir la URL real
-        $product->images->transform(function ($image) {
-            $image->url = $this->getImageUrl($image->image_path);
-            return $image;
-        });
+        $validated = $request->validate([
+            'category_id'    => 'sometimes|exists:categories,id',
+            'name'           => 'sometimes|string|max:255',
+            'description'    => 'sometimes|string',
+            'price'          => 'sometimes|numeric|min:0',
+            'stock_quantity' => 'sometimes|integer|min:0',
+            'images'         => 'sometimes|array|max:6',
+            'images.*'       => 'image|mimes:jpeg,png,jpg,webp|max:2048',
+            'image_order'    => 'sometimes|array',
+        ]);
 
-        // Añadimos una propiedad extra para la imagen principal fácil de acceder
-        $product->main_image_url = $this->getImageUrl($product->images->first()?->image_path);
+        $product->update(collect($validated)->except(['images', 'image_order'])->toArray());
 
-        return response()->json($product);
-    }
+        if ($request->has('image_order')) {
+            foreach ($request->image_order as $pos => $imgId) {
+                $product->images()->where('id', $imgId)->update(['order' => (int) $pos]);
+            }
+        }
 
-    /**
-     * Listado para el panel del Agricultor (Mis Productos)
-     */
-    public function misProductos(Request $request)
-    {
-        $farmer = $request->user()->farmer;
-        if (!$farmer) return response()->json(['message' => 'No eres agricultor'], 403);
+        if ($request->hasFile('images')) {
+            $disk = config('filesystems.default', 'public');
+            $nextOrder = ($product->images()->max('order') ?? -1) + 1;
 
-        $perPage = $request->query('per_page', 12);
-        $todos = Product::where('farmer_id', $farmer->id)->get();
-        
-        $kpis = [
-            'total'       => $todos->count(),
-            'agotados'    => $todos->where('stock_quantity', 0)->count(),
-            'pocoStock'   => $todos->where('stock_quantity', '>', 0)->filter(fn($p) => $p->stock_quantity <= 10)->count(),
-            'disponibles' => $todos->where('stock_quantity', '>', 0)->count(),
-        ];
+            foreach ($request->file('images') as $file) {
+                $filename = uniqid() . '.webp';
+                $path = "products/farmer_{$farmerId}/{$filename}";
 
-        $productos = Product::with(['category', 'images'])
-            ->where('farmer_id', $farmer->id)
-            ->paginate($perPage)
-            ->through(function ($product) {
-                return [
-                    'id'          => $product->id,
-                    'name'        => $product->name,
-                    'description' => $product->description,
-                    'price'       => $product->price,
-                    'unit'        => $product->unit,
-                    'stock'       => $product->stock_quantity,
-                    'max_stock'   => max($product->stock_quantity, 100),
-                    'sold'        => 0,
-                    'rating'      => 4.9,
-                    'category'    => $product->category?->name,
-                    'image'       => $this->getImageUrl($product->images->first()?->image_path),
-                    'created_at'  => $product->created_at,
-                ];
-            });
+                $optimizedImage = Image::read($file)->scale(width: 800)->encodeByMediaType('image/webp', quality: 80);
+                
+                Storage::disk($disk)->put($path, $optimizedImage);
+
+                $product->images()->create([
+                    'image_path' => $path,
+                    'order'      => $nextOrder++
+                ]);
+            }
+        }
 
         return response()->json([
-            'kpis'      => $kpis,
-            'productos' => $productos,
+            'message' => 'Actualizado correctamente',
+            'product' => $product->load('images')
         ]);
     }
 
-    /**
-     * Eliminar producto y sus archivos
-     */
     public function destroy(Request $request, $id)
     {
         $product = Product::find($id);
         if (!$product) return response()->json(['message' => 'No encontrado'], 404);
 
         $disk = config('filesystems.default', 'public');
-
         foreach ($product->images as $image) {
             if (Storage::disk($disk)->exists($image->image_path)) {
                 Storage::disk($disk)->delete($image->image_path);
@@ -183,6 +262,23 @@ class ProductController extends Controller
         }
 
         $product->delete();
-        return response()->json(['message' => 'Producto eliminado correctamente']);
+        return response()->json(['message' => 'Producto eliminado']);
+    }
+
+    public function destroyImage(Request $request, $productId, $imageId)
+    {
+        $image = ProductImage::where('id', $imageId)->where('product_id', $productId)->first();
+
+        if (!$image || $request->user()->farmer?->id !== $image->product->farmer_id) {
+            return response()->json(['message' => 'Error de permisos o no encontrada'], 403);
+        }
+
+        $disk = config('filesystems.default', 'public');
+        if (Storage::disk($disk)->exists($image->image_path)) {
+            Storage::disk($disk)->delete($image->image_path);
+        }
+
+        $image->delete();
+        return response()->json(['message' => 'Imagen eliminada']);
     }
 }

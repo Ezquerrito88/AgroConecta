@@ -3,7 +3,6 @@
 
   <main class="main-content">
 
-    <!-- Topbar -->
     <div class="topbar">
       <div class="topbar-left">
         <h1 class="page-title">Mis Productos</h1>
@@ -28,7 +27,6 @@
       </div>
     </div>
 
-    <!-- Banner de bienvenida -->
     <div class="welcome-banner">
       <div class="welcome-text">
         <h2 class="welcome-title">Tu catálogo</h2>
@@ -46,7 +44,6 @@
       </div>
     </div>
 
-    <!-- Alerta de stock agotado -->
     <div class="alert-banner" *ngIf="agotados > 0">
       <span class="material-symbols-rounded alert-icon">warning</span>
       <div class="alert-text">
@@ -56,7 +53,6 @@
       <a routerLink="/agricultor/mis-productos" class="btn-alert">Actualizar stock →</a>
     </div>
 
-    <!-- KPIs -->
     <div class="kpi-grid">
       <div class="kpi-card kpi-featured">
         <div class="kpi-header">
@@ -108,7 +104,6 @@
       </div>
     </div>
 
-    <!-- Catálogo de Productos -->
     <div class="section-card">
       <div class="section-header">
         <div class="section-title-group">
@@ -122,32 +117,42 @@
         </select>
       </div>
 
-      <!-- Skeleton loader -->
       <div class="products-grid" *ngIf="loading">
-        <div class="skeleton-card-premium" *ngFor="let item of [1,2,3,4]">
-          <div class="sk-img"></div>
-          <div class="sk-content"></div>
+        <div class="skeleton-card-premium" *ngFor="let item of [1,2,3,4,5,6,7,8]">
+          <div class="sk-img-box">
+            <span class="material-symbols-rounded sk-icon">eco</span>
+            <div class="sk-wave"></div>
+          </div>
+          <div class="sk-body">
+            <div class="sk-line short mb-2"></div>
+            <div class="sk-line long mb-3"></div>
+            <div class="sk-line medium mb-3"></div>
+            <div class="sk-inventory">
+              <div class="sk-line-text"></div>
+              <div class="sk-bar"></div>
+            </div>
+            <div class="sk-footer">
+              <div class="sk-btn-circle"></div>
+              <div class="sk-btn-rect"></div>
+            </div>
+          </div>
         </div>
       </div>
 
-      <!-- Grid de productos -->
       <div class="products-grid" *ngIf="!loading && productos.length > 0">
         <div class="product-card-premium"
              *ngFor="let p of productos; let i = index"
              (click)="goToEdit(p.id)">
 
-          <!-- RANK - Esquina superior izquierda -->
           <div class="product-rank"
-               [class.rank-gold]="i === 0"
-               [class.rank-silver]="i === 1"
-               [class.rank-bronze]="i === 2">
-            {{ i + 1 }}
+               [class.rank-gold]="i === 0 && currentPage === 1"
+               [class.rank-silver]="i === 1 && currentPage === 1"
+               [class.rank-bronze]="i === 2 && currentPage === 1">
+            {{ (currentPage - 1) * perPage + i + 1 }}
           </div>
 
-          <!-- Imagen con STATUS badge -->
           <div class="p-img-box">
             <img [src]="p.image || 'assets/img/placeholder.jpg'" [alt]="p.name" />
-            <!-- STATUS BADGE FIJO - ahora SÍ se ve -->
             <div class="p-status-float" [ngClass]="getStatusClass(p.moderation_status)">
               {{ getStatusLabel(p.moderation_status) }}
             </div>
@@ -160,6 +165,7 @@
               <span class="p-price">{{ p.price | currency:'EUR':'symbol':'1.2-2' }}</span>
               <span class="p-unit">/{{ p.unit }}</span>
             </div>
+            
             <div class="p-inventory">
               <div class="p-inv-text">
                 <span>Stock: <strong>{{ p.stock }}</strong></span>
@@ -172,6 +178,7 @@
                 </div>
               </div>
             </div>
+
             <div class="p-actions-row">
               <button class="p-btn-icon"
                       (click)="$event.stopPropagation()"
@@ -189,17 +196,35 @@
         </div>
       </div>
 
-      <!-- Empty state -->
+      <div class="pagination-premium" *ngIf="!loading && lastPage > 1">
+        <div class="pagination-info">
+          Mostrando página <strong>{{ currentPage }}</strong> de {{ lastPage }}
+        </div>
+        <div class="pagination-actions">
+          <button class="btn-pag" [disabled]="currentPage === 1" (click)="changePage(currentPage - 1)">
+            <span class="material-symbols-rounded">chevron_left</span>
+            Anterior
+          </button>
+          
+          <div class="pag-number active">{{ currentPage }}</div>
+          
+          <button class="btn-pag" [disabled]="currentPage === lastPage" (click)="changePage(currentPage + 1)">
+            Siguiente
+            <span class="material-symbols-rounded">chevron_right</span>
+          </button>
+        </div>
+      </div>
+
       <div class="empty-state" *ngIf="!loading && productos.length === 0">
         <span class="material-symbols-rounded empty-icon">inventory</span>
-        <p class="empty-title">Tu almacén está vacío</p>
+        <p class="empty-title">No se encontraron productos</p>
         <p class="empty-sub">Comienza publicando tus productos de temporada.</p>
         <button class="btn-primary-green" routerLink="/agricultor/mis-productos/nuevo">
           <span class="material-symbols-rounded">add_circle</span>
           Añadir mi primer producto
         </button>
       </div>
-    </div>
 
+    </div>
   </main>
 </div>

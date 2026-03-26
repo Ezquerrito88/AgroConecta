@@ -1,4 +1,4 @@
-// Reseñas
+// 1. Definir la interfaz Review
 export interface Review {
   id: number;
   rating: number;
@@ -10,33 +10,43 @@ export interface Review {
   };
 }
 
-// Producto
+// 2. Definir la interfaz de imágenes
+export interface ProductImage {
+  id: number;
+  product_id: number;
+  image_path: string;
+  url: string; 
+  order: number;
+}
+
+// 3. Definir la interfaz Producto
 export interface Producto {
   id: number;
   name: string;
   description: string;
   short_description?: string;
-  price: string;
+  price: string | number;
   unit: string;
   stock_quantity: number;
-  
-  // ¡AQUÍ AÑADIMOS LA PROPIEDAD QUE FALTA PARA EL TFG Y EL HTML!
   season_end?: string | Date; 
-  
   moderation_status: string;
   is_favorite?: boolean;
-  
-  // Agricultor
+  created_at?: string;
+
+  // IMÁGENES
+  image_url?: string;      
+  main_image_url?: string; 
+  images: ProductImage[];  
+
+  // AGRICULTOR
   farmer?: {
     id: number;
     full_name: string;
-    name?: string;       
-    location?: string;   
-    city?: string;       
-    
+    name?: string;
+    location?: string;
+    city?: string;
     email: string;
     role: string;
-    
     farmer?: {
         city?: string;
         farm_name?: string;
@@ -44,5 +54,4 @@ export interface Producto {
   };
   
   reviews?: Review[];
-  images: any[]; 
 }
