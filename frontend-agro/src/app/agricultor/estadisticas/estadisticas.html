@@ -1,1 +1,204 @@
-<p>estadisticas works!</p>
+<div class="stats-layout">
+  <app-sidebar></app-sidebar>
+
+  <main class="main-content">
+
+    <!-- Topbar -->
+    <div class="topbar">
+      <div class="topbar-left">
+        <h1 class="page-title">Estadísticas</h1>
+        <span class="page-subtitle">Rendimiento histórico de tu finca</span>
+      </div>
+      <div class="topbar-right">
+        <div class="user-chip">
+          <div class="user-avatar">{{ user?.name?.charAt(0)?.toUpperCase() || '?' }}</div>
+          <span class="user-name">{{ user?.name?.split(' ')[0] || 'Usuario' }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Error state -->
+    <div class="error-banner" *ngIf="hasError && !isLoading">
+      <span class="material-symbols-rounded">error</span>
+      <span>No se pudieron cargar las estadísticas. <button (click)="loadStatistics()">Reintentar</button></span>
+    </div>
+
+    <!-- ── KPI SUMMARY ──────────────────────────────────────────────── -->
+    <div class="kpi-grid">
+
+      <div class="kpi-card kpi-featured">
+        <div class="kpi-icon-wrap white-icon">
+          <span class="material-symbols-rounded">euro</span>
+        </div>
+        <span class="kpi-value" *ngIf="!isLoading">{{ summary.total_revenue | currency:'EUR':'symbol':'1.0-0' }}</span>
+        <div class="sk-line medium sk-shimmer-bg" *ngIf="isLoading"></div>
+        <span class="kpi-label">💰 Ingresos totales</span>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-icon-wrap green">
+          <span class="material-symbols-rounded">shopping_bag</span>
+        </div>
+        <span class="kpi-value" *ngIf="!isLoading">{{ summary.total_orders }}</span>
+        <div class="sk-line short sk-shimmer-bg" *ngIf="isLoading"></div>
+        <span class="kpi-label">📦 Pedidos totales</span>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-icon-wrap blue">
+          <span class="material-symbols-rounded">storefront</span>
+        </div>
+        <span class="kpi-value" *ngIf="!isLoading">{{ summary.total_products }}</span>
+        <div class="sk-line short sk-shimmer-bg" *ngIf="isLoading"></div>
+        <span class="kpi-label">🌿 Productos activos</span>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-icon-wrap purple">
+          <span class="material-symbols-rounded">star</span>
+        </div>
+        <div *ngIf="!isLoading" class="kpi-value-row">
+          <span class="kpi-value">{{ summary.avg_rating }}</span>
+          <span class="kpi-reviews">({{ summary.total_reviews }} reseñas)</span>
+        </div>
+        <div class="sk-line medium sk-shimmer-bg" *ngIf="isLoading"></div>
+        <span class="kpi-label">⭐ Valoración media</span>
+      </div>
+
+    </div>
+
+    <!-- ── MONTHLY REVENUE CHART ─────────────────────────────────────── -->
+    <div class="section-card">
+      <div class="section-header">
+        <div class="section-title-group">
+          <span class="material-symbols-rounded section-icon">bar_chart</span>
+          <h2>Ingresos por Mes</h2>
+        </div>
+      </div>
+
+      <!-- Skeleton -->
+      <div class="chart-skeleton" *ngIf="isLoading">
+        <div class="chart-bars-sk">
+          <div class="bar-sk sk-shimmer-bg" *ngFor="let h of skeletonBarHeights" [style.height.%]="h"></div>
+        </div>
+        <div class="chart-labels-sk">
+          <div class="sk-line sk-w-60 sk-shimmer-bg" *ngFor="let h of skeletonBarHeights"></div>
+        </div>
+      </div>
+
+      <!-- Chart -->
+      <ng-container *ngIf="!isLoading">
+        <div class="chart-wrap" *ngIf="monthlyRevenue.length > 0; else noData">
+          <div class="bar-chart">
+            <div class="bar-col" *ngFor="let m of monthlyRevenue">
+              <div class="bar-tooltip">{{ m.revenue | currency:'EUR':'symbol':'1.0-0' }}<br><small>{{ m.orders }} pedidos</small></div>
+              <div class="bar-fill" [style.height.%]="barHeight(m.revenue)">
+                <span class="bar-value" *ngIf="m.revenue > 0">{{ m.revenue | currency:'EUR':'symbol':'1.0-0' }}</span>
+              </div>
+              <div class="bar-label">
+                <span class="bar-month">{{ m.month }}</span>
+                <span class="bar-year">{{ m.year }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </ng-container>
+    </div>
+
+    <!-- ── ROW: Status + Top Products ─────────────────────────────────── -->
+    <div class="two-col-row">
+
+      <!-- Orders by Status -->
+      <div class="section-card">
+        <div class="section-header">
+          <div class="section-title-group">
+            <span class="material-symbols-rounded section-icon">donut_large</span>
+            <h2>Pedidos por Estado</h2>
+          </div>
+        </div>
+
+        <div class="status-list" *ngIf="!isLoading && ordersByStatus.length > 0">
+          <div class="status-row" *ngFor="let s of ordersByStatus">
+            <div class="status-info">
+              <span class="status-dot" [style.background]="getStatusColor(s.status)"></span>
+              <span class="status-name">{{ getStatusLabel(s.status) }}</span>
+            </div>
+            <div class="status-bar-wrap">
+              <div class="status-bar-fill" [style.width.%]="statusPercent(s.count)" [style.background]="getStatusColor(s.status)"></div>
+            </div>
+            <span class="status-count">{{ s.count }}</span>
+          </div>
+        </div>
+
+        <div *ngIf="!isLoading && ordersByStatus.length === 0" class="empty-state">
+          <span class="material-symbols-rounded empty-icon">inbox</span>
+          <p class="empty-title">Sin pedidos aún</p>
+        </div>
+
+        <div class="status-skeleton" *ngIf="isLoading">
+          <div class="status-row sk" *ngFor="let i of [1,2,3,4]">
+            <div class="sk-line sk-w-80 sk-shimmer-bg"></div>
+            <div class="sk-bar sk-shimmer-bg"></div>
+            <div class="sk-line sk-w-60 sk-shimmer-bg"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Top Products -->
+      <div class="section-card">
+        <div class="section-header">
+          <div class="section-title-group">
+            <span class="material-symbols-rounded section-icon">trending_up</span>
+            <h2>Top Productos</h2>
+          </div>
+          <a routerLink="/agricultor/mis-productos" class="ver-todos" *ngIf="!isLoading">Ver todos →</a>
+        </div>
+
+        <div class="top-products-list" *ngIf="!isLoading && topProducts.length > 0">
+          <div class="tp-row" *ngFor="let p of topProducts; let i = index">
+            <span class="tp-rank" [class.gold]="i===0" [class.silver]="i===1" [class.bronze]="i===2">{{ i + 1 }}</span>
+            <img class="tp-img" [src]="getProductImage(p)" [alt]="p.name" (error)="onImgError($event)" />
+            <div class="tp-info">
+              <p class="tp-name">{{ p.name }}</p>
+              <div class="tp-meta">
+                <span class="material-symbols-rounded tp-star">star</span>
+                <span>{{ p.rating }}</span>
+                <span class="tp-dot">•</span>
+                <span>{{ p.sold }} vendidos</span>
+              </div>
+            </div>
+            <span class="tp-revenue">{{ p.revenue | currency:'EUR':'symbol':'1.0-0' }}</span>
+          </div>
+        </div>
+
+        <div *ngIf="!isLoading && topProducts.length === 0" class="empty-state">
+          <span class="material-symbols-rounded empty-icon">storefront</span>
+          <p class="empty-title">Sin productos aún</p>
+        </div>
+
+        <div class="tp-skeleton" *ngIf="isLoading">
+          <div class="tp-row sk" *ngFor="let i of [1,2,3,4,5]">
+            <div class="sk-circle sk-shimmer-bg"></div>
+            <div class="sk-avatar sk-shimmer-bg"></div>
+            <div class="tp-info">
+              <div class="sk-line sk-w-140 sk-shimmer-bg"></div>
+              <div class="sk-line sk-w-80 sk-shimmer-bg" style="margin-top:6px"></div>
+            </div>
+            <div class="sk-line sk-w-60 sk-shimmer-bg"></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+</div>
+
+<ng-template #noData>
+  <div class="empty-state">
+    <span class="material-symbols-rounded empty-icon">bar_chart</span>
+    <p class="empty-title">Sin datos de ingresos aún</p>
+    <p class="empty-sub">Los datos aparecerán cuando recibas tus primeros pedidos.</p>
+  </div>
+</ng-template>
+

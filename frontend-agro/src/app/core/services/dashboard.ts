@@ -26,13 +26,57 @@ export interface DashboardData {
   top_products:  TopProduct[];
 }
 
+// ── Statistics types ──────────────────────────────────────────────────────────
+
+export interface StatsSummary {
+  total_revenue:  number;
+  total_orders:   number;
+  total_products: number;
+  avg_rating:     number;
+  total_reviews:  number;
+}
+
+export interface MonthlyRevenue {
+  month:   string;
+  year:    number;
+  revenue: number;
+  orders:  number;
+}
+
+export interface StatusCount {
+  status: string;
+  count:  number;
+}
+
+export interface StatsTopProduct {
+  id:      number;
+  name:    string;
+  image:   string | null;
+  sold:    number;
+  revenue: number;
+  rating:  number;
+  unit:    string;
+}
+
+export interface StatisticsData {
+  summary:           StatsSummary;
+  monthly_revenue:   MonthlyRevenue[];
+  orders_by_status:  StatusCount[];
+  top_products:      StatsTopProduct[];
+}
+
 @Injectable({ providedIn: 'root' })
 export class DashboardService {
-  private url = `${environment.apiUrl}/farmer/dashboard`;
+  private dashboardUrl  = `${environment.apiUrl}/farmer/dashboard`;
+  private statisticsUrl = `${environment.apiUrl}/farmer/statistics`;
 
   constructor(private http: HttpClient) {}
 
   getData(): Observable<DashboardData> {
-    return this.http.get<DashboardData>(this.url);
+    return this.http.get<DashboardData>(this.dashboardUrl);
+  }
+
+  getStatistics(): Observable<StatisticsData> {
+    return this.http.get<StatisticsData>(this.statisticsUrl);
   }
 }
