@@ -13,6 +13,7 @@ use App\Http\Controllers\WebhookController;
 use App\Http\Controllers\ConversationController;
 use App\Http\Controllers\FarmerProfileController;
 use App\Http\Controllers\Api\Farmer\DashboardController;
+use App\Http\Controllers\Api\Farmer\StatisticsController;
 
 /*
 |--------------------------------------------------------------------------
@@ -65,7 +66,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::prefix('farmer')->group(function () {
 
         // Dashboard
-        Route::get('/dashboard', [DashboardController::class, 'index']);
+        Route::get('/dashboard',   [DashboardController::class, 'index']);
+
+        // Estadísticas
+        Route::get('/statistics',  [StatisticsController::class, 'index']);
 
         // Perfil
         Route::get('/profile',  [FarmerProfileController::class, 'show']);
