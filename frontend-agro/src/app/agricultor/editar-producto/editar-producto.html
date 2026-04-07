@@ -19,12 +19,16 @@
           <span class="material-symbols-rounded">search</span>
           <input type="text" placeholder="Buscar..." />
         </div>
-        <button class="icon-btn">
+        <button class="icon-btn notif-btn">
           <span class="material-symbols-rounded">notifications</span>
         </button>
         <button class="icon-btn">
           <span class="material-symbols-rounded">help</span>
         </button>
+        <div class="user-chip">
+          <div class="user-avatar">{{ user?.name?.charAt(0)?.toUpperCase() || '?' }}</div>
+          <span class="user-name">{{ user?.name?.split(' ')[0] || 'Usuario' }}</span>
+        </div>
       </div>
     </div>
 
@@ -49,8 +53,7 @@
           <div class="card-body">
             <div class="form-group">
               <label>Nombre del producto</label>
-              <input type="text" class="form-input" [(ngModel)]="producto.name"
-                placeholder="Ej: Manzanas Fuji" />
+              <input type="text" class="form-input" [(ngModel)]="producto.name" placeholder="Ej: Manzanas Fuji" />
             </div>
             <div class="form-group">
               <label>Descripción completa</label>
@@ -78,8 +81,8 @@
               <div class="form-group">
                 <label>Precio</label>
                 <div class="input-with-suffix">
-                  <input type="number" class="form-input" [(ngModel)]="producto.price"
-                    placeholder="0.00" min="0" step="0.01" />
+                  <input type="number" class="form-input" [(ngModel)]="producto.price" placeholder="0.00" min="0"
+                    step="0.01" />
                   <span class="input-suffix">€</span>
                 </div>
               </div>
@@ -96,8 +99,8 @@
               <div class="form-group">
                 <label>Stock disponible</label>
                 <div class="input-with-suffix">
-                  <input type="number" class="form-input" [(ngModel)]="producto.stock_quantity"
-                    placeholder="0" min="0" />
+                  <input type="number" class="form-input" [(ngModel)]="producto.stock_quantity" placeholder="0"
+                    min="0" />
                   <span class="input-suffix">ud</span>
                 </div>
               </div>
@@ -144,24 +147,14 @@
           <div class="card-body">
 
             <!-- Grid imágenes existentes + nuevas -->
-            <div
-              class="images-grid"
-              *ngIf="(producto.images?.length || 0) + newImagePreviews.length > 0"
-            >
+            <div class="images-grid" *ngIf="(producto.images?.length || 0) + newImagePreviews.length > 0">
               <!-- ✅ Existentes — con reordenación drag -->
-              <div
-                class="image-thumb"
-                [class.image-thumb--main]="i === 0"
+              <div class="image-thumb" [class.image-thumb--main]="i === 0"
                 [class.image-thumb--dragging]="dragIndex === i"
                 [class.image-thumb--dragover]="dragOverIndex === i && dragIndex !== i"
-                *ngFor="let img of producto.images; let i = index"
-                draggable="true"
-                (dragstart)="onThumbDragStart(i)"
-                (dragover)="onThumbDragOver($event, i)"
-                (dragleave)="onThumbDragLeave()"
-                (drop)="onThumbDrop(i)"
-                (dragend)="onThumbDragEnd()"
-              >
+                *ngFor="let img of producto.images; let i = index" draggable="true" (dragstart)="onThumbDragStart(i)"
+                (dragover)="onThumbDragOver($event, i)" (dragleave)="onThumbDragLeave()" (drop)="onThumbDrop(i)"
+                (dragend)="onThumbDragEnd()">
                 <img [src]="img.url" [alt]="producto.name" loading="lazy" />
 
                 <!-- Handle de arrastre -->
@@ -174,58 +167,38 @@
                 </span>
 
                 <div class="thumb-overlay">
-                  <button
-                    class="img-action-btn img-delete-btn"
-                    (click)="deleteImage(img.id)"
-                    title="Eliminar imagen"
-                    type="button"
-                  >
+                  <button class="img-action-btn img-delete-btn" (click)="deleteImage(img.id)" title="Eliminar imagen"
+                    type="button">
                     <span class="material-symbols-rounded">delete</span>
                   </button>
                 </div>
               </div>
 
               <!-- Nuevas (pendientes de guardar) — sin reordenación -->
-              <div
-                class="image-thumb image-thumb--new"
-                *ngFor="let prev of newImagePreviews; let i = index"
-              >
+              <div class="image-thumb image-thumb--new" *ngFor="let prev of newImagePreviews; let i = index">
                 <img [src]="prev" alt="Nueva imagen" />
                 <span class="new-badge">Nueva</span>
                 <div class="thumb-overlay">
-                  <button
-                    class="img-action-btn img-delete-btn"
-                    (click)="removeNewImage(i)"
-                    title="Quitar imagen"
-                    type="button"
-                  >
+                  <button class="img-action-btn img-delete-btn" (click)="removeNewImage(i)" title="Quitar imagen"
+                    type="button">
                     <span class="material-symbols-rounded">close</span>
                   </button>
                 </div>
               </div>
 
               <!-- Slot vacío para añadir -->
-              <div
-                class="image-thumb image-thumb--add"
-                *ngIf="(producto.images?.length || 0) + newImages.length < 6"
-                (click)="fileInput.click()"
-                title="Añadir imagen"
-              >
+              <div class="image-thumb image-thumb--add" *ngIf="(producto.images?.length || 0) + newImages.length < 6"
+                (click)="fileInput.click()" title="Añadir imagen">
                 <span class="material-symbols-rounded">add_photo_alternate</span>
                 <span>Añadir</span>
               </div>
             </div>
 
             <!-- Zona de drag & drop subida -->
-            <div
-              class="upload-zone"
-              [class.upload-zone--drag]="isDragging"
+            <div class="upload-zone" [class.upload-zone--drag]="isDragging"
               [class.upload-zone--full]="(producto.images?.length || 0) + newImages.length >= 6"
-              (click)="fileInput.click()"
-              (dragover)="onDragOver($event)"
-              (dragleave)="onDragLeave()"
-              (drop)="onDrop($event)"
-            >
+              (click)="fileInput.click()" (dragover)="onDragOver($event)" (dragleave)="onDragLeave()"
+              (drop)="onDrop($event)">
               <div class="upload-zone-inner">
                 <span class="material-symbols-rounded upload-zone-icon">cloud_upload</span>
                 <p class="upload-zone-title">
@@ -235,21 +208,12 @@
                   JPG, PNG o WEBP · Máx. 2 MB · Hasta 6 imágenes
                 </span>
               </div>
-              <input
-                #fileInput
-                type="file"
-                accept="image/jpeg,image/png,image/webp"
-                multiple
-                hidden
-                (change)="onImageSelected($event)"
-              />
+              <input #fileInput type="file" accept="image/jpeg,image/png,image/webp" multiple hidden
+                (change)="onImageSelected($event)" />
             </div>
 
             <!-- Aviso límite alcanzado -->
-            <p
-              class="limit-warning"
-              *ngIf="(producto.images?.length || 0) + newImages.length >= 6"
-            >
+            <p class="limit-warning" *ngIf="(producto.images?.length || 0) + newImages.length >= 6">
               <span class="material-symbols-rounded">info</span>
               Has alcanzado el límite de 6 imágenes. Elimina alguna para añadir nuevas.
             </p>
@@ -315,12 +279,7 @@
       <button class="modal-btn-cancel" (click)="cancelarEliminar()" type="button">
         Cancelar
       </button>
-      <button
-        class="modal-btn-confirm"
-        (click)="confirmarEliminar()"
-        [disabled]="deleting"
-        type="button"
-      >
+      <button class="modal-btn-confirm" (click)="confirmarEliminar()" [disabled]="deleting" type="button">
         <span class="material-symbols-rounded">delete</span>
         {{ deleting ? 'Eliminando...' : 'Sí, eliminar' }}
       </button>

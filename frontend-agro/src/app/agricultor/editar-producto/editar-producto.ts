@@ -8,6 +8,7 @@ import { Sidebar } from '../sidebar/sidebar';
 import { ProductoService } from '../../core/services/producto.service';
 import { CategoryService } from '../../core/services/category';
 import { environment } from '../../../environments/environment';
+import { AuthService } from '../../core/services/auth';
 
 @Component({
   selector: 'app-editar-producto',
@@ -19,6 +20,7 @@ import { environment } from '../../../environments/environment';
 })
 export class EditarProducto implements OnInit {
 
+  user: any = null;
   producto: any = {};
   categorias: any[] = [];
   loading = true;
@@ -36,6 +38,7 @@ export class EditarProducto implements OnInit {
   unidades = ['kg', 'g', 'l', 'ml', 'ud', 'docena', 'manojo', 'caja', 'bandeja', 'saco', 'pack'];
 
   constructor(
+    private authService: AuthService,
     private route: ActivatedRoute,
     private router: Router,
     private productoService: ProductoService,
@@ -47,6 +50,7 @@ export class EditarProducto implements OnInit {
     const id = this.route.snapshot.paramMap.get('id');
     this.loadCategorias();
     this.loadProducto(Number(id));
+    this.user = this.authService.getCurrentUser();
   }
 
   loadProducto(id: number): void {

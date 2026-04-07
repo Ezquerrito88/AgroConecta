@@ -10,8 +10,8 @@
           <span class="material-symbols-rounded">arrow_back</span>
         </button>
         <div>
-          <h1 class="page-title">Nuevo Producto</h1>
-          <p class="page-subtitle">Rellena los datos para publicar tu producto</p>
+          <h1 class="page-title">Crear Producto</h1>
+          <p class="page-subtitle">Agrega un nuevo producto a tu catálogo</p>
         </div>
       </div>
       <div class="topbar-right">
@@ -19,12 +19,16 @@
           <span class="material-symbols-rounded">search</span>
           <input type="text" placeholder="Buscar..." />
         </div>
-        <button class="icon-btn">
+        <button class="icon-btn notif-btn">
           <span class="material-symbols-rounded">notifications</span>
         </button>
         <button class="icon-btn">
           <span class="material-symbols-rounded">help</span>
         </button>
+        <div class="user-chip">
+          <div class="user-avatar">{{ user?.name?.charAt(0)?.toUpperCase() || '?' }}</div>
+          <span class="user-name">{{ user?.name?.split(' ')[0] || 'Usuario' }}</span>
+        </div>
       </div>
     </div>
 

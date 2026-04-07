@@ -4,20 +4,29 @@
   <main class="main-content">
 
     <header class="topbar">
+  <div class="topbar-left">
+    <div>
       <h1 class="page-title">Configuración</h1>
-      <div class="topbar-right">
-        <div class="search-box">
-          <span class="material-symbols-rounded" aria-hidden="true">search</span>
-          <input type="search" placeholder="Buscar..." aria-label="Buscar" />
-        </div>
-        <button class="icon-btn" aria-label="Notificaciones">
-          <span class="material-symbols-rounded" aria-hidden="true">notifications</span>
-        </button>
-        <button class="icon-btn" aria-label="Ayuda">
-          <span class="material-symbols-rounded" aria-hidden="true">help</span>
-        </button>
-      </div>
-    </header>
+      <span class="page-subtitle">Gestiona tu cuenta y preferencias</span>
+    </div>
+  </div>
+  <div class="topbar-right">
+    <div class="search-box">
+      <span class="material-symbols-rounded" aria-hidden="true">search</span>
+      <input type="search" placeholder="Buscar ajustes…" aria-label="Buscar ajustes" />
+    </div>
+    <button class="icon-btn notif-btn" aria-label="Notificaciones">
+      <span class="material-symbols-rounded" aria-hidden="true">notifications</span>
+    </button>
+    <button class="icon-btn" aria-label="Ayuda">
+      <span class="material-symbols-rounded" aria-hidden="true">help</span>
+    </button>
+    <div class="user-chip">
+      <div class="user-avatar">{{ user?.name?.charAt(0)?.toUpperCase() || '?' }}</div>
+      <span class="user-name">{{ user?.name?.split(' ')[0] || 'Usuario' }}</span>
+    </div>
+  </div>
+</header>
 
     <div class="config-layout">
 

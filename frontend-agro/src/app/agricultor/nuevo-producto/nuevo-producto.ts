@@ -7,6 +7,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { Sidebar } from '../sidebar/sidebar';
 import { environment } from '../../../environments/environment';
+import { AuthService } from '../../core/services/auth';
 
 @Component({
   selector: 'app-nuevo-producto',
@@ -18,6 +19,7 @@ import { environment } from '../../../environments/environment';
 export class NuevoProducto implements OnInit {
 
   saving = false;
+  user: any = null;
 
   // Modelo del producto
   producto = {
@@ -40,12 +42,14 @@ export class NuevoProducto implements OnInit {
   private apiUrl = environment.apiUrl;
 
   constructor(
+    private authService: AuthService,
     private http: HttpClient, 
     private router: Router,
-    private cdr: ChangeDetectorRef // Inyectado para forzar la actualización de la vista
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
+    this.user = this.authService.getCurrentUser();
     this.loadCategorias();
   }
 

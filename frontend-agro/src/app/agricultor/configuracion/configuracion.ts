@@ -37,6 +37,7 @@ export class Configuracion implements OnInit {
   loading = false;
   formDirty = false;
   toast: Toast | null = null;
+  user: any = null;
 
   perfil: PerfilForm = {
     name: '',
@@ -61,6 +62,7 @@ export class Configuracion implements OnInit {
 
   ngOnInit(): void {
     this.cargarPerfil();
+    this.user = this.authService.getCurrentUser();
   }
 
   // Getter para el avatar con fallback de iniciales
