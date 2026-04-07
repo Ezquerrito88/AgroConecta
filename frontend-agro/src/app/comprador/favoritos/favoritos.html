@@ -3,16 +3,13 @@
 
   <main class="main-content">
 
-    <!-- Topbar usando las clases globales -->
+    <!-- Topbar -->
     <div class="topbar">
       <div class="topbar-left">
         <h1 class="page-title">Mis Favoritos</h1>
-        <span class="fav-count" *ngIf="!loading">{{ products.length }}</span>
+        <p class="page-subtitle">Productos que te han gustado</p>
       </div>
-
-      <!-- topbar-right ya existe en el CSS global -->
-      <div class="topbar-right" *ngIf="!loading && products.length > 0">
-        <!-- search-box ya existe en el CSS global -->
+      <div class="topbar-right">
         <div class="search-box">
           <span class="material-symbols-rounded">search</span>
           <input
@@ -24,67 +21,123 @@
             <span class="material-symbols-rounded">close</span>
           </button>
         </div>
-        <!-- filter-select ya existe en el CSS global -->
-        <select class="filter-select" [(ngModel)]="sortBy" (ngModelChange)="applyFilters()">
+        <select class="filter-select-premium" [(ngModel)]="sortBy" (ngModelChange)="applyFilters()">
           <option *ngFor="let opt of sortOptions" [value]="opt.value">{{ opt.label }}</option>
         </select>
+        <a class="icon-btn" routerLink="/comprador/favoritos" title="Favoritos">
+          <span class="material-symbols-rounded">favorite</span>
+        </a>
+        <button class="icon-btn notif-btn" title="Notificaciones">
+          <span class="material-symbols-rounded">notifications</span>
+          <span class="notif-dot"></span>
+        </button>
+        <div class="user-chip">
+          <div class="user-avatar">{{ userInitial }}</div>
+          <span class="user-name">{{ firstName }}</span>
+        </div>
       </div>
     </div>
 
-    <!-- Contenido con padding (igual que el resto del dashboard) -->
     <div class="fav-content">
 
-      <!-- Skeleton loader -->
-      <div class="fav-grid" *ngIf="loading">
-        <div class="fav-card skeleton-card" *ngFor="let s of skeletons">
-          <div class="sk-img"></div>
+      <!-- KPI strip -->
+      <div class="fav-kpi-strip" *ngIf="!loading && products.length > 0">
+        <div class="fav-kpi">
+          <span class="material-symbols-rounded">favorite</span>
+          <span><strong>{{ products.length }}</strong> guardados</span>
+        </div>
+        <div class="fav-kpi">
+          <span class="material-symbols-rounded">storefront</span>
+          <span><strong>{{ uniqueFarmers }}</strong> agricultores</span>
+        </div>
+        <div class="fav-kpi">
+          <span class="material-symbols-rounded">euro</span>
+          <span>Precio medio <strong>{{ avgPrice | currency:'EUR':'symbol':'1.2-2' }}</strong></span>
+        </div>
+      </div>
+
+      <!-- Skeleton -->
+      <div class="fav-list" *ngIf="loading">
+        <div class="fav-row skeleton-row" *ngFor="let s of skeletons">
+          <div class="sk-thumb"></div>
           <div class="sk-body">
             <div class="sk-line long"></div>
             <div class="sk-line short"></div>
-            <div class="sk-line medium"></div>
           </div>
-          <div class="sk-btn"></div>
+          <div class="sk-price"></div>
+          <div class="sk-btn-r"></div>
         </div>
       </div>
 
       <!-- Sin favoritos -->
-      <div *ngIf="!loading && products.length === 0" class="empty-state-full">
+      <div *ngIf="!loading && products.length === 0" class="empty-state">
         <span class="material-symbols-rounded empty-icon">favorite_border</span>
-        <p>No tienes productos guardados en favoritos.</p>
-        <a routerLink="/productos" class="btn-explorar-empty">Explorar productos</a>
+        <p class="empty-title">Aún no tienes favoritos</p>
+        <p class="empty-sub">Explora el catálogo y guarda los productos que más te gusten.</p>
+        <a routerLink="/productos" class="btn-primary" style="text-decoration:none; margin-top:8px">
+          <span class="material-symbols-rounded">storefront</span> Explorar catálogo
+        </a>
       </div>
 
-      <!-- Sin resultados de búsqueda -->
-      <div *ngIf="!loading && products.length > 0 && filteredProducts.length === 0" class="empty-state-full">
+      <!-- Sin resultados -->
+      <div *ngIf="!loading && products.length > 0 && filteredProducts.length === 0" class="empty-state">
         <span class="material-symbols-rounded empty-icon">search_off</span>
-        <p>No hay favoritos que coincidan con "<strong>{{ searchQuery }}</strong>".</p>
-        <button class="btn-explorar-empty" (click)="searchQuery=''; applyFilters()">Limpiar búsqueda</button>
+        <p class="empty-title">Sin resultados</p>
+        <p class="empty-sub">Ningún favorito coincide con "<strong>{{ searchQuery }}</strong>".</p>
+        <button class="btn-outline" (click)="searchQuery=''; applyFilters()">Limpiar búsqueda</button>
       </div>
 
-      <!-- Grid -->
-      <div class="fav-grid" *ngIf="!loading && filteredProducts.length > 0">
+      <!-- Lista -->
+      <div class="fav-list" *ngIf="!loading && filteredProducts.length > 0">
+
+        <!-- Cabecera -->
+        <div class="fav-list-header">
+          <span>Producto</span>
+          <span>Agricultor</span>
+          <span>Precio</span>
+          <span>Acciones</span>
+        </div>
+
+        <!-- Filas -->
         <div
-          class="fav-card"
+          class="fav-row"
           *ngFor="let p of filteredProducts"
           [class.removing]="removingIds.has(p.id)">
-          <div class="fav-img-wrap">
-            <img [src]="getImagen(p)" [alt]="p.name" class="fav-img"
+
+          <!-- Thumb + nombre -->
+          <div class="fav-product-cell">
+            <img [src]="getImagen(p)" [alt]="p.name" class="fav-thumb"
                  onerror="this.src='img/logo/logo.png'" />
-            <button class="btn-remove-fav" (click)="toggleFavorito(p)" title="Quitar de favoritos">
-              <span class="material-symbols-rounded">favorite</span>
+            <div class="fav-product-info">
+              <span class="fav-name">{{ p.name }}</span>
+              <span class="fav-category">{{ p.category?.name ?? 'Producto' }}</span>
+            </div>
+          </div>
+
+          <!-- Agricultor -->
+          <div class="fav-farmer-cell">
+            <div class="farmer-chip">
+              <div class="farmer-initial">{{ (p.farmer?.user?.name ?? p.farmer?.farm_name).charAt(0).toUpperCase() }}</div>
+              <span>{{ p.farmer?.user?.name ?? p.farmer?.farm_name}}</span>
+            </div>
+          </div>
+
+          <!-- Precio -->
+          <div class="fav-price-cell">
+            <span class="fav-price">{{ p.price | currency:'EUR':'symbol':'1.2-2' }}</span>
+            <span class="fav-unit">/ {{ p.unit }}</span>
+          </div>
+
+          <!-- Acciones -->
+          <div class="fav-actions-cell">
+            <a [routerLink]="['/producto', p.id]" class="btn-ver-sm" title="Ver producto">
+              <span class="material-symbols-rounded">open_in_new</span>
+            </a>
+            <button class="btn-remove-sm" (click)="toggleFavorito(p)" title="Quitar de favoritos">
+              <span class="material-symbols-rounded">heart_minus</span>
             </button>
           </div>
-          <div class="fav-info">
-            <p class="fav-name">{{ p.name }}</p>
-            <p class="fav-price">
-              {{ p.price | currency:'EUR':'symbol':'1.2-2' }}<span>/{{ p.unit }}</span>
-            </p>
-            <p class="fav-farmer">
-              <span class="material-symbols-rounded">storefront</span>
-              {{ p.farmer?.name ?? 'Agricultor' }}
-            </p>
-          </div>
-          <a [routerLink]="['/producto', p.id]" class="btn-ver-producto">Ver producto</a>
+
         </div>
       </div>
 

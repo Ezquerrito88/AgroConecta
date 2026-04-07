@@ -33,7 +33,7 @@ export class DetalleProducto implements OnInit, AfterViewInit {
     private http: HttpClient,
     private cd: ChangeDetectorRef,
     private cartService: CartService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     const user = JSON.parse(localStorage.getItem('user') ?? 'null');
@@ -73,7 +73,7 @@ export class DetalleProducto implements OnInit, AfterViewInit {
     const indicator = document.querySelector<HTMLElement>('.tab-indicator');
     if (!activeBtn || !indicator) return;
     indicator.style.width = `${activeBtn.offsetWidth}px`;
-    indicator.style.left  = `${activeBtn.offsetLeft}px`;
+    indicator.style.left = `${activeBtn.offsetLeft}px`;
   }
 
   openLightbox(index: number): void {
@@ -143,14 +143,17 @@ export class DetalleProducto implements OnInit, AfterViewInit {
 
   contactarFarmer(): void {
     const farmerId = this.product?.farmer?.user_id ?? this.product?.farmer?.id;
-    if (!farmerId) {
-      console.warn('No se encontró el ID del agricultor');
-      return;
-    }
-    // Navega al chat/mensajes con el farmer
-    // Ajusta la ruta según tengas configurado el módulo de mensajes
-    this.router.navigate(['/mensajes'], {
-      queryParams: { to: farmerId, nombre: this.product?.farmer?.user?.name }
+    if (!farmerId) return;
+
+    this.router.navigate(['/comprador/mensajes'], {
+      queryParams: {
+        farmerId,
+        productId: this.product.id,
+        productName: this.product.name,
+        productImage: this.getImagenUrlByIndex(0),
+        productPrice: this.product.price,
+        productUnit: this.product.unit
+      }
     });
   }
 
@@ -158,8 +161,8 @@ export class DetalleProducto implements OnInit, AfterViewInit {
     if (!this.product || this.isFarmer) return;
 
     const rawFarmerUserId = this.product?.farmer?.user_id;
-    const rawFarmerId     = this.product?.farmer?.id;
-    const farmerId        = Number(rawFarmerUserId ?? rawFarmerId);
+    const rawFarmerId = this.product?.farmer?.id;
+    const farmerId = Number(rawFarmerUserId ?? rawFarmerId);
 
     if (!Number.isFinite(farmerId) || farmerId <= 0) {
       console.error('No se pudo determinar el agricultor del producto', this.product);
@@ -167,14 +170,14 @@ export class DetalleProducto implements OnInit, AfterViewInit {
     }
 
     this.cartService.addToCart({
-      id:       this.product.id,
-      name:     this.product.name,
-      farmer:   this.product?.farmer?.user?.name || 'Agricultor local',
+      id: this.product.id,
+      name: this.product.name,
+      farmer: this.product?.farmer?.user?.name || 'Agricultor local',
       farmerId,
-      price:    Number(this.product.price),
-      unit:     this.product.unit,
+      price: Number(this.product.price),
+      unit: this.product.unit,
       quantity: this.cantidad,
-      image:    this.getImagenUrl(this.product)
+      image: this.getImagenUrl(this.product)
     });
   }
 }

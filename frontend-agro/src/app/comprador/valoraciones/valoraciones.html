@@ -1,13 +1,185 @@
 <div class="dashboard-layout">
   <app-sidebar-comprador />
+
   <main class="main-content">
+
     <div class="topbar">
-      <h1 class="page-title">Valoraciones</h1>
+      <div class="topbar-left">
+        <h1 class="page-title">Valoraciones</h1>
+        <p class="page-subtitle">Valora los productos que has recibido</p>
+      </div>
+      <div class="topbar-right">
+        <a class="icon-btn" routerLink="/comprador/favoritos" title="Favoritos">
+          <span class="material-symbols-rounded">favorite</span>
+        </a>
+        <button class="icon-btn notif-btn" title="Notificaciones">
+          <span class="material-symbols-rounded">notifications</span>
+        </button>
+        <div class="user-chip">
+          <div class="user-avatar">{{ userInitial }}</div>
+          <span class="user-name">{{ firstName }}</span>
+        </div>
+      </div>
     </div>
-    <div class="section-card coming-soon">
-      <span class="material-symbols-rounded cs-icon">star</span>
-      <h2>Próximamente</h2>
-      <p>Podrás valorar los productos que hayas recibido. Esta sección está en desarrollo.</p>
+
+    <div class="section-card">
+
+      <!-- Tabs -->
+      <div class="val-tabs">
+        <button
+          class="val-tab"
+          [class.active]="activeTab === 'pendientes'"
+          (click)="activeTab = 'pendientes'">
+          Pendientes
+          <span class="badge" *ngIf="pendientes.length">{{ pendientes.length }}</span>
+        </button>
+        <button
+          class="val-tab"
+          [class.active]="activeTab === 'hechas'"
+          (click)="activeTab = 'hechas'">
+          Mis valoraciones
+        </button>
+      </div>
+
+      <!-- Skeleton -->
+      <div *ngIf="loading" class="skeleton-list">
+        <div class="skeleton-row" *ngFor="let i of [1,2,3]">
+          <div class="skeleton-cell short"></div>
+          <div class="skeleton-cell long"></div>
+          <div class="skeleton-cell medium"></div>
+        </div>
+      </div>
+
+      <!-- PENDIENTES -->
+      <div *ngIf="!loading && activeTab === 'pendientes'">
+
+        <div *ngIf="pendientes.length === 0" class="empty-state">
+          <div class="empty-illustration">
+            <div class="empty-circle">
+              <span class="material-symbols-rounded">store</span>
+            </div>
+            <div class="empty-stars">
+              <span class="star-float s1">★</span>
+              <span class="star-float s2">★</span>
+              <span class="star-float s3">★</span>
+            </div>
+          </div>
+          <h3>Aún no tienes productos que valorar</h3>
+          <p>Cuando recibas un pedido, aparecerá aquí para que puedas compartir tu experiencia con otros compradores.</p>
+          <a routerLink="/productos" class="btn-cta">
+            <span class="material-symbols-rounded">shopping_bag</span>
+            Explorar productos
+          </a>
+        </div>
+
+        <div class="val-grid" *ngIf="pendientes.length > 0">
+          <div class="val-card" *ngFor="let item of pendientes">
+            <img [src]="getImageUrl(item.product)" [alt]="item.product.name" class="val-card-img"/>
+            <div class="val-card-info">
+              <span class="val-card-name">{{ item.product.name }}</span>
+              <span class="val-card-price">{{ item.product.price }}€/{{ item.product.unit }}</span>
+            </div>
+            <button class="btn-valorar" (click)="abrirModal(item)">Valorar</button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- MIS REVIEWS -->
+      <div *ngIf="!loading && activeTab === 'hechas'">
+
+        <div *ngIf="misReviews.length === 0" class="empty-state">
+          <div class="empty-illustration">
+            <div class="empty-circle">
+              <span class="material-symbols-rounded">rate_review</span>
+            </div>
+            <div class="empty-stars">
+              <span class="star-float s1">★</span>
+              <span class="star-float s2">★</span>
+              <span class="star-float s3">★</span>
+            </div>
+          </div>
+          <h3>Todavía no has valorado ningún producto</h3>
+          <p>Tus valoraciones ayudan a otros compradores a elegir mejor y a los agricultores a mejorar.</p>
+          <button class="btn-cta" (click)="activeTab = 'pendientes'">
+            <span class="material-symbols-rounded">star</span>
+            Ver pendientes de valorar
+          </button>
+        </div>
+
+        <div class="val-grid" *ngIf="misReviews.length > 0">
+          <div class="val-card done" *ngFor="let r of misReviews">
+            <img [src]="getImageUrl(r.product)" [alt]="r.product?.name" class="val-card-img"/>
+            <div class="val-card-info">
+              <span class="val-card-name">{{ r.product?.name }}</span>
+              <div class="stars-display">
+                <span *ngFor="let s of stars(5)" class="star" [class.filled]="s <= r.rating">★</span>
+              </div>
+              <p class="val-comment" *ngIf="r.comment">{{ r.comment }}</p>
+              <span class="val-date">{{ r.created_at | date:'d MMM yyyy' }}</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
     </div>
   </main>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" *ngIf="modalOpen" (click)="cerrarModal()">
+  <div class="modal-box" (click)="$event.stopPropagation()">
+
+    <button class="modal-close" (click)="cerrarModal()">✕</button>
+
+    <div class="modal-product" *ngIf="selectedProduct">
+      <img [src]="getImageUrl(selectedProduct.product)" class="modal-product-img"/>
+      <div>
+        <strong>{{ selectedProduct.product.name }}</strong>
+        <span>{{ selectedProduct.product.price }}€/{{ selectedProduct.product.unit }}</span>
+      </div>
+    </div>
+
+    <h3 class="modal-title">¿Cómo valorarías este producto?</h3>
+
+    <div class="stars-input" (mouseleave)="clearHover()">
+      <span
+        *ngFor="let s of stars(5)"
+        class="star-btn"
+        [class.active]="s <= activeRating()"
+        (mouseenter)="setHover(s)"
+        (click)="setRating(s)">★</span>
+    </div>
+
+    <div class="rating-label">
+      <span *ngIf="activeRating() === 1">Muy malo</span>
+      <span *ngIf="activeRating() === 2">Malo</span>
+      <span *ngIf="activeRating() === 3">Regular</span>
+      <span *ngIf="activeRating() === 4">Bueno</span>
+      <span *ngIf="activeRating() === 5">¡Excelente!</span>
+      <span *ngIf="activeRating() === 0" class="muted">Selecciona una puntuación</span>
+    </div>
+
+    <textarea
+      [(ngModel)]="comment"
+      placeholder="Cuéntanos tu experiencia con este producto (opcional)"
+      class="modal-textarea"
+      rows="4"
+      maxlength="1000">
+    </textarea>
+
+    <p class="modal-error" *ngIf="errorMsg">{{ errorMsg }}</p>
+
+    <div class="modal-actions">
+      <button class="btn-cancel" (click)="cerrarModal()">Cancelar</button>
+      <button
+        class="btn-submit"
+        (click)="enviarReview()"
+        [disabled]="!rating || sending">
+        {{ sending ? 'Enviando...' : 'Publicar valoración' }}
+      </button>
+    </div>
+
+  </div>
 </div>

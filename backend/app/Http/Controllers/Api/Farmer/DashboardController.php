@@ -66,7 +66,7 @@ class DashboardController extends Controller
 
             // 6. Top 3 productos con imagen real (híbrido local/Azure)
             $topProducts = Product::where('farmer_id', $farmerId)
-                ->with(['firstImage'])                     // 👈 eager load sin N+1
+                ->with(['firstImage'])
                 ->withCount(['orderItems as total_sold' => function ($query) {
                     $query->select(DB::raw('sum(quantity)'));
                 }])
@@ -78,7 +78,7 @@ class DashboardController extends Controller
                     'id'     => $p->id,
                     'name'   => $p->name,
                     'price'  => (float) $p->price,
-                    'image'  => $p->firstImage?->image_url ?? null, // 👈 accessor híbrido
+                    'image'  => $p->firstImage?->image_url ?? null,
                     'rating' => round((float) ($p->reviews_avg_rating ?? 0), 1),
                     'sold'   => (int) ($p->total_sold ?? 0),
                     'unit'   => $p->unit ?? 'kg',

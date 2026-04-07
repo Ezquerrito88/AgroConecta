@@ -15,6 +15,7 @@ import { environment } from '../../../environments/environment';
 })
 export class Favoritos implements OnInit {
 
+  user: any = {};
   products:         any[] = [];
   filteredProducts: any[] = [];
   removingIds:      Set<number> = new Set();
@@ -22,7 +23,7 @@ export class Favoritos implements OnInit {
   searchQuery       = '';
   sortBy            = 'default';
 
-  skeletons = [1, 2, 3, 4, 5, 6]; // número de tarjetas skeleton
+  skeletons = [1, 2, 3, 4, 5, 6];
 
   sortOptions = [
     { value: 'default',    label: 'Más recientes' },
@@ -31,9 +32,24 @@ export class Favoritos implements OnInit {
     { value: 'price_desc', label: 'Precio: mayor a menor' },
   ];
 
+  get firstName(): string { return this.user?.name?.split(' ')[0] ?? ''; }
+  get userInitial(): string { return this.firstName.charAt(0).toUpperCase(); }
+
+  get uniqueFarmers(): number {
+  const names = this.products.map(p => p.farmer?.user?.name ?? p.farmer?.farm_name).filter(Boolean);
+  return new Set(names).size;
+}
+
+  get avgPrice(): number {
+    if (!this.products.length) return 0;
+    return this.products.reduce((acc, p) => acc + Number(p.price), 0) / this.products.length;
+  }
+
   constructor(private http: HttpClient, private cdr: ChangeDetectorRef) {}
 
   ngOnInit(): void {
+    this.user = JSON.parse(localStorage.getItem('user') || '{}');
+
     this.http.get<any[]>(`${environment.apiUrl}/favorites`).subscribe({
       next: (data) => {
         this.products = data;
@@ -68,7 +84,7 @@ export class Favoritos implements OnInit {
   }
 
   toggleFavorito(product: any): void {
-    this.removingIds.add(product.id); // activa animación de salida
+    this.removingIds.add(product.id);
     this.cdr.detectChanges();
 
     setTimeout(() => {
@@ -79,7 +95,7 @@ export class Favoritos implements OnInit {
           this.applyFilters();
         }
       });
-    }, 280); // espera a que termine la animación
+    }, 280);
   }
 
   getImagen(product: any): string {

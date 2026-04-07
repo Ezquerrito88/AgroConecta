@@ -2,27 +2,44 @@
   <app-sidebar-comprador />
 
   <main class="main-content">
+
     <div class="topbar">
-      <h1 class="page-title">Mis Pedidos</h1>
+      <div class="topbar-left">
+        <h1 class="page-title">Mis Pedidos</h1>
+        <p class="page-subtitle">Consulta y gestiona todos tus pedidos</p>
+      </div>
+      <div class="topbar-right">
+        <div class="search-box">
+          <span class="material-symbols-rounded">search</span>
+          <input type="text" placeholder="Buscar pedidos..." />
+        </div>
+        <a class="icon-btn" routerLink="/comprador/favoritos" title="Favoritos">
+          <span class="material-symbols-rounded">favorite</span>
+        </a>
+        <button class="icon-btn notif-btn" title="Notificaciones">
+          <span class="material-symbols-rounded">notifications</span>
+        </button>
+        <div class="user-chip">
+          <div class="user-avatar">{{ userInitial }}</div>
+          <span class="user-name">{{ firstName }}</span>
+        </div>
+      </div>
     </div>
 
     <div class="section-card">
 
-      <!-- Filtros DENTRO de section-card -->
+      <!-- Filtros -->
       <div class="filter-tabs">
-        <button
-          *ngFor="let f of filtros"
-          class="filter-tab"
-          [class.active]="filtroActivo === f.id"
+        <button *ngFor="let f of filtros" class="filter-tab" [class.active]="filtroActivo === f.id"
           (click)="setFiltro(f.id)">
           {{ f.label }}
           <span class="filter-count">{{ getCount(f.id) }}</span>
         </button>
       </div>
 
-      <!-- Skeleton loader -->
+      <!-- Skeleton -->
       <div *ngIf="loading" class="skeleton-list">
-        <div class="skeleton-row" *ngFor="let i of [1,2,3,4]">
+        <div class="skeleton-row" *ngFor="let i of [1,2,3,4,5]">
           <div class="skeleton-cell short"></div>
           <div class="skeleton-cell medium"></div>
           <div class="skeleton-cell long"></div>
@@ -32,43 +49,43 @@
         </div>
       </div>
 
-      <!-- Estado vacío con CTA -->
+      <!-- Empty state -->
       <div *ngIf="!loading && filteredOrders.length === 0" class="empty-state">
         <span class="material-symbols-rounded">inbox</span>
         <p>No hay pedidos en esta categoría.</p>
-        <a routerLink="/catalogo" class="btn-cta">Explorar productos</a>
+        <a routerLink="/productos" class="btn-cta">Explorar productos</a>
       </div>
 
-      <!-- Tabla (desktop) -->
+      <!-- Tabla desktop -->
       <table class="orders-table" *ngIf="!loading && filteredOrders.length > 0">
         <thead>
           <tr>
-            <th>PEDIDO</th>
-            <th>AGRICULTOR</th>
-            <th>PRODUCTOS</th>
-            <th>FECHA</th>
-            <th>TOTAL</th>
-            <th>ESTADO</th>
-            <th></th>
+            <th style="min-width:80px">PEDIDO</th>
+            <th style="min-width:180px">AGRICULTOR</th>
+            <th style="min-width:160px; max-width:400px; width:40%">PRODUCTOS</th>
+            <th style="min-width:110px">FECHA</th>
+            <th style="min-width:90px">TOTAL</th>
+            <th style="min-width:130px">ESTADO</th>
+            <th style="min-width:40px"></th>
           </tr>
         </thead>
         <tbody>
-          <ng-container *ngFor="let order of filteredOrders">
-            <tr
-              class="order-row"
-              [class.expanded]="expandedId === order.id"
-              (click)="toggleExpand(order.id)">
-              <td><strong>ORD-{{ order.id }}</strong></td>
+          <ng-container *ngFor="let order of pagedOrders">
+            <tr class="order-row" [class.expanded]="expandedId === order.id" (click)="toggleExpand(order.id)">
+              <td><strong>#{{ order.id }}</strong></td>
               <td>
                 <div class="client-cell">
                   <div class="client-avatar-initial">
                     {{ getFarmerName(order).charAt(0).toUpperCase() }}
                   </div>
-                  {{ getFarmerName(order) }}
+                  <div class="client-cell-info">
+                    <span class="client-name">{{ getFarmerName(order) }}</span>
+                    <span class="client-date">{{ order.created_at | date:'dd/MM/yyyy' }}</span>
+                  </div>
                 </div>
               </td>
               <td class="td-products">{{ getProductosLabel(order) }}</td>
-              <td>{{ order.created_at | date:'dd MMM yyyy' }}</td>
+              <td class="td-date">{{ order.created_at | date:'dd MMM yyyy' }}</td>
               <td><strong>{{ order.total | currency:'EUR':'symbol':'1.2-2' }}</strong></td>
               <td>
                 <span class="status-badge" [ngClass]="statusClasses[order.status]">
@@ -83,6 +100,7 @@
               </td>
             </tr>
 
+            <!-- Detalle expandido -->
             <tr *ngIf="expandedId === order.id" class="detail-row">
               <td colspan="7">
                 <div class="detail-panel">
@@ -95,7 +113,8 @@
                     </div>
                   </div>
                   <p *ngIf="order.notes" class="detail-note">
-                    <span class="material-symbols-rounded">note</span> {{ order.notes }}
+                    <span class="material-symbols-rounded">note</span>
+                    {{ order.notes }}
                   </p>
                 </div>
               </td>
@@ -104,11 +123,11 @@
         </tbody>
       </table>
 
-      <!-- Vista tarjetas (móvil) -->
+      <!-- Tarjetas móvil -->
       <div class="orders-cards" *ngIf="!loading && filteredOrders.length > 0">
-        <div class="order-card" *ngFor="let order of filteredOrders">
+        <div class="order-card" *ngFor="let order of pagedOrders">
           <div class="card-header">
-            <strong>ORD-{{ order.id }}</strong>
+            <strong>#{{ order.id }}</strong>
             <span class="status-badge" [ngClass]="statusClasses[order.status]">
               <span class="material-symbols-rounded status-icon">{{ statusIcons[order.status] }}</span>
               {{ statusLabels[order.status] }}
@@ -119,7 +138,7 @@
               <div class="client-avatar-initial">
                 {{ getFarmerName(order).charAt(0).toUpperCase() }}
               </div>
-              {{ getFarmerName(order) }}
+              <span>{{ getFarmerName(order) }}</span>
             </div>
             <p class="td-products">{{ getProductosLabel(order) }}</p>
           </div>
@@ -128,6 +147,20 @@
             <strong>{{ order.total | currency:'EUR':'symbol':'1.2-2' }}</strong>
           </div>
         </div>
+      </div>
+
+      <!-- Ver más -->
+      <div class="load-more-wrap" *ngIf="!loading && hasMore">
+        <button class="btn-load-more" (click)="cargarMas()">
+          <span class="material-symbols-rounded">expand_more</span>
+          Ver más pedidos
+          <span class="load-more-count">{{ remaining }} restantes</span>
+        </button>
+      </div>
+
+      <!-- Contador -->
+      <div class="results-info" *ngIf="!loading && filteredOrders.length > 0">
+        Mostrando {{ pagedOrders.length }} de {{ filteredOrders.length }} pedidos
       </div>
 
     </div>

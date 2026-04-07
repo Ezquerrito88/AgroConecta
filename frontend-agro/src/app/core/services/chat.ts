@@ -27,9 +27,9 @@ export interface Conversation {
 
 @Injectable({ providedIn: 'root' })
 export class ChatService {
-  private api = `${environment.apiUrl}`;
+  private api = environment.apiUrl;
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient) {}
 
   getConversations(): Observable<Conversation[]> {
     return this.http.get<Conversation[]>(`${this.api}/conversations`);
@@ -44,6 +44,9 @@ export class ChatService {
   }
 
   sendMessage(conversationId: number, content: string): Observable<Message> {
-    return this.http.post<Message>(`${this.api}/conversations/${conversationId}/messages`, { content });
+    return this.http.post<Message>(
+      `${this.api}/conversations/${conversationId}/messages`,
+      { content }
+    );
   }
 }

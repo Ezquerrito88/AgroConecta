@@ -5,28 +5,52 @@
 
     <!-- Topbar -->
     <div class="topbar">
-      <div>
-        <h1 class="page-title">{{ greeting }}<span *ngIf="firstName">, {{ firstName }}</span> </h1>
-        <p class="page-subtitle">Aquí tienes el resumen de tu actividad</p>
+      <div class="topbar-left">
+        <h1 class="page-title">Mi Panel</h1>
+        <p class="page-subtitle">{{ today }}</p>
       </div>
       <div class="topbar-right">
         <div class="search-box">
           <span class="material-symbols-rounded">search</span>
-          <input type="text" placeholder="Buscar productos..." />
+          <input type="text" placeholder="Buscar pedidos, productos..." />
         </div>
-        <button class="icon-btn" routerLink="/comprador/favoritos" title="Favoritos">
+        <a class="icon-btn" routerLink="/comprador/favoritos" title="Favoritos">
           <span class="material-symbols-rounded">favorite</span>
-        </button>
-        <button class="icon-btn" title="Notificaciones">
+        </a>
+        <button class="icon-btn notif-btn" title="Notificaciones">
           <span class="material-symbols-rounded">notifications</span>
         </button>
+        <div class="user-chip">
+          <div class="user-avatar">{{ firstName.charAt(0).toUpperCase() }}</div>
+          <span class="user-name">{{ firstName }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Banner bienvenida -->
+    <div class="welcome-banner">
+      <div>
+        <p class="welcome-title">
+          {{ greeting }}<span *ngIf="firstName">, {{ firstName }}!</span>
+        </p>
+        <p class="welcome-sub">Aquí tienes el resumen de tu actividad. ¿Qué quieres hacer hoy?</p>
+      </div>
+      <div class="welcome-actions">
+        <a routerLink="/productos" class="btn-primary-white">
+          <span class="material-symbols-rounded">storefront</span>
+          Explorar Productos
+        </a>
+        <a routerLink="/comprador/mis-pedidos" class="btn-ghost-white">
+          <span class="material-symbols-rounded">receipt_long</span>
+          Ver Pedidos
+        </a>
       </div>
     </div>
 
     <!-- KPIs -->
     <div class="kpi-grid">
 
-      <!-- Skeleton KPIs -->
+      <!-- Skeleton -->
       <ng-container *ngIf="loadingOrders || loadingFavoritos">
         <div class="kpi-card sk-kpi" *ngFor="let s of [1,2,3,4]">
           <div class="sk-kpi-icon"></div>
@@ -37,42 +61,43 @@
 
       <!-- KPIs reales -->
       <ng-container *ngIf="!loadingOrders && !loadingFavoritos">
-        <div class="kpi-card">
-          <div class="kpi-header">
-            <div class="kpi-icon green">
-              <span class="material-symbols-rounded">receipt_long</span>
-            </div>
-            <span class="kpi-badge positive">total</span>
-          </div>
-          <span class="kpi-value">{{ kpis.pedidos }}</span>
-          <span class="kpi-label">Pedidos realizados</span>
-        </div>
 
-        <div class="kpi-card">
+        <div class="kpi-card kpi-featured">
           <div class="kpi-header">
-            <div class="kpi-icon orange">
+            <div class="kpi-icon-wrap white-icon">
               <span class="material-symbols-rounded">payments</span>
             </div>
-            <span class="kpi-badge positive">acumulado</span>
+            <span class="kpi-badge-white">acumulado</span>
           </div>
-          <span class="kpi-value">{{ kpis.gastado | currency:'EUR':'symbol':'1.0-0' }}</span>
+          <span class="kpi-value">{{ kpis.gastado | currency:'EUR':'symbol':'1.2-2' }}</span>
           <span class="kpi-label">Total gastado</span>
         </div>
 
         <div class="kpi-card">
           <div class="kpi-header">
-            <div class="kpi-icon blue">
+            <div class="kpi-icon-wrap orange">
+              <span class="material-symbols-rounded">receipt_long</span>
+            </div>
+            <span class="kpi-badge positive">+{{ kpis.pedidos }}</span>
+          </div>
+          <span class="kpi-value">{{ kpis.pedidos }}</span>
+          <span class="kpi-label">Pedidos totales</span>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-header">
+            <div class="kpi-icon-wrap blue">
               <span class="material-symbols-rounded">local_shipping</span>
             </div>
             <span class="kpi-badge neutral">en tránsito</span>
           </div>
           <span class="kpi-value">{{ kpis.enCamino }}</span>
-          <span class="kpi-label">Pedidos en camino</span>
+          <span class="kpi-label">En camino</span>
         </div>
 
         <div class="kpi-card">
           <div class="kpi-header">
-            <div class="kpi-icon purple">
+            <div class="kpi-icon-wrap purple">
               <span class="material-symbols-rounded">favorite</span>
             </div>
             <span class="kpi-badge positive">guardados</span>
@@ -80,37 +105,40 @@
           <span class="kpi-value">{{ kpis.favoritos }}</span>
           <span class="kpi-label">Favoritos</span>
         </div>
-      </ng-container>
 
+      </ng-container>
     </div>
 
-    <!-- Accesos rápidos -->
-    <div class="section-card quick-actions-card">
+    <!-- Accesos Rápidos -->
+    <div class="section-card">
       <div class="section-header">
-        <h2>Accesos Rápidos</h2>
+        <div class="section-title-group">
+          <span class="material-symbols-rounded section-icon">bolt</span>
+          <h2>Accesos Rápidos</h2>
+        </div>
       </div>
       <div class="quick-actions-grid">
-        <a
-          *ngFor="let a of quickActions"
-          [routerLink]="a.route"
-          class="quick-action-btn">
+        <a *ngFor="let a of quickActions" [routerLink]="a.route" class="quick-action-btn">
           <span class="material-symbols-rounded">{{ a.icon }}</span>
           {{ a.label }}
         </a>
       </div>
     </div>
 
-    <!-- Pedidos Recientes -->
+    <!-- Últimos Pedidos -->
     <div class="section-card">
       <div class="section-header">
-        <h2>Pedidos Recientes</h2>
+        <div class="section-title-group">
+          <span class="material-symbols-rounded section-icon">receipt_long</span>
+          <h2>Últimos Pedidos</h2>
+        </div>
         <a routerLink="/comprador/mis-pedidos" class="ver-todos">Ver todos →</a>
       </div>
 
-      <!-- Skeleton tabla -->
+      <!-- Skeleton -->
       <div *ngIf="loadingOrders" class="skeleton-list">
         <div class="skeleton-row" *ngFor="let s of skeletons">
-          <div class="skeleton-cell" style="width:32px; height:32px; border-radius:50%;"></div>
+          <div class="skeleton-cell" style="width:32px;height:32px;border-radius:50%;"></div>
           <div class="skeleton-cell medium"></div>
           <div class="skeleton-cell long"></div>
           <div class="skeleton-cell short"></div>
@@ -125,11 +153,12 @@
         <a routerLink="/productos" class="btn-cta-sm">Explorar productos</a>
       </div>
 
+      <!-- Tabla -->
       <table class="orders-table" *ngIf="!loadingOrders && recentOrders.length > 0">
         <thead>
           <tr>
             <th>AGRICULTOR</th>
-            <th>PEDIDO</th>
+            <th>Nº PEDIDO</th>
             <th>PRODUCTOS</th>
             <th>TOTAL</th>
             <th>ESTADO</th>
@@ -142,10 +171,13 @@
                 <div class="client-avatar-initial">
                   {{ getFarmerName(order).charAt(0).toUpperCase() }}
                 </div>
-                {{ getFarmerName(order) }}
+                <div class="client-cell-info">
+                  <span class="client-name">{{ getFarmerName(order) }}</span>
+                  <span class="client-date">{{ order.created_at | date:'dd/MM/yyyy' }}</span>
+                </div>
               </div>
             </td>
-            <td><strong>ORD-{{ order.id }}</strong></td>
+            <td><strong>#{{ order.id }}</strong></td>
             <td class="td-products">{{ getProductosLabel(order) }}</td>
             <td><strong>{{ order.total | currency:'EUR':'symbol':'1.2-2' }}</strong></td>
             <td>
@@ -159,15 +191,18 @@
       </table>
     </div>
 
-    <!-- Favoritos -->
+    <!-- Mis Favoritos -->
     <div class="section-card">
       <div class="section-header">
-        <h2>Mis Favoritos</h2>
+        <div class="section-title-group">
+          <span class="material-symbols-rounded section-icon">favorite</span>
+          <h2>Mis Favoritos</h2>
+        </div>
         <a routerLink="/comprador/favoritos" class="ver-todos">Ver todos →</a>
       </div>
 
-      <!-- Skeleton favoritos -->
-      <div class="top-products-grid" *ngIf="loadingFavoritos">
+      <!-- Skeleton -->
+      <div class="buyer-favorites-grid" *ngIf="loadingFavoritos">
         <div class="product-card sk-product" *ngFor="let s of [1,2,3,4]">
           <div class="sk-prod-img"></div>
           <div class="sk-prod-body">
@@ -184,7 +219,8 @@
         <a routerLink="/productos" class="btn-cta-sm">Descubrir productos</a>
       </div>
 
-      <div class="top-products-grid" *ngIf="!loadingFavoritos && favProducts.length > 0">
+      <!-- Grid -->
+      <div class="buyer-favorites-grid" *ngIf="!loadingFavoritos && favProducts.length > 0">
         <div class="product-card" *ngFor="let p of favProducts"
              [routerLink]="['/producto', p.id]" style="cursor:pointer;">
           <img [src]="getImagen(p)" [alt]="p.name" class="product-img"

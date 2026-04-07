@@ -1,6 +1,6 @@
 <div class="chat-layout">
 
-  <!-- Panel izquierdo: lista de conversaciones -->
+  <!-- Panel izquierdo -->
   <div class="conversations-panel">
     <div class="conversations-header">
       <span>AgroChat</span>
@@ -10,63 +10,106 @@
     </div>
 
     <div class="conversations-list">
-
-      <div
-        *ngFor="let conv of conversations"
-        class="conv-item"
-        [class.active]="selectedConversation?.id === conv.id"
+      <div *ngFor="let conv of conversations" class="conv-item" [class.active]="selectedConversation?.id === conv.id"
         (click)="selectConversation(conv)">
         <div class="conv-avatar">{{ getContactInitial(conv) }}</div>
         <div class="conv-info">
           <span class="conv-name">{{ getContactName(conv) }}</span>
-          <span class="conv-last">{{ conv.last_message?.content | slice:0:35 }}...</span>
+          <span class="conv-last">
+            {{ getLastMessagePreview(conv) | slice:0:35 }}
+            <ng-container *ngIf="getLastMessagePreview(conv).length > 35">...</ng-container>
+          </span>
         </div>
       </div>
 
-      <div *ngIf="conversations.length === 0" class="no-convs">
-        No tienes conversaciones aún
+      <div *ngIf="!loading && conversations.length === 0" class="no-convs">
+        <mat-icon>forum</mat-icon>
+        <p>No tienes conversaciones aún</p>
+      </div>
+
+      <div *ngIf="loading" class="no-convs">
+        <p>Cargando...</p>
       </div>
     </div>
   </div>
 
-  <!-- Panel derecho: ventana de mensajes -->
+  <!-- Panel derecho -->
   <div class="chat-panel">
 
-    <!-- Sin conversación seleccionada -->
     <div *ngIf="!selectedConversation" class="empty-chat">
       <mat-icon>chat_bubble_outline</mat-icon>
       <p>Selecciona una conversación para empezar</p>
     </div>
 
-    <!-- Con conversación seleccionada -->
     <ng-container *ngIf="selectedConversation">
+
+      <!-- Cabecera -->
       <div class="chat-header">
         <div class="conv-avatar">{{ getContactInitial(selectedConversation) }}</div>
-        <span>{{ getContactName(selectedConversation) }}</span>
-      </div>
-
-      <div class="messages-container">
-        <div
-          *ngFor="let msg of messages"
-          class="message-bubble"
-          [class.own]="isOwn(msg)"
-          [class.other]="!isOwn(msg)">
-          <p>{{ msg.content }}</p>
-          <span class="msg-time">{{ msg.created_at | date:'HH:mm' }}</span>
+        <div class="chat-header-info">
+          <span class="chat-header-name">{{ getContactName(selectedConversation) }}</span>
         </div>
       </div>
 
-      <div class="message-input">
-        <input
-          [(ngModel)]="newMessage"
-          (keyup.enter)="send()"
-          placeholder="Escribe un mensaje..."
-          class="input-field" />
-        <button (click)="send()" class="btn-send" [disabled]="!newMessage.trim()">
-          <mat-icon>send</mat-icon>
-        </button>
-      </div>
-    </ng-container>
+      <!-- Mensajes -->
+      <div class="messages-container">
+        <ng-container *ngFor="let msg of messages; let i = index">
 
+          <div *ngIf="showDateSeparator(i)" class="date-separator">
+            <span>{{ formatDateLabel(msg.created_at) }}</span>
+          </div>
+
+          <div class="message-bubble" [class.own]="isOwn(msg)" [class.other]="!isOwn(msg)">
+
+            <!-- Mensaje con producto -->
+            <ng-container *ngIf="isProductMessage(msg); else plainText">
+              <div class="product-card-msg">
+                <img [src]="extractProductImage(msg.content)" alt="Producto" class="product-card-img" loading="lazy" />
+                <div class="product-card-info">
+                  <span class="product-card-name">{{ extractProductName(msg.content) }}</span>
+                  <span class="product-card-price">{{ extractProductPrice(msg.content) }}</span>
+                </div>
+              </div>
+              <p *ngIf="extractProductText(msg.content)">{{ extractProductText(msg.content) }}</p>
+            </ng-container>
+
+            <!-- Mensaje normal -->
+            <ng-template #plainText>
+              <p>{{ msg.content }}</p>
+            </ng-template>
+
+            <span class="msg-time">{{ msg.created_at | date:'HH:mm' }}</span>
+          </div>
+
+        </ng-container>
+      </div>
+
+      <!-- Input -->
+      <div class="message-input">
+
+        <!-- Tarjeta producto pendiente -->
+        <div class="product-preview" *ngIf="pendingProduct">
+          <img [src]="pendingProduct.image" [alt]="pendingProduct.name" class="product-preview-img" />
+          <div class="product-preview-info">
+            <span class="product-preview-name">{{ pendingProduct.name }}</span>
+            <span class="product-preview-price">{{ pendingProduct.price }}€/{{ pendingProduct.unit }}</span>
+          </div>
+          <button class="product-preview-close" (click)="pendingProduct = null" aria-label="Quitar producto">
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+
+        <div class="input-row">
+          <input [(ngModel)]="newMessage" (keyup.enter)="send()" placeholder="Escribe un mensaje..." class="input-field"
+            [disabled]="sendingMessage" />
+          <button (click)="send()" class="btn-send" [disabled]="!newMessage.trim() || sendingMessage"
+            aria-label="Enviar mensaje">
+            <mat-icon>send</mat-icon>
+          </button>
+        </div>
+
+      </div>
+
+    </ng-container>
   </div>
 </div>

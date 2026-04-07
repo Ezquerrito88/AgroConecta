@@ -13,7 +13,8 @@ use App\Http\Controllers\WebhookController;
 use App\Http\Controllers\ConversationController;
 use App\Http\Controllers\FarmerProfileController;
 use App\Http\Controllers\Api\Farmer\DashboardController;
-
+use App\Http\Controllers\UserProfileController;
+use App\Http\Controllers\ReviewController;
 /*
 |--------------------------------------------------------------------------
 | RUTAS PÚBLICAS
@@ -80,7 +81,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/orders/{id}/status', [OrderController::class, 'updateStatus']);
     });
 
-    // CRUD productos (solo el agricultor dueño puede editar/borrar — validado en controller)
+    // CRUD productos
     Route::post('/products',        [ProductController::class, 'store']);
     Route::put('/products/{id}',    [ProductController::class, 'update']);
     Route::delete('/products/{id}', [ProductController::class, 'destroy']);
@@ -98,14 +99,23 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/favorites',        [FavoriteController::class, 'index']);
     Route::post('/favorites/{id}',  [FavoriteController::class, 'toggle']);
 
+    // Perfil de usuario
+    Route::put('/user/profile', [UserProfileController::class, 'update']);
+
+    // Valoraciones
+    Route::get('/reviews/pendientes',  [ReviewController::class, 'pendientes']);
+    Route::get('/reviews/mis-reviews', [ReviewController::class, 'misReviews']);
+    Route::get('/reviews/{id}',        [ReviewController::class, 'show']);
+    Route::post('/reviews',            [ReviewController::class, 'store']);
+
     /*
     |----------------------------------------------------------------------
     | PAGOS
     |----------------------------------------------------------------------
     */
     Route::prefix('payments')->group(function () {
-        Route::post('/stripe/intent',                        [PaymentController::class, 'createStripeIntent']);
-        Route::post('/paypal/orders',                        [PaymentController::class, 'createPaypalOrder']);
+        Route::post('/stripe/intent',                         [PaymentController::class, 'createStripeIntent']);
+        Route::post('/paypal/orders',                         [PaymentController::class, 'createPaypalOrder']);
         Route::post('/paypal/orders/{paypalOrderId}/capture', [PaymentController::class, 'capturePaypalOrder']);
     });
 
@@ -115,9 +125,9 @@ Route::middleware('auth:sanctum')->group(function () {
     |----------------------------------------------------------------------
     */
     Route::prefix('conversations')->group(function () {
-        Route::get('/',                    [ConversationController::class, 'index']);
-        Route::post('/',                   [ConversationController::class, 'store']);
-        Route::get('/{id}/messages',       [ConversationController::class, 'messages']);
-        Route::post('/{id}/messages',      [ConversationController::class, 'sendMessage']);
+        Route::get('/',               [ConversationController::class, 'index']);
+        Route::post('/',              [ConversationController::class, 'store']);
+        Route::get('/{id}/messages',  [ConversationController::class, 'messages']);
+        Route::post('/{id}/messages', [ConversationController::class, 'sendMessage']);
     });
 });
