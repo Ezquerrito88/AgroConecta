@@ -1,0 +1,236 @@
+<div class="page-wrapper">
+
+  <!-- Topbar -->
+  <div class="page-topbar">
+    <div class="page-topbar-left">
+      <div class="page-icon-wrap green">
+        <span class="material-symbols-rounded">inventory_2</span>
+      </div>
+      <div>
+        <h1 class="page-title">Gestión de Productos</h1>
+        <p class="page-subtitle">Modera y administra los productos de la plataforma</p>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <div class="pending-alert" *ngIf="pendingCount() > 0">
+        <span class="material-symbols-rounded">schedule</span>
+        <span><strong>{{ pendingCount() }}</strong> pendiente{{ pendingCount() > 1 ? 's' : '' }} de revisión</span>
+        <button class="pending-btn" (click)="onStatusFilter('pending')">Ver ahora</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filtros -->
+  <div class="filters-card">
+    <div class="filters-left">
+      <div class="search-box">
+        <span class="material-symbols-rounded">search</span>
+        <input type="text" placeholder="Buscar producto o agricultor…"
+          [(ngModel)]="search" (input)="onSearch()" />
+      </div>
+    </div>
+    <div class="filters-right">
+      <button class="filter-chip"          [class.active]="statusFilter === ''"         (click)="onStatusFilter('')">Todos</button>
+      <button class="filter-chip pending"  [class.active]="statusFilter === 'pending'"  (click)="onStatusFilter('pending')">Pendientes</button>
+      <button class="filter-chip approved" [class.active]="statusFilter === 'approved'" (click)="onStatusFilter('approved')">Aprobados</button>
+      <button class="filter-chip rejected" [class.active]="statusFilter === 'rejected'" (click)="onStatusFilter('rejected')">Rechazados</button>
+    </div>
+  </div>
+
+  <!-- Tabla -->
+  <div class="table-card">
+
+    <div class="loading-state" *ngIf="loading()">
+      <span class="material-symbols-rounded loading-icon">progress_activity</span>
+      <p>Cargando productos…</p>
+    </div>
+
+    <div class="empty-state" *ngIf="!loading() && products().length === 0">
+      <span class="material-symbols-rounded empty-icon">inventory_2</span>
+      <p class="empty-title">No se encontraron productos</p>
+      <p class="empty-sub">Prueba con otros filtros</p>
+    </div>
+
+    <div class="table-wrapper" *ngIf="!loading() && products().length > 0">
+      <table>
+        <thead>
+          <tr>
+            <th>Producto</th>
+            <th>Agricultor</th>
+            <th>Categoría</th>
+            <th>Precio</th>
+            <th>Stock</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let product of products()" class="clickable-row"
+            (click)="navigateToEdit(product)">
+
+            <td>
+              <div class="product-cell">
+                <img *ngIf="getImageUrl(product)" [src]="getImageUrl(product)"
+                  [alt]="product.name" class="product-thumb" />
+                <div *ngIf="!getImageUrl(product)" class="product-thumb-placeholder">
+                  <span class="material-symbols-rounded">image_not_supported</span>
+                </div>
+                <div>
+                  <span class="product-name">{{ product.name }}</span>
+                  <span class="product-sub" *ngIf="product.description">
+                    {{ product.description | slice:0:40 }}{{ product.description?.length > 40 ? '…' : '' }}
+                  </span>
+                </div>
+              </div>
+            </td>
+
+            <td>
+              <div class="farmer-cell" *ngIf="product.farmer?.user">
+                <div class="farmer-avatar">{{ getInitials(product.farmer.user.name) }}</div>
+                <div>
+                  <span class="farmer-name">{{ product.farmer.user.name }}</span>
+                  <span class="farmer-farm" *ngIf="product.farmer.farm_name">{{ product.farmer.farm_name }}</span>
+                </div>
+              </div>
+              <span class="text-muted" *ngIf="!product.farmer?.user">—</span>
+            </td>
+
+            <td>
+              <span class="category-chip">{{ product.category?.name || '—' }}</span>
+            </td>
+
+            <td class="text-bold">{{ product.price | currency:'EUR':'symbol':'1.2-2' }}</td>
+
+            <td>
+              <div class="stock-cell">
+                <span class="stock-qty" [class.low-stock]="product.stock_quantity < 5">
+                  {{ product.stock_quantity }}
+                </span>
+                <span class="stock-unit text-muted">{{ product.unit }}</span>
+              </div>
+            </td>
+
+            <td>
+              <span class="status-badge" [ngClass]="getStatusClass(product.moderation_status)">
+                <span class="material-symbols-rounded">{{ getStatusIcon(product.moderation_status) }}</span>
+                {{ getStatusLabel(product.moderation_status) }}
+              </span>
+            </td>
+
+            <td>
+              <div class="actions-row" (click)="$event.stopPropagation()">
+                <!-- EDITAR -->
+                <button class="action-btn edit"
+                  [routerLink]="['/admin/productos', product.id, 'editar']"
+                  title="Editar">
+                  <span class="material-symbols-rounded">edit</span>
+                </button>
+                <!-- APROBAR -->
+                <button *ngIf="product.moderation_status !== 'approved'"
+                  class="action-btn approve"
+                  (click)="openModal('approve', product, $event)" title="Aprobar">
+                  <span class="material-symbols-rounded">check_circle</span>
+                </button>
+                <!-- RECHAZAR -->
+                <button *ngIf="product.moderation_status !== 'rejected'"
+                  class="action-btn reject"
+                  (click)="openModal('reject', product, $event)" title="Rechazar">
+                  <span class="material-symbols-rounded">cancel</span>
+                </button>
+                <!-- ELIMINAR -->
+                <button class="action-btn delete"
+                  (click)="openModal('delete', product, $event)" title="Eliminar">
+                  <span class="material-symbols-rounded">delete</span>
+                </button>
+              </div>
+            </td>
+
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Paginación -->
+    <div class="pagination" *ngIf="pagination() && pagination().last_page > 1">
+      <button class="page-btn" [disabled]="currentPage === 1" (click)="goToPage(currentPage - 1)">
+        <span class="material-symbols-rounded">chevron_left</span>
+      </button>
+      <button *ngFor="let page of getPages()" class="page-btn"
+        [class.active]="page === currentPage" (click)="goToPage(page)">{{ page }}</button>
+      <button class="page-btn" [disabled]="currentPage === pagination().last_page" (click)="goToPage(currentPage + 1)">
+        <span class="material-symbols-rounded">chevron_right</span>
+      </button>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════
+     MODALES
+══════════════════════════════ -->
+<div class="modal-backdrop" *ngIf="modalVisible" (click)="closeModal()">
+  <div class="modal-card" (click)="$event.stopPropagation()">
+
+    <!-- APROBAR -->
+    <ng-container *ngIf="modalType === 'approve'">
+      <div class="modal-icon-wrap success">
+        <span class="material-symbols-rounded">check_circle</span>
+      </div>
+      <h2 class="modal-title">Aprobar producto</h2>
+      <p class="modal-desc">
+        ¿Confirmas que quieres aprobar
+        <strong>{{ selectedProduct()?.name }}</strong>?
+        Será visible en la tienda.
+      </p>
+      <div class="modal-actions">
+        <button class="modal-btn-cancel" (click)="closeModal()">Cancelar</button>
+        <button class="modal-btn-confirm success" (click)="confirmAction()" [disabled]="actionLoading">
+          <span class="material-symbols-rounded">check_circle</span>
+          {{ actionLoading ? 'Aprobando…' : 'Aprobar' }}
+        </button>
+      </div>
+    </ng-container>
+
+    <!-- RECHAZAR -->
+    <ng-container *ngIf="modalType === 'reject'">
+      <div class="modal-icon-wrap warning">
+        <span class="material-symbols-rounded">cancel</span>
+      </div>
+      <h2 class="modal-title">Rechazar producto</h2>
+      <p class="modal-desc">
+        ¿Confirmas que quieres rechazar
+        <strong>{{ selectedProduct()?.name }}</strong>?
+        El agricultor será notificado.
+      </p>
+      <div class="modal-actions">
+        <button class="modal-btn-cancel" (click)="closeModal()">Cancelar</button>
+        <button class="modal-btn-confirm warning" (click)="confirmAction()" [disabled]="actionLoading">
+          <span class="material-symbols-rounded">cancel</span>
+          {{ actionLoading ? 'Rechazando…' : 'Rechazar' }}
+        </button>
+      </div>
+    </ng-container>
+
+    <!-- ELIMINAR -->
+    <ng-container *ngIf="modalType === 'delete'">
+      <div class="modal-icon-wrap danger">
+        <span class="material-symbols-rounded">delete</span>
+      </div>
+      <h2 class="modal-title">Eliminar producto</h2>
+      <p class="modal-desc">
+        ¿Estás seguro de que quieres eliminar
+        <strong>{{ selectedProduct()?.name }}</strong>?
+        Esta acción no se puede deshacer.
+      </p>
+      <div class="modal-actions">
+        <button class="modal-btn-cancel" (click)="closeModal()">Cancelar</button>
+        <button class="modal-btn-confirm danger" (click)="confirmAction()" [disabled]="actionLoading">
+          <span class="material-symbols-rounded">delete</span>
+          {{ actionLoading ? 'Eliminando…' : 'Eliminar' }}
+        </button>
+      </div>
+    </ng-container>
+
+  </div>
+</div>

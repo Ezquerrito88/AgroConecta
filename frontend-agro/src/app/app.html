@@ -15,7 +15,6 @@
         <input type="text" placeholder="¿Qué cosecha buscas hoy?" [(ngModel)]="textoBusquedaGlobal"
           (keyup.enter)="buscarDesdeHeader()" />
       </div>
-
     </div>
 
     <div class="header-actions">
@@ -29,34 +28,44 @@
 
       <ng-container *ngIf="isLoggedIn">
 
-        <ng-container *ngIf="!isFarmer">
+        <!-- COMPRADOR -->
+        <ng-container *ngIf="!isFarmer && !isAdmin">
           <button class="action-btn fav-btn" title="Favoritos" routerLink="/productos/favoritos">
             <i class="far fa-heart"></i>
           </button>
-
           <button class="action-btn bag-btn" title="Mi Cesta" routerLink="/cesta">
             <span class="material-symbols-rounded">shopping_bag</span>
           </button>
         </ng-container>
 
+        <!-- AGRICULTOR -->
         <ng-container *ngIf="isFarmer">
-
           <button class="action-btn orders-btn" routerLink="/agricultor/mis-productos" title="Mis Pedidos">
             <i class="fa-solid fa-box-open"></i>
           </button>
-
           <button class="action-btn add-btn" routerLink="/agricultor/mis-productos/nuevo" title="Subir Producto">
             <i class="fa-solid fa-plus"></i>
           </button>
-
         </ng-container>
 
+        <!-- ADMIN -->
+        <ng-container *ngIf="isAdmin">
+          <button class="action-btn admin-users-btn" routerLink="/admin/usuarios" title="Usuarios">
+            <i class="fa-solid fa-users"></i>
+          </button>
+          <button class="action-btn admin-products-btn" routerLink="/admin/productos" title="Productos">
+            <i class="fa-solid fa-boxes-stacked"></i>
+          </button>
+        </ng-container>
+
+        <!-- BOTÓN PERFIL -->
         <button
           class="action-btn user-btn"
           [class.farmer-style]="isFarmer"
+          [class.admin-style]="isAdmin"
           title="Mi Perfil"
-          [routerLink]="isFarmer ? '/agricultor/dashboard' : '/comprador/dashboard'">
-          <i [class]="isFarmer ? 'fa-solid fa-tractor' : 'fa-regular fa-user'"></i>
+          [routerLink]="isAdmin ? '/admin/dashboard' : (isFarmer ? '/agricultor/dashboard' : '/comprador/dashboard')">
+          <i [class]="isAdmin ? 'fa-solid fa-shield-halved' : (isFarmer ? 'fa-solid fa-tractor' : 'fa-regular fa-user')"></i>
         </button>
 
       </ng-container>

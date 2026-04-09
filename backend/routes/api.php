@@ -15,6 +15,11 @@ use App\Http\Controllers\FarmerProfileController;
 use App\Http\Controllers\Api\Farmer\DashboardController;
 use App\Http\Controllers\UserProfileController;
 use App\Http\Controllers\ReviewController;
+use App\Http\Controllers\Admin\AdminUserController;
+use App\Http\Controllers\Admin\AdminProductController;
+use App\Http\Controllers\Admin\AdminCategoryController;
+use App\Http\Controllers\Admin\AdminStatsController;
+
 /*
 |--------------------------------------------------------------------------
 | RUTAS PÚBLICAS
@@ -33,22 +38,22 @@ Route::post('/login',    [AuthController::class, 'login']);
 
 // Productos públicos
 Route::prefix('products')->group(function () {
-    Route::get('/latest',  [ProductController::class, 'getLatest']);
-    Route::get('/',        [ProductController::class, 'index']);
-    Route::get('/{id}',    [ProductController::class, 'show']);
+    Route::get('/latest', [ProductController::class, 'getLatest']);
+    Route::get('/',       [ProductController::class, 'index']);
+    Route::get('/{id}',   [ProductController::class, 'show']);
 });
 
 // Categorías públicas
 Route::get('/categories',      [CategoryController::class, 'index']);
 Route::get('/categories/{id}', [CategoryController::class, 'show']);
 
-// Webhooks (sin auth, validan firma internamente)
+// Webhooks
 Route::post('/webhooks/stripe', [WebhookController::class, 'handleStripe']);
 Route::post('/webhooks/paypal', [WebhookController::class, 'handlePaypal']);
 
 /*
 |--------------------------------------------------------------------------
-| RUTAS PROTEGIDAS — cualquier usuario autenticado
+| RUTAS PROTEGIDAS
 |--------------------------------------------------------------------------
 */
 Route::middleware('auth:sanctum')->group(function () {
@@ -63,46 +68,37 @@ Route::middleware('auth:sanctum')->group(function () {
     | AGRICULTOR
     |----------------------------------------------------------------------
     */
-    Route::prefix('farmer')->group(function () {
-
-        // Dashboard
+    Route::middleware('farmer')->prefix('farmer')->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'index']);
+        Route::get('/profile',   [FarmerProfileController::class, 'show']);
+        Route::put('/profile',   [FarmerProfileController::class, 'update']);
+        Route::get('/products',  [ProductController::class, 'misProductos']);
 
-        // Perfil
-        Route::get('/profile',  [FarmerProfileController::class, 'show']);
-        Route::put('/profile',  [FarmerProfileController::class, 'update']);
-
-        // Productos del agricultor autenticado
-        Route::get('/products', [ProductController::class, 'misProductos']);
-
-        // Pedidos recibidos
-        Route::get('/orders',             [OrderController::class, 'farmerOrders']);
-        Route::get('/orders/{id}',        [OrderController::class, 'show']);
-        Route::put('/orders/{id}/status', [OrderController::class, 'updateStatus']);
+        Route::get('/orders',              [OrderController::class, 'farmerOrders']);
+        Route::get('/orders/{id}',         [OrderController::class, 'show']);
+        Route::put('/orders/{id}/status',  [OrderController::class, 'updateStatus']);
     });
 
-    // CRUD productos
-    Route::post('/products',        [ProductController::class, 'store']);
-    Route::put('/products/{id}',    [ProductController::class, 'update']);
-    Route::delete('/products/{id}', [ProductController::class, 'destroy']);
-    Route::delete('/products/{productId}/images/{imageId}', [ProductController::class, 'destroyImage']);
+    Route::middleware('farmer')->group(function () {
+        Route::post('/products',        [ProductController::class, 'store']);
+        Route::put('/products/{id}',    [ProductController::class, 'update']);
+        Route::delete('/products/{id}', [ProductController::class, 'destroy']);
+        Route::delete('/products/{productId}/images/{imageId}', [ProductController::class, 'destroyImage']);
+    });
 
     /*
     |----------------------------------------------------------------------
     | COMPRADOR
     |----------------------------------------------------------------------
     */
-    Route::post('/orders',       [OrderController::class, 'store']);
-    Route::get('/buyer/orders',  [OrderController::class, 'buyerOrders']);
+    Route::post('/orders',      [OrderController::class, 'store']);
+    Route::get('/buyer/orders', [OrderController::class, 'buyerOrders']);
 
-    // Favoritos
-    Route::get('/favorites',        [FavoriteController::class, 'index']);
-    Route::post('/favorites/{id}',  [FavoriteController::class, 'toggle']);
+    Route::get('/favorites',       [FavoriteController::class, 'index']);
+    Route::post('/favorites/{id}', [FavoriteController::class, 'toggle']);
 
-    // Perfil de usuario
     Route::put('/user/profile', [UserProfileController::class, 'update']);
 
-    // Valoraciones
     Route::get('/reviews/pendientes',  [ReviewController::class, 'pendientes']);
     Route::get('/reviews/mis-reviews', [ReviewController::class, 'misReviews']);
     Route::get('/reviews/{id}',        [ReviewController::class, 'show']);
@@ -129,5 +125,40 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/',              [ConversationController::class, 'store']);
         Route::get('/{id}/messages',  [ConversationController::class, 'messages']);
         Route::post('/{id}/messages', [ConversationController::class, 'sendMessage']);
+    });
+
+    /*
+    |----------------------------------------------------------------------
+    | ADMIN
+    |----------------------------------------------------------------------
+    */
+    Route::middleware('admin')->prefix('admin')->group(function () {
+
+        // Estadísticas
+        Route::get('/stats', [AdminStatsController::class, 'index']);
+
+        // Usuarios
+        Route::get('/users',               [AdminUserController::class, 'index']);
+        Route::get('/users/{id}',          [AdminUserController::class, 'show']);
+        Route::patch('/users/{id}/role',   [AdminUserController::class, 'updateRole']);
+        Route::patch('/users/{id}/toggle', [AdminUserController::class, 'toggleActive']);
+        Route::delete('/users/{id}',       [AdminUserController::class, 'destroy']);
+        Route::put('/users/{id}',          [AdminUserController::class, 'updateUser']);
+
+        // Productos
+        Route::get('/products',                          [AdminProductController::class, 'index']);
+        Route::get('/products/{id}',                     [AdminProductController::class, 'show']);
+        Route::put('/products/{id}',                     [AdminProductController::class, 'update']);
+        Route::patch('/products/{id}/approve',           [AdminProductController::class, 'approve']);
+        Route::patch('/products/{id}/reject',            [AdminProductController::class, 'reject']);
+        Route::delete('/products/{id}',                  [AdminProductController::class, 'destroy']);
+        Route::post('/products/{id}/images',             [AdminProductController::class, 'uploadImages']);
+        Route::delete('/products/{id}/images/{imageId}', [AdminProductController::class, 'destroyImage']);
+
+        // Categorías
+        Route::get('/categories',         [AdminCategoryController::class, 'index']);
+        Route::post('/categories',        [AdminCategoryController::class, 'store']);
+        Route::put('/categories/{id}',    [AdminCategoryController::class, 'update']);
+        Route::delete('/categories/{id}', [AdminCategoryController::class, 'destroy']);
     });
 });

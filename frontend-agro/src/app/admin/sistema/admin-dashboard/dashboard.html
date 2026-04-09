@@ -1,0 +1,252 @@
+<!-- dashboard.html -->
+<div class="page-wrapper">
+
+  <!-- ── TOPBAR ── -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <h1 class="page-title">Mi Panel</h1>
+      <span class="page-subtitle">{{ today | date:"EEEE, d 'de' MMMM" : undefined : 'es' }}</span>
+    </div>
+    <div class="topbar-right">
+      <div class="user-chip">
+        <div class="user-avatar">{{ user?.name?.charAt(0)?.toUpperCase() || 'A' }}</div>
+        <span class="user-name">{{ user?.name?.split(' ')[0] || 'Admin' }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── CONTENIDO ── -->
+  <div class="page-content">
+
+    <!-- ── WELCOME BANNER ── -->
+    <div class="welcome-banner">
+      <div class="welcome-text">
+        <h2 class="welcome-title">¡Hola, {{ user?.name?.split(' ')[0] }}!</h2>
+        <p class="welcome-sub">Aquí tienes el resumen de la plataforma. ¿Qué quieres gestionar hoy?</p>
+      </div>
+      <div class="welcome-actions">
+        <button class="btn-primary-white" routerLink="/admin/usuarios">
+          <span class="material-symbols-rounded">group</span>
+          Gestionar Usuarios
+        </button>
+        <button class="btn-ghost-white" routerLink="/admin/productos">
+          <span class="material-symbols-rounded">inventory_2</span>
+          Ver Productos
+        </button>
+      </div>
+    </div>
+
+    <!-- ── ALERT productos pendientes ── -->
+    <div class="alert-banner" *ngIf="!isLoading && stats()?.products?.pending > 0">
+      <span class="material-symbols-rounded alert-icon">warning</span>
+      <div class="alert-text">
+        <strong>
+          {{ stats().products.pending }} producto{{ stats().products.pending > 1 ? 's' : '' }}
+          pendiente{{ stats().products.pending > 1 ? 's' : '' }} de moderación.
+        </strong>
+        Revísalos para que los agricultores puedan vender.
+      </div>
+      <a routerLink="/admin/productos" class="btn-alert">Revisar ahora →</a>
+    </div>
+
+    <!-- ── KPIs — 2 filas de 4 ── -->
+    <div class="kpi-grid">
+
+      <!-- Fila 1 -->
+      <div class="kpi-card kpi-featured">
+        <div class="kpi-header">
+          <div class="kpi-icon-wrap white-icon">
+            <span class="material-symbols-rounded">group</span>
+          </div>
+          <span class="kpi-badge kpi-badge-white">+{{ stats()?.users?.new_month || 0 }} este mes</span>
+        </div>
+        <span class="kpi-value" *ngIf="!isLoading">{{ stats()?.users?.total || 0 }}</span>
+        <div class="sk-line medium sk-shimmer-bg" *ngIf="isLoading"></div>
+        <span class="kpi-label">👥 Usuarios totales</span>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-header">
+          <div class="kpi-icon-wrap green">
+            <span class="material-symbols-rounded">inventory_2</span>
+          </div>
+          <span class="kpi-badge positive">{{ stats()?.products?.approved || 0 }} aprobados</span>
+        </div>
+        <span class="kpi-value" *ngIf="!isLoading">{{ stats()?.products?.total || 0 }}</span>
+        <div class="sk-line short sk-shimmer-bg" *ngIf="isLoading"></div>
+        <span class="kpi-label">📦 Productos totales</span>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-header">
+          <div class="kpi-icon-wrap purple">
+            <span class="material-symbols-rounded">receipt_long</span>
+          </div>
+          <span class="kpi-badge">{{ stats()?.orders?.month || 0 }} este mes</span>
+        </div>
+        <span class="kpi-value" *ngIf="!isLoading">{{ stats()?.orders?.total || 0 }}</span>
+        <div class="sk-line short sk-shimmer-bg" *ngIf="isLoading"></div>
+        <span class="kpi-label">🛒 Pedidos totales</span>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-header">
+          <div class="kpi-icon-wrap blue">
+            <span class="material-symbols-rounded">euro</span>
+          </div>
+          <span class="kpi-badge">
+            {{ stats()?.orders?.revenue_month || 0 | currency:'EUR':'symbol':'1.0-0' }} este mes
+          </span>
+        </div>
+        <span class="kpi-value" *ngIf="!isLoading">
+          {{ stats()?.orders?.revenue_total || 0 | currency:'EUR':'symbol':'1.0-0' }}
+        </span>
+        <div class="sk-line medium sk-shimmer-bg" *ngIf="isLoading"></div>
+        <span class="kpi-label">💰 Ingresos totales</span>
+      </div>
+
+      <!-- Fila 2 -->
+      <div class="kpi-card">
+        <div class="kpi-header">
+          <div class="kpi-icon-wrap orange">
+            <span class="material-symbols-rounded">agriculture</span>
+          </div>
+        </div>
+        <span class="kpi-value" *ngIf="!isLoading">{{ stats()?.users?.farmers || 0 }}</span>
+        <div class="sk-line short sk-shimmer-bg" *ngIf="isLoading"></div>
+        <span class="kpi-label">🌱 Agricultores</span>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-header">
+          <div class="kpi-icon-wrap yellow">
+            <span class="material-symbols-rounded">shopping_bag</span>
+          </div>
+        </div>
+        <span class="kpi-value" *ngIf="!isLoading">{{ stats()?.users?.buyers || 0 }}</span>
+        <div class="sk-line short sk-shimmer-bg" *ngIf="isLoading"></div>
+        <span class="kpi-label">🛍️ Compradores</span>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-header">
+          <div class="kpi-icon-wrap teal">
+            <span class="material-symbols-rounded">category</span>
+          </div>
+        </div>
+        <span class="kpi-value" *ngIf="!isLoading">{{ stats()?.categories?.total || 0 }}</span>
+        <div class="sk-line short sk-shimmer-bg" *ngIf="isLoading"></div>
+        <span class="kpi-label">🏷️ Categorías</span>
+      </div>
+
+      <div
+        class="kpi-card"
+        [class.kpi-danger]="stats()?.products?.pending > 0"
+      >
+        <div class="kpi-header">
+          <div
+            class="kpi-icon-wrap"
+            [class.red]="stats()?.products?.pending > 0"
+            [class.green]="!stats()?.products?.pending || stats()?.products?.pending === 0"
+          >
+            <span class="material-symbols-rounded">
+              {{ stats()?.products?.pending > 0 ? 'schedule' : 'check_circle' }}
+            </span>
+          </div>
+        </div>
+        <span class="kpi-value" *ngIf="!isLoading">{{ stats()?.products?.pending || 0 }}</span>
+        <div class="sk-line short sk-shimmer-bg" *ngIf="isLoading"></div>
+        <span class="kpi-label">⏳ Pendientes moderación</span>
+      </div>
+
+    </div>
+
+    <!-- ── DOS COLUMNAS ── -->
+    <div class="two-col">
+
+      <!-- Usuarios recientes -->
+      <div class="section-card">
+        <div class="section-header">
+          <div class="section-title-group">
+            <span class="material-symbols-rounded section-icon">group</span>
+            <h2>Usuarios Recientes</h2>
+          </div>
+          <a routerLink="/admin/usuarios" class="ver-todos">Ver todos →</a>
+        </div>
+
+        <div class="loading-state" *ngIf="isLoading">
+          <span class="material-symbols-rounded loading-icon">progress_activity</span>
+        </div>
+
+        <div class="users-list" *ngIf="!isLoading">
+          <div class="empty-state" *ngIf="recentUsers().length === 0">
+            <span class="material-symbols-rounded empty-icon">person_off</span>
+            <p>Sin usuarios recientes</p>
+          </div>
+          <div class="user-row" *ngFor="let u of recentUsers()">
+            <div class="user-cell">
+              <div class="user-avatar-sm">{{ u.name?.charAt(0)?.toUpperCase() }}</div>
+              <div class="user-cell-info">
+                <span class="user-cell-name">{{ u.name }}</span>
+                <span class="user-cell-email">{{ u.email }}</span>
+              </div>
+            </div>
+            <span class="role-badge" [ngClass]="getRoleBadgeClass(u.role)">
+              <span class="material-symbols-rounded">{{ getRoleIcon(u.role) }}</span>
+              {{ getRoleLabel(u.role) }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Últimos productos -->
+      <div class="section-card">
+        <div class="section-header">
+          <div class="section-title-group">
+            <span class="material-symbols-rounded section-icon green-icon">inventory_2</span>
+            <h2>Últimos Productos</h2>
+          </div>
+          <a routerLink="/admin/productos" class="ver-todos">Ver todos →</a>
+        </div>
+
+        <div class="loading-state" *ngIf="isLoading">
+          <span class="material-symbols-rounded loading-icon">progress_activity</span>
+        </div>
+
+        <div class="products-list" *ngIf="!isLoading">
+          <div class="empty-state" *ngIf="latestProds().length === 0">
+            <span class="material-symbols-rounded empty-icon">inventory_2</span>
+            <p>Sin productos recientes</p>
+          </div>
+          <div class="product-row" *ngFor="let p of latestProds()">
+            <div class="product-cell">
+              <div class="product-thumb-wrap">
+                <img
+                  *ngIf="getProductThumb(p); else noThumb"
+                  [src]="getProductThumb(p)"
+                  [alt]="p.name"
+                  class="product-thumb"
+                  (error)="$any($event.target).src='assets/img/placeholder.jpg'"
+                />
+                <ng-template #noThumb>
+                  <div class="product-thumb-placeholder">
+                    <span class="material-symbols-rounded">image_not_supported</span>
+                  </div>
+                </ng-template>
+              </div>
+              <div class="product-cell-info">
+                <span class="product-cell-name">{{ p.name }}</span>
+                <span class="product-cell-farmer">{{ p.farmer?.user?.name || '—' }}</span>
+              </div>
+            </div>
+            <span class="status-badge" [ngClass]="getStatusClass(p.moderation_status)">
+              <span class="material-symbols-rounded">{{ getStatusIcon(p.moderation_status) }}</span>
+              {{ getStatusLabel(p.moderation_status) }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div><!-- /page-content -->
+</div><!-- /page-wrapper -->

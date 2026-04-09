@@ -2,15 +2,15 @@ import { HttpInterceptorFn } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
-  
-  const token = localStorage.getItem('token'); 
+
+  const token = localStorage.getItem('token');
 
   const isApiUrl = req.url.startsWith(environment.apiUrl) || req.url.includes('127.0.0.1:8000');
 
   // Rutas públicas — no inyectar token aunque haya sesión activa
-  const rutasPublicas = ['/products/latest', '/products/featured', '/categories', '/health'];
-  const esPublica = rutasPublicas.some(ruta => req.url.includes(ruta));
-
+  const rutasPublicas = ['/products/latest', '/products/featured', '/health'];
+  const esPublica = rutasPublicas.some(ruta => req.url.includes(ruta))
+    || (req.url.includes('/categories') && !req.url.includes('/admin'));
   if (token && isApiUrl && !esPublica) {
     const cloned = req.clone({
       setHeaders: {

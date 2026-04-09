@@ -19,7 +19,8 @@ class Product extends Model
         'price',
         'unit',
         'stock_quantity',
-        'moderation_status'
+        'moderation_status',
+        'rejection_reason',
     ];
 
     protected $casts = [

@@ -1,0 +1,424 @@
+<div class="page-wrapper">
+
+  <div class="page-topbar">
+    <div class="page-topbar-left">
+      <div class="page-icon-wrap">
+        <span class="material-symbols-rounded">group</span>
+      </div>
+      <div>
+        <h1 class="page-title">Gestión de Usuarios</h1>
+        <p class="page-subtitle">Administra los usuarios de la plataforma</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-content">
+
+    <!-- Filtros -->
+    <div class="filters-card">
+      <div class="filters-left">
+        <div class="search-box">
+          <span class="material-symbols-rounded">search</span>
+          <input type="text" placeholder="Buscar por nombre o email…"
+            [(ngModel)]="search" (input)="onSearch()" />
+        </div>
+      </div>
+      <div class="filters-right">
+        <button class="filter-chip"        [class.active]="roleFilter === ''"       (click)="onRoleFilter('')">Todos</button>
+        <button class="filter-chip farmer" [class.active]="roleFilter === 'farmer'" (click)="onRoleFilter('farmer')">Agricultores</button>
+        <button class="filter-chip buyer"  [class.active]="roleFilter === 'buyer'"  (click)="onRoleFilter('buyer')">Compradores</button>
+        <button class="filter-chip admin"  [class.active]="roleFilter === 'admin'"  (click)="onRoleFilter('admin')">Admins</button>
+      </div>
+    </div>
+
+    <!-- Hint dinámico -->
+    <div class="view-hint farmer-hint" *ngIf="roleFilter === 'farmer'">
+      <span class="material-symbols-rounded">info</span>
+      Vista de Agricultor — explotación, verificación y ubicación
+    </div>
+    <div class="view-hint buyer-hint" *ngIf="roleFilter === 'buyer'">
+      <span class="material-symbols-rounded">info</span>
+      Vista de Comprador — datos de envío y estado de cuenta
+    </div>
+
+    <!-- Tabla -->
+    <div class="table-card">
+
+      <div class="loading-state" *ngIf="loading()">
+        <span class="material-symbols-rounded loading-icon">progress_activity</span>
+        <p>Cargando usuarios…</p>
+      </div>
+
+      <div class="empty-state" *ngIf="!loading() && users().length === 0">
+        <span class="material-symbols-rounded empty-icon">person_off</span>
+        <p class="empty-title">No se encontraron usuarios</p>
+        <p class="empty-sub">Prueba con otros filtros de búsqueda</p>
+      </div>
+
+      <div class="table-wrapper" *ngIf="!loading() && users().length > 0">
+        <table>
+
+          <!-- CABECERA ALL / ADMIN -->
+          <thead *ngIf="viewMode === 'all' || viewMode === 'admin'">
+            <tr>
+              <th>Usuario</th>
+              <th>Email</th>
+              <th>Rol</th>
+              <th>Estado</th>
+              <th>Registro</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+
+          <!-- CABECERA FARMER -->
+          <thead *ngIf="viewMode === 'farmer'">
+            <tr>
+              <th>Agricultor</th>
+              <th>Explotación</th>
+              <th>Ciudad</th>
+              <th>Verificación</th>
+              <th>Teléfono</th>
+              <th>Bio</th>
+              <th>Estado</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+
+          <!-- CABECERA BUYER -->
+          <thead *ngIf="viewMode === 'buyer'">
+            <tr>
+              <th>Comprador</th>
+              <th>Teléfono</th>
+              <th>Dirección</th>
+              <th>Email verificado</th>
+              <th>Estado</th>
+              <th>Registro</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr *ngFor="let u of users()">
+
+              <!-- VISTA ALL / ADMIN -->
+              <ng-container *ngIf="viewMode === 'all' || viewMode === 'admin'">
+                <td>
+                  <div class="user-cell">
+                    <div class="user-avatar" [ngClass]="'avatar-' + u.role">{{ u.name?.charAt(0)?.toUpperCase() }}</div>
+                    <span class="user-name">{{ u.name }}</span>
+                  </div>
+                </td>
+                <td class="text-muted">{{ u.email }}</td>
+                <td>
+                  <span class="role-badge" [ngClass]="getRoleBadgeClass(u.role)">
+                    {{ getRoleLabel(u.role) }}
+                  </span>
+                </td>
+                <td>
+                  <span class="status-pill" [class.active]="u.is_active" [class.inactive]="!u.is_active">
+                    <span class="status-dot"></span>
+                    {{ u.is_active ? 'Activo' : 'Inactivo' }}
+                  </span>
+                </td>
+                <td class="text-muted text-sm">{{ u.created_at | date:'dd/MM/yyyy' }}</td>
+                <td>
+                  <div class="actions-row">
+                    <button class="action-btn edit"   (click)="openEdit(u)"   title="Editar"><span class="material-symbols-rounded">edit</span></button>
+                    <button class="action-btn toggle" (click)="openToggle(u)" [title]="u.is_active ? 'Desactivar' : 'Activar'">
+                      <span class="material-symbols-rounded">{{ u.is_active ? 'block' : 'check_circle' }}</span>
+                    </button>
+                    <button class="action-btn delete" (click)="openDelete(u)" title="Eliminar"><span class="material-symbols-rounded">delete</span></button>
+                  </div>
+                </td>
+              </ng-container>
+
+              <!-- VISTA FARMER -->
+              <ng-container *ngIf="viewMode === 'farmer'">
+                <td>
+                  <div class="user-cell">
+                    <div class="user-avatar avatar-farmer">{{ u.name?.charAt(0)?.toUpperCase() }}</div>
+                    <div>
+                      <span class="user-name">{{ u.name }}</span>
+                      <span class="user-sub">{{ u.email }}</span>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <span class="farm-name" *ngIf="u.farmer?.farm_name">{{ u.farmer.farm_name }}</span>
+                  <span class="text-muted text-sm" *ngIf="!u.farmer?.farm_name">—</span>
+                </td>
+                <td>
+                  <div class="location-cell" *ngIf="u.farmer?.city">
+                    <span class="material-symbols-rounded location-icon">location_on</span>
+                    {{ u.farmer.city }}
+                  </div>
+                  <span class="text-muted text-sm" *ngIf="!u.farmer?.city">—</span>
+                </td>
+                <td>
+                  <span class="verified-badge" [class.verified]="u.farmer?.is_verified" [class.pending]="!u.farmer?.is_verified">
+                    <span class="material-symbols-rounded">{{ u.farmer?.is_verified ? 'verified' : 'schedule' }}</span>
+                    {{ u.farmer?.is_verified ? 'Verificado' : 'Pendiente' }}
+                  </span>
+                </td>
+                <td class="text-muted text-sm">{{ u.phone || '—' }}</td>
+                <td>
+                  <span class="bio-text" *ngIf="u.farmer?.bio" [title]="u.farmer.bio">
+                    {{ u.farmer.bio | slice:0:50 }}{{ u.farmer.bio.length > 50 ? '…' : '' }}
+                  </span>
+                  <span class="text-muted text-sm" *ngIf="!u.farmer?.bio">—</span>
+                </td>
+                <td>
+                  <span class="status-pill" [class.active]="u.is_active" [class.inactive]="!u.is_active">
+                    <span class="status-dot"></span>
+                    {{ u.is_active ? 'Activo' : 'Inactivo' }}
+                  </span>
+                </td>
+                <td>
+                  <div class="actions-row">
+                    <button class="action-btn edit"   (click)="openEdit(u)"   title="Editar"><span class="material-symbols-rounded">edit</span></button>
+                    <button class="action-btn toggle" (click)="openToggle(u)" [title]="u.is_active ? 'Desactivar' : 'Activar'">
+                      <span class="material-symbols-rounded">{{ u.is_active ? 'block' : 'check_circle' }}</span>
+                    </button>
+                    <button class="action-btn delete" (click)="openDelete(u)" title="Eliminar"><span class="material-symbols-rounded">delete</span></button>
+                  </div>
+                </td>
+              </ng-container>
+
+              <!-- VISTA BUYER -->
+              <ng-container *ngIf="viewMode === 'buyer'">
+                <td>
+                  <div class="user-cell">
+                    <div class="user-avatar avatar-buyer">{{ u.name?.charAt(0)?.toUpperCase() }}</div>
+                    <div>
+                      <span class="user-name">{{ u.name }}</span>
+                      <span class="user-sub">{{ u.email }}</span>
+                    </div>
+                  </div>
+                </td>
+                <td class="text-muted text-sm">{{ u.phone || '—' }}</td>
+                <td>
+                  <div class="location-cell" *ngIf="u.address">
+                    <span class="material-symbols-rounded location-icon">home</span>
+                    {{ u.address }}
+                  </div>
+                  <span class="text-muted text-sm" *ngIf="!u.address">—</span>
+                </td>
+                <td>
+                  <span class="verified-badge" [class.verified]="isEmailVerified(u)" [class.pending]="!isEmailVerified(u)">
+                    <span class="material-symbols-rounded">{{ isEmailVerified(u) ? 'mark_email_read' : 'mail_off' }}</span>
+                    {{ isEmailVerified(u) ? 'Verificado' : 'Sin verificar' }}
+                  </span>
+                </td>
+                <td>
+                  <span class="status-pill" [class.active]="u.is_active" [class.inactive]="!u.is_active">
+                    <span class="status-dot"></span>
+                    {{ u.is_active ? 'Activo' : 'Inactivo' }}
+                  </span>
+                </td>
+                <td class="text-muted text-sm">{{ u.created_at | date:'dd/MM/yyyy' }}</td>
+                <td>
+                  <div class="actions-row">
+                    <button class="action-btn edit"   (click)="openEdit(u)"   title="Editar"><span class="material-symbols-rounded">edit</span></button>
+                    <button class="action-btn toggle" (click)="openToggle(u)" [title]="u.is_active ? 'Desactivar' : 'Activar'">
+                      <span class="material-symbols-rounded">{{ u.is_active ? 'block' : 'check_circle' }}</span>
+                    </button>
+                    <button class="action-btn delete" (click)="openDelete(u)" title="Eliminar"><span class="material-symbols-rounded">delete</span></button>
+                  </div>
+                </td>
+              </ng-container>
+
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Paginación -->
+      <div class="pagination" *ngIf="pagination() && pagination().last_page > 1">
+        <button class="page-btn" [disabled]="currentPage === 1" (click)="goToPage(currentPage - 1)">
+          <span class="material-symbols-rounded">chevron_left</span>
+        </button>
+        <button *ngFor="let page of getPages()" class="page-btn"
+          [class.active]="page === currentPage" (click)="goToPage(page)">{{ page }}</button>
+        <button class="page-btn" [disabled]="currentPage === pagination().last_page" (click)="goToPage(currentPage + 1)">
+          <span class="material-symbols-rounded">chevron_right</span>
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════
+     MODALES
+══════════════════════════════ -->
+<div class="modal-backdrop" *ngIf="modalVisible" (click)="closeModal()">
+  <div class="modal-card"
+    [class.modal-card--wide]="modalType === 'edit'"
+    (click)="$event.stopPropagation()">
+
+    <!-- ── ELIMINAR ── -->
+    <ng-container *ngIf="modalType === 'delete'">
+      <div class="modal-icon-wrap danger">
+        <span class="material-symbols-rounded">delete</span>
+      </div>
+      <h2 class="modal-title">Eliminar usuario</h2>
+      <p class="modal-desc">
+        ¿Estás seguro de que quieres eliminar a <strong>{{ selected()?.name }}</strong>?
+        Esta acción no se puede deshacer.
+      </p>
+      <div class="modal-actions">
+        <button class="modal-btn-cancel" (click)="closeModal()">Cancelar</button>
+        <button class="modal-btn-confirm danger" (click)="confirmAction()" [disabled]="actionLoading">
+          <span class="material-symbols-rounded">delete</span>
+          {{ actionLoading ? 'Eliminando…' : 'Eliminar' }}
+        </button>
+      </div>
+    </ng-container>
+
+    <!-- ── TOGGLE ── -->
+    <ng-container *ngIf="modalType === 'toggle'">
+      <div class="modal-icon-wrap"
+        [class.warning]="selected()?.is_active"
+        [class.success]="!selected()?.is_active">
+        <span class="material-symbols-rounded">{{ selected()?.is_active ? 'block' : 'check_circle' }}</span>
+      </div>
+      <h2 class="modal-title">{{ selected()?.is_active ? 'Desactivar' : 'Activar' }} usuario</h2>
+      <p class="modal-desc">
+        ¿Confirmas que quieres
+        <strong>{{ selected()?.is_active ? 'desactivar' : 'activar' }}</strong>
+        la cuenta de <strong>{{ selected()?.name }}</strong>?
+      </p>
+      <div class="modal-actions">
+        <button class="modal-btn-cancel" (click)="closeModal()">Cancelar</button>
+        <button class="modal-btn-confirm"
+          [class.warning]="selected()?.is_active"
+          [class.success]="!selected()?.is_active"
+          (click)="confirmAction()" [disabled]="actionLoading">
+          <span class="material-symbols-rounded">{{ selected()?.is_active ? 'block' : 'check_circle' }}</span>
+          {{ actionLoading ? 'Guardando…' : (selected()?.is_active ? 'Desactivar' : 'Activar') }}
+        </button>
+      </div>
+    </ng-container>
+
+    <!-- ── EDITAR ── -->
+    <ng-container *ngIf="modalType === 'edit'">
+
+      <div class="modal-icon-wrap"
+        [class.blue]="selected()?.role === 'admin' || selected()?.role === 'buyer'"
+        [class.green-wrap]="selected()?.role === 'farmer'">
+        <span class="material-symbols-rounded">{{ getRoleIcon(selected()?.role) }}</span>
+      </div>
+      <h2 class="modal-title">Editar {{ getRoleLabel(selected()?.role) }}</h2>
+      <p class="modal-desc">Modifica los datos de <strong>{{ selected()?.name }}</strong></p>
+
+      <form class="edit-form" (ngSubmit)="confirmAction()">
+
+        <!-- Solo farmer: datos explotación -->
+        <ng-container *ngIf="selected()?.role === 'farmer'">
+          <div class="form-section-title">
+            <span class="material-symbols-rounded">storefront</span>
+            Datos de la explotación
+          </div>
+          <div class="form-group">
+            <label class="form-label">Nombre explotación</label>
+            <input class="form-input" type="text" [(ngModel)]="editForm.farm_name" name="farm_name" placeholder="Ej: Huerta Los Pinos" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Ciudad</label>
+            <input class="form-input" type="text" [(ngModel)]="editForm.city" name="city" placeholder="Ej: Logroño" />
+          </div>
+          <div class="form-group full">
+            <label class="form-label">Bio</label>
+            <textarea class="form-input form-textarea" [(ngModel)]="editForm.bio" name="bio" placeholder="Breve descripción del productor…" rows="2"></textarea>
+          </div>
+          <div class="form-group full">
+            <label class="form-label">Verificación</label>
+            <button type="button" class="toggle-status-btn" [class.is-active]="editForm.is_verified" (click)="editForm.is_verified = !editForm.is_verified">
+              <span class="toggle-track"><span class="toggle-thumb"></span></span>
+              <span>{{ editForm.is_verified ? '✅ Verificado' : '🟡 Pendiente de verificación' }}</span>
+            </button>
+          </div>
+        </ng-container>
+
+        <!-- Solo buyer: dirección -->
+        <ng-container *ngIf="selected()?.role === 'buyer'">
+          <div class="form-section-title">
+            <span class="material-symbols-rounded">local_shipping</span>
+            Datos de envío
+          </div>
+          <div class="form-group full">
+            <label class="form-label">Dirección de envío</label>
+            <input class="form-input" type="text" [(ngModel)]="editForm.address" name="address" placeholder="Ej: Calle Mayor 12, Logroño" />
+          </div>
+        </ng-container>
+
+        <!-- Todos: datos cuenta -->
+        <div class="form-section-title">
+          <span class="material-symbols-rounded">person</span>
+          Datos de la cuenta
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Nombre</label>
+          <input class="form-input" type="text" [(ngModel)]="editForm.name" name="name" required />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Teléfono</label>
+          <input class="form-input" type="tel" [(ngModel)]="editForm.phone" name="phone" placeholder="Ej: 644 974 258" />
+        </div>
+
+        <div class="form-group full">
+          <label class="form-label">Email</label>
+          <input class="form-input" type="email" [(ngModel)]="editForm.email" name="email" required />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Rol</label>
+          <div class="form-select-wrap" [attr.data-role]="editForm.role">
+            <select class="form-select" [(ngModel)]="editForm.role" name="role">
+              <option value="buyer">Comprador</option>
+              <option value="farmer">Agricultor</option>
+              <option value="admin">Admin</option>
+            </select>
+            <span class="material-symbols-rounded select-arrow">expand_more</span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Estado</label>
+          <button type="button" class="toggle-status-btn" [class.is-active]="editForm.is_active" (click)="editForm.is_active = !editForm.is_active">
+            <span class="toggle-track"><span class="toggle-thumb"></span></span>
+            <span>{{ editForm.is_active ? 'Activo' : 'Inactivo' }}</span>
+          </button>
+        </div>
+
+        <div class="form-group full">
+          <label class="form-label">
+            Nueva contraseña
+            <span class="form-label-hint">(dejar vacío para no cambiar)</span>
+          </label>
+          <div class="input-password-wrap">
+            <input class="form-input" [type]="showPassword ? 'text' : 'password'"
+              [(ngModel)]="editForm.password" name="password" placeholder="Mínimo 8 caracteres" />
+            <button type="button" class="toggle-password" (click)="showPassword = !showPassword">
+              <span class="material-symbols-rounded">{{ showPassword ? 'visibility_off' : 'visibility' }}</span>
+            </button>
+          </div>
+        </div>
+
+      </form>
+
+      <div class="modal-actions">
+        <button class="modal-btn-cancel" (click)="closeModal()">Cancelar</button>
+        <button class="modal-btn-confirm"
+          [class.blue]="selected()?.role !== 'farmer'"
+          [class.green-btn]="selected()?.role === 'farmer'"
+          (click)="confirmAction()" [disabled]="actionLoading">
+          <span class="material-symbols-rounded">save</span>
+          {{ actionLoading ? 'Guardando…' : 'Guardar cambios' }}
+        </button>
+      </div>
+
+    </ng-container>
+  </div>
+</div>

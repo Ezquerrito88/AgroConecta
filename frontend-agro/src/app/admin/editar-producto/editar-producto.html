@@ -1,0 +1,366 @@
+<!-- Topbar -->
+<div class="topbar">
+  <div class="topbar-left">
+    <button class="btn-back" [routerLink]="['/admin/productos']">
+      <span class="material-symbols-rounded">arrow_back</span>
+    </button>
+    <div>
+      <h1 class="page-title">Editar Producto</h1>
+      <p class="page-subtitle">{{ producto?.name || 'Cargando…' }}</p>
+    </div>
+  </div>
+  <div class="topbar-right">
+    <div class="search-box">
+      <span class="material-symbols-rounded">search</span>
+      <input type="text" placeholder="Buscar..." />
+    </div>
+    <button class="icon-btn notif-btn">
+      <span class="material-symbols-rounded">notifications</span>
+    </button>
+    <button class="icon-btn">
+      <span class="material-symbols-rounded">help</span>
+    </button>
+    <div class="user-chip">
+      <div class="user-avatar">{{ user?.name?.charAt(0)?.toUpperCase() || '?' }}</div>
+      <span class="user-name">{{ user?.name?.split(' ')[0] || 'Admin' }}</span>
+    </div>
+  </div>
+</div>
+
+<!-- Loading -->
+<div *ngIf="loading" class="loading-state">
+  <span class="material-symbols-rounded loading-icon">autorenew</span>
+  <p>Cargando producto…</p>
+</div>
+
+<!-- Formulario -->
+<div class="form-layout" *ngIf="!loading">
+
+  <!-- ══ COLUMNA IZQUIERDA ══ -->
+  <div class="form-main">
+
+    <!-- Info básica -->
+    <div class="form-card">
+      <div class="card-header green">
+        <span class="material-symbols-rounded">storefront</span>
+        <h2>Información básica</h2>
+      </div>
+      <div class="card-body">
+        <div class="form-group">
+          <label>Nombre del producto</label>
+          <input type="text" class="form-input" [(ngModel)]="producto.name"
+            placeholder="Ej: Manzanas Fuji" />
+        </div>
+        <div class="form-group">
+          <label>Descripción completa</label>
+          <textarea class="form-input form-textarea" [(ngModel)]="producto.description"
+            placeholder="Describe el origen, sabor, usos recomendados…"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Descripción corta
+            <span class="label-hint">— para listados y tarjetas</span>
+          </label>
+          <input type="text" class="form-input" [(ngModel)]="producto.short_description"
+            placeholder="Ej: Dulces y crujientes, recién cogidas." />
+        </div>
+      </div>
+    </div>
+
+    <!-- Precio y Stock -->
+    <div class="form-card">
+      <div class="card-header orange">
+        <span class="material-symbols-rounded">payments</span>
+        <h2>Precio y Stock</h2>
+      </div>
+      <div class="card-body">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Precio</label>
+            <div class="input-with-suffix">
+              <input type="number" class="form-input" [(ngModel)]="producto.price"
+                placeholder="0.00" min="0" step="0.01" />
+              <span class="input-suffix">€</span>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Unidad de venta</label>
+            <select class="form-input form-select" [(ngModel)]="producto.unit">
+              <option *ngFor="let u of unidades" [value]="u">{{ u }}</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Stock disponible</label>
+            <div class="input-with-suffix">
+              <input type="number" class="form-input" [(ngModel)]="producto.stock_quantity"
+                placeholder="0" min="0" />
+              <span class="input-suffix">ud</span>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Fin de temporada</label>
+            <input type="date" class="form-input" [(ngModel)]="producto.season_end" />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Clasificación -->
+    <div class="form-card">
+      <div class="card-header blue">
+        <span class="material-symbols-rounded">category</span>
+        <h2>Clasificación</h2>
+      </div>
+      <div class="card-body">
+        <div class="form-group">
+          <label>Categoría</label>
+          <select class="form-input form-select" [(ngModel)]="producto.category_id">
+            <option *ngFor="let c of categorias" [value]="c.id">{{ c.name }}</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Moderación -->
+    <div class="form-card">
+      <div class="card-header red">
+        <span class="material-symbols-rounded">gavel</span>
+        <h2>Moderación</h2>
+      </div>
+      <div class="card-body">
+        <p class="mod-hint">Cambia el estado del producto. El agricultor será notificado.</p>
+
+        <div class="status-options">
+          <label class="status-option option-approved"
+            [class.selected]="producto.moderation_status === 'approved'">
+            <input type="radio" name="mod_status" value="approved"
+              [(ngModel)]="producto.moderation_status" />
+            <span class="status-dot"></span>
+            <div>
+              <span class="option-title">Aprobado</span>
+              <span class="option-desc">Visible en la tienda</span>
+            </div>
+          </label>
+
+          <label class="status-option option-pending"
+            [class.selected]="producto.moderation_status === 'pending'">
+            <input type="radio" name="mod_status" value="pending"
+              [(ngModel)]="producto.moderation_status" />
+            <span class="status-dot"></span>
+            <div>
+              <span class="option-title">Pendiente</span>
+              <span class="option-desc">En revisión, no visible</span>
+            </div>
+          </label>
+
+          <label class="status-option option-rejected"
+            [class.selected]="producto.moderation_status === 'rejected'">
+            <input type="radio" name="mod_status" value="rejected"
+              [(ngModel)]="producto.moderation_status" />
+            <span class="status-dot"></span>
+            <div>
+              <span class="option-title">Rechazado</span>
+              <span class="option-desc">No cumple los requisitos</span>
+            </div>
+          </label>
+        </div>
+
+        <!-- Mensaje al agricultor -->
+        <div class="mod-message-wrap"
+          *ngIf="producto.moderation_status === 'pending' || producto.moderation_status === 'rejected'">
+          <label class="mod-message-label">
+            <span class="material-symbols-rounded">mail</span>
+            Mensaje para el agricultor
+            <span class="label-required"
+              *ngIf="producto.moderation_status === 'rejected'">*</span>
+          </label>
+          <textarea
+            class="form-input form-textarea mod-textarea"
+            [(ngModel)]="producto.rejection_reason"
+            [placeholder]="producto.moderation_status === 'rejected'
+              ? 'Ej: Las imágenes no cumplen los requisitos mínimos de calidad...'
+              : 'Ej: Estamos revisando tu producto, te notificaremos en breve...'"
+            rows="3">
+          </textarea>
+          <span class="mod-message-hint"
+            *ngIf="producto.moderation_status === 'rejected'">
+            <span class="material-symbols-rounded">info</span>
+            El agricultor verá este mensaje al consultar su producto rechazado.
+          </span>
+          <span class="mod-message-hint mod-message-hint--pending"
+            *ngIf="producto.moderation_status === 'pending'">
+            <span class="material-symbols-rounded">info</span>
+            Opcional. Puedes indicar qué está pendiente de revisión.
+          </span>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ══ COLUMNA DERECHA ══ -->
+  <div class="form-side">
+
+    <!-- Imágenes -->
+    <div class="form-card">
+      <div class="card-header purple">
+        <span class="material-symbols-rounded">photo_library</span>
+        <h2>Imágenes</h2>
+        <span class="img-counter">
+          {{ (producto.images?.length || 0) + newImages.length }} / 6
+        </span>
+      </div>
+      <div class="card-body">
+
+        <div class="images-grid"
+          *ngIf="(producto.images?.length || 0) + newImagePreviews.length > 0">
+
+          <!-- Existentes -->
+          <div class="image-thumb"
+            [class.image-thumb--main]="i === 0"
+            [class.image-thumb--dragging]="dragIndex === i"
+            [class.image-thumb--dragover]="dragOverIndex === i && dragIndex !== i"
+            *ngFor="let img of producto.images; let i = index"
+            draggable="true"
+            (dragstart)="onThumbDragStart(i)"
+            (dragover)="onThumbDragOver($event, i)"
+            (dragleave)="onThumbDragLeave()"
+            (drop)="onThumbDrop(i)"
+            (dragend)="onThumbDragEnd()">
+            <img [src]="img.url" [alt]="producto.name" loading="lazy" />
+            <span class="drag-handle">
+              <span class="material-symbols-rounded">drag_indicator</span>
+            </span>
+            <span class="main-badge" *ngIf="i === 0">
+              <span class="material-symbols-rounded">star</span> Principal
+            </span>
+            <div class="thumb-overlay">
+              <button class="img-action-btn img-delete-btn"
+                (click)="deleteImage(img.id)" type="button">
+                <span class="material-symbols-rounded">delete</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Nuevas -->
+          <div class="image-thumb image-thumb--new"
+            *ngFor="let prev of newImagePreviews; let i = index">
+            <img [src]="prev" alt="Nueva imagen" />
+            <span class="new-badge">Nueva</span>
+            <div class="thumb-overlay">
+              <button class="img-action-btn img-delete-btn"
+                (click)="removeNewImage(i)" type="button">
+                <span class="material-symbols-rounded">close</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Slot añadir -->
+          <div class="image-thumb image-thumb--add"
+            *ngIf="(producto.images?.length || 0) + newImages.length < 6"
+            (click)="fileInput.click()">
+            <span class="material-symbols-rounded">add_photo_alternate</span>
+            <span>Añadir</span>
+          </div>
+        </div>
+
+        <!-- Upload zone -->
+        <div class="upload-zone"
+          [class.upload-zone--drag]="isDragging"
+          [class.upload-zone--full]="(producto.images?.length || 0) + newImages.length >= 6"
+          (click)="fileInput.click()"
+          (dragover)="onDragOver($event)"
+          (dragleave)="onDragLeave()"
+          (drop)="onDrop($event)">
+          <div class="upload-zone-inner">
+            <span class="material-symbols-rounded upload-zone-icon">cloud_upload</span>
+            <p class="upload-zone-title">
+              {{ isDragging ? 'Suelta las imágenes aquí' : 'Arrastra imágenes o haz clic' }}
+            </p>
+            <span class="upload-zone-hint">JPG, PNG o WEBP · Máx. 2 MB · Hasta 6 imágenes</span>
+          </div>
+          <input #fileInput type="file" accept="image/jpeg,image/png,image/webp"
+            multiple hidden (change)="onImageSelected($event)" />
+        </div>
+
+        <p class="limit-warning"
+          *ngIf="(producto.images?.length || 0) + newImages.length >= 6">
+          <span class="material-symbols-rounded">info</span>
+          Has alcanzado el límite de 6 imágenes.
+        </p>
+
+      </div>
+    </div>
+
+    <!-- Info agricultor -->
+    <div class="form-card" *ngIf="producto.farmer?.user">
+      <div class="card-header green">
+        <span class="material-symbols-rounded">person</span>
+        <h2>Agricultor</h2>
+      </div>
+      <div class="card-body">
+        <div class="farmer-info-row">
+          <div class="farmer-avatar-lg">
+            {{ producto.farmer.user.name?.charAt(0)?.toUpperCase() }}
+          </div>
+          <div>
+            <p class="farmer-name-lg">{{ producto.farmer.user.name }}</p>
+            <p class="farmer-meta" *ngIf="producto.farmer.farm_name">
+              <span class="material-symbols-rounded">yard</span>
+              {{ producto.farmer.farm_name }}
+            </p>
+            <p class="farmer-meta" *ngIf="producto.farmer.city">
+              <span class="material-symbols-rounded">location_on</span>
+              {{ producto.farmer.city }}
+            </p>
+            <p class="farmer-meta">
+              <span class="material-symbols-rounded">mail</span>
+              {{ producto.farmer.user.email }}
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Acciones -->
+    <div class="form-card form-actions-card">
+      <button class="btn-save" (click)="guardar()" [disabled]="saving" type="button">
+        <span class="material-symbols-rounded">save</span>
+        {{ saving ? 'Guardando…' : 'Guardar Cambios' }}
+      </button>
+      <button class="btn-cancel" [routerLink]="['/admin/productos']" type="button">
+        Cancelar
+      </button>
+      <div class="divider"></div>
+      <button class="btn-delete" (click)="eliminar()" type="button">
+        <span class="material-symbols-rounded">delete</span>
+        Eliminar Producto
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══ MODAL ELIMINAR ══ -->
+<div class="modal-backdrop" *ngIf="showDeleteModal" (click)="cancelarEliminar()">
+  <div class="modal-card" (click)="$event.stopPropagation()">
+    <div class="modal-icon-wrap">
+      <span class="material-symbols-rounded">delete_forever</span>
+    </div>
+    <h2 class="modal-title">¿Eliminar producto?</h2>
+    <p class="modal-desc">
+      Vas a eliminar <strong>{{ producto.name }}</strong> de forma permanente.
+      Esta acción no se puede deshacer.
+    </p>
+    <div class="modal-actions">
+      <button class="modal-btn-cancel" (click)="cancelarEliminar()" type="button">Cancelar</button>
+      <button class="modal-btn-confirm" (click)="confirmarEliminar()"
+        [disabled]="deleting" type="button">
+        <span class="material-symbols-rounded">delete</span>
+        {{ deleting ? 'Eliminando…' : 'Sí, eliminar' }}
+      </button>
+    </div>
+  </div>
+</div>

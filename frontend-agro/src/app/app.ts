@@ -20,16 +20,17 @@ export class App implements OnInit {
   isFarmer = false;
   isUserMenuOpen = false;
   currentUser: any = null;
+  isAdmin = false;
 
   textoBusquedaGlobal = '';
 
-  constructor(private router: Router, public cartService: CartService) {}
+  constructor(private router: Router, public cartService: CartService) { }
 
   ngOnInit(): void {
     this.router.events.pipe(
       filter(event => event instanceof NavigationEnd)
     ).subscribe((event: NavigationEnd) => {
-      const rutasOcultas = ['/login', '/registro', '/agricultor', '/comprador'];
+      const rutasOcultas = ['/login', '/registro', '/agricultor', '/comprador', '/admin'];
       this.mostrarLayout = !rutasOcultas.some(ruta => event.urlAfterRedirects.includes(ruta));
       this.isUserMenuOpen = false;
       this.checkLoginStatus();
@@ -62,6 +63,7 @@ export class App implements OnInit {
     const token = localStorage.getItem('token');
     this.isLoggedIn = !!token;
     this.isFarmer = false;
+    this.isAdmin = false;
     this.currentUser = null;
 
     if (this.isLoggedIn) {
@@ -70,9 +72,13 @@ export class App implements OnInit {
         try {
           this.currentUser = JSON.parse(userStr);
           const role = this.currentUser.role;
+
           if (role === 'agricultor' || role === 'farmer') {
             this.isFarmer = true;
+          } else if (role === 'admin') {
+            this.isAdmin = true;
           }
+
         } catch (error) {
           console.error('Error al leer datos del usuario:', error);
           this.logout();
@@ -87,6 +93,7 @@ export class App implements OnInit {
     localStorage.removeItem('user_role');
     this.isLoggedIn = false;
     this.isFarmer = false;
+    this.isAdmin = false; //
     this.currentUser = null;
     this.isUserMenuOpen = false;
     this.router.navigate(['/login']);

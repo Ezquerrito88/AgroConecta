@@ -1,0 +1,64 @@
+<div class="admin-shell">
+
+  <!-- ── SIDEBAR ── -->
+  <aside class="sidebar">
+
+    <!-- Header -->
+    <div class="sidebar-header">
+      <img src="img/logo/logo.png" alt="AgroConecta" class="logo-img">
+      <div class="brand-text">
+        <h2>AgroConecta</h2>
+        <span>Panel de Administración</span>
+      </div>
+    </div>
+
+    <hr class="divider">
+
+    <!-- User profile -->
+    <div class="user-profile">
+      <div class="avatar">
+        {{ user?.name?.charAt(0)?.toUpperCase() || 'A' }}
+        <span class="status-dot"></span>
+      </div>
+      <div class="user-info">
+        <h3>{{ user?.name }}</h3>
+        <span class="admin-badge">Administrador</span>
+      </div>
+    </div>
+
+    <!-- Nav -->
+    <nav class="sidebar-nav">
+      <ul>
+        <li *ngFor="let item of navItems">
+          <a [routerLink]="item.route" routerLinkActive="active">
+            <span class="material-symbols-rounded">{{ item.icon }}</span>
+            <span>{{ item.label }}</span>
+          </a>
+        </li>
+      </ul>
+    </nav>
+
+    <!-- Footer -->
+    <div class="sidebar-footer">
+      <hr class="divider">
+      <a routerLink="/" class="footer-link">
+        <span class="material-symbols-rounded">open_in_new</span>
+        <span>Ir a la web</span>
+      </a>
+      <hr class="divider">
+      <button class="logout-btn" (click)="logout()">
+        <span class="material-symbols-rounded">logout</span>
+        <span>Cerrar Sesión</span>
+      </button>
+    </div>
+
+  </aside>
+
+  <!-- ── MAIN ── -->
+  <div class="admin-main">
+    <main class="admin-content">
+      <router-outlet />
+    </main>
+  </div>
+
+</div>
