@@ -1,0 +1,315 @@
+<div class="dashboard-layout">
+  <main class="main-content">
+
+    <!-- ── Topbar ──────────────────────────────────── -->
+    <div class="topbar">
+      <div class="topbar-left">
+        <h1 class="page-title">Estadísticas</h1>
+        <span class="page-subtitle">{{ mesActualLabel }}</span>
+      </div>
+      <div class="topbar-right">
+        <div class="search-box">
+          <span class="material-symbols-rounded">search</span>
+          <input type="text" placeholder="Buscar…" />
+        </div>
+        <button class="icon-btn notif-btn">
+          <span class="material-symbols-rounded">notifications</span>
+        </button>
+        <div class="user-chip">
+          <div class="user-avatar">{{ user?.name?.charAt(0)?.toUpperCase() || '?' }}</div>
+          <span class="user-name">{{ user?.name?.split(' ')[0] || 'Admin' }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Skeleton ────────────────────────────────── -->
+    <ng-container *ngIf="loading">
+      <div class="welcome-banner skel-banner"></div>
+      <div class="kpi-grid kpi-grid-3">
+        <div class="kpi-card skel-block" *ngFor="let i of [1,2,3]"></div>
+      </div>
+      <div class="charts-row">
+        <div class="section-card skel-block" style="height:300px"></div>
+        <div class="section-card skel-block" style="height:300px"></div>
+      </div>
+    </ng-container>
+
+    <!-- ── Error ───────────────────────────────────── -->
+    <div *ngIf="error" class="section-card error-state" role="alert">
+      <span class="material-symbols-rounded empty-icon">error_outline</span>
+      <p class="empty-title">No se pudieron cargar las estadísticas</p>
+      <button class="btn-filter" (click)="loadStats()">
+        <span class="material-symbols-rounded">refresh</span> Reintentar
+      </button>
+    </div>
+
+    <!-- ── Contenido principal ──────────────────────── -->
+    <ng-container *ngIf="!loading && !error && dashboard">
+
+      <!-- Welcome banner -->
+      <div class="welcome-banner">
+        <div>
+          <h2 class="welcome-title">Panel de administración</h2>
+          <p class="welcome-sub">Visión global de la plataforma AgroConecta.</p>
+        </div>
+        <div class="welcome-actions">
+          <button class="btn-primary-white" (click)="exportPDF()" [disabled]="exporting">
+            <span class="material-symbols-rounded">{{ exporting ? 'hourglass_empty' : 'download' }}</span>
+            {{ exporting ? 'Generando PDF…' : 'Exportar informe' }}
+          </button>
+        </div>
+      </div>
+
+      <!-- ── KPIs ─────────────────────────────────── -->
+      <div class="kpi-grid kpi-grid-3">
+
+        <div class="kpi-card kpi-featured">
+          <div class="kpi-header">
+            <div class="kpi-icon-wrap white-icon">
+              <span class="material-symbols-rounded">euro</span>
+            </div>
+            <span class="kpi-badge kpi-badge-white">
+              {{ dashboard?.orders?.revenue_month | currency:'EUR':'symbol':'1.0-0' }} este mes
+            </span>
+          </div>
+          <span class="kpi-value">{{ dashboard?.orders?.revenue_total | currency:'EUR':'symbol':'1.0-0' }}</span>
+          <span class="kpi-label">💰 Ingresos totales</span>
+          <span class="kpi-sublabel white-sub">Acumulado histórico</span>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-header">
+            <div class="kpi-icon-wrap green">
+              <span class="material-symbols-rounded">shopping_basket</span>
+            </div>
+          </div>
+          <span class="kpi-value">{{ dashboard?.orders?.total }}</span>
+          <span class="kpi-label">📦 Pedidos totales</span>
+          <span class="kpi-sublabel green">{{ dashboard?.orders?.month }} este mes</span>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-header">
+            <div class="kpi-icon-wrap blue">
+              <span class="material-symbols-rounded">group</span>
+            </div>
+          </div>
+          <span class="kpi-value">{{ dashboard?.users?.total }}</span>
+          <span class="kpi-label">👥 Usuarios registrados</span>
+          <span class="kpi-sublabel blue">
+            {{ dashboard?.users?.farmers }} agricultores · {{ dashboard?.users?.buyers }} compradores
+          </span>
+        </div>
+
+      </div>
+
+      <!-- ── Gráficas ─────────────────────────────── -->
+      <div class="charts-row">
+
+        <div class="section-card">
+          <div class="section-header">
+            <div class="section-title-group">
+              <span class="material-symbols-rounded section-icon">trending_up</span>
+              <h2>Ingresos por mes</h2>
+            </div>
+          </div>
+          <apx-chart
+            [series]="areaOptions.series" [chart]="areaOptions.chart"
+            [xaxis]="areaOptions.xaxis"  [stroke]="areaOptions.stroke"
+            [fill]="areaOptions.fill"    [dataLabels]="areaOptions.dataLabels"
+            [grid]="areaOptions.grid"    [tooltip]="areaOptions.tooltip"
+            [colors]="['#01696f']">
+          </apx-chart>
+        </div>
+
+        <div class="section-card">
+          <div class="section-header">
+            <div class="section-title-group">
+              <span class="material-symbols-rounded section-icon">bar_chart</span>
+              <h2>Pedidos por mes</h2>
+            </div>
+          </div>
+          <apx-chart
+            [series]="barOptions.series"         [chart]="barOptions.chart"
+            [xaxis]="barOptions.xaxis"           [plotOptions]="barOptions.plotOptions"
+            [dataLabels]="barOptions.dataLabels" [grid]="barOptions.grid"
+            [tooltip]="barOptions.tooltip"       [fill]="barOptions.fill"
+            [colors]="['#3b82f6']">
+          </apx-chart>
+        </div>
+
+      </div>
+
+      <!-- ── Fila inferior ────────────────────────── -->
+      <div class="bottom-row">
+
+        <!-- Top productos -->
+        <div class="section-card">
+          <div class="section-header">
+            <div class="section-title-group">
+              <span class="material-symbols-rounded section-icon">emoji_events</span>
+              <h2>Top productos</h2>
+            </div>
+          </div>
+          <div *ngIf="!dashboard?.top_products?.length" class="empty-state">
+            <span class="material-symbols-rounded empty-icon">inventory_2</span>
+            <p class="empty-title">Sin datos aún</p>
+          </div>
+          <ul *ngIf="dashboard?.top_products?.length" class="product-list">
+            <li *ngFor="let p of dashboard.top_products; let i = index" class="product-row">
+              <span class="rank" [class.gold]="i===0" [class.silver]="i===1" [class.bronze]="i===2">
+                #{{ i + 1 }}
+              </span>
+              <img
+                [src]="getProductImage(p)"
+                [alt]="p.name"
+                class="prod-img"
+                width="44" height="44"
+                loading="lazy"
+                (error)="onImgError($event, p.name)"
+              />
+              <div class="prod-info">
+                <span class="prod-name">{{ p.name }}</span>
+                <div class="prod-bar-wrap">
+                  <div class="prod-bar">
+                    <div class="prod-bar-fill"
+                      [style.width.%]="getBarWidth(p.sold ?? 0, dashboard.top_products, 'sold')">
+                    </div>
+                  </div>
+                  <span class="prod-sold">{{ p.sold ?? 0 }} uds.</span>
+                </div>
+              </div>
+              <span class="prod-price">{{ p.revenue | currency:'EUR':'symbol':'1.0-0' }}</span>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Top agricultores -->
+        <div class="section-card">
+          <div class="section-header">
+            <div class="section-title-group">
+              <span class="material-symbols-rounded section-icon">military_tech</span>
+              <h2>Top agricultores</h2>
+            </div>
+          </div>
+          <div *ngIf="!dashboard?.top_farmers?.length" class="empty-state">
+            <span class="material-symbols-rounded empty-icon">person_off</span>
+            <p class="empty-title">Sin datos aún</p>
+          </div>
+          <ul *ngIf="dashboard?.top_farmers?.length" class="orders-list">
+            <li *ngFor="let f of dashboard.top_farmers; let i = index" class="order-row">
+              <div class="order-client">
+                <div class="client-avatar-initial"
+                  [style.background-color]="getAvatarColor(f.name ?? '')">
+                  {{ f.name?.charAt(0)?.toUpperCase() ?? '?' }}
+                </div>
+                <div class="order-left">
+                  <span class="order-client-name">{{ f.name }}</span>
+                  <span class="order-ref-num">{{ f.products_count }} productos</span>
+                </div>
+              </div>
+              <div class="farmer-bar-wrap">
+                <div class="prod-bar">
+                  <div class="prod-bar-fill farmer-fill"
+                    [style.width.%]="getBarWidth(f.revenue ?? 0, dashboard.top_farmers, 'revenue')">
+                  </div>
+                </div>
+                <span class="order-total-value">{{ f.revenue | currency:'EUR':'symbol':'1.0-0' }}</span>
+              </div>
+            </li>
+          </ul>
+        </div>
+
+      </div>
+
+    </ng-container>
+  </main>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════
+     SECCIONES OCULTAS PARA EXPORTAR PDF
+     Cada bloque se captura por separado → sin cortes
+══════════════════════════════════════════════════ -->
+<ng-container *ngIf="!loading && !error && dashboard">
+
+  <!-- 1. Cabecera + KPIs -->
+  <div id="pdf-header"
+    style="position:fixed;left:-9999px;top:0;width:860px;background:#fff;padding:28px;font-family:sans-serif;color:#28251d;">
+    <div style="background:#01696f;color:#fff;padding:20px 24px;border-radius:12px;display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+      <div>
+        <div style="font-size:20px;font-weight:700;">AgroConecta — Informe de estadísticas</div>
+        <div style="font-size:13px;opacity:.8;margin-top:3px;">{{ mesActualLabel }}</div>
+      </div>
+      <div style="font-size:13px;opacity:.8;">{{ today }}</div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;">
+      <div style="background:#f0fafa;border-radius:10px;padding:16px;">
+        <div style="color:#01696f;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;margin-bottom:5px;">Ingresos totales</div>
+        <div style="font-size:24px;font-weight:700;">{{ dashboard?.orders?.revenue_total | currency:'EUR':'symbol':'1.0-0' }}</div>
+        <div style="font-size:12px;color:#7a7974;margin-top:2px;">{{ dashboard?.orders?.revenue_month | currency:'EUR':'symbol':'1.0-0' }} este mes</div>
+      </div>
+      <div style="background:#eff6ff;border-radius:10px;padding:16px;">
+        <div style="color:#3b82f6;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;margin-bottom:5px;">Pedidos totales</div>
+        <div style="font-size:24px;font-weight:700;">{{ dashboard?.orders?.total }}</div>
+        <div style="font-size:12px;color:#7a7974;margin-top:2px;">{{ dashboard?.orders?.month }} este mes</div>
+      </div>
+      <div style="background:#f5f3ff;border-radius:10px;padding:16px;">
+        <div style="color:#8b5cf6;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;margin-bottom:5px;">Usuarios</div>
+        <div style="font-size:24px;font-weight:700;">{{ dashboard?.users?.total }}</div>
+        <div style="font-size:12px;color:#7a7974;margin-top:2px;">{{ dashboard?.users?.farmers }} agric. · {{ dashboard?.users?.buyers }} comprad.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. Top productos -->
+  <div id="pdf-top-products"
+    style="position:fixed;left:-9999px;top:0;width:860px;background:#fff;padding:20px 28px;font-family:sans-serif;color:#28251d;">
+    <div style="font-size:15px;font-weight:700;margin-bottom:12px;">🏆 Top productos</div>
+    <table style="width:100%;border-collapse:collapse;font-size:13px;">
+      <thead>
+        <tr style="background:#f7f6f2;">
+          <th style="padding:9px 12px;text-align:left;color:#7a7974;font-weight:600;">#</th>
+          <th style="padding:9px 12px;text-align:left;color:#7a7974;font-weight:600;">Producto</th>
+          <th style="padding:9px 12px;text-align:right;color:#7a7974;font-weight:600;">Unidades</th>
+          <th style="padding:9px 12px;text-align:right;color:#7a7974;font-weight:600;">Ingresos</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let p of dashboard.top_products; let i = index"
+          [style.background]="i % 2 === 0 ? '#fff' : '#f9f8f5'">
+          <td style="padding:9px 12px;font-weight:700;color:#01696f;">{{ i + 1 }}</td>
+          <td style="padding:9px 12px;">{{ p.name }}</td>
+          <td style="padding:9px 12px;text-align:right;color:#7a7974;">{{ p.sold ?? 0 }} uds.</td>
+          <td style="padding:9px 12px;text-align:right;font-weight:700;">{{ p.revenue | currency:'EUR':'symbol':'1.0-0' }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 3. Top agricultores -->
+  <div id="pdf-top-farmers"
+    style="position:fixed;left:-9999px;top:0;width:860px;background:#fff;padding:20px 28px;font-family:sans-serif;color:#28251d;">
+    <div style="font-size:15px;font-weight:700;margin-bottom:12px;">🥇 Top agricultores</div>
+    <table style="width:100%;border-collapse:collapse;font-size:13px;">
+      <thead>
+        <tr style="background:#f7f6f2;">
+          <th style="padding:9px 12px;text-align:left;color:#7a7974;font-weight:600;">#</th>
+          <th style="padding:9px 12px;text-align:left;color:#7a7974;font-weight:600;">Agricultor</th>
+          <th style="padding:9px 12px;text-align:right;color:#7a7974;font-weight:600;">Productos</th>
+          <th style="padding:9px 12px;text-align:right;color:#7a7974;font-weight:600;">Ingresos</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let f of dashboard.top_farmers; let i = index"
+          [style.background]="i % 2 === 0 ? '#fff' : '#f9f8f5'">
+          <td style="padding:9px 12px;font-weight:700;color:#01696f;">{{ i + 1 }}</td>
+          <td style="padding:9px 12px;">{{ f.name }}</td>
+          <td style="padding:9px 12px;text-align:right;color:#7a7974;">{{ f.products_count }}</td>
+          <td style="padding:9px 12px;text-align:right;font-weight:700;">{{ f.revenue | currency:'EUR':'symbol':'1.0-0' }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+</ng-container>

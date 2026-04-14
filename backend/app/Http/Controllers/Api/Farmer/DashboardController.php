@@ -22,7 +22,7 @@ class DashboardController extends Controller
         $mesActual = Carbon::now();
 
         try {
-            // 1. KPI: Pedidos
+            // 1. KPI: Pedidos del mes
             $pedidos = DB::table('orders')
                 ->join('order_items', 'orders.id', '=', 'order_items.order_id')
                 ->join('products', 'order_items.product_id', '=', 'products.id')
@@ -32,7 +32,7 @@ class DashboardController extends Controller
                 ->distinct('orders.id')
                 ->count('orders.id');
 
-            // 2. KPI: Ingresos
+            // 2. KPI: Ingresos del mes
             $ventas = DB::table('order_items')
                 ->join('products', 'order_items.product_id', '=', 'products.id')
                 ->join('orders', 'order_items.order_id', '=', 'orders.id')
@@ -64,7 +64,7 @@ class DashboardController extends Controller
                 ->take(5)
                 ->get();
 
-            // 6. Top 3 productos con imagen real (híbrido local/Azure)
+            // 6. Top 3 productos más vendidos
             $topProducts = Product::where('farmer_id', $farmerId)
                 ->with(['firstImage'])
                 ->withCount(['orderItems as total_sold' => function ($query) {
@@ -84,6 +84,46 @@ class DashboardController extends Controller
                     'unit'   => $p->unit ?? 'kg',
                 ]);
 
+            // 7. Ingresos + pedidos por mes (últimos 12 meses) → gráficas
+            $monthlyRevenue = DB::table('order_items')
+                ->join('products', 'order_items.product_id', '=', 'products.id')
+                ->join('orders',   'order_items.order_id',   '=', 'orders.id')
+                ->where('products.farmer_id', $farmerId)
+                ->where('orders.status', '!=', 'cancelled')
+                ->where('orders.created_at', '>=', Carbon::now()->subMonths(11)->startOfMonth())
+                ->selectRaw('
+                    YEAR(orders.created_at)  AS year,
+                    MONTH(orders.created_at) AS month,
+                    SUM(order_items.quantity * order_items.price) AS total,
+                    COUNT(DISTINCT orders.id) AS orders_count
+                ')
+                ->groupByRaw('YEAR(orders.created_at), MONTH(orders.created_at)')
+                ->orderByRaw('YEAR(orders.created_at), MONTH(orders.created_at)')
+                ->get();
+
+            // 8. Pedidos por estado → gráfica dona
+            $ordersByStatus = DB::table('orders')
+                ->join('order_items', 'orders.id', '=', 'order_items.order_id')
+                ->join('products',    'order_items.product_id', '=', 'products.id')
+                ->where('products.farmer_id', $farmerId)
+                ->selectRaw('orders.status, COUNT(DISTINCT orders.id) as count')
+                ->groupBy('orders.status')
+                ->get();
+
+            // 9. Stock bajo (entre 1 y 5 unidades)
+            $lowStock = Product::where('farmer_id', $farmerId)
+                ->where('stock_quantity', '>', 0)
+                ->where('stock_quantity', '<=', 5)
+                ->orderBy('stock_quantity')
+                ->get()
+                ->map(fn($p) => [
+                    'id'    => $p->id,
+                    'name'  => $p->name,
+                    'stock' => (int) $p->stock_quantity,
+                    'unit'  => $p->unit ?? 'kg',
+                    'image' => $p->firstImage?->image_url ?? null,
+                ]);
+
             return response()->json([
                 'kpis' => [
                     'pedidos'      => $pedidos,
@@ -91,8 +131,11 @@ class DashboardController extends Controller
                     'agotados'     => $agotados,
                     'calificacion' => round((float) ($calificacion ?? 0), 1),
                 ],
-                'recent_orders' => $recentOrders,
-                'top_products'  => $topProducts,
+                'monthly_revenue'  => $monthlyRevenue,
+                'orders_by_status' => $ordersByStatus,
+                'low_stock'        => $lowStock,
+                'recent_orders'    => $recentOrders,
+                'top_products'     => $topProducts,
             ]);
 
         } catch (\Exception $e) {

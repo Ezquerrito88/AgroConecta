@@ -1,1 +1,357 @@
-<p>estadisticas works!</p>
+<div class="dashboard-layout">
+  <app-sidebar></app-sidebar>
+
+  <main class="main-content">
+
+    <!-- ── Topbar ─────────────────────────────────── -->
+    <div class="topbar">
+      <div class="topbar-left">
+        <h1 class="page-title">Estadísticas</h1>
+        <span class="page-subtitle">Mira tus estadísticas</span>
+      </div>
+      <div class="topbar-right">
+        <div class="search-box">
+          <span class="material-symbols-rounded">search</span>
+          <input type="text" placeholder="Buscar productos, pedidos…" />
+        </div>
+        <button class="icon-btn notif-btn">
+          <span class="material-symbols-rounded">notifications</span>
+        </button>
+        <button class="icon-btn">
+          <span class="material-symbols-rounded">help</span>
+        </button>
+        <div class="user-chip">
+          <div class="user-avatar">{{ user?.name?.charAt(0)?.toUpperCase() || '?' }}</div>
+          <span class="user-name">{{ user?.name?.split(' ')[0] || 'Usuario' }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Skeleton ───────────────────────────────── -->
+    <ng-container *ngIf="loading">
+      <div class="welcome-banner skel-banner"></div>
+      <div class="kpi-grid">
+        <div class="kpi-card skel-block" *ngFor="let i of [1,2,3,4]"></div>
+      </div>
+      <div class="section-card skel-block" style="height:320px"></div>
+    </ng-container>
+
+    <!-- ── Error ──────────────────────────────────── -->
+    <div *ngIf="error" class="section-card error-state" role="alert">
+      <span class="material-symbols-rounded empty-icon">error_outline</span>
+      <p class="empty-title">No se pudieron cargar las estadísticas</p>
+      <button class="btn-filter" (click)="ngOnInit()">
+        <span class="material-symbols-rounded">refresh</span> Reintentar
+      </button>
+    </div>
+
+    <ng-container *ngIf="!loading && !error && dashboard">
+
+      <!-- ── Welcome banner ─────────────────────── -->
+      <div class="welcome-banner">
+        <div>
+          <h2 class="welcome-title">Resumen de actividad</h2>
+          <p class="welcome-sub">Consulta el rendimiento de tus ventas y productos de temporada.</p>
+        </div>
+        <div class="welcome-actions">
+          <button class="btn-primary-white" (click)="exportPDF()" [disabled]="exporting">
+            <span class="material-symbols-rounded">{{ exporting ? 'hourglass_empty' : 'download' }}</span>
+            {{ exporting ? 'Generando PDF…' : 'Exportar informe' }}
+          </button>
+        </div>
+      </div>
+
+      <!-- ── KPIs ───────────────────────────────── -->
+      <div class="kpi-grid">
+
+        <div class="kpi-card">
+          <div class="kpi-header">
+            <div class="kpi-icon-wrap green">
+              <span class="material-symbols-rounded">shopping_basket</span>
+            </div>
+          </div>
+          <span class="kpi-value">{{ dashboard.kpis.pedidos }}</span>
+          <span class="kpi-label">📦 Pedidos este mes</span>
+        </div>
+
+        <div class="kpi-card kpi-featured">
+          <div class="kpi-header">
+            <div class="kpi-icon-wrap white-icon">
+              <span class="material-symbols-rounded">euro</span>
+            </div>
+          </div>
+          <span class="kpi-value">{{ dashboard.kpis.ventas | currency:'EUR':'symbol':'1.0-0' }}</span>
+          <span class="kpi-label">💰 Ingresos del mes</span>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-header">
+            <div class="kpi-icon-wrap orange">
+              <span class="material-symbols-rounded">warning</span>
+            </div>
+          </div>
+          <span class="kpi-value" [class.danger-val]="dashboard.kpis.agotados > 0">
+            {{ dashboard.kpis.agotados }}
+          </span>
+          <span class="kpi-label">🚨 Productos agotados</span>
+          <span class="kpi-sublabel orange" *ngIf="dashboard.kpis.agotados > 0">Requieren atención</span>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-header">
+            <div class="kpi-icon-wrap blue">
+              <span class="material-symbols-rounded">star</span>
+            </div>
+          </div>
+          <span class="kpi-value">
+            {{ dashboard.kpis.calificacion | number:'1.1-1' }}<small>/5</small>
+          </span>
+          <span class="kpi-label">⭐ Valoración media</span>
+          <span class="kpi-sublabel blue">Basada en reseñas</span>
+        </div>
+
+      </div>
+
+      <!-- ── Gráficas ────────────────────────────── -->
+      <div class="charts-row">
+
+        <div class="section-card chart-wide" id="pdf-chart-ingresos">
+          <div class="section-header">
+            <div class="section-title-group">
+              <span class="material-symbols-rounded section-icon">trending_up</span>
+              <h2>Ingresos mensuales</h2>
+            </div>
+          </div>
+          <apx-chart
+            [series]="areaOptions.series" [chart]="areaOptions.chart"
+            [xaxis]="areaOptions.xaxis"  [stroke]="areaOptions.stroke"
+            [fill]="areaOptions.fill"    [dataLabels]="areaOptions.dataLabels"
+            [grid]="areaOptions.grid"    [tooltip]="areaOptions.tooltip"
+            [colors]="['#16a34a']">
+          </apx-chart>
+        </div>
+
+        <div class="section-card chart-donut" id="pdf-chart-dona">
+          <div class="section-header">
+            <div class="section-title-group">
+              <span class="material-symbols-rounded section-icon">donut_large</span>
+              <h2>Estado de pedidos</h2>
+            </div>
+          </div>
+          <apx-chart
+            [series]="donutOptions.series"   [chart]="donutOptions.chart"
+            [labels]="donutOptions.labels"   [colors]="donutOptions.colors"
+            [legend]="donutOptions.legend"   [dataLabels]="donutOptions.dataLabels"
+            [plotOptions]="donutOptions.plotOptions"
+            [responsive]="donutOptions.responsive"
+            [tooltip]="donutOptions.tooltip">
+          </apx-chart>
+          <ul class="donut-legend">
+            <li *ngFor="let label of donutOptions.labels; let i = index">
+              <span class="dot" [style.background]="donutOptions.colors[i]"></span>
+              {{ label }}
+              <span class="dot-val">{{ donutOptions.series[i] }}</span>
+            </li>
+          </ul>
+        </div>
+
+      </div>
+
+      <!-- Barras: pedidos por mes -->
+      <div class="section-card" id="pdf-chart-pedidos">
+        <div class="section-header">
+          <div class="section-title-group">
+            <span class="material-symbols-rounded section-icon">bar_chart</span>
+            <h2>Pedidos por mes</h2>
+          </div>
+        </div>
+        <apx-chart
+          [series]="barOptions.series"         [chart]="barOptions.chart"
+          [xaxis]="barOptions.xaxis"           [plotOptions]="barOptions.plotOptions"
+          [dataLabels]="barOptions.dataLabels" [grid]="barOptions.grid"
+          [tooltip]="barOptions.tooltip"       [fill]="barOptions.fill"
+          [colors]="['#0ea858']">
+        </apx-chart>
+      </div>
+
+      <!-- ── Fila inferior ──────────────────────── -->
+      <div class="bottom-row">
+
+        <!-- Top productos -->
+        <div class="section-card">
+          <div class="section-header">
+            <div class="section-title-group">
+              <span class="material-symbols-rounded section-icon">emoji_events</span>
+              <h2>Top productos</h2>
+            </div>
+          </div>
+          <div *ngIf="dashboard.top_products?.length === 0" class="empty-state">
+            <span class="material-symbols-rounded empty-icon">inventory_2</span>
+            <p class="empty-title">Aún no hay ventas registradas</p>
+          </div>
+          <ul *ngIf="dashboard.top_products?.length > 0" class="product-list">
+            <li *ngFor="let p of dashboard.top_products; let i = index" class="product-row">
+              <span class="rank" [class.gold]="i===0" [class.silver]="i===1" [class.bronze]="i===2">
+                #{{ i + 1 }}
+              </span>
+              <img
+                [src]="p.image ?? 'assets/images/placeholder.png'"
+                [alt]="p.name" class="prod-img"
+                width="44" height="44" loading="lazy"
+                onerror="this.src='assets/images/placeholder.png'"
+              />
+              <div class="prod-info">
+                <div class="prod-name-row">
+                  <span class="prod-name">{{ p.name }}</span>
+                  <span class="prod-price">{{ p.price | currency:'EUR' }}/{{ p.unit }}</span>
+                </div>
+                <div class="prod-bar-wrap">
+                  <div class="prod-bar">
+                    <div class="prod-bar-fill" [style.width.%]="getBarWidth(p.sold ?? 0)"></div>
+                  </div>
+                  <span class="prod-sold">{{ p.sold ?? 0 }} uds.</span>
+                </div>
+              </div>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Pedidos recientes -->
+        <div class="section-card orders-card">
+          <div class="section-header">
+            <div class="section-title-group">
+              <span class="material-symbols-rounded section-icon">receipt_long</span>
+              <h2>Pedidos recientes</h2>
+            </div>
+          </div>
+          <div *ngIf="dashboard.recent_orders?.length === 0" class="empty-state">
+            <span class="material-symbols-rounded empty-icon">inventory_2</span>
+            <p class="empty-title">No hay pedidos aún</p>
+          </div>
+          <div *ngIf="dashboard.recent_orders?.length > 0" class="orders-table-wrap">
+            <table class="orders-table">
+              <thead>
+                <tr>
+                  <th>Ref.</th>
+                  <th>Cliente</th>
+                  <th class="col-num">Total</th>
+                  <th class="col-status">Estado</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let order of dashboard.recent_orders">
+                  <td class="col-ref">#{{ order.id }}</td>
+                  <td>
+                    <div class="tbl-client">
+                      <div class="client-avatar-initial"
+                        [style.background-color]="getAvatarColor(order.buyer?.name ?? '?')">
+                        {{ order.buyer?.name?.charAt(0)?.toUpperCase() ?? '?' }}
+                      </div>
+                      <span class="tbl-client-name">{{ order.buyer?.name ?? '—' }}</span>
+                    </div>
+                  </td>
+                  <td class="col-num">
+                    <span class="tbl-total">{{ order.total | currency:'EUR' }}</span>
+                  </td>
+                  <td class="col-status">
+                    <span class="status-badge" [ngClass]="order.status">
+                      <span class="material-symbols-rounded status-icon">{{ statusIcons[order.status] }}</span>
+                      {{ getStatusLabel(order.status) }}
+                    </span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+
+    </ng-container>
+  </main>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════
+     SECCIONES OCULTAS PARA PDF
+══════════════════════════════════════════════════ -->
+<ng-container *ngIf="!loading && !error && dashboard">
+
+  <div id="pdf-farmer-header"
+    style="position:fixed;left:-9999px;top:0;width:860px;background:#fff;padding:28px;font-family:sans-serif;color:#28251d;">
+    <div style="background:#01696f;color:#fff;padding:20px 24px;border-radius:12px;display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+      <div>
+        <div style="font-size:20px;font-weight:700;">AgroConecta — Informe del agricultor</div>
+        <div style="font-size:13px;opacity:.8;margin-top:3px;">{{ user?.name }} · {{ mesActualLabel }}</div>
+      </div>
+      <div style="font-size:13px;opacity:.8;">{{ today }}</div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;">
+      <div style="background:#f0fafa;border-radius:10px;padding:14px;">
+        <div style="color:#01696f;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;margin-bottom:5px;">Ingresos del mes</div>
+        <div style="font-size:22px;font-weight:700;">{{ dashboard?.kpis?.ventas | currency:'EUR':'symbol':'1.0-0' }}</div>
+      </div>
+      <div style="background:#f0f9f0;border-radius:10px;padding:14px;">
+        <div style="color:#437a22;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;margin-bottom:5px;">Pedidos este mes</div>
+        <div style="font-size:22px;font-weight:700;">{{ dashboard?.kpis?.pedidos }}</div>
+      </div>
+      <div style="background:#fff8f0;border-radius:10px;padding:14px;">
+        <div style="color:#da7101;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;margin-bottom:5px;">Productos agotados</div>
+        <div style="font-size:22px;font-weight:700;">{{ dashboard?.kpis?.agotados }}</div>
+      </div>
+      <div style="background:#eff6ff;border-radius:10px;padding:14px;">
+        <div style="color:#3b82f6;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;margin-bottom:5px;">Valoración media</div>
+        <div style="font-size:22px;font-weight:700;">{{ dashboard?.kpis?.calificacion | number:'1.1-1' }}/5</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="pdf-top-products"
+    style="position:fixed;left:-9999px;top:0;width:860px;background:#fff;padding:20px 28px;font-family:sans-serif;color:#28251d;">
+    <div style="font-size:15px;font-weight:700;margin-bottom:12px;">🏆 Top productos</div>
+    <table style="width:100%;border-collapse:collapse;font-size:13px;">
+      <thead>
+        <tr style="background:#f7f6f2;">
+          <th style="padding:9px 12px;text-align:left;color:#7a7974;font-weight:600;">#</th>
+          <th style="padding:9px 12px;text-align:left;color:#7a7974;font-weight:600;">Producto</th>
+          <th style="padding:9px 12px;text-align:right;color:#7a7974;font-weight:600;">Unidades vendidas</th>
+          <th style="padding:9px 12px;text-align:right;color:#7a7974;font-weight:600;">Precio</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let p of dashboard.top_products; let i = index"
+          [style.background]="i % 2 === 0 ? '#fff' : '#f9f8f5'">
+          <td style="padding:9px 12px;font-weight:700;color:#01696f;">{{ i + 1 }}</td>
+          <td style="padding:9px 12px;">{{ p.name }}</td>
+          <td style="padding:9px 12px;text-align:right;color:#7a7974;">{{ p.sold ?? 0 }} uds.</td>
+          <td style="padding:9px 12px;text-align:right;font-weight:700;">{{ p.price | currency:'EUR' }}/{{ p.unit }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div id="pdf-recent-orders"
+    style="position:fixed;left:-9999px;top:0;width:860px;background:#fff;padding:20px 28px;font-family:sans-serif;color:#28251d;">
+    <div style="font-size:15px;font-weight:700;margin-bottom:12px;">🧾 Pedidos recientes</div>
+    <table style="width:100%;border-collapse:collapse;font-size:13px;">
+      <thead>
+        <tr style="background:#f7f6f2;">
+          <th style="padding:9px 12px;text-align:left;color:#7a7974;font-weight:600;">Ref.</th>
+          <th style="padding:9px 12px;text-align:left;color:#7a7974;font-weight:600;">Cliente</th>
+          <th style="padding:9px 12px;text-align:right;color:#7a7974;font-weight:600;">Total</th>
+          <th style="padding:9px 12px;text-align:right;color:#7a7974;font-weight:600;">Estado</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let order of dashboard.recent_orders; let i = index"
+          [style.background]="i % 2 === 0 ? '#fff' : '#f9f8f5'">
+          <td style="padding:9px 12px;font-weight:700;color:#01696f;">#{{ order.id }}</td>
+          <td style="padding:9px 12px;">{{ order.buyer?.name ?? '—' }}</td>
+          <td style="padding:9px 12px;text-align:right;font-weight:700;">{{ order.total | currency:'EUR' }}</td>
+          <td style="padding:9px 12px;text-align:right;color:#7a7974;">{{ getStatusLabel(order.status) }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+</ng-container>

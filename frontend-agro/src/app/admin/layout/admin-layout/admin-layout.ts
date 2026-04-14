@@ -18,10 +18,11 @@ export class AdminLayout {
   sidebarCollapsed = signal(false);
 
   navItems = [
-    { label: 'Inicio',     icon: 'home',      route: '/admin/dashboard'    },
-    { label: 'Usuarios',    icon: 'group',         route: '/admin/usuarios'   },
-    { label: 'Productos',   icon: 'inventory_2',   route: '/admin/productos'  },
-    { label: 'Categorías',  icon: 'category',      route: '/admin/categorias' },
+    { label: 'Inicio',           icon: 'home',          route: '/admin/dashboard'    },
+    { label: 'Usuarios',         icon: 'group',         route: '/admin/usuarios'   },
+    { label: 'Productos',        icon: 'inventory_2',   route: '/admin/productos'  },
+    { label: 'Categorías',       icon: 'category',      route: '/admin/categorias' },
+    { label: 'Estadísticas',     icon: 'bar_chart',     route: '/admin/estadisticas'},
     
   ];
 

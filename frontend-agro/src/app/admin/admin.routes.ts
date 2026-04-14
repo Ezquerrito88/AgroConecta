@@ -45,6 +45,13 @@ export const ADMIN_ROUTES: Routes = [
           import('./categorias/gestion-categorias/gestion-categorias').then(
             m => m.GestionCategorias
           )
+      },
+      {
+        path: 'estadisticas',
+        loadComponent: () =>
+          import('./estadisticas/admin-estadisticas').then(
+            m => m.AdminEstadisticas
+          )
       }
     ]
   }
