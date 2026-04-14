@@ -473,6 +473,56 @@
   margin: 0;
 }
 
+.load-more-wrap {
+  display: flex;
+  justify-content: center;
+  padding: 1rem 0 0.25rem;
+}
+
+.btn-load-more {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.5rem 1.1rem;
+  border-radius: 999px;        /* pill shape */
+  border: 1px solid #e2e8f0;
+  background: #fff;
+  color: #374151;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 150ms ease;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+
+.btn-load-more:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+}
+
+.btn-load-more .material-symbols-rounded {
+  font-size: 1rem;
+  color: #6b7280;
+}
+
+.load-more-count {
+  background: #f1f5f9;
+  color: #6b7280;
+  font-size: 0.78rem;
+  font-weight: 500;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  margin-left: 0.1rem;
+}
+
+.results-info {
+  text-align: center;
+  font-size: 0.8rem;
+  color: #9ca3af;
+  padding: 0.5rem 0 0.75rem;
+  margin-top: 0.25rem;
+}
+
 /* ══════════════════════════════════════════════
    9. RESPONSIVE
    ══════════════════════════════════════════════ */

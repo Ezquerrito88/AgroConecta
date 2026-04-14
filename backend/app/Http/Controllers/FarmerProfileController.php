@@ -10,51 +10,52 @@ use Illuminate\Validation\Rule;
 
 class FarmerProfileController extends Controller
 {
-    /**
-     * Mostrar perfil del agricultor
-     */
     public function show()
     {
         $user = Auth::user();
-        
-        // Verificar que es agricultor
-        if (!$user->is_farmer) {
+
+        // ← Usar role en vez de is_farmer (que no existe en User)
+        if ($user->role !== 'farmer') {
             return response()->json(['error' => 'No autorizado'], 403);
         }
 
         $profile = Farmer::where('user_id', $user->id)->first();
-        
+
         return response()->json([
-            'profile' => $profile ?? (object)[]
+            // ← Devolver null explícito si no existe, no (object)[]
+            'profile' => $profile ?? null
         ]);
     }
 
-    /**
-     * Actualizar perfil del agricultor
-     */
     public function update(Request $request)
     {
+        /** @var \App\Models\User $user */
         $user = Auth::user();
-        
-        if (!$user->is_farmer) {
+
+        if ($user->role !== 'farmer') {
             return response()->json(['error' => 'No autorizado'], 403);
         }
 
         $validated = $request->validate([
             'farm_name' => 'nullable|string|max:255',
-            'city' => 'nullable|string|max:100',
-            'bio' => 'nullable|string',
-            'is_verified' => Rule::in([0, 1]),
+            'city'      => 'nullable|string|max:100',
+            'bio'       => 'nullable|string',
+            'phone'     => 'nullable|string|max:20',
         ]);
 
-        $profile = Farmer::updateOrCreate(
+        // phone va en tabla users
+        if (array_key_exists('phone', $validated)) {
+            $user->phone = $validated['phone'];
+            $user->save();
+            unset($validated['phone']);
+        }
+
+        // farm_name, city, bio van en farmer_profiles
+        Farmer::updateOrCreate(
             ['user_id' => $user->id],
             $validated
         );
 
-        return response()->json([
-            'message' => 'Perfil actualizado correctamente',
-            'profile' => $profile->load('user')
-        ]);
+        return response()->json(['message' => 'Perfil actualizado correctamente']);
     }
 }

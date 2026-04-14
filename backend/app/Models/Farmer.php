@@ -9,15 +9,14 @@ class Farmer extends Model
 {
     use HasFactory;
 
-    //Conectar con la bd
-    protected $table = 'farmer_profiles'; 
+    protected $table = 'farmer_profiles';
 
     protected $fillable = [
         'user_id',
         'farm_name',
         'city',
         'bio',
-        'is_verified'
+        'is_verified',
     ];
 
     public function user()

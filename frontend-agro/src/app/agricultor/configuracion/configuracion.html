@@ -4,29 +4,29 @@
   <main class="main-content">
 
     <header class="topbar">
-  <div class="topbar-left">
-    <div>
-      <h1 class="page-title">Configuración</h1>
-      <span class="page-subtitle">Gestiona tu cuenta y preferencias</span>
-    </div>
-  </div>
-  <div class="topbar-right">
-    <div class="search-box">
-      <span class="material-symbols-rounded" aria-hidden="true">search</span>
-      <input type="search" placeholder="Buscar ajustes…" aria-label="Buscar ajustes" />
-    </div>
-    <button class="icon-btn notif-btn" aria-label="Notificaciones">
-      <span class="material-symbols-rounded" aria-hidden="true">notifications</span>
-    </button>
-    <button class="icon-btn" aria-label="Ayuda">
-      <span class="material-symbols-rounded" aria-hidden="true">help</span>
-    </button>
-    <div class="user-chip">
-      <div class="user-avatar">{{ user?.name?.charAt(0)?.toUpperCase() || '?' }}</div>
-      <span class="user-name">{{ user?.name?.split(' ')[0] || 'Usuario' }}</span>
-    </div>
-  </div>
-</header>
+      <div class="topbar-left">
+        <div>
+          <h1 class="page-title">Configuración</h1>
+          <span class="page-subtitle">Gestiona tu cuenta y preferencias</span>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <div class="search-box">
+          <span class="material-symbols-rounded" aria-hidden="true">search</span>
+          <input type="search" placeholder="Buscar ajustes…" aria-label="Buscar ajustes" />
+        </div>
+        <button class="icon-btn notif-btn" aria-label="Notificaciones">
+          <span class="material-symbols-rounded" aria-hidden="true">notifications</span>
+        </button>
+        <button class="icon-btn" aria-label="Ayuda">
+          <span class="material-symbols-rounded" aria-hidden="true">help</span>
+        </button>
+        <div class="user-chip">
+          <div class="user-avatar">{{ user?.name?.charAt(0)?.toUpperCase() || '?' }}</div>
+          <span class="user-name">{{ user?.name?.split(' ')[0] || 'Usuario' }}</span>
+        </div>
+      </div>
+    </header>
 
     <div class="config-layout">
 
@@ -35,11 +35,8 @@
         <h3 class="menu-title">Secciones</h3>
         <ul class="menu-list" role="list">
 
-          <li role="button" tabindex="0"
-            [class.active]="isSectionActive('perfil')"
-            (click)="section = 'perfil'"
-            (keydown.enter)="section = 'perfil'"
-            (keydown.space)="section = 'perfil'"
+          <li role="button" tabindex="0" [class.active]="isSectionActive('perfil')" (click)="section = 'perfil'"
+            (keydown.enter)="section = 'perfil'" (keydown.space)="section = 'perfil'"
             [attr.aria-current]="isSectionActive('perfil') ? 'page' : null">
             <span class="material-symbols-rounded" aria-hidden="true">manage_accounts</span>
             <div class="menu-text">
@@ -48,11 +45,8 @@
             </div>
           </li>
 
-          <li role="button" tabindex="0"
-            [class.active]="isSectionActive('fincas')"
-            (click)="section = 'fincas'"
-            (keydown.enter)="section = 'fincas'"
-            (keydown.space)="section = 'fincas'"
+          <li role="button" tabindex="0" [class.active]="isSectionActive('fincas')" (click)="section = 'fincas'"
+            (keydown.enter)="section = 'fincas'" (keydown.space)="section = 'fincas'"
             [attr.aria-current]="isSectionActive('fincas') ? 'page' : null">
             <span class="material-symbols-rounded" aria-hidden="true">agriculture</span>
             <div class="menu-text">
@@ -61,11 +55,8 @@
             </div>
           </li>
 
-          <li role="button" tabindex="0"
-            [class.active]="isSectionActive('productos')"
-            (click)="section = 'productos'"
-            (keydown.enter)="section = 'productos'"
-            (keydown.space)="section = 'productos'"
+          <li role="button" tabindex="0" [class.active]="isSectionActive('productos')" (click)="section = 'productos'"
+            (keydown.enter)="section = 'productos'" (keydown.space)="section = 'productos'"
             [attr.aria-current]="isSectionActive('productos') ? 'page' : null">
             <span class="material-symbols-rounded" aria-hidden="true">storefront</span>
             <div class="menu-text">
@@ -74,10 +65,8 @@
             </div>
           </li>
 
-          <li role="button" tabindex="0"
-            [class.active]="isSectionActive('notificaciones')"
-            (click)="section = 'notificaciones'"
-            (keydown.enter)="section = 'notificaciones'"
+          <li role="button" tabindex="0" [class.active]="isSectionActive('notificaciones')"
+            (click)="section = 'notificaciones'" (keydown.enter)="section = 'notificaciones'"
             (keydown.space)="section = 'notificaciones'"
             [attr.aria-current]="isSectionActive('notificaciones') ? 'page' : null">
             <span class="material-symbols-rounded" aria-hidden="true">notifications</span>
@@ -87,11 +76,8 @@
             </div>
           </li>
 
-          <li role="button" tabindex="0"
-            [class.active]="isSectionActive('pagos')"
-            (click)="section = 'pagos'"
-            (keydown.enter)="section = 'pagos'"
-            (keydown.space)="section = 'pagos'"
+          <li role="button" tabindex="0" [class.active]="isSectionActive('pagos')" (click)="section = 'pagos'"
+            (keydown.enter)="section = 'pagos'" (keydown.space)="section = 'pagos'"
             [attr.aria-current]="isSectionActive('pagos') ? 'page' : null">
             <span class="material-symbols-rounded" aria-hidden="true">payments</span>
             <div class="menu-text">
@@ -100,11 +86,8 @@
             </div>
           </li>
 
-          <li role="button" tabindex="0"
-            [class.active]="isSectionActive('seguridad')"
-            (click)="section = 'seguridad'"
-            (keydown.enter)="section = 'seguridad'"
-            (keydown.space)="section = 'seguridad'"
+          <li role="button" tabindex="0" [class.active]="isSectionActive('seguridad')" (click)="section = 'seguridad'"
+            (keydown.enter)="section = 'seguridad'" (keydown.space)="section = 'seguridad'"
             [attr.aria-current]="isSectionActive('seguridad') ? 'page' : null">
             <span class="material-symbols-rounded" aria-hidden="true">lock</span>
             <div class="menu-text">
@@ -113,10 +96,8 @@
             </div>
           </li>
 
-          <li role="button" tabindex="0"
-            [class.active]="isSectionActive('integraciones')"
-            (click)="section = 'integraciones'"
-            (keydown.enter)="section = 'integraciones'"
+          <li role="button" tabindex="0" [class.active]="isSectionActive('integraciones')"
+            (click)="section = 'integraciones'" (keydown.enter)="section = 'integraciones'"
             (keydown.space)="section = 'integraciones'"
             [attr.aria-current]="isSectionActive('integraciones') ? 'page' : null">
             <span class="material-symbols-rounded" aria-hidden="true">hub</span>
@@ -133,7 +114,8 @@
            SECCIÓN: PERFIL
       ===================== -->
       <div class="config-forms" *ngIf="isSectionActive('perfil')">
-        <form #configForm="ngForm" (ngSubmit)="guardarPerfil(configForm)" novalidate>
+        <form #configForm="ngForm" (ngSubmit)="guardarPerfil(configForm)" novalidate
+          [ngFormOptions]="{updateOn: 'change'}">
 
           <section class="content-card" aria-labelledby="personal-info-title">
             <div class="card-header">
@@ -148,8 +130,7 @@
 
             <div class="avatar-section">
               <div class="avatar-img">
-                <img [src]="avatarSrc"
-                  alt="Foto de perfil de {{ perfil.name || 'usuario' }}"
+                <img [src]="avatarSrc" alt="Foto de perfil de {{ perfil.name || 'usuario' }}"
                   (error)="onAvatarError($event)" />
                 <button type="button" class="btn-camera" aria-label="Cambiar foto de perfil">
                   <span class="material-symbols-rounded" aria-hidden="true">photo_camera</span>
@@ -158,6 +139,7 @@
               <div class="avatar-info">
                 <h3>{{ perfil.name || 'Sin nombre' }}</h3>
                 <p class="avatar-farm">Propietario de {{ perfil.farm_name || 'tu finca' }}</p>
+
                 <span class="avatar-since" *ngIf="perfil.member_since">
                   Miembro desde {{ perfil.member_since }}
                 </span>
@@ -167,26 +149,23 @@
             <div class="form-grid">
               <div class="form-group">
                 <label for="name">Nombre completo</label>
-                <input id="name" type="text" name="name"
-                  [(ngModel)]="perfil.name" (ngModelChange)="onFormChange()"
-                  placeholder="Ej: Juan García López" required autocomplete="name" />
+                <input id="name" type="text" name="name" [(ngModel)]="perfil.name" placeholder="Ej: Juan García López"
+                  required autocomplete="name" />
               </div>
               <div class="form-group">
                 <label for="email">Email</label>
-                <input id="email" type="email" name="email"
-                  [(ngModel)]="perfil.email" (ngModelChange)="onFormChange()"
-                  placeholder="correo@ejemplo.com" required autocomplete="email" />
+                <input id="email" type="email" name="email" [(ngModel)]="perfil.email" placeholder="correo@ejemplo.com"
+                  required autocomplete="email" />
               </div>
               <div class="form-group">
-                <label for="phone">Teléfono</label>
-                <input id="phone" type="tel" name="phone"
-                  [(ngModel)]="perfil.phone" (ngModelChange)="onFormChange()"
-                  placeholder="+34 600 000 000" autocomplete="tel" />
-              </div>
-              <div class="form-group">
-                <label for="birth_date">Fecha de nacimiento</label>
-                <input id="birth_date" type="date" name="birth_date" autocomplete="bday" />
-              </div>
+  <label for="phone">Teléfono</label>
+  <input id="phone" type="tel" name="phone"
+    [(ngModel)]="perfil.phone"
+    (input)="formatPhone($event)"
+    placeholder="+34 600 000 000"
+    maxlength="16"
+    autocomplete="tel" />
+</div>
             </div>
           </section>
 
@@ -204,54 +183,27 @@
             <div class="form-grid">
               <div class="form-group">
                 <label for="farm_name">Nombre de la finca</label>
-                <input id="farm_name" type="text" name="farm_name"
-                  [(ngModel)]="perfil.farm_name" (ngModelChange)="onFormChange()"
-                  placeholder="Ej: Finca El Paraíso" required />
+                <input id="farm_name" type="text" name="farm_name" [(ngModel)]="perfil.farm_name"
+                  placeholder="Ej: Finca El Paraíso" />
               </div>
               <div class="form-group">
-                <label for="crop_type">Tipo de cultivo principal</label>
-                <select id="crop_type" name="crop_type" (change)="onFormChange()">
-                  <option value="" disabled selected>Selecciona un tipo...</option>
-                  <option value="frutas">Frutas tropicales</option>
-                  <option value="hortalizas">Hortalizas</option>
-                  <option value="cereal">Cereales</option>
-                  <option value="viñedo">Viñedo</option>
-                  <option value="olivar">Olivar</option>
-                </select>
-              </div>
-              <div class="form-group full-width">
-                <label for="city">Dirección completa</label>
-                <input id="city" type="text" name="city"
-                  [(ngModel)]="perfil.city" (ngModelChange)="onFormChange()"
-                  class="highlight-input"
-                  placeholder="Calle, número, municipio, provincia"
-                  autocomplete="street-address" />
-              </div>
-              <div class="form-group">
-                <label for="area">Superficie (hectáreas)</label>
-                <input id="area" type="number" name="area"
-                  min="0" step="0.1" (change)="onFormChange()" placeholder="Ej: 12.5" />
-              </div>
-              <div class="form-group">
-                <label for="certifications">Certificaciones</label>
-                <input id="certifications" type="text" name="certifications"
-                  (input)="onFormChange()" placeholder="Ej: Orgánico, Fair Trade..." />
+                <label for="city">Ciudad / Localidad</label>
+                <input id="city" type="text" name="city" [(ngModel)]="perfil.city" placeholder="Ej: Logroño"
+                  autocomplete="address-level2" />
               </div>
               <div class="form-group full-width">
                 <label for="bio">Descripción de la finca</label>
-                <textarea id="bio" name="bio"
-                  [(ngModel)]="perfil.bio" (ngModelChange)="onFormChange()"
-                  rows="4" placeholder="Cuéntanos qué hace especial tu finca..."></textarea>
+                <textarea id="bio" name="bio" [(ngModel)]="perfil.bio" rows="4"
+                  placeholder="Cuéntanos qué hace especial tu finca..."></textarea>
               </div>
             </div>
           </section>
 
           <div class="actions-card">
             <div class="form-actions">
-              <button type="button" class="btn-cancel"
-                (click)="cancelarCambios()" [disabled]="!formDirty">Cancelar</button>
-              <button type="submit" class="btn-save"
-                [disabled]="!formDirty || configForm.invalid || loading"
+              <button type="button" class="btn-cancel" (click)="cancelarCambios(configForm)"
+                [disabled]="!configForm.dirty">Cancelar</button>
+              <button type="submit" class="btn-save" [disabled]="!configForm.dirty || configForm.invalid || loading"
                 [attr.aria-busy]="loading">
                 <span class="material-symbols-rounded" aria-hidden="true">
                   {{ loading ? 'progress_activity' : 'save' }}
@@ -326,7 +278,6 @@
           </div>
 
           <div class="toggle-list">
-
             <div class="toggle-item">
               <div class="toggle-info">
                 <span class="toggle-title">Nuevos pedidos</span>
@@ -337,7 +288,6 @@
                 <span class="toggle-slider"></span>
               </label>
             </div>
-
             <div class="toggle-item">
               <div class="toggle-info">
                 <span class="toggle-title">Mensajes de compradores</span>
@@ -348,7 +298,6 @@
                 <span class="toggle-slider"></span>
               </label>
             </div>
-
             <div class="toggle-item">
               <div class="toggle-info">
                 <span class="toggle-title">Actualizaciones de la plataforma</span>
@@ -359,7 +308,6 @@
                 <span class="toggle-slider"></span>
               </label>
             </div>
-
             <div class="toggle-item">
               <div class="toggle-info">
                 <span class="toggle-title">Recordatorios de cosecha</span>
@@ -370,7 +318,6 @@
                 <span class="toggle-slider"></span>
               </label>
             </div>
-
             <div class="toggle-item">
               <div class="toggle-info">
                 <span class="toggle-title">Resumen semanal por email</span>
@@ -381,7 +328,6 @@
                 <span class="toggle-slider"></span>
               </label>
             </div>
-
           </div>
         </section>
 
@@ -433,39 +379,49 @@
             </div>
           </div>
 
-          <form class="form-grid">
+          <form class="form-grid" #passwordNgForm="ngForm" [ngFormOptions]="{updateOn: 'change'}"
+            (ngSubmit)="cambiarPassword()">
             <div class="form-group full-width">
               <label for="current_password">Contraseña actual</label>
               <input id="current_password" type="password" name="current_password"
-                placeholder="Introduce tu contraseña actual"
+                [(ngModel)]="passwordForm.current_password" placeholder="Introduce tu contraseña actual" required
                 autocomplete="current-password" />
             </div>
             <div class="form-group">
               <label for="new_password">Nueva contraseña</label>
-              <input id="new_password" type="password" name="new_password"
-                placeholder="Mínimo 8 caracteres"
-                autocomplete="new-password" />
+              <input id="new_password" type="password" name="new_password" [(ngModel)]="passwordForm.new_password"
+                placeholder="Mínimo 8 caracteres" required minlength="8" autocomplete="new-password" />
             </div>
             <div class="form-group">
               <label for="confirm_password">Confirmar nueva contraseña</label>
               <input id="confirm_password" type="password" name="confirm_password"
-                placeholder="Repite la nueva contraseña"
+                [(ngModel)]="passwordForm.new_password_confirmation" placeholder="Repite la nueva contraseña" required
                 autocomplete="new-password" />
             </div>
           </form>
 
-          <div class="security-info">
+          <div class="security-info security-error" *ngIf="passwordError">
+            <span class="material-symbols-rounded" aria-hidden="true">error</span>
+            <p>{{ passwordError }}</p>
+          </div>
+
+          <div class="security-info" *ngIf="!passwordError">
             <span class="material-symbols-rounded" aria-hidden="true">info</span>
-            <p>La contraseña debe tener al menos 8 caracteres, una mayúscula y un número.</p>
+            <p>La contraseña debe tener al menos 8 caracteres.</p>
           </div>
         </section>
 
         <div class="actions-card">
           <div class="form-actions">
-            <button type="button" class="btn-cancel">Cancelar</button>
-            <button type="button" class="btn-save">
-              <span class="material-symbols-rounded" aria-hidden="true">lock_reset</span>
-              Cambiar contraseña
+            <button type="button" class="btn-cancel" (click)="resetPasswordForm()">
+              Cancelar
+            </button>
+            <button type="button" class="btn-save" (click)="cambiarPassword()"
+              [disabled]="passwordLoading || passwordNgForm.invalid">
+              <span class="material-symbols-rounded" aria-hidden="true">
+                {{ passwordLoading ? 'progress_activity' : 'lock_reset' }}
+              </span>
+              {{ passwordLoading ? 'Guardando...' : 'Cambiar contraseña' }}
             </button>
           </div>
         </div>
@@ -487,7 +443,6 @@
           </div>
 
           <div class="integration-list">
-
             <div class="integration-item">
               <div class="integration-logo">
                 <span class="material-symbols-rounded">shopping_cart</span>
@@ -498,7 +453,6 @@
               </div>
               <span class="integration-badge badge-soon">Próximamente</span>
             </div>
-
             <div class="integration-item">
               <div class="integration-logo">
                 <span class="material-symbols-rounded">local_shipping</span>
@@ -509,7 +463,6 @@
               </div>
               <span class="integration-badge badge-soon">Próximamente</span>
             </div>
-
             <div class="integration-item">
               <div class="integration-logo">
                 <span class="material-symbols-rounded">bar_chart</span>
@@ -520,7 +473,6 @@
               </div>
               <span class="integration-badge badge-soon">Próximamente</span>
             </div>
-
             <div class="integration-item">
               <div class="integration-logo">
                 <span class="material-symbols-rounded">mail</span>
@@ -531,7 +483,6 @@
               </div>
               <span class="integration-badge badge-soon">Próximamente</span>
             </div>
-
           </div>
         </section>
       </div>
@@ -539,10 +490,8 @@
     </div>
 
     <!-- TOAST -->
-    <div *ngIf="toast" class="toast"
-      [class.toast-success]="toast.type === 'success'"
-      [class.toast-error]="toast.type === 'error'"
-      role="alert" aria-live="polite">
+    <div *ngIf="toast" class="toast" [class.toast-success]="toast.type === 'success'"
+      [class.toast-error]="toast.type === 'error'" role="alert" aria-live="polite">
       <span class="material-symbols-rounded toast-icon" aria-hidden="true">
         {{ toast.type === 'success' ? 'check_circle' : 'error' }}
       </span>

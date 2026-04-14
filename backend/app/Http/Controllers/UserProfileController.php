@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
+
 class UserProfileController extends Controller
 {
     public function update(Request $request)
@@ -36,5 +37,31 @@ class UserProfileController extends Controller
         }
 
         return response()->json($user->fresh());
+    }
+
+    public function changePassword(Request $request)
+    {
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+
+        $request->validate([
+            'current_password'      => 'required|string',
+            'new_password'          => 'required|string|min:8|confirmed', // confirmed busca new_password_confirmation
+            'new_password_confirmation' => 'required|string',
+        ]);
+
+        // Verificar que la contraseña actual es correcta
+        if (!Hash::check($request->current_password, $user->password)) {
+            return response()->json([
+                'message' => 'La contraseña actual no es correcta.'
+            ], 422);
+        }
+
+        $user->password = Hash::make($request->new_password);
+        $user->save();
+
+        return response()->json([
+            'message' => 'Contraseña actualizada correctamente.'
+        ]);
     }
 }

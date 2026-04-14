@@ -98,13 +98,13 @@
           <span class="material-symbols-rounded">search</span>
           <input type="text" placeholder="Buscar por cliente o ID..." (input)="onSearch($event)" />
         </div>
-        
         <div class="action-buttons">
           <button class="btn-filter" (click)="applyFilters()">
             <span class="material-symbols-rounded">filter_list</span> Filtrar
           </button>
-          <button class="btn-export">
-            <span class="material-symbols-rounded">download</span> Exportar
+          <button class="btn-export" (click)="exportPDF()" [disabled]="exporting">
+            <span class="material-symbols-rounded">{{ exporting ? 'hourglass_empty' : 'download' }}</span>
+            {{ exporting ? 'Generando…' : 'Exportar' }}
           </button>
         </div>
       </div>
@@ -122,10 +122,11 @@
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let order of filteredOrders">
+            <tr *ngFor="let order of displayedOrders">
               <td>
                 <div class="order-client">
-                  <div class="client-avatar-initial" [style.background-color]="getAvatarColor(order.buyer.name)">
+                  <div class="client-avatar-initial"
+                    [style.background-color]="getAvatarColor(order.buyer.name)">
                     {{ order.buyer.name.charAt(0).toUpperCase() }}
                   </div>
                   <span class="order-client-name">{{ order.buyer.name }}</span>
@@ -163,11 +164,82 @@
           </tbody>
         </table>
       </div>
-      
+
+      <div class="load-more-wrap" *ngIf="hasMoreOrders">
+        <button class="btn-load-more" (click)="loadMore()">
+          <span class="material-symbols-rounded">expand_more</span>
+          Ver más pedidos
+          <span class="load-more-count">({{ remainingCount }} restantes)</span>
+        </button>
+      </div>
+
+      <div class="results-info" *ngIf="filteredOrders.length > 0">
+        Mostrando <strong>{{ displayedOrders.length }}</strong> de <strong>{{ filteredOrders.length }}</strong> pedidos
+      </div>
+
       <div *ngIf="filteredOrders.length === 0" class="empty-state">
         <span class="material-symbols-rounded empty-icon">inventory_2</span>
         <p class="empty-title">No hay pedidos que coincidan</p>
       </div>
     </div>
   </main>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════
+     SECCIONES OCULTAS PARA PDF
+══════════════════════════════════════════════════ -->
+<div id="pdf-pedidos-header"
+  style="position:fixed;left:-9999px;top:0;width:860px;background:#fff;padding:28px;font-family:sans-serif;color:#28251d;">
+  <div style="background:#01696f;color:#fff;padding:20px 24px;border-radius:12px;display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+    <div>
+      <div style="font-size:20px;font-weight:700;">AgroConecta — Informe de pedidos</div>
+      <div style="font-size:13px;opacity:.8;margin-top:3px;">{{ user?.name }}</div>
+    </div>
+    <div style="font-size:13px;opacity:.8;">{{ today | date:"d 'de' MMMM yyyy" : undefined : 'es' }}</div>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;">
+    <div style="background:#f0f9f0;border-radius:10px;padding:14px;">
+      <div style="color:#437a22;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;margin-bottom:5px;">Total pedidos</div>
+      <div style="font-size:22px;font-weight:700;">{{ totalPedidos }}</div>
+    </div>
+    <div style="background:#f0fafa;border-radius:10px;padding:14px;">
+      <div style="color:#01696f;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;margin-bottom:5px;">Ganancias</div>
+      <div style="font-size:22px;font-weight:700;">{{ totalGanancias | currency:'EUR':'symbol':'1.0-0' }}</div>
+    </div>
+    <div style="background:#fff8f0;border-radius:10px;padding:14px;">
+      <div style="color:#da7101;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;margin-bottom:5px;">Pendientes</div>
+      <div style="font-size:22px;font-weight:700;">{{ pendingCount }}</div>
+    </div>
+    <div style="background:#eff6ff;border-radius:10px;padding:14px;">
+      <div style="color:#3b82f6;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;margin-bottom:5px;">En preparación</div>
+      <div style="font-size:22px;font-weight:700;">{{ processingCount }}</div>
+    </div>
+  </div>
+</div>
+
+<div id="pdf-pedidos-table"
+  style="position:fixed;left:-9999px;top:0;width:860px;background:#fff;padding:20px 28px;font-family:sans-serif;color:#28251d;">
+  <div style="font-size:15px;font-weight:700;margin-bottom:12px;">🧾 Listado de pedidos</div>
+  <table style="width:100%;border-collapse:collapse;font-size:13px;">
+    <thead>
+      <tr style="background:#f7f6f2;">
+        <th style="padding:9px 12px;text-align:left;color:#7a7974;font-weight:600;">Ref.</th>
+        <th style="padding:9px 12px;text-align:left;color:#7a7974;font-weight:600;">Cliente</th>
+        <th style="padding:9px 12px;text-align:left;color:#7a7974;font-weight:600;">Fecha</th>
+        <th style="padding:9px 12px;text-align:right;color:#7a7974;font-weight:600;">Total</th>
+        <th style="padding:9px 12px;text-align:right;color:#7a7974;font-weight:600;">Estado</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let order of filteredOrders; let i = index"
+        [style.background]="i % 2 === 0 ? '#fff' : '#f9f8f5'">
+        <td style="padding:9px 12px;font-weight:700;color:#01696f;">#{{ order.id }}</td>
+        <td style="padding:9px 12px;">{{ order.buyer.name }}</td>
+        <td style="padding:9px 12px;color:#7a7974;">{{ order.created_at | smartDate }}</td>
+        <td style="padding:9px 12px;text-align:right;font-weight:700;">{{ order.total | currency:'EUR' }}</td>
+        <td style="padding:9px 12px;text-align:right;color:#7a7974;">{{ statusLabels[order.status] }}</td>
+      </tr>
+    </tbody>
+  </table>
 </div>
