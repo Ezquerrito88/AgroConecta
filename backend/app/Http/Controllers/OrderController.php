@@ -6,6 +6,8 @@ use App\Models\Order;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Mail\OrderConfirmationMail;
+use Illuminate\Support\Facades\Mail;
 
 class OrderController extends Controller
 {
@@ -143,8 +145,14 @@ class OrderController extends Controller
                 Product::where('id', $item['product_id'])->decrement('stock_quantity', $item['quantity']);
             }
 
+            $order->load('buyer', 'items.product');
+           
+
+
             return $order;
         });
+
+         Mail::to($order->buyer->email)->send(new OrderConfirmationMail($order));
 
         return response()->json($order->load('items.product'), 201);
     }

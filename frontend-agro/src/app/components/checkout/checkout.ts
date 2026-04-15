@@ -10,7 +10,8 @@ import { CommonModule, CurrencyPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { Router, RouterModule } from '@angular/router';
-import { firstValueFrom, forkJoin } from 'rxjs';
+import { Subject, firstValueFrom, forkJoin, of } from 'rxjs';
+import { debounceTime, distinctUntilChanged, switchMap, catchError } from 'rxjs/operators';
 import { loadScript } from '@paypal/paypal-js';
 import { loadStripe, Stripe, StripeElements } from '@stripe/stripe-js';
 import { CarritoService } from '../../core/services/carrito';
@@ -98,6 +99,9 @@ export class Checkout implements OnInit, AfterViewChecked {
   postalCodeError    = false;
   postalCodeResolved = false;
 
+  // ── Postal code Subject (debounce) ────────  ← NUEVO
+  private postalCodeSubject = new Subject<string>();
+
   // ── Private Stripe/PayPal state ───────────
   private stripe: Stripe | null                 = null;
   private stripeElements: StripeElements | null = null;
@@ -165,6 +169,45 @@ export class Checkout implements OnInit, AfterViewChecked {
     this.prefillUserData();
     this.loadDiscountFromStorage();
     this.preloadStripe();
+
+    // ── Suscripción al Subject con debounce ──  ← NUEVO
+    this.postalCodeSubject.pipe(
+      debounceTime(400),
+      distinctUntilChanged(),
+      switchMap(code => {
+        if (code.length !== 5) {
+          this.postalCodeLoading  = false;
+          this.postalCodeError    = false;
+          this.postalCodeResolved = false;
+          this.form.city          = '';
+          return of(null);
+        }
+        this.postalCodeLoading = true;
+        this.postalCodeError   = false;
+        this.form.city         = '';
+        return this.http
+          .get<ZippopotamResponse>(`https://api.zippopotam.us/es/${code}`)
+          .pipe(catchError(() => of(null)));
+      }),
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe(data => {
+      this.postalCodeLoading = false;
+      if (!data) {
+        if (this.form.postalCode.length === 5) {
+          this.postalCodeError    = true;
+          this.postalCodeResolved = false;
+        }
+        return;
+      }
+      if (data.places?.length > 0) {
+        this.form.city          = data.places[0]['place name'];
+        this.postalCodeError    = false;
+        this.postalCodeResolved = true;
+      } else {
+        this.postalCodeError    = true;
+        this.postalCodeResolved = false;
+      }
+    });
   }
 
   ngAfterViewChecked(): void {
@@ -244,45 +287,13 @@ export class Checkout implements OnInit, AfterViewChecked {
 
 
   // ════════════════════════════════════════════
-  // Postal code autocomplete
+  // Postal code autocomplete  ← SIMPLIFICADO
   // ════════════════════════════════════════════
 
   onPostalCodeChange(postalCode: string): void {
     const cleaned = postalCode.replace(/\D/g, '').substring(0, 5);
     this.form.postalCode = cleaned;
-
-    this.postalCodeError    = false;
-    this.postalCodeResolved = false;
-
-    if (cleaned.length !== 5) {
-      this.postalCodeLoading = false;
-      return;
-    }
-
-    this.postalCodeLoading = true;
-    this.form.city = '';
-
-    this.http
-      .get<ZippopotamResponse>(`https://api.zippopotam.us/es/${cleaned}`)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (data) => {
-          this.postalCodeLoading = false;
-          if (data?.places?.length > 0) {
-            this.form.city          = data.places[0]['place name'];
-            this.postalCodeError    = false;
-            this.postalCodeResolved = true;
-          } else {
-            this.postalCodeError    = true;
-            this.postalCodeResolved = false;
-          }
-        },
-        error: () => {
-          this.postalCodeLoading  = false;
-          this.postalCodeError    = true;
-          this.postalCodeResolved = false;
-        },
-      });
+    this.postalCodeSubject.next(cleaned);
   }
 
 
