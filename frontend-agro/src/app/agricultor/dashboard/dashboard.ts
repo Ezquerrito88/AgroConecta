@@ -17,7 +17,6 @@ export class Dashboard implements OnInit {
 
   user: any = null;
   today = new Date();
-
   isLoading = true;
   hasError = false;
 
@@ -34,27 +33,27 @@ export class Dashboard implements OnInit {
   readonly PLACEHOLDER = 'assets/img/placeholder.jpg';
 
   statusLabels: Record<string, string> = {
-    pending: 'Pendiente',
+    pending:    'Pendiente',
     processing: 'Procesando',
-    shipped: 'En camino',
-    delivered: 'Entregado',
-    cancelled: 'Cancelado',
+    shipped:    'En camino',
+    delivered:  'Entregado',
+    cancelled:  'Cancelado',
   };
 
   statusClasses: Record<string, string> = {
-    pending: 'pendiente',
+    pending:    'pendiente',
     processing: 'procesando',
-    shipped: 'enviado',
-    delivered: 'entregado',
-    cancelled: 'cancelado',
+    shipped:    'enviado',
+    delivered:  'entregado',
+    cancelled:  'cancelado',
   };
 
   statusIcons: Record<string, string> = {
-    pending: 'schedule',
+    pending:    'schedule',
     processing: 'sync',
-    shipped: 'local_shipping',
-    delivered: 'check_circle',
-    cancelled: 'cancel',
+    shipped:    'local_shipping',
+    delivered:  'check_circle',
+    cancelled:  'cancel',
   };
 
   constructor(
@@ -62,24 +61,27 @@ export class Dashboard implements OnInit {
     private dashboardService: DashboardService,
     private router: Router,
     private cdr: ChangeDetectorRef
-  ) { }
+  ) {}
 
   ngOnInit(): void {
     this.user = this.authService.getCurrentUser();
     this.loadDashboard();
   }
 
-  /** Top 3 productos estrella */
+  // ── Ventas con precisión de 2 decimales ─────────
+  get ventasRedondeadas(): number {
+    const num = parseFloat(String(this.kpis.ventas ?? 0).replace(',', '.'));
+    return isNaN(num) ? 0 : Math.round(num * 100) / 100;
+  }
+
   get topProducts(): TopProduct[] {
     return this._topProducts.slice(0, 3);
   }
 
-  /** Devuelve la imagen real del producto o el placeholder */
   getProductImage(p: TopProduct): string {
     return p?.image || this.PLACEHOLDER;
   }
-  
-  /** Fallback si la imagen no carga */
+
   onImgError(event: Event): void {
     (event.target as HTMLImageElement).src = this.PLACEHOLDER;
   }
@@ -90,17 +92,25 @@ export class Dashboard implements OnInit {
 
     this.dashboardService.getData().subscribe({
       next: (data) => {
-        this.kpis = data.kpis;
+        this.kpis         = data.kpis;
         this.recentOrders = data.recent_orders;
         this._topProducts = data.top_products ?? [];
-        this.isLoading = false;
+        this.isLoading    = false;
         this.cdr.detectChanges();
       },
       error: () => {
-        this.hasError = true;
+        this.hasError  = true;
         this.isLoading = false;
         this.cdr.detectChanges();
       }
     });
+  }
+
+  get starsArray(): { full: boolean; half: boolean }[] {
+    const rating = this.kpis.calificacion;
+    return Array.from({ length: 5 }, (_, i) => ({
+      full: i < Math.floor(rating),
+      half: i === Math.floor(rating) && rating % 1 >= 0.5,
+    }));
   }
 }

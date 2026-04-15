@@ -3,6 +3,7 @@
 
   <main class="main-content">
 
+    <!-- TOPBAR -->
     <div class="topbar">
       <div class="topbar-left">
         <h1 class="page-title">Mis Productos</h1>
@@ -27,6 +28,7 @@
       </div>
     </div>
 
+    <!-- WELCOME BANNER -->
     <div class="welcome-banner">
       <div class="welcome-text">
         <h2 class="welcome-title">Tu catálogo</h2>
@@ -44,8 +46,9 @@
       </div>
     </div>
 
+    <!-- ALERT BANNER -->
     <div class="alert-banner" *ngIf="agotados > 0">
-      <span class="material-symbols-rounded alert-icon">warning</span>
+      <span class="material-symbols-rounded alert-icon">inventory_2</span>
       <div class="alert-text">
         <strong>{{ agotados }} producto{{ agotados > 1 ? 's' : '' }} sin stock.</strong>
         Los compradores no pueden pedirlos hasta que actualices el inventario.
@@ -53,57 +56,68 @@
       <a routerLink="/agricultor/mis-productos" class="btn-alert">Actualizar stock →</a>
     </div>
 
+    <!-- KPI GRID -->
     <div class="kpi-grid">
+
+      <!-- Total productos -->
       <div class="kpi-card kpi-featured">
         <div class="kpi-header">
           <div class="kpi-icon-wrap white-icon">
-            <span class="material-symbols-rounded">inventory_2</span>
+            <span class="material-symbols-rounded">storefront</span>
           </div>
-          <span class="kpi-badge kpi-badge-white">Catálogo total</span>
         </div>
         <span class="kpi-value">{{ totalProductos }}</span>
-        <span class="kpi-label">📦 Productos en tu granja</span>
+        <span class="kpi-label">Productos en tu granja</span>
       </div>
 
+      <!-- Sin stock -->
       <div class="kpi-card" [class.kpi-danger]="agotados > 0">
         <div class="kpi-header">
-          <div class="kpi-icon-wrap" [class.red]="agotados > 0" [class.green]="agotados === 0">
-            <span class="material-symbols-rounded">{{ agotados > 0 ? 'warning' : 'check_circle' }}</span>
+          <div class="kpi-icon-wrap"
+               [class.red]="agotados > 0"
+               [class.green]="agotados === 0">
+            <span class="material-symbols-rounded">
+              {{ agotados > 0 ? 'inventory_2' : 'inventory' }}
+            </span>
           </div>
           <span class="kpi-badge negative" *ngIf="agotados > 0">¡Atención!</span>
           <span class="kpi-badge positive" *ngIf="agotados === 0">Todo OK</span>
         </div>
         <span class="kpi-value">{{ agotados }}</span>
-        <span class="kpi-label">⚠️ Productos sin stock</span>
+        <span class="kpi-label">{{ agotados > 0 ? 'Sin stock' : 'Todo con stock' }}</span>
         <a routerLink="/agricultor/mis-productos" class="kpi-action-link" *ngIf="agotados > 0">
           Actualizar ahora →
         </a>
       </div>
 
+      <!-- Bajo inventario -->
       <div class="kpi-card">
         <div class="kpi-header">
           <div class="kpi-icon-wrap orange">
-            <span class="material-symbols-rounded">schedule</span>
+            <span class="material-symbols-rounded">avg_pace</span>
           </div>
         </div>
         <span class="kpi-value">{{ pocoStock }}</span>
-        <span class="kpi-label">🟠 Bajo inventario</span>
+        <span class="kpi-label">Bajo inventario</span>
         <span class="kpi-hint">Próximos a agotarse</span>
       </div>
 
+      <!-- Unidades vendidas -->
       <div class="kpi-card">
         <div class="kpi-header">
           <div class="kpi-icon-wrap blue">
-            <span class="material-symbols-rounded">bar_chart</span>
+            <span class="material-symbols-rounded">trending_up</span>
           </div>
           <span class="kpi-badge positive">Este mes</span>
         </div>
         <span class="kpi-value">{{ unidadesVendidas }}</span>
-        <span class="kpi-label">📈 Unidades vendidas</span>
+        <span class="kpi-label">Unidades vendidas</span>
         <span class="kpi-hint">Comparado con el mes pasado</span>
       </div>
+
     </div>
 
+    <!-- SECCIÓN PRODUCTOS -->
     <div class="section-card">
       <div class="section-header">
         <div class="section-title-group">
@@ -117,6 +131,7 @@
         </select>
       </div>
 
+      <!-- SKELETON -->
       <div class="products-grid" *ngIf="loading">
         <div class="skeleton-card-premium" *ngFor="let item of [1,2,3,4,5,6,7,8]">
           <div class="sk-img-box">
@@ -139,6 +154,7 @@
         </div>
       </div>
 
+      <!-- GRID PRODUCTOS -->
       <div class="products-grid" *ngIf="!loading && productos.length > 0">
         <div class="product-card-premium"
              *ngFor="let p of productos; let i = index"
@@ -165,11 +181,13 @@
               <span class="p-price">{{ p.price | currency:'EUR':'symbol':'1.2-2' }}</span>
               <span class="p-unit">/{{ p.unit }}</span>
             </div>
-            
+
             <div class="p-inventory">
               <div class="p-inv-text">
                 <span>Stock: <strong>{{ p.stock }}</strong></span>
-                <span>{{ p.stockPct }}%</span>
+                <span class="p-inv-pct" [class.pct-low]="p.stockPct <= 15" [class.pct-mid]="p.stockPct > 15 && p.stockPct <= 40">
+                  {{ p.stockPct }}%
+                </span>
               </div>
               <div class="p-inv-bar">
                 <div class="p-inv-fill"
@@ -182,7 +200,8 @@
             <div class="p-actions-row">
               <button class="p-btn-icon"
                       (click)="$event.stopPropagation()"
-                      [routerLink]="['/producto', p.id]">
+                      [routerLink]="['/producto', p.id]"
+                      title="Ver producto">
                 <span class="material-symbols-rounded">visibility</span>
               </button>
               <button class="p-btn-edit"
@@ -196,18 +215,17 @@
         </div>
       </div>
 
+      <!-- PAGINACIÓN -->
       <div class="pagination-premium" *ngIf="!loading && lastPage > 1">
         <div class="pagination-info">
-          Mostrando página <strong>{{ currentPage }}</strong> de {{ lastPage }}
+          Página <strong>{{ currentPage }}</strong> de {{ lastPage }}
         </div>
         <div class="pagination-actions">
           <button class="btn-pag" [disabled]="currentPage === 1" (click)="changePage(currentPage - 1)">
             <span class="material-symbols-rounded">chevron_left</span>
             Anterior
           </button>
-          
           <div class="pag-number active">{{ currentPage }}</div>
-          
           <button class="btn-pag" [disabled]="currentPage === lastPage" (click)="changePage(currentPage + 1)">
             Siguiente
             <span class="material-symbols-rounded">chevron_right</span>
@@ -215,8 +233,9 @@
         </div>
       </div>
 
+      <!-- EMPTY STATE -->
       <div class="empty-state" *ngIf="!loading && productos.length === 0">
-        <span class="material-symbols-rounded empty-icon">inventory</span>
+        <span class="material-symbols-rounded empty-icon">storefront</span>
         <p class="empty-title">No se encontraron productos</p>
         <p class="empty-sub">Comienza publicando tus productos de temporada.</p>
         <button class="btn-primary-green" routerLink="/agricultor/mis-productos/nuevo">

@@ -69,7 +69,7 @@ Route::middleware('auth:sanctum')->group(function () {
     |----------------------------------------------------------------------
     */
     Route::middleware('farmer')->prefix('farmer')->group(function () {
-        Route::get('/dashboard', [DashboardController::class, 'index']);
+        Route::get('/dashboard', [DashboardController::class, 'farmerStats']);
         Route::get('/profile',   [FarmerProfileController::class, 'show']);
         Route::put('/profile',   [FarmerProfileController::class, 'update']);
         Route::get('/products',  [ProductController::class, 'misProductos']);

@@ -3,7 +3,7 @@
 
   <main class="main-content">
 
-    <!-- ── Topbar ─────────────────────────────────── -->
+    <!-- ── Topbar ──────────────────────────────── -->
     <div class="topbar">
       <div class="topbar-left">
         <h1 class="page-title">Estadísticas</h1>
@@ -27,27 +27,27 @@
       </div>
     </div>
 
-    <!-- ── Skeleton ───────────────────────────────── -->
+    <!-- ── Skeleton ────────────────────────────── -->
     <ng-container *ngIf="loading">
       <div class="welcome-banner skel-banner"></div>
       <div class="kpi-grid">
         <div class="kpi-card skel-block" *ngFor="let i of [1,2,3,4]"></div>
       </div>
-      <div class="section-card skel-block" style="height:320px"></div>
+      <div class="section-card skel-block" style="height:320px;margin:20px 24px 0"></div>
     </ng-container>
 
-    <!-- ── Error ──────────────────────────────────── -->
+    <!-- ── Error ───────────────────────────────── -->
     <div *ngIf="error" class="section-card error-state" role="alert">
       <span class="material-symbols-rounded empty-icon">error_outline</span>
       <p class="empty-title">No se pudieron cargar las estadísticas</p>
-      <button class="btn-filter" (click)="ngOnInit()">
+      <button class="btn-filter" (click)="loadStats()">
         <span class="material-symbols-rounded">refresh</span> Reintentar
       </button>
     </div>
 
     <ng-container *ngIf="!loading && !error && dashboard">
 
-      <!-- ── Welcome banner ─────────────────────── -->
+      <!-- ── Welcome banner ──────────────────── -->
       <div class="welcome-banner">
         <div>
           <h2 class="welcome-title">Resumen de actividad</h2>
@@ -61,124 +61,276 @@
         </div>
       </div>
 
-      <!-- ── KPIs ───────────────────────────────── -->
+      <!-- ── KPIs ────────────────────────────── -->
       <div class="kpi-grid">
+
+        <div class="kpi-card kpi-featured">
+          <div class="kpi-header">
+            <div class="kpi-icon-wrap white-icon">
+              <span class="material-symbols-rounded">payments</span>
+            </div>
+            <span class="kpi-badge white-badge">Este mes</span>
+          </div>
+          <span class="kpi-value">{{ totalGanancias | currency:'EUR':'symbol':'1.2-2' }}</span>
+          <span class="kpi-label">Ganancias totales</span>
+        </div>
 
         <div class="kpi-card">
           <div class="kpi-header">
             <div class="kpi-icon-wrap green">
               <span class="material-symbols-rounded">shopping_basket</span>
             </div>
+            <span class="kpi-badge green-badge">Este mes</span>
           </div>
           <span class="kpi-value">{{ dashboard.kpis.pedidos }}</span>
-          <span class="kpi-label">📦 Pedidos este mes</span>
+          <span class="kpi-label">Pedidos este mes</span>
         </div>
 
-        <div class="kpi-card kpi-featured">
+        <div class="kpi-card" [class.kpi-danger]="dashboard.kpis.agotados > 0">
           <div class="kpi-header">
-            <div class="kpi-icon-wrap white-icon">
-              <span class="material-symbols-rounded">euro</span>
+            <div class="kpi-icon-wrap" [class.red]="dashboard.kpis.agotados > 0"
+              [class.green]="dashboard.kpis.agotados === 0">
+              <span class="material-symbols-rounded">
+                {{ dashboard.kpis.agotados > 0 ? 'inventory_2' : 'inventory' }}
+              </span>
             </div>
-          </div>
-          <span class="kpi-value">{{ dashboard.kpis.ventas | currency:'EUR':'symbol':'1.0-0' }}</span>
-          <span class="kpi-label">💰 Ingresos del mes</span>
-        </div>
-
-        <div class="kpi-card">
-          <div class="kpi-header">
-            <div class="kpi-icon-wrap orange">
-              <span class="material-symbols-rounded">warning</span>
-            </div>
+            <span class="kpi-badge" [class.red-badge]="dashboard.kpis.agotados > 0"
+              [class.green-badge]="dashboard.kpis.agotados === 0">
+              {{ dashboard.kpis.agotados > 0 ? 'Urgente' : 'OK' }}
+            </span>
           </div>
           <span class="kpi-value" [class.danger-val]="dashboard.kpis.agotados > 0">
             {{ dashboard.kpis.agotados }}
           </span>
-          <span class="kpi-label">🚨 Productos agotados</span>
-          <span class="kpi-sublabel orange" *ngIf="dashboard.kpis.agotados > 0">Requieren atención</span>
+          <span class="kpi-label">
+            {{ dashboard.kpis.agotados > 0 ? 'Sin stock' : 'Todo con stock' }}
+          </span>
         </div>
 
         <div class="kpi-card">
           <div class="kpi-header">
-            <div class="kpi-icon-wrap blue">
-              <span class="material-symbols-rounded">star</span>
+            <div class="kpi-icon-wrap purple">
+              <span class="material-symbols-rounded">kid_star</span>
             </div>
           </div>
-          <span class="kpi-value">
-            {{ dashboard.kpis.calificacion | number:'1.1-1' }}<small>/5</small>
-          </span>
-          <span class="kpi-label">⭐ Valoración media</span>
-          <span class="kpi-sublabel blue">Basada en reseñas</span>
+          <div class="kpi-value-row">
+            <span class="kpi-value">
+              {{ dashboard.kpis.calificacion | number:'1.1-1' }}<small>/5</small>
+            </span>
+            <div class="stars-mini">
+              <ng-container *ngFor="let s of getStarsArray(dashboard.kpis.calificacion)">
+                <span class="material-symbols-rounded" [class.star-filled]="s.full" [class.star-half]="s.half"
+                  [class.star-empty]="!s.full && !s.half">
+                  {{ s.half ? 'star_half' : 'star' }}
+                </span>
+              </ng-container>
+            </div>
+          </div>
+          <span class="kpi-label">Valoración media</span>
         </div>
 
       </div>
 
-      <!-- ── Gráficas ────────────────────────────── -->
-      <div class="charts-row">
-
-        <div class="section-card chart-wide" id="pdf-chart-ingresos">
-          <div class="section-header">
-            <div class="section-title-group">
-              <span class="material-symbols-rounded section-icon">trending_up</span>
-              <h2>Ingresos mensuales</h2>
-            </div>
+      <!-- ══════════════════════════════════════
+           GRÁFICA 1: Ingresos año actual vs anterior
+      ══════════════════════════════════════════ -->
+      <div class="section-card" id="pdf-chart-ingresos">
+        <div class="section-header">
+          <div class="section-title-group">
+            <span class="material-symbols-rounded section-icon">trending_up</span>
+            <h2>Ingresos mensuales</h2>
           </div>
-          <apx-chart
-            [series]="areaOptions.series" [chart]="areaOptions.chart"
-            [xaxis]="areaOptions.xaxis"  [stroke]="areaOptions.stroke"
-            [fill]="areaOptions.fill"    [dataLabels]="areaOptions.dataLabels"
-            [grid]="areaOptions.grid"    [tooltip]="areaOptions.tooltip"
-            [colors]="['#16a34a']">
-          </apx-chart>
+          <div class="chart-legend">
+            <span class="legend-dot" style="background:#11C267"></span><span>Este año</span>
+            <span class="legend-dot" style="background:#94a3b8; opacity:.6"></span><span>Año anterior</span>
+          </div>
         </div>
+        <apx-chart [series]="areaOptions.series" [chart]="areaOptions.chart" [xaxis]="areaOptions.xaxis"
+          [yaxis]="areaOptions.yaxis" [stroke]="areaOptions.stroke" [fill]="areaOptions.fill"
+          [dataLabels]="areaOptions.dataLabels" [grid]="areaOptions.grid" [tooltip]="areaOptions.tooltip"
+          [markers]="areaOptions.markers" [annotations]="areaOptions.annotations" [colors]="['#11C267','#94a3b8']">
+        </apx-chart>
+      </div>
 
-        <div class="section-card chart-donut" id="pdf-chart-dona">
+      <!-- ══════════════════════════════════════
+           GRÁFICA 2: Combo barras + línea (pedidos + ticket medio)
+      ══════════════════════════════════════════ -->
+      <div class="section-card" id="pdf-chart-combo">
+        <div class="section-header">
+          <div class="section-title-group">
+            <span class="material-symbols-rounded section-icon">bar_chart</span>
+            <h2>Pedidos por mes y ticket medio</h2>
+          </div>
+          <div class="chart-legend">
+            <span class="legend-dot" style="background:#11C267"></span><span>Pedidos</span>
+            <span class="legend-dot" style="background:#f97316"></span><span>Ticket medio</span>
+          </div>
+        </div>
+        <apx-chart [series]="comboOptions.series" [chart]="comboOptions.chart" [xaxis]="comboOptions.xaxis"
+          [yaxis]="comboOptions.yaxis" [stroke]="comboOptions.stroke" [fill]="comboOptions.fill"
+          [plotOptions]="comboOptions.plotOptions" [dataLabels]="comboOptions.dataLabels" [grid]="comboOptions.grid"
+          [tooltip]="comboOptions.tooltip" [markers]="comboOptions.markers" [colors]="['#11C267','#f97316']">
+        </apx-chart>
+      </div>
+
+      <!-- ══════════════════════════════════════
+           FILA: Dona mejorada + Stock bajo
+      ══════════════════════════════════════════ -->
+      <div class="charts-row-2" id="pdf-chart-dona-stock">
+
+        <!-- GRÁFICA 3: Estado de pedidos mejorada -->
+        <div class="section-card status-card">
           <div class="section-header">
             <div class="section-title-group">
               <span class="material-symbols-rounded section-icon">donut_large</span>
               <h2>Estado de pedidos</h2>
             </div>
+            <span class="kpi-badge green-badge">{{ totalPedidosStatus }} total</span>
           </div>
-          <apx-chart
-            [series]="donutOptions.series"   [chart]="donutOptions.chart"
-            [labels]="donutOptions.labels"   [colors]="donutOptions.colors"
-            [legend]="donutOptions.legend"   [dataLabels]="donutOptions.dataLabels"
-            [plotOptions]="donutOptions.plotOptions"
-            [responsive]="donutOptions.responsive"
-            [tooltip]="donutOptions.tooltip">
-          </apx-chart>
-          <ul class="donut-legend">
-            <li *ngFor="let label of donutOptions.labels; let i = index">
-              <span class="dot" [style.background]="donutOptions.colors[i]"></span>
-              {{ label }}
-              <span class="dot-val">{{ donutOptions.series[i] }}</span>
+
+          <div class="status-layout">
+
+            <!-- Dona centrada -->
+            <div class="donut-center-wrap">
+              <apx-chart [series]="donutOptions.series" [chart]="donutOptions.chart" [labels]="donutOptions.labels"
+                [colors]="donutOptions.colors" [legend]="donutOptions.legend" [dataLabels]="donutOptions.dataLabels"
+                [plotOptions]="donutOptions.plotOptions" [responsive]="donutOptions.responsive"
+                [tooltip]="donutOptions.tooltip">
+              </apx-chart>
+            </div>
+
+            <!-- Barras horizontales -->
+            <ul class="status-bar-list">
+              <li *ngFor="let label of donutOptions.labels; let i = index" class="status-bar-row">
+                <div class="status-bar-left">
+                  <span class="status-dot" [style.background]="donutOptions.colors[i]"></span>
+                  <span class="status-bar-label">{{ label }}</span>
+                </div>
+                <div class="status-bar-track">
+                  <div class="status-bar-fill"
+                    [style.width.%]="getStatusPct(donutOptions.series[i], totalPedidosStatus)"
+                    [style.background]="donutOptions.colors[i]">
+                  </div>
+                </div>
+                <div class="status-bar-right">
+                  <span class="status-bar-count">{{ donutOptions.series[i] }}</span>
+                  <span class="status-bar-pct">{{ getStatusPct(donutOptions.series[i], totalPedidosStatus) }}%</span>
+                </div>
+              </li>
+            </ul>
+
+          </div>
+        </div>
+
+        <!-- Stock bajo -->
+        <div class="section-card">
+          <div class="section-header">
+            <div class="section-title-group">
+              <span class="material-symbols-rounded section-icon" style="color:#f97316">warning</span>
+              <h2>Stock bajo</h2>
+            </div>
+            <span class="badge-count" *ngIf="dashboard.low_stock?.length > 0">
+              {{ dashboard.low_stock.length }} productos
+            </span>
+          </div>
+          <div *ngIf="dashboard.low_stock?.length === 0" class="empty-state">
+            <span class="material-symbols-rounded empty-icon">inventory</span>
+            <p class="empty-title">Todo el stock está bien</p>
+          </div>
+          <ul *ngIf="dashboard.low_stock?.length > 0" class="stock-list">
+            <li *ngFor="let p of dashboard.low_stock" class="stock-row">
+              <div class="stock-info">
+                <span class="stock-name">{{ p.name }}</span>
+                <span class="stock-unit">{{ p.unit }}</span>
+              </div>
+              <div class="stock-bar-wrap">
+                <div class="stock-bar">
+                  <div class="stock-bar-fill" [style.width.%]="(p.stock / 5) * 100" [class.critical]="p.stock <= 2">
+                  </div>
+                </div>
+                <span class="stock-qty" [class.critical-text]="p.stock <= 2">
+                  {{ p.stock }} uds.
+                </span>
+              </div>
             </li>
           </ul>
         </div>
 
       </div>
 
-      <!-- Barras: pedidos por mes -->
-      <div class="section-card" id="pdf-chart-pedidos">
+      <!-- ══════════════════════════════════════
+           GRÁFICA 4: Mapa de calor día × hora
+      ══════════════════════════════════════════ -->
+      <div class="section-card" id="pdf-heatmap">
         <div class="section-header">
           <div class="section-title-group">
-            <span class="material-symbols-rounded section-icon">bar_chart</span>
-            <h2>Pedidos por mes</h2>
+            <span class="material-symbols-rounded section-icon">grid_view</span>
+            <h2>Cuándo compran tus clientes</h2>
           </div>
+          <span class="chart-subtitle">Pedidos por día y hora</span>
         </div>
-        <apx-chart
-          [series]="barOptions.series"         [chart]="barOptions.chart"
-          [xaxis]="barOptions.xaxis"           [plotOptions]="barOptions.plotOptions"
-          [dataLabels]="barOptions.dataLabels" [grid]="barOptions.grid"
-          [tooltip]="barOptions.tooltip"       [fill]="barOptions.fill"
-          [colors]="['#0ea858']">
+        <div *ngIf="heatmapEmpty" class="empty-state">
+          <span class="material-symbols-rounded empty-icon">grid_view</span>
+          <p class="empty-title">Aún no hay suficientes datos para el mapa de calor</p>
+        </div>
+        <apx-chart *ngIf="!heatmapEmpty" [series]="heatmapOptions.series" [chart]="heatmapOptions.chart"
+          [xaxis]="heatmapOptions.xaxis" [dataLabels]="heatmapOptions.dataLabels" [colors]="heatmapOptions.colors"
+          [tooltip]="heatmapOptions.tooltip" [plotOptions]="heatmapOptions.plotOptions"
+          [stroke]="heatmapOptions.stroke">
         </apx-chart>
       </div>
 
-      <!-- ── Fila inferior ──────────────────────── -->
-      <div class="bottom-row">
+      <!-- ══════════════════════════════════════
+           FILA: Dispersión + Barras apiladas categorías
+      ══════════════════════════════════════════ -->
+      <div class="charts-row-2" id="pdf-scatter-stacked">
 
-        <!-- Top productos -->
+        <!-- GRÁFICA 5: Dispersión precio vs vendidos -->
         <div class="section-card">
+          <div class="section-header">
+            <div class="section-title-group">
+              <span class="material-symbols-rounded section-icon">scatter_plot</span>
+              <h2>Precio vs unidades vendidas</h2>
+            </div>
+          </div>
+          <div *ngIf="scatterEmpty" class="empty-state">
+            <span class="material-symbols-rounded empty-icon">scatter_plot</span>
+            <p class="empty-title">Aún no hay ventas registradas</p>
+          </div>
+          <apx-chart *ngIf="!scatterEmpty" [series]="scatterOptions.series" [chart]="scatterOptions.chart"
+            [xaxis]="scatterOptions.xaxis" [yaxis]="scatterOptions.yaxis" [dataLabels]="scatterOptions.dataLabels"
+            [grid]="scatterOptions.grid" [tooltip]="scatterOptions.tooltip" [markers]="scatterOptions.markers"
+            [colors]="['#11C267']">
+          </apx-chart>
+        </div>
+
+        <!-- GRÁFICA 6: Barras apiladas por categoría -->
+        <div class="section-card">
+          <div class="section-header">
+            <div class="section-title-group">
+              <span class="material-symbols-rounded section-icon">stacked_bar_chart</span>
+              <h2>Ingresos por categoría</h2>
+            </div>
+          </div>
+          <div *ngIf="stackedEmpty" class="empty-state">
+            <span class="material-symbols-rounded empty-icon">stacked_bar_chart</span>
+            <p class="empty-title">Aún no hay datos por categoría</p>
+          </div>
+          <apx-chart *ngIf="!stackedEmpty" [series]="stackedOptions.series" [chart]="stackedOptions.chart"
+            [xaxis]="stackedOptions.xaxis" [yaxis]="stackedOptions.yaxis" [plotOptions]="stackedOptions.plotOptions"
+            [dataLabels]="stackedOptions.dataLabels" [grid]="stackedOptions.grid" [tooltip]="stackedOptions.tooltip"
+            [fill]="stackedOptions.fill" [legend]="stackedOptions.legend" [colors]="stackedOptions.colors">
+          </apx-chart>
+        </div>
+
+      </div>
+
+      <!-- ══════════════════════════════════════
+           FILA INFERIOR: Top productos + Pedidos recientes
+      ══════════════════════════════════════════ -->
+      <div class="bottom-row" id="pdf-bottom">
+
+        <div class="section-card" id="pdf-top-products">
           <div class="section-header">
             <div class="section-title-group">
               <span class="material-symbols-rounded section-icon">emoji_events</span>
@@ -194,12 +346,8 @@
               <span class="rank" [class.gold]="i===0" [class.silver]="i===1" [class.bronze]="i===2">
                 #{{ i + 1 }}
               </span>
-              <img
-                [src]="p.image ?? 'assets/images/placeholder.png'"
-                [alt]="p.name" class="prod-img"
-                width="44" height="44" loading="lazy"
-                onerror="this.src='assets/images/placeholder.png'"
-              />
+              <img [src]="p.image ?? 'assets/images/placeholder.png'" [alt]="p.name" class="prod-img" width="44"
+                height="44" loading="lazy" onerror="this.src='assets/images/placeholder.png'" />
               <div class="prod-info">
                 <div class="prod-name-row">
                   <span class="prod-name">{{ p.name }}</span>
@@ -211,13 +359,16 @@
                   </div>
                   <span class="prod-sold">{{ p.sold ?? 0 }} uds.</span>
                 </div>
+                <div class="prod-rating">
+                  <span class="material-symbols-rounded tpv-star">star</span>
+                  <span>{{ p.rating | number:'1.1-1' }}</span>
+                </div>
               </div>
             </li>
           </ul>
         </div>
 
-        <!-- Pedidos recientes -->
-        <div class="section-card orders-card">
+        <div class="section-card orders-card" id="pdf-recent-orders">
           <div class="section-header">
             <div class="section-title-group">
               <span class="material-symbols-rounded section-icon">receipt_long</span>
@@ -251,7 +402,7 @@
                     </div>
                   </td>
                   <td class="col-num">
-                    <span class="tbl-total">{{ order.total | currency:'EUR' }}</span>
+                    <span class="tbl-total">{{ order.total | currency:'EUR':'symbol':'1.2-2' }}</span>
                   </td>
                   <td class="col-status">
                     <span class="status-badge" [ngClass]="order.status">
@@ -271,15 +422,12 @@
   </main>
 </div>
 
-
-<!-- ══════════════════════════════════════════════════
-     SECCIONES OCULTAS PARA PDF
-══════════════════════════════════════════════════ -->
+<!-- ══ PDF OCULTO ══ -->
 <ng-container *ngIf="!loading && !error && dashboard">
-
   <div id="pdf-farmer-header"
     style="position:fixed;left:-9999px;top:0;width:860px;background:#fff;padding:28px;font-family:sans-serif;color:#28251d;">
-    <div style="background:#01696f;color:#fff;padding:20px 24px;border-radius:12px;display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+    <div
+      style="background:linear-gradient(135deg,#11C267,#049a56);color:#fff;padding:20px 24px;border-radius:12px;display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
       <div>
         <div style="font-size:20px;font-weight:700;">AgroConecta — Informe del agricultor</div>
         <div style="font-size:13px;opacity:.8;margin-top:3px;">{{ user?.name }} · {{ mesActualLabel }}</div>
@@ -288,70 +436,29 @@
     </div>
     <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;">
       <div style="background:#f0fafa;border-radius:10px;padding:14px;">
-        <div style="color:#01696f;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;margin-bottom:5px;">Ingresos del mes</div>
-        <div style="font-size:22px;font-weight:700;">{{ dashboard?.kpis?.ventas | currency:'EUR':'symbol':'1.0-0' }}</div>
+        <div
+          style="color:#01696f;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;margin-bottom:5px;">
+          Ganancias totales</div>
+        <div style="font-size:22px;font-weight:700;">{{ totalGanancias | currency:'EUR':'symbol':'1.2-2' }}</div>
       </div>
       <div style="background:#f0f9f0;border-radius:10px;padding:14px;">
-        <div style="color:#437a22;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;margin-bottom:5px;">Pedidos este mes</div>
+        <div
+          style="color:#437a22;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;margin-bottom:5px;">
+          Pedidos este mes</div>
         <div style="font-size:22px;font-weight:700;">{{ dashboard?.kpis?.pedidos }}</div>
       </div>
       <div style="background:#fff8f0;border-radius:10px;padding:14px;">
-        <div style="color:#da7101;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;margin-bottom:5px;">Productos agotados</div>
+        <div
+          style="color:#da7101;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;margin-bottom:5px;">
+          Productos agotados</div>
         <div style="font-size:22px;font-weight:700;">{{ dashboard?.kpis?.agotados }}</div>
       </div>
       <div style="background:#eff6ff;border-radius:10px;padding:14px;">
-        <div style="color:#3b82f6;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;margin-bottom:5px;">Valoración media</div>
+        <div
+          style="color:#3b82f6;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;margin-bottom:5px;">
+          Valoración media</div>
         <div style="font-size:22px;font-weight:700;">{{ dashboard?.kpis?.calificacion | number:'1.1-1' }}/5</div>
       </div>
     </div>
   </div>
-
-  <div id="pdf-top-products"
-    style="position:fixed;left:-9999px;top:0;width:860px;background:#fff;padding:20px 28px;font-family:sans-serif;color:#28251d;">
-    <div style="font-size:15px;font-weight:700;margin-bottom:12px;">🏆 Top productos</div>
-    <table style="width:100%;border-collapse:collapse;font-size:13px;">
-      <thead>
-        <tr style="background:#f7f6f2;">
-          <th style="padding:9px 12px;text-align:left;color:#7a7974;font-weight:600;">#</th>
-          <th style="padding:9px 12px;text-align:left;color:#7a7974;font-weight:600;">Producto</th>
-          <th style="padding:9px 12px;text-align:right;color:#7a7974;font-weight:600;">Unidades vendidas</th>
-          <th style="padding:9px 12px;text-align:right;color:#7a7974;font-weight:600;">Precio</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let p of dashboard.top_products; let i = index"
-          [style.background]="i % 2 === 0 ? '#fff' : '#f9f8f5'">
-          <td style="padding:9px 12px;font-weight:700;color:#01696f;">{{ i + 1 }}</td>
-          <td style="padding:9px 12px;">{{ p.name }}</td>
-          <td style="padding:9px 12px;text-align:right;color:#7a7974;">{{ p.sold ?? 0 }} uds.</td>
-          <td style="padding:9px 12px;text-align:right;font-weight:700;">{{ p.price | currency:'EUR' }}/{{ p.unit }}</td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-
-  <div id="pdf-recent-orders"
-    style="position:fixed;left:-9999px;top:0;width:860px;background:#fff;padding:20px 28px;font-family:sans-serif;color:#28251d;">
-    <div style="font-size:15px;font-weight:700;margin-bottom:12px;">🧾 Pedidos recientes</div>
-    <table style="width:100%;border-collapse:collapse;font-size:13px;">
-      <thead>
-        <tr style="background:#f7f6f2;">
-          <th style="padding:9px 12px;text-align:left;color:#7a7974;font-weight:600;">Ref.</th>
-          <th style="padding:9px 12px;text-align:left;color:#7a7974;font-weight:600;">Cliente</th>
-          <th style="padding:9px 12px;text-align:right;color:#7a7974;font-weight:600;">Total</th>
-          <th style="padding:9px 12px;text-align:right;color:#7a7974;font-weight:600;">Estado</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let order of dashboard.recent_orders; let i = index"
-          [style.background]="i % 2 === 0 ? '#fff' : '#f9f8f5'">
-          <td style="padding:9px 12px;font-weight:700;color:#01696f;">#{{ order.id }}</td>
-          <td style="padding:9px 12px;">{{ order.buyer?.name ?? '—' }}</td>
-          <td style="padding:9px 12px;text-align:right;font-weight:700;">{{ order.total | currency:'EUR' }}</td>
-          <td style="padding:9px 12px;text-align:right;color:#7a7974;">{{ getStatusLabel(order.status) }}</td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-
 </ng-container>

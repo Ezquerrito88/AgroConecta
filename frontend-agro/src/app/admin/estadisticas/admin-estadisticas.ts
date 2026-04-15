@@ -1,5 +1,5 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
-import { CommonModule, CurrencyPipe, DecimalPipe } from '@angular/common';
+import { CommonModule, CurrencyPipe } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { AuthService } from '../../core/services/auth';
 import { AdminStatsService } from '../guards/admin-stats.service';
@@ -16,7 +16,7 @@ import html2canvas from 'html2canvas';
 @Component({
   selector: 'app-admin-estadisticas',
   standalone: true,
-  imports: [CommonModule, RouterModule, CurrencyPipe, DecimalPipe, NgApexchartsModule],
+  imports: [CommonModule, RouterModule, CurrencyPipe, NgApexchartsModule],
   templateUrl: './admin-estadisticas.html',
   styleUrls: ['./admin-estadisticas.css']
 })

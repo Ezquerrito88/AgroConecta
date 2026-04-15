@@ -7,6 +7,9 @@
   --border: #e5e7eb;
   --hover-bg: #f3f4f6;
   --green: #22c55e;
+  --red: #ef4444;
+  --red-light: #fef2f2;
+  --red-dark: #dc2626;
 }
 
 .sidebar {
@@ -155,28 +158,47 @@
 
 /* Footer */
 .sidebar-footer {
-  padding-bottom: 8px;
+  padding-bottom: 12px;
+  display: flex; flex-direction: column; gap: 4px;
+}
+
+.btn-web {
+  display: flex; align-items: center; gap: 12px;
+  padding: 13px 22px;
+  text-decoration: none;
+  color: var(--text-mid);
+  font-size: 0.95rem; font-weight: 500;
+  font-family: var(--fuente-principal);
+  transition: background 0.15s, color 0.15s;
+  border-radius: 0;
+}
+.btn-web .material-symbols-rounded {
+  font-size: 1.3rem; color: var(--orange);
+  transition: color 0.15s;
+}
+
+.btn-web:hover {
+  background: #f2fff0;
+  color: var(--orange);
 }
 .logout-btn {
   width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  padding: 18px 22px;
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: var(--text-mid);
-  font-size: 1rem;
-  font-weight: 500;
-  font-family: 'Inter', sans-serif;
+  display: flex; align-items: center; gap: 12px;
+  padding: 13px 22px;
+  background: none; border: none; cursor: pointer;
+  color: var(--red);
+  font-size: 0.95rem; font-weight: 500;
+  font-family: var(--fuente-principal);
+  transition: background 0.15s, color 0.15s;
+  text-align: left;
+}
+
+.logout-btn .material-symbols-rounded {
+  font-size: 1.3rem; color: var(--red);
   transition: color 0.15s;
 }
-.logout-btn .material-symbols-rounded {
-  font-size: 1.4rem;
-  color: var(--orange);
-}
 .logout-btn:hover {
-  color: #000;
+  background: var(--red-light);
+  color: var(--red-dark);
 }
+.logout-btn:hover .material-symbols-rounded { color: var(--red-dark); }

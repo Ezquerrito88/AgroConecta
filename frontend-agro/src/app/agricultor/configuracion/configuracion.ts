@@ -6,7 +6,6 @@ import { Router } from '@angular/router';
 import { AuthService } from '../../core/services/auth';
 import { FarmerService, FarmerProfile } from '../../core/services/farmer';
 import { Sidebar } from '../sidebar/sidebar';
-import { PhoneFormatPipe } from '../../core/pipes/phone-format-pipe';
 import { environment } from '../../../environments/environment';
 
 interface PerfilForm {
@@ -26,7 +25,7 @@ interface Toast { message: string; type: ToastType; }
 @Component({
   selector: 'app-configuracion-agricultor',
   standalone: true,
-  imports: [CommonModule, FormsModule, Sidebar, PhoneFormatPipe],
+  imports: [CommonModule, FormsModule, Sidebar],
   templateUrl: './configuracion.html',
   styleUrls: ['./configuracion.css']
 })

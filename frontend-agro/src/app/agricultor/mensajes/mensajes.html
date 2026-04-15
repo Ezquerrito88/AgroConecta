@@ -5,18 +5,25 @@
 
     <!-- Topbar -->
     <div class="topbar">
-      <h1 class="page-title">Mensajes</h1>
+      <div class="topbar-left">
+        <h1 class="page-title">Mensajes</h1>
+        <span class="page-subtitle">Mira tus mensajes</span>
+      </div>
       <div class="topbar-right">
         <div class="search-box">
           <span class="material-symbols-rounded">search</span>
-          <input type="text" placeholder="Buscar..." />
+          <input type="text" placeholder="Buscar productos, pedidos…" />
         </div>
-        <button class="icon-btn">
+        <button class="icon-btn notif-btn">
           <span class="material-symbols-rounded">notifications</span>
         </button>
         <button class="icon-btn">
           <span class="material-symbols-rounded">help</span>
         </button>
+        <div class="user-chip">
+          <div class="user-avatar">{{ user?.name?.charAt(0)?.toUpperCase() || '?' }}</div>
+          <span class="user-name">{{ user?.name?.split(' ')[0] || 'Usuario' }}</span>
+        </div>
       </div>
     </div>
 

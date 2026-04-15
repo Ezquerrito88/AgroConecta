@@ -12,10 +12,17 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
+
+        // ── CORS — debe ir primero para que los preflight OPTIONS
+        //           no sean bloqueados por auth antes de responder
+        $middleware->prepend(\Illuminate\Http\Middleware\HandleCors::class);
+
+        // ── CSRF — excluir todas las rutas API
         $middleware->validateCsrfTokens(except: [
             'api/*',
         ]);
 
+        // ── Aliases de middleware personalizados
         $middleware->alias([
             'admin'  => \App\Http\Middleware\EnsureIsAdmin::class,
             'farmer' => \App\Http\Middleware\EnsureIsFarmer::class,

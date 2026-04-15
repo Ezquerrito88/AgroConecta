@@ -2,10 +2,12 @@
   <app-sidebar></app-sidebar>
 
   <main class="main-content">
+
+    <!-- TOPBAR -->
     <div class="topbar">
       <div class="topbar-left">
         <h1 class="page-title">Tus pedidos</h1>
-        <span class="page-subtitle">{{ today | date:"EEEE, d 'de' MMMM" : undefined : 'es' }}</span>
+        <span class="page-subtitle">Gestiona tus ventas de temporada</span>
       </div>
       <div class="topbar-right">
         <div class="search-box">
@@ -26,73 +28,93 @@
       </div>
     </div>
 
+    <!-- WELCOME BANNER -->
     <div class="welcome-banner">
-      <div>
+      <div class="welcome-text">
         <h2 class="welcome-title">Tus pedidos</h2>
         <p class="welcome-sub">Revisa, prepara y gestiona el envío de tus ventas de temporada.</p>
       </div>
       <div class="welcome-actions">
-        <button class="btn-primary-white">
-          <span class="material-symbols-rounded">add_circle</span>
-          Nuevo pedido manual
-        </button>
-      </div>
+  <button class="btn-primary-white" style="color: var(--green) !important;">
+    <span class="material-symbols-rounded" style="color: var(--green) !important;">add_circle</span>
+    Nuevo pedido manual
+  </button>
+</div>
     </div>
 
+    <!-- KPI GRID -->
     <div class="kpi-grid">
-      <div class="kpi-card">
-        <div class="kpi-header">
-          <div class="kpi-icon-wrap green">
-            <span class="material-symbols-rounded">shopping_basket</span>
-          </div>
-          <span class="kpi-badge positive">+12% vs mes anterior</span>
-        </div>
-        <span class="kpi-value">{{ totalPedidos }}</span>
-        <span class="kpi-label">💰 Pedidos este mes</span>
-      </div>
 
+      <!-- Ganancias del mes -->
       <div class="kpi-card kpi-featured">
         <div class="kpi-header">
           <div class="kpi-icon-wrap white-icon">
-            <span class="material-symbols-rounded">euro</span>
+            <span class="material-symbols-rounded">shopping_basket</span>
           </div>
-          <span class="kpi-badge kpi-badge-white">+8% vs mes anterior</span>
+          <span class="kpi-badge kpi-badge-white" *ngIf="pedidosVsMesAnterior"
+            [class.kpi-badge-white-negative]="isPctNegative(pedidosVsMesAnterior)">
+            {{ pedidosVsMesAnterior }}
+          </span>
         </div>
-        <span class="kpi-value">{{ totalGanancias | currency:'EUR':'symbol':'1.0-0' }}</span>
-        <span class="kpi-label">💰 Ganancias del mes</span>
+        <span class="kpi-value">{{ totalPedidos }}</span>
+        <span class="kpi-label">Pedidos este mes</span>
       </div>
 
+      <!-- Ganancias del mes -->
       <div class="kpi-card">
+        <div class="kpi-header">
+          <div class="kpi-icon-wrap green">
+            <span class="material-symbols-rounded">payments</span>
+          </div>
+          <span class="kpi-badge" *ngIf="gananciasVsMesAnterior"
+            [class.positive]="!isPctNegative(gananciasVsMesAnterior)"
+            [class.negative]="isPctNegative(gananciasVsMesAnterior)">
+            {{ gananciasVsMesAnterior }}
+          </span>
+        </div>
+        <span class="kpi-value">{{ totalGanancias | currency:'EUR':'symbol':'1.2-2' }}</span>
+        <span class="kpi-label">Ganancias del mes</span>
+      </div>
+
+      <!-- Pendientes (total general) -->
+      <div class="kpi-card" [class.kpi-danger]="pendingCount > 0">
         <div class="kpi-header">
           <div class="kpi-icon-wrap orange">
             <span class="material-symbols-rounded">pending_actions</span>
           </div>
+          <span class="kpi-badge negative" *ngIf="pendingCount > 0">Atención</span>
+          <span class="kpi-badge positive" *ngIf="pendingCount === 0">Al día</span>
         </div>
         <span class="kpi-value">{{ pendingCount }}</span>
-        <span class="kpi-label">📦 Nuevos / Pendientes</span>
-        <span class="kpi-sublabel orange">Requieren atención</span>
+        <span class="kpi-label">Nuevos / Pendientes</span>
+        <span class="kpi-hint" *ngIf="pendingCount > 0">Requieren atención</span>
+        <span class="kpi-hint" *ngIf="pendingCount === 0">Sin pendientes 🎉</span>
       </div>
 
+      <!-- En preparación (total general) -->
       <div class="kpi-card">
         <div class="kpi-header">
           <div class="kpi-icon-wrap blue">
-            <span class="material-symbols-rounded">box</span>
+            <span class="material-symbols-rounded">inventory_2</span>
           </div>
+          <span class="kpi-badge info" *ngIf="processingCount > 0">En curso</span>
         </div>
         <span class="kpi-value">{{ processingCount }}</span>
-        <span class="kpi-label">📦 En preparación</span>
-        <span class="kpi-sublabel blue">Listos para enviar</span>
+        <span class="kpi-label">En preparación</span>
+        <span class="kpi-hint">Listos para enviar</span>
       </div>
-    </div>
 
+    </div>
+    <!-- SECTION CARD — TABLA -->
     <div class="section-card">
       <div class="section-header">
         <div class="section-title-group">
           <span class="material-symbols-rounded section-icon">receipt_long</span>
-          <h2>Listado Detallado</h2>
+          <h2>Listado de pedidos</h2>
         </div>
       </div>
 
+      <!-- CONTROLES -->
       <div class="table-controls">
         <div class="search-box-table">
           <span class="material-symbols-rounded">search</span>
@@ -100,15 +122,19 @@
         </div>
         <div class="action-buttons">
           <button class="btn-filter" (click)="applyFilters()">
-            <span class="material-symbols-rounded">filter_list</span> Filtrar
+            <span class="material-symbols-rounded">filter_list</span>
+            Filtrar
           </button>
           <button class="btn-export" (click)="exportPDF()" [disabled]="exporting">
-            <span class="material-symbols-rounded">{{ exporting ? 'hourglass_empty' : 'download' }}</span>
-            {{ exporting ? 'Generando…' : 'Exportar' }}
+            <span class="material-symbols-rounded">
+              {{ exporting ? 'hourglass_empty' : 'download' }}
+            </span>
+            {{ exporting ? 'Generando…' : 'Exportar PDF' }}
           </button>
         </div>
       </div>
 
+      <!-- TABLA -->
       <div class="table-container">
         <table class="custom-table">
           <thead>
@@ -123,48 +149,71 @@
           </thead>
           <tbody>
             <tr *ngFor="let order of displayedOrders">
+
+              <!-- Cliente -->
               <td>
                 <div class="order-client">
-                  <div class="client-avatar-initial"
-                    [style.background-color]="getAvatarColor(order.buyer.name)">
+                  <div class="client-avatar-initial" [style.background-color]="getAvatarColor(order.buyer.name)"
+                    [style.color]="getAvatarTextColor(order.buyer.name)">
                     {{ order.buyer.name.charAt(0).toUpperCase() }}
                   </div>
                   <span class="order-client-name">{{ order.buyer.name }}</span>
                 </div>
               </td>
+
+              <!-- Referencia -->
               <td><span class="order-ref-num">#{{ order.id }}</span></td>
+
+              <!-- Fecha -->
               <td><span class="order-date">{{ order.created_at | smartDate }}</span></td>
+
+              <!-- Total -->
               <td><span class="order-total-value">{{ order.total | currency:'EUR' }}</span></td>
+
+              <!-- Estado -->
               <td>
                 <span class="status-badge" [ngClass]="order.status">
-                  <span class="material-symbols-rounded status-icon">{{ statusIcons[order.status] }}</span>
+                  <span class="material-symbols-rounded status-icon">
+                    {{ statusIcons[order.status] }}
+                  </span>
                   {{ statusLabels[order.status] }}
                 </span>
               </td>
+
+              <!-- Acciones -->
               <td class="text-right">
                 <div class="actions-menu">
-                  <button class="icon-btn-dots" (click)="toggleMenu(order.id)">
+                  <button class="icon-btn-dots" (click)="toggleMenu(order.id, $event)">
                     <span class="material-symbols-rounded">more_vert</span>
                   </button>
                   <div class="dropdown-menu" *ngIf="openMenuId === order.id">
                     <button (click)="updateStatus(order.id, 'processing')">
-                      <span class="material-symbols-rounded">sync</span> Procesar
+                      <span class="material-symbols-rounded">sync</span>
+                      Procesar
+                    </button>
+                    <button (click)="updateStatus(order.id, 'shipped')">
+                      <span class="material-symbols-rounded">local_shipping</span>
+                      En camino
                     </button>
                     <button (click)="updateStatus(order.id, 'delivered')">
-                      <span class="material-symbols-rounded">check_circle</span> Entregado
+                      <span class="material-symbols-rounded">check_circle</span>
+                      Entregado
                     </button>
                     <div class="divider"></div>
                     <button class="danger" (click)="updateStatus(order.id, 'cancelled')">
-                      <span class="material-symbols-rounded">cancel</span> Cancelar
+                      <span class="material-symbols-rounded">cancel</span>
+                      Cancelar pedido
                     </button>
                   </div>
                 </div>
               </td>
+
             </tr>
           </tbody>
         </table>
       </div>
 
+      <!-- LOAD MORE -->
       <div class="load-more-wrap" *ngIf="hasMoreOrders">
         <button class="btn-load-more" (click)="loadMore()">
           <span class="material-symbols-rounded">expand_more</span>
@@ -173,25 +222,28 @@
         </button>
       </div>
 
+      <!-- INFO RESULTADOS -->
       <div class="results-info" *ngIf="filteredOrders.length > 0">
-        Mostrando <strong>{{ displayedOrders.length }}</strong> de <strong>{{ filteredOrders.length }}</strong> pedidos
+        Mostrando <strong>{{ displayedOrders.length }}</strong> de
+        <strong>{{ filteredOrders.length }}</strong> pedidos
       </div>
 
-      <div *ngIf="filteredOrders.length === 0" class="empty-state">
-        <span class="material-symbols-rounded empty-icon">inventory_2</span>
+      <!-- EMPTY STATE -->
+      <div class="empty-state" *ngIf="!loading && filteredOrders.length === 0">
+        <span class="material-symbols-rounded empty-icon">receipt_long</span>
         <p class="empty-title">No hay pedidos que coincidan</p>
+        <p class="empty-sub">Prueba con otro término o revisa los filtros activos.</p>
       </div>
+
     </div>
   </main>
 </div>
 
-
-<!-- ══════════════════════════════════════════════════
-     SECCIONES OCULTAS PARA PDF
-══════════════════════════════════════════════════ -->
+<!-- ══ SECCIONES OCULTAS PARA PDF ══ -->
 <div id="pdf-pedidos-header"
   style="position:fixed;left:-9999px;top:0;width:860px;background:#fff;padding:28px;font-family:sans-serif;color:#28251d;">
-  <div style="background:#01696f;color:#fff;padding:20px 24px;border-radius:12px;display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+  <div
+    style="background:linear-gradient(135deg,#11C267,#049a56);color:#fff;padding:20px 24px;border-radius:12px;display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
     <div>
       <div style="font-size:20px;font-weight:700;">AgroConecta — Informe de pedidos</div>
       <div style="font-size:13px;opacity:.8;margin-top:3px;">{{ user?.name }}</div>
@@ -199,20 +251,28 @@
     <div style="font-size:13px;opacity:.8;">{{ today | date:"d 'de' MMMM yyyy" : undefined : 'es' }}</div>
   </div>
   <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;">
-    <div style="background:#f0f9f0;border-radius:10px;padding:14px;">
-      <div style="color:#437a22;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;margin-bottom:5px;">Total pedidos</div>
+    <div style="background:#f0fdf4;border-radius:10px;padding:14px;">
+      <div
+        style="color:#16a34a;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;margin-bottom:5px;">
+        Total pedidos</div>
       <div style="font-size:22px;font-weight:700;">{{ totalPedidos }}</div>
     </div>
-    <div style="background:#f0fafa;border-radius:10px;padding:14px;">
-      <div style="color:#01696f;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;margin-bottom:5px;">Ganancias</div>
+    <div style="background:#f0fdf4;border-radius:10px;padding:14px;">
+      <div
+        style="color:#16a34a;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;margin-bottom:5px;">
+        Ganancias</div>
       <div style="font-size:22px;font-weight:700;">{{ totalGanancias | currency:'EUR':'symbol':'1.0-0' }}</div>
     </div>
     <div style="background:#fff8f0;border-radius:10px;padding:14px;">
-      <div style="color:#da7101;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;margin-bottom:5px;">Pendientes</div>
+      <div
+        style="color:#f97316;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;margin-bottom:5px;">
+        Pendientes</div>
       <div style="font-size:22px;font-weight:700;">{{ pendingCount }}</div>
     </div>
     <div style="background:#eff6ff;border-radius:10px;padding:14px;">
-      <div style="color:#3b82f6;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;margin-bottom:5px;">En preparación</div>
+      <div
+        style="color:#3b82f6;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;margin-bottom:5px;">
+        En preparación</div>
       <div style="font-size:22px;font-weight:700;">{{ processingCount }}</div>
     </div>
   </div>
@@ -220,7 +280,7 @@
 
 <div id="pdf-pedidos-table"
   style="position:fixed;left:-9999px;top:0;width:860px;background:#fff;padding:20px 28px;font-family:sans-serif;color:#28251d;">
-  <div style="font-size:15px;font-weight:700;margin-bottom:12px;">🧾 Listado de pedidos</div>
+  <div style="font-size:15px;font-weight:700;margin-bottom:12px;">Listado de pedidos</div>
   <table style="width:100%;border-collapse:collapse;font-size:13px;">
     <thead>
       <tr style="background:#f7f6f2;">
@@ -232,9 +292,8 @@
       </tr>
     </thead>
     <tbody>
-      <tr *ngFor="let order of filteredOrders; let i = index"
-        [style.background]="i % 2 === 0 ? '#fff' : '#f9f8f5'">
-        <td style="padding:9px 12px;font-weight:700;color:#01696f;">#{{ order.id }}</td>
+      <tr *ngFor="let order of filteredOrders; let i = index" [style.background]="i % 2 === 0 ? '#fff' : '#f9f8f5'">
+        <td style="padding:9px 12px;font-weight:700;color:#11C267;">#{{ order.id }}</td>
         <td style="padding:9px 12px;">{{ order.buyer.name }}</td>
         <td style="padding:9px 12px;color:#7a7974;">{{ order.created_at | smartDate }}</td>
         <td style="padding:9px 12px;text-align:right;font-weight:700;">{{ order.total | currency:'EUR' }}</td>

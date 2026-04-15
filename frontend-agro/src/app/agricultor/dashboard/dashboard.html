@@ -54,60 +54,75 @@
     </div>
 
     <div class="kpi-grid">
+
+      <!-- Ganancias del mes -->
       <div class="kpi-card kpi-featured">
         <div class="kpi-header">
           <div class="kpi-icon-wrap white-icon">
-            <span class="material-symbols-rounded">euro</span>
+            <span class="material-symbols-rounded">payments</span>
           </div>
-          <span class="kpi-badge kpi-badge-white">+8% vs mes anterior</span>
         </div>
-        <span class="kpi-value" *ngIf="!isLoading">{{ kpis.ventas | currency:'EUR':'symbol':'1.0-0' }}</span>
+        <span class="kpi-value" *ngIf="!isLoading">
+          {{ ventasRedondeadas | currency:'EUR':'symbol':'1.2-2' }}
+        </span>
         <div class="sk-line medium sk-shimmer-bg" *ngIf="isLoading"></div>
-        <span class="kpi-label">💰 Ganancias del mes</span>
+        <span class="kpi-label">Ganancias del mes</span>
       </div>
 
+      <!-- Pedidos totales -->
       <div class="kpi-card">
         <div class="kpi-header">
           <div class="kpi-icon-wrap green">
-            <span class="material-symbols-rounded">shopping_bag</span>
+            <span class="material-symbols-rounded">package_2</span>
           </div>
-          <span class="kpi-badge positive">+12%</span>
         </div>
         <span class="kpi-value" *ngIf="!isLoading">{{ kpis.pedidos }}</span>
         <div class="sk-line short sk-shimmer-bg" *ngIf="isLoading"></div>
-        <span class="kpi-label">📦 Pedidos totales</span>
+        <span class="kpi-label">Pedidos totales</span>
       </div>
 
+      <!-- Sin stock -->
       <div class="kpi-card" [class.kpi-danger]="kpis.agotados > 0">
         <div class="kpi-header">
-          <div class="kpi-icon-wrap" [class.red]="kpis.agotados > 0" [class.green]="kpis.agotados === 0">
-            <span class="material-symbols-rounded">{{ kpis.agotados > 0 ? 'warning' : 'check_circle' }}</span>
+          <div class="kpi-icon-wrap"
+               [class.red]="kpis.agotados > 0"
+               [class.green]="kpis.agotados === 0">
+            <span class="material-symbols-rounded">
+              {{ kpis.agotados > 0 ? 'inventory_2' : 'inventory' }}
+            </span>
           </div>
         </div>
         <span class="kpi-value" *ngIf="!isLoading">{{ kpis.agotados }}</span>
         <div class="sk-line short sk-shimmer-bg" *ngIf="isLoading"></div>
-        <span class="kpi-label">⚠️ Sin stock</span>
+        <span class="kpi-label">
+          {{ kpis.agotados > 0 ? 'Sin stock' : 'Todo con stock' }}
+        </span>
       </div>
 
+      <!-- Valoración media -->
       <div class="kpi-card">
         <div class="kpi-header">
           <div class="kpi-icon-wrap purple">
-            <span class="material-symbols-rounded">star</span>
+            <span class="material-symbols-rounded">kid_star</span>
           </div>
         </div>
         <div class="kpi-value-row" *ngIf="!isLoading">
-          <span class="kpi-value">{{ kpis.calificacion }}</span>
+          <span class="kpi-value">{{ kpis.calificacion | number:'1.1-1' }}</span>
           <div class="stars-mini">
-            <span class="material-symbols-rounded star-filled">star</span>
-            <span class="material-symbols-rounded star-filled">star</span>
-            <span class="material-symbols-rounded star-filled">star</span>
-            <span class="material-symbols-rounded star-filled">star</span>
-            <span class="material-symbols-rounded star-half">star_half</span>
+            <ng-container *ngFor="let s of starsArray">
+              <span class="material-symbols-rounded"
+                    [class.star-filled]="s.full"
+                    [class.star-half]="s.half"
+                    [class.star-empty]="!s.full && !s.half">
+                {{ s.half ? 'star_half' : 'star' }}
+              </span>
+            </ng-container>
           </div>
         </div>
         <div class="sk-line medium sk-shimmer-bg" *ngIf="isLoading"></div>
-        <span class="kpi-label">⭐ Valoración media</span>
+        <span class="kpi-label">Valoración media</span>
       </div>
+
     </div>
 
     <div class="section-card">
@@ -118,9 +133,6 @@
         </div>
         <a *ngIf="!isLoading" routerLink="/agricultor/pedidos" class="ver-todos">Ver todos →</a>
       </div>
-
-      <ng-container *ngIf="isLoading">
-        </ng-container>
 
       <ng-container *ngIf="!isLoading">
         <div class="orders-list" *ngIf="recentOrders.length > 0">
@@ -148,7 +160,9 @@
               </span>
             </div>
             <div class="order-total">
-              <strong class="order-total-value">{{ order.total | currency:'EUR':'symbol':'1.2-2' }}</strong>
+              <strong class="order-total-value">
+                {{ order.total | currency:'EUR':'symbol':'1.2-2' }}
+              </strong>
             </div>
           </div>
         </div>
@@ -174,7 +188,6 @@
           <div class="tpv-img-box">
             <img [src]="getProductImage(p)" [alt]="p.name" class="tpv-img" (error)="onImgError($event)" />
           </div>
-
           <div class="tpv-info">
             <p class="tpv-name">{{ p.name }}</p>
             <p class="tpv-price">
