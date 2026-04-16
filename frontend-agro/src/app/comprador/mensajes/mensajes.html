@@ -3,18 +3,33 @@
 
   <main class="main-content">
     <div class="topbar">
-      <h1 class="page-title">Mensajes</h1>
+      <div class="topbar-left">
+        <h1 class="page-title">Mis Mensajes</h1>
+        <p class="page-subtitle">Mensajes con vendedores</p>
+      </div>
       <div class="topbar-right">
         <div class="search-box">
           <span class="material-symbols-rounded">search</span>
-          <input type="text" placeholder="Buscar..." />
+          <input
+            type="text"
+            placeholder="Buscar mensaje..."
+            [(ngModel)]="searchQuery"
+            (ngModelChange)="applyFilters()" />
+          <button *ngIf="searchQuery" class="clear-search" (click)="searchQuery=''; applyFilters()">
+            <span class="material-symbols-rounded">close</span>
+          </button>
         </div>
-        <button class="icon-btn">
+        <a class="icon-btn" routerLink="/comprador/favoritos" title="Favoritos">
+          <span class="material-symbols-rounded">favorite</span>
+        </a>
+        <button class="icon-btn notif-btn" title="Notificaciones">
           <span class="material-symbols-rounded">notifications</span>
+          <span class="notif-dot"></span>
         </button>
-        <button class="icon-btn">
-          <span class="material-symbols-rounded">help</span>
-        </button>
+        <div class="user-chip">
+          <div class="user-avatar">{{ userInitial }}</div>
+          <span class="user-name">{{ firstName }}</span>
+        </div>
       </div>
     </div>
 

@@ -20,6 +20,7 @@ export class NuevoProducto implements OnInit {
 
   saving = false;
   user: any = null;
+  isDragging = false; // Controla el estado visual del drag & drop
 
   // Modelo del producto
   producto = {
@@ -43,19 +44,16 @@ export class NuevoProducto implements OnInit {
 
   constructor(
     private authService: AuthService,
-    private http: HttpClient, 
+    private http: HttpClient,
     private router: Router,
     private cdr: ChangeDetectorRef
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.user = this.authService.getCurrentUser();
     this.loadCategorias();
   }
 
-  /**
-   * Carga las categorías desde la API
-   */
   loadCategorias(): void {
     this.http.get<any>(`${this.apiUrl}/categories`).subscribe({
       next: (res) => {
@@ -66,30 +64,43 @@ export class NuevoProducto implements OnInit {
     });
   }
 
-  /**
-   * Valida si el formulario está listo para ser enviado.
-   * El botón de "Publicar" dependerá de esta función.
-   */
   formularioValido(): boolean {
     return !!(
-      this.producto.name && 
+      this.producto.name &&
       this.producto.price && this.producto.price > 0 &&
-      this.producto.category_id && 
+      this.producto.category_id &&
       this.producto.description &&
       this.producto.stock_quantity !== null &&
-      this.newImages.length >= 1 // Mínimo 1 imagen obligatoria
+      this.newImages.length >= 1
     );
   }
 
   /**
-   * Gestiona la selección de imágenes y genera las previsualizaciones.
+   * Captura archivos desde el input (click)
    */
   onImageSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
-    if (!input.files || input.files.length === 0) return;
+    if (input.files && input.files.length > 0) {
+      this.processFiles(Array.from(input.files));
+    }
+    input.value = ''; // Reset para permitir subir la misma foto tras borrarla
+  }
 
-    const files = Array.from(input.files);
+  /**
+   * Captura archivos desde el evento Drop
+   */
+  onDrop(event: DragEvent): void {
+    this.isDragging = false;
+    const files = event.dataTransfer?.files;
+    if (files && files.length > 0) {
+      this.processFiles(Array.from(files));
+    }
+  }
 
+  /**
+   * Lógica única para procesar y validar imágenes
+   */
+  private processFiles(files: File[]): void {
     // Validación: Máximo 6 imágenes en total
     if (this.newImages.length + files.length > 6) {
       alert('No puedes subir más de 6 imágenes por producto.');
@@ -97,6 +108,12 @@ export class NuevoProducto implements OnInit {
     }
 
     files.forEach(file => {
+      // Validación: Formato de imagen
+      if (!file.type.startsWith('image/')) {
+        alert(`El archivo "${file.name}" no es una imagen válida.`);
+        return;
+      }
+
       // Validación: Tamaño máximo 2MB
       if (file.size > 2 * 1024 * 1024) {
         alert(`La imagen "${file.name}" supera los 2MB permitidos.`);
@@ -105,35 +122,29 @@ export class NuevoProducto implements OnInit {
 
       this.newImages.push(file);
 
-      // Generar preview asíncrona
       const reader = new FileReader();
       reader.onload = (e: any) => {
         this.newImagePreviews.push(e.target.result);
-        
-        // FORZAR ACTUALIZACIÓN: Esto hace que el botón se encienda 
-        // y las fotos aparezcan al instante sin necesidad de hacer clic fuera.
-        this.cdr.detectChanges(); 
+        this.cdr.detectChanges();
       };
       reader.readAsDataURL(file);
     });
-
-    // Limpiar el input para permitir volver a seleccionar el mismo archivo si se borra
-    input.value = '';
-    this.cdr.detectChanges();
   }
 
-  /**
-   * Elimina una imagen seleccionada antes de subirla.
-   */
+  onDragOver(event: DragEvent): void {
+    this.isDragging = true;
+  }
+
+  onDragLeave(event: DragEvent): void {
+    this.isDragging = false;
+  }
+
   removeImage(index: number): void {
     this.newImages.splice(index, 1);
     this.newImagePreviews.splice(index, 1);
-    this.cdr.detectChanges(); // Actualizar vista tras borrar
+    this.cdr.detectChanges();
   }
 
-  /**
-   * Envía los datos al servidor Laravel.
-   */
   guardar(): void {
     if (!this.formularioValido()) return;
 
@@ -149,8 +160,7 @@ export class NuevoProducto implements OnInit {
     formData.append('stock_quantity', String(this.producto.stock_quantity));
     formData.append('category_id', String(this.producto.category_id));
     formData.append('unit', this.producto.unit);
-    
-    // Adjuntar imágenes al array que espera Laravel
+
     this.newImages.forEach(img => {
       formData.append('images[]', img);
     });
@@ -162,7 +172,7 @@ export class NuevoProducto implements OnInit {
       },
       error: (err) => {
         console.error('Error creando producto', err);
-        alert('Hubo un error al guardar el producto. Revisa los datos.');
+        alert('Hubo un error al guardar el producto.');
         this.saving = false;
         this.cdr.detectChanges();
       }

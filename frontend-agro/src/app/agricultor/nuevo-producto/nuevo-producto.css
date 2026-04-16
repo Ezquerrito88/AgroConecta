@@ -510,6 +510,29 @@
   line-height: 1.5;
 }
 
+.upload-area {
+  transition: all 0.3s ease;
+  border: 2px dashed #cbd5e0;
+  /* ... tus estilos actuales ... */
+}
+
+/* Esta clase se activa automáticamente por el [class.dragging] */
+.upload-area.dragging {
+  border-color: #6b46c1; /* Color púrpura como tu header */
+  background-color: #f3f0ff;
+  transform: scale(1.02);
+}
+
+.upload-area.dragging .upload-icon {
+  color: #6b46c1;
+  animation: bounce 0.5s infinite alternate;
+}
+
+@keyframes bounce {
+  from { transform: translateY(0); }
+  to { transform: translateY(-5px); }
+}
+
 
 .btn-delete .material-symbols-rounded { font-size: 1.1rem; }
 
