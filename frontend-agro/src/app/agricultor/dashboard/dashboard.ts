@@ -79,10 +79,7 @@ export class Dashboard implements OnInit {
   }
 
   getProductImage(p: any): string {
-    if (p?.images && p.images.length > 0) {
-      return p.images[0].url;
-    }
-    return this.PLACEHOLDER;
+    return p?.image || this.PLACEHOLDER;
   }
 
   onImgError(event: Event): void {
