@@ -346,8 +346,8 @@
               <span class="rank" [class.gold]="i===0" [class.silver]="i===1" [class.bronze]="i===2">
                 #{{ i + 1 }}
               </span>
-              <img [src]="p.image ?? 'assets/images/placeholder.png'" [alt]="p.name" class="prod-img" width="44"
-                height="44" loading="lazy" onerror="this.src='assets/images/placeholder.png'" />
+              <img [src]="(p.images && p.images.length > 0) ? p.images[0].url : 'assets/images/placeholder.png'"
+                [alt]="p.name" class="prod-img" width="44" height="44" loading="lazy" />
               <div class="prod-info">
                 <div class="prod-name-row">
                   <span class="prod-name">{{ p.name }}</span>

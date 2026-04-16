@@ -33,27 +33,27 @@ export class Dashboard implements OnInit {
   readonly PLACEHOLDER = 'assets/img/placeholder.jpg';
 
   statusLabels: Record<string, string> = {
-    pending:    'Pendiente',
+    pending: 'Pendiente',
     processing: 'Procesando',
-    shipped:    'En camino',
-    delivered:  'Entregado',
-    cancelled:  'Cancelado',
+    shipped: 'En camino',
+    delivered: 'Entregado',
+    cancelled: 'Cancelado',
   };
 
   statusClasses: Record<string, string> = {
-    pending:    'pendiente',
+    pending: 'pendiente',
     processing: 'procesando',
-    shipped:    'enviado',
-    delivered:  'entregado',
-    cancelled:  'cancelado',
+    shipped: 'enviado',
+    delivered: 'entregado',
+    cancelled: 'cancelado',
   };
 
   statusIcons: Record<string, string> = {
-    pending:    'schedule',
+    pending: 'schedule',
     processing: 'sync',
-    shipped:    'local_shipping',
-    delivered:  'check_circle',
-    cancelled:  'cancel',
+    shipped: 'local_shipping',
+    delivered: 'check_circle',
+    cancelled: 'cancel',
   };
 
   constructor(
@@ -61,7 +61,7 @@ export class Dashboard implements OnInit {
     private dashboardService: DashboardService,
     private router: Router,
     private cdr: ChangeDetectorRef
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.user = this.authService.getCurrentUser();
@@ -78,8 +78,11 @@ export class Dashboard implements OnInit {
     return this._topProducts.slice(0, 3);
   }
 
-  getProductImage(p: TopProduct): string {
-    return p?.image || this.PLACEHOLDER;
+  getProductImage(p: any): string {
+    if (p?.images && p.images.length > 0) {
+      return p.images[0].url;
+    }
+    return this.PLACEHOLDER;
   }
 
   onImgError(event: Event): void {
@@ -92,14 +95,14 @@ export class Dashboard implements OnInit {
 
     this.dashboardService.getData().subscribe({
       next: (data) => {
-        this.kpis         = data.kpis;
+        this.kpis = data.kpis;
         this.recentOrders = data.recent_orders;
         this._topProducts = data.top_products ?? [];
-        this.isLoading    = false;
+        this.isLoading = false;
         this.cdr.detectChanges();
       },
       error: () => {
-        this.hasError  = true;
+        this.hasError = true;
         this.isLoading = false;
         this.cdr.detectChanges();
       }

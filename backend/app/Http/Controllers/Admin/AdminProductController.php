@@ -13,7 +13,23 @@ class AdminProductController extends Controller
     private function normalizeImages($images)
     {
         return $images->transform(function ($img) {
-            $img->url = $img->url ?? asset('storage/' . $img->image_path);
+            $path = $img->image_path;
+
+            if (!$path) {
+                $img->url = asset('img/default-product.png');
+            } elseif (filter_var($path, FILTER_VALIDATE_URL)) {
+                $img->url = $path;
+            } else {
+                $disk = config('filesystems.default', 'public');
+
+                if ($disk === 'azure') {
+                    $account   = config('filesystems.disks.azure.name');
+                    $container = config('filesystems.disks.azure.container');
+                    $img->url = "https://{$account}.blob.core.windows.net/{$container}/{$path}";
+                } else {
+                    $img->url = asset('storage/' . $path);
+                }
+            }
             return $img;
         });
     }
@@ -62,9 +78,15 @@ class AdminProductController extends Controller
         $product = Product::findOrFail($id);
 
         $product->update($request->only([
-            'name', 'description', 'short_description',
-            'price', 'unit', 'stock_quantity',
-            'season_end', 'category_id', 'moderation_status',
+            'name',
+            'description',
+            'short_description',
+            'price',
+            'unit',
+            'stock_quantity',
+            'season_end',
+            'category_id',
+            'moderation_status',
             'rejection_reason',  // ← AÑADIDO
         ]));
 
@@ -83,16 +105,23 @@ class AdminProductController extends Controller
     public function uploadImages(Request $request, $id)
     {
         $product = Product::findOrFail($id);
+        $disk = config('filesystems.default', 'public');
 
         $images = [];
         foreach ($request->file('images', []) as $file) {
-            $path  = $file->store("products/{$id}", 'public');
+            // Guardamos en el disco activo (Local -> storage, Azure -> Cloud)
+            $path = $file->store("products/{$id}", $disk);
+
             $image = $product->images()->create([
                 'image_path' => $path,
                 'order'      => $product->images()->count(),
             ]);
-            $image->url = asset('storage/' . $path);
-            $images[]   = $image;
+
+            $image->url = ($disk === 'azure')
+                ? "https://" . config('filesystems.disks.azure.name') . ".blob.core.windows.net/" . config('filesystems.disks.azure.container') . "/{$path}"
+                : asset('storage/' . $path);
+
+            $images[] = $image;
         }
 
         return response()->json(['images' => $images]);
