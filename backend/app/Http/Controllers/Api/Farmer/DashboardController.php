@@ -11,7 +11,9 @@ class DashboardController extends Controller
 {
     public function farmerStats(Request $request)
     {
-        $farmerId  = $request->user()->farmer->id ?? $request->user()->id;
+        // ✅ Nullsafe operator para PHP 8 — sin tabla farmers usa user id directamente
+        $user      = $request->user();
+        $farmerId  = $user->farmer?->id ?? $user->id;
         $now       = Carbon::now();
         $thisYear  = $now->year;
         $prevYear  = $now->year - 1;
@@ -33,7 +35,7 @@ class DashboardController extends Controller
             ->join('orders',   'order_items.order_id',   '=', 'orders.id')
             ->where('products.farmer_id', $farmerId)
             ->whereNotIn('orders.status', ['cancelled'])
-            ->whereYear('orders.created_at', $thisYear)
+            ->whereYear('orders.created_at',  $thisYear)
             ->whereMonth('orders.created_at', $now->month)
             ->sum(DB::raw('order_items.quantity * order_items.price'));
 
@@ -93,7 +95,7 @@ class DashboardController extends Controller
 
         $ordersByStatus = DB::table('orders')
             ->where('farmer_id', $farmerId)
-            ->selectRaw('status, COUNT(*) as count')
+            ->selectRaw('status, COUNT(id) as count')
             ->groupBy('status')
             ->orderBy('count', 'desc')
             ->get();
@@ -105,11 +107,11 @@ class DashboardController extends Controller
         $lowStock = DB::table('products')
             ->leftJoin(
                 DB::raw('(SELECT product_id, image_path FROM product_images WHERE id IN (
-            SELECT MIN(id) FROM product_images GROUP BY product_id
-        )) pi'),
+                    SELECT MIN(id) FROM product_images GROUP BY product_id
+                )) pi'),
                 'pi.product_id',
                 '=',
-                'products.id'   // ← faltaba esto
+                'products.id'
             )
             ->where('products.farmer_id', $farmerId)
             ->where('products.moderation_status', 'approved')
@@ -121,9 +123,9 @@ class DashboardController extends Controller
                 'products.stock_quantity as stock',
                 'products.unit',
                 DB::raw("IF(pi.image_path IS NOT NULL,
-            CONCAT('{$appUrl}/storage/', pi.image_path),
-            NULL
-        ) as image")
+                    CONCAT('{$appUrl}/storage/', pi.image_path),
+                    NULL
+                ) as image")
             )
             ->orderBy('products.stock_quantity')
             ->limit(8)
@@ -192,7 +194,7 @@ class DashboardController extends Controller
             ->selectRaw('
                 DAYOFWEEK(created_at) AS day_of_week,
                 HOUR(created_at)      AS hour,
-                COUNT(*)              AS count
+                COUNT(id)             AS count
             ')
             ->groupByRaw('DAYOFWEEK(created_at), HOUR(created_at)')
             ->orderByRaw('DAYOFWEEK(created_at), HOUR(created_at)')
