@@ -48,8 +48,6 @@ export class LoginSuccess implements OnInit {
           // 5. Redirección automática por ROL
           if (userObj.role === 'farmer') {
             this.router.navigate(['/agricultor/dashboard']);
-          } else if (userObj.role === 'buyer') {
-            this.router.navigate(['/comprador/dashboard']);
           } else {
             this.router.navigate(['/']);
           }
