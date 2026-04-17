@@ -88,11 +88,11 @@ class PaymentController extends Controller
 
             return response()->json(['paypal_order_id' => $response->json('id')]);
         } catch (\Exception $e) {
-    return response()->json([
-        'message' => 'Error de conexión con PayPal.',
-        'debug'   => $e->getMessage(),  // ← añade esto temporalmente
-    ], 500);
-}
+            return response()->json([
+                'message' => 'Error de conexión con PayPal.',
+                'debug'   => $e->getMessage(),  // ← añade esto temporalmente
+            ], 500);
+        }
     }
 
     /**
@@ -133,11 +133,11 @@ class PaymentController extends Controller
 
         /** @var Response $response */
         $response = Http::asForm()
-    ->withoutVerifying()
-    ->withBasicAuth($clientId, $secret)
-    ->post($this->paypalBaseUrl() . '/v1/oauth2/token', [
-        'grant_type' => 'client_credentials',
-    ]);
+            ->withoutVerifying()
+            ->withBasicAuth($clientId, $secret)
+            ->post($this->paypalBaseUrl() . '/v1/oauth2/token', [
+                'grant_type' => 'client_credentials',
+            ]);
 
         return $response->json('access_token');
     }

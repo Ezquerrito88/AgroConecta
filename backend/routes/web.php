@@ -13,7 +13,8 @@ Route::get('/ejecutar-link', function () {
     }
 });
 
+
 Route::middleware('web')->group(function () {
     Route::get('/api/auth/google', [AuthController::class, 'redirectToGoogle']);
-    Route::get('/api/auth/google/callback', [AuthController::class, 'handleGoogleCallback']);
+    Route::get('/api/auth/callback/google', [AuthController::class, 'handleGoogleCallback']);
 });

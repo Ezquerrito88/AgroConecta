@@ -14,7 +14,6 @@ import { environment } from '../../../environments/environment';
 })
 export class Login implements OnInit {
   private readonly PENDING_CHECKOUT_KEY = 'pending_checkout';
-
   private apiUrl = environment.apiUrl;
 
   loginData = {
@@ -34,17 +33,22 @@ export class Login implements OnInit {
   ) { }
 
   ngOnInit() {
+    // Escuchamos los parámetros que vienen de Laravel tras el éxito de Google
     this.route.queryParams.subscribe(params => {
-      if (params['token']) {
+      const token = params['token'];
+      const encodedData = params['data']; // Laravel envía 'data' en base64
+
+      if (token) {
         let userObj = null;
-        if (params['user']) {
+        if (encodedData) {
           try {
-            userObj = JSON.parse(params['user']);
+            // Decodificamos el Base64 que viene de la API
+            userObj = JSON.parse(atob(encodedData));
           } catch (e) {
-            console.error('Error leyendo usuario de Google', e);
+            console.error('Error decodificando usuario de Google', e);
           }
         }
-        this.guardarSesion(params['token'], userObj);
+        this.guardarSesion(token, userObj);
       }
     });
   }
@@ -56,19 +60,17 @@ export class Login implements OnInit {
     this.http.post(`${this.apiUrl}/login`, this.loginData)
       .subscribe({
         next: (res: any) => {
+          // Usamos access_token para ser consistentes con Laravel Sanctum
           this.guardarSesion(res.access_token || res.token, res.user);
           this.isLoading = false;
         },
         error: (err) => {
           this.isLoading = false;
-          console.error('Error completo:', err);
-
           if (err.status === 401) {
             this.errorMessage = 'Credenciales incorrectas.';
           } else {
             this.errorMessage = 'Error de comunicación con el servidor.';
           }
-
           this.cdr.detectChanges();
         }
       });
@@ -76,7 +78,9 @@ export class Login implements OnInit {
 
   loginWithGoogle() {
     this.isLoading = true;
-    window.location.href = `${this.apiUrl}/auth/google`;
+    // Recuperamos el rol si estuviera en la URL actual, si no, 'buyer' por defecto
+    const role = this.route.snapshot.queryParamMap.get('role') || 'buyer';
+    window.location.href = `${this.apiUrl}/auth/google?role=${role}`;
   }
 
   private guardarSesion(token: string, user: any) {
@@ -86,6 +90,7 @@ export class Login implements OnInit {
       localStorage.setItem('user', JSON.stringify(user));
     }
 
+    // Lógica de redirección inteligente
     const redirectTo = this.route.snapshot.queryParamMap.get('redirectTo');
     const hasPendingCheckout = sessionStorage.getItem(this.PENDING_CHECKOUT_KEY) === '1';
 
@@ -99,6 +104,11 @@ export class Login implements OnInit {
       return;
     }
 
-    this.router.navigate(['/']);
+    // Redirección por rol si no hay rutas pendientes
+    if (user?.role === 'farmer') {
+      this.router.navigate(['/farmer/dashboard']);
+    } else {
+      this.router.navigate(['/']);
+    }
   }
 }
