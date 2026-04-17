@@ -32,6 +32,7 @@ export class Dashboard implements OnInit {
   isFarmer = false;
   currentUser: any = null;
   isLoading = false;
+  isBuyer = false;
 
   minPrice = 0;
   maxPrice = 100;
@@ -51,17 +52,22 @@ export class Dashboard implements OnInit {
   }
 
   verificarUsuario(): void {
-    if (typeof window !== 'undefined' && window.localStorage) {
-      const userStr = localStorage.getItem('user');
-      if (userStr) {
-        this.currentUser = JSON.parse(userStr);
-        const role = this.currentUser.role?.toLowerCase();
-        this.isFarmer = role === 'agricultor' || role === 'farmer' || this.currentUser.role_id === 2;
-      }
+  if (typeof window !== 'undefined' && window.localStorage) {
+    const userStr = localStorage.getItem('user');
+    if (userStr) {
+      this.currentUser = JSON.parse(userStr);
+      const role = this.currentUser.role?.toLowerCase();
+      
+      this.isFarmer = role === 'agricultor' || role === 'farmer' || this.currentUser.role_id === 2;    
+      this.isBuyer = role === 'comprador' || role === 'buyer' || this.currentUser.role_id === 3;
+      
+    } else {
+      this.isBuyer = true; 
     }
   }
+}
 
-  // ✅ Usa image_url del backend, fallback a construcción manual
+  // Usa image_url del backend, fallback a construcción manual
   getImagenUrl(prod: any): string {
     if (prod?.images?.length > 0) {
       return prod.images[0].image_url

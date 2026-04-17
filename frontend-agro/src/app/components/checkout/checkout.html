@@ -44,6 +44,14 @@
 
 <main class="checkout-layout" *ngIf="items.length > 0">
 
+  <!-- Mini barra total en móvil -->
+  <div class="mobile-total-bar">
+    <span class="material-symbols-rounded">shopping_bag</span>
+    <span>{{ totalItems }} artículo{{ totalItems !== 1 ? 's' : '' }}</span>
+    <span class="mobile-total-amount">{{ total | currency:'EUR':'symbol':'1.2-2' }}</span>
+  </div>
+
+
   <!-- ══════════════════════════════════════════
        PASO 1 – DATOS DE ENTREGA
   ══════════════════════════════════════════ -->
@@ -71,8 +79,8 @@
         </label>
         <div class="input-wrapper">
           <span class="input-icon material-symbols-rounded">badge</span>
-          <input id="fullName" type="text" [(ngModel)]="form.fullName" placeholder="Juan García López"
-            autocomplete="name" />
+          <input id="fullName" type="text" [(ngModel)]="form.fullName"
+            placeholder="Juan García López" autocomplete="name" autofocus />
           <span class="valid-icon material-symbols-rounded" *ngIf="form.fullName.length > 2">check_circle</span>
         </div>
       </div>
@@ -84,8 +92,10 @@
         </label>
         <div class="input-wrapper">
           <span class="input-icon material-symbols-rounded">mail</span>
-          <input id="email" type="email" [(ngModel)]="form.email" placeholder="tu@email.com" autocomplete="email" />
-          <span class="valid-icon material-symbols-rounded" *ngIf="form.email.includes('@')">check_circle</span>
+          <input id="email" type="email" [(ngModel)]="form.email"
+            placeholder="tu@email.com" autocomplete="email" />
+          <span class="valid-icon material-symbols-rounded"
+            *ngIf="/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)">check_circle</span>
         </div>
       </div>
 
@@ -96,8 +106,8 @@
         </label>
         <div class="input-wrapper">
           <span class="input-icon material-symbols-rounded">phone</span>
-          <input id="phone" type="tel" [(ngModel)]="form.phone" placeholder="600 123 456" maxlength="15"
-            autocomplete="tel" inputmode="tel" />
+          <input id="phone" type="tel" [(ngModel)]="form.phone"
+            placeholder="600 123 456" maxlength="15" autocomplete="tel" inputmode="tel" />
           <span class="valid-icon material-symbols-rounded" *ngIf="form.phone.length >= 9">check_circle</span>
         </div>
       </div>
@@ -118,8 +128,8 @@
         </label>
         <div class="input-wrapper">
           <span class="input-icon material-symbols-rounded">location_on</span>
-          <input id="address" type="text" [(ngModel)]="form.address" placeholder="Calle Mayor, 123, 2º A"
-            autocomplete="street-address" />
+          <input id="address" type="text" [(ngModel)]="form.address"
+            placeholder="Calle Mayor, 123, 2º A" autocomplete="street-address" />
           <span class="valid-icon material-symbols-rounded" *ngIf="form.address.length > 5">check_circle</span>
         </div>
       </div>
@@ -131,55 +141,47 @@
         </label>
         <div class="input-wrapper">
           <span class="input-icon material-symbols-rounded">local_post_office</span>
-          <input id="postalCode" type="text" [(ngModel)]="form.postalCode" (ngModelChange)="onPostalCodeChange($event)"
-            placeholder="26001" maxlength="5" inputmode="numeric" pattern="[0-9]*" autocomplete="postal-code" />
-          <!-- Spinner mientras carga -->
+          <input id="postalCode" type="text" [(ngModel)]="form.postalCode"
+            (ngModelChange)="onPostalCodeChange($event)"
+            placeholder="26001" maxlength="5" inputmode="numeric"
+            pattern="[0-9]*" autocomplete="postal-code" />
           <span class="postal-spinner" *ngIf="postalCodeLoading" aria-label="Buscando ciudad..."></span>
-          <!-- Check si encontró ciudad -->
           <span class="valid-icon material-symbols-rounded"
             *ngIf="!postalCodeLoading && form.postalCode.length === 5 && form.city.length > 0 && !postalCodeError">
             check_circle
           </span>
-          <!-- Error si no encontró -->
-          <span class="invalid-icon material-symbols-rounded" *ngIf="!postalCodeLoading && postalCodeError">
-            error
-          </span>
+          <span class="invalid-icon material-symbols-rounded"
+            *ngIf="!postalCodeLoading && postalCodeError">error</span>
         </div>
-        <!-- Mensaje de error bajo el input -->
         <small class="postal-error-text" *ngIf="postalCodeError">
           Código postal no encontrado. Introduce la ciudad manualmente.
         </small>
       </div>
 
-      <!-- Ciudad — se rellena sola pero sigue siendo editable -->
-      <div class="field-group" [class.has-value]="form.city.length > 0">
-        <label for="city" class="label-text">
-          Ciudad <strong aria-hidden="true">*</strong>
-          <span class="city-auto-badge"
-            *ngIf="form.city.length > 0 && form.postalCode.length === 5 && !postalCodeError">
-            <span class="material-symbols-rounded">auto_fix_high</span>
-            Autocompletado
-          </span>
-        </label>
-        <div class="input-wrapper">
-          <span class="input-icon material-symbols-rounded">location_city</span>
-          <input id="city" type="text" [(ngModel)]="form.city" placeholder="Se rellena automáticamente"
-            autocomplete="address-level2" />
-          <span class="valid-icon material-symbols-rounded" *ngIf="form.city.length > 2">check_circle</span>
-        </div>
-      </div>
-
+      <!-- Ciudad -->
+<div class="field-group" [class.has-value]="form.city.length > 0">
+  <label for="city" class="label-text">
+    Ciudad <strong aria-hidden="true">*</strong>
+  </label>
+  <div class="input-wrapper">
+    <span class="input-icon material-symbols-rounded">location_city</span>
+    <input id="city" type="text" [(ngModel)]="form.city"
+      placeholder="Se rellena automáticamente" autocomplete="address-level2" />
+    <span class="valid-icon material-symbols-rounded" *ngIf="form.city.length > 2">check_circle</span>
+  </div>
+</div>
 
       <!-- Notas -->
       <div class="field-group full-width">
         <label for="notes" class="label-text">
           Notas para el repartidor <span class="optional-tag">opcional</span>
         </label>
-        <div class="input-wrapper">
-          <span class="input-icon material-symbols-rounded" style="top:1rem; align-self:flex-start;">note</span>
-          <textarea id="notes" rows="3" [(ngModel)]="form.notes"
+        <div class="input-wrapper textarea-wrapper">
+          <span class="input-icon material-symbols-rounded textarea-icon">note</span>
+          <textarea id="notes" rows="3" [(ngModel)]="form.notes" maxlength="200"
             placeholder="Ej: Llamar al llegar, portal sin portero automático..."></textarea>
         </div>
+        <small class="char-counter">{{ form.notes.length }}/200</small>
       </div>
 
     </div>
@@ -194,7 +196,8 @@
         <span class="material-symbols-rounded">arrow_back</span>
         Volver a la cesta
       </button>
-      <button class="btn-primary" (click)="nextStep()">
+      <button class="btn-primary" (click)="nextStep()"
+        [disabled]="!form.fullName || !form.email || !form.phone || !form.address || !form.postalCode || !form.city">
         Continuar al pago
         <span class="material-symbols-rounded">arrow_forward</span>
       </button>
@@ -218,8 +221,8 @@
     <div class="payment-grid" role="radiogroup" aria-label="Método de pago">
 
       <label class="payment-option" [class.active]="form.paymentMethod === 'card'">
-        <input class="payment-radio" type="radio" name="paymentMethod" [(ngModel)]="form.paymentMethod"
-          (ngModelChange)="onPaymentMethodChanged()" value="card" />
+        <input class="payment-radio" type="radio" name="paymentMethod"
+          [(ngModel)]="form.paymentMethod" (ngModelChange)="onPaymentMethodChanged()" value="card" />
         <div class="payment-icon-wrap">
           <span class="material-symbols-rounded">credit_card</span>
         </div>
@@ -231,8 +234,8 @@
       </label>
 
       <label class="payment-option" [class.active]="form.paymentMethod === 'paypal'">
-        <input class="payment-radio" type="radio" name="paymentMethod" [(ngModel)]="form.paymentMethod"
-          (ngModelChange)="onPaymentMethodChanged()" value="paypal" />
+        <input class="payment-radio" type="radio" name="paymentMethod"
+          [(ngModel)]="form.paymentMethod" (ngModelChange)="onPaymentMethodChanged()" value="paypal" />
         <div class="payment-icon-wrap">
           <span class="material-symbols-rounded">account_balance_wallet</span>
         </div>
@@ -244,8 +247,8 @@
       </label>
 
       <label class="payment-option" [class.active]="form.paymentMethod === 'bizum'">
-        <input class="payment-radio" type="radio" name="paymentMethod" [(ngModel)]="form.paymentMethod"
-          (ngModelChange)="onPaymentMethodChanged()" value="bizum" />
+        <input class="payment-radio" type="radio" name="paymentMethod"
+          [(ngModel)]="form.paymentMethod" (ngModelChange)="onPaymentMethodChanged()" value="bizum" />
         <div class="payment-icon-wrap">
           <span class="material-symbols-rounded">smartphone</span>
         </div>
@@ -257,8 +260,8 @@
       </label>
 
       <label class="payment-option" [class.active]="form.paymentMethod === 'cash_on_delivery'">
-        <input class="payment-radio" type="radio" name="paymentMethod" [(ngModel)]="form.paymentMethod"
-          (ngModelChange)="onPaymentMethodChanged()" value="cash_on_delivery" />
+        <input class="payment-radio" type="radio" name="paymentMethod"
+          [(ngModel)]="form.paymentMethod" (ngModelChange)="onPaymentMethodChanged()" value="cash_on_delivery" />
         <div class="payment-icon-wrap">
           <span class="material-symbols-rounded">payments</span>
         </div>
@@ -320,14 +323,27 @@
         <span class="material-symbols-rounded expand-icon">expand_more</span>
       </summary>
       <div class="delivery-summary-content">
-        <p>{{ form.fullName }}</p>
-        <p>{{ form.address }}, {{ form.postalCode }} {{ form.city }}</p>
-        <p>{{ form.phone }}</p>
+        <p><span class="material-symbols-rounded summary-inline-icon">person</span>{{ form.fullName }}</p>
+        <p><span class="material-symbols-rounded summary-inline-icon">location_on</span>{{ form.address }}, {{ form.postalCode }} {{ form.city }}</p>
+        <p><span class="material-symbols-rounded summary-inline-icon">phone</span>{{ form.phone }}</p>
         <button type="button" class="btn-edit-link" (click)="currentStep = 1">
           <span class="material-symbols-rounded">edit</span> Modificar dirección
         </button>
       </div>
     </details>
+
+    <!-- Método de pago elegido (badge informativo) -->
+    <div class="chosen-payment-badge">
+      <span class="material-symbols-rounded">
+        {{ form.paymentMethod === 'card' ? 'credit_card' :
+           form.paymentMethod === 'paypal' ? 'account_balance_wallet' :
+           form.paymentMethod === 'bizum' ? 'smartphone' : 'payments' }}
+      </span>
+      <span>Pagando con <strong>{{ getPaymentLabel(form.paymentMethod) }}</strong></span>
+      <button type="button" class="btn-edit-link" (click)="prevStep()">
+        <span class="material-symbols-rounded">edit</span> Cambiar
+      </button>
+    </div>
 
     <!-- Detalles del método de pago -->
     <div class="payment-details">
@@ -354,8 +370,10 @@
           <div class="input-wrapper">
             <span class="input-icon material-symbols-rounded">smartphone</span>
             <input id="bizumPhone" type="tel" [(ngModel)]="form.bizumPhone"
-              (ngModelChange)="form.bizumPhone = formatBizumPhone($event)" placeholder="644 97 42 59" maxlength="12"
-              inputmode="numeric" />
+              (ngModelChange)="form.bizumPhone = formatBizumPhone($event)"
+              placeholder="644 97 42 59" maxlength="12" inputmode="numeric" />
+            <span class="valid-icon material-symbols-rounded"
+              *ngIf="form.bizumPhone.replace(' ','').replace(' ','').replace(' ','').length === 9">check_circle</span>
           </div>
           <small>Número donde recibirás la solicitud de Bizum</small>
         </div>
@@ -406,8 +424,10 @@
         <span class="material-symbols-rounded">arrow_back</span>
         Volver atrás
       </button>
-      <button class="btn-primary btn-confirm" *ngIf="form.paymentMethod !== 'paypal'" (click)="submit()"
-        [disabled]="loading">
+      <button class="btn-primary btn-confirm"
+        *ngIf="form.paymentMethod !== 'paypal'"
+        (click)="submit()"
+        [disabled]="loading || !form.acceptTerms">
         <span class="material-symbols-rounded" *ngIf="!loading">lock</span>
         <span *ngIf="!loading">Confirmar y pagar</span>
         <span class="loading-dots" *ngIf="loading">
@@ -450,6 +470,16 @@
         {{ shipping === 0 ? 'Gratis' : (shipping | currency:'EUR':'symbol':'1.2-2') }}
       </span>
     </div>
+
+    <!-- Banner envío gratis si no lo tiene aún -->
+    <div class="free-shipping-nudge" *ngIf="shipping > 0">
+      <span class="material-symbols-rounded">local_shipping</span>
+      <span>
+        Añade <strong>{{ (freeShippingThreshold - subtotal) | currency:'EUR':'symbol':'1.2-2' }}</strong>
+        más y el envío es gratis
+      </span>
+    </div>
+
     <div class="summary-row discount-row" *ngIf="discountPct > 0">
       <span>
         <span class="discount-chip">{{ discountCode }}</span>
@@ -470,8 +500,8 @@
         {{ currentStep === 1 ? 'local_shipping' : currentStep === 2 ? 'payments' : 'verified' }}
       </span>
       <span>
-        {{ currentStep === 1 ? 'Completando entrega' : currentStep === 2 ? 'Eligiendo método de pago' : 'Confirmando
-        pedido' }}
+        {{ currentStep === 1 ? 'Completando entrega' :
+           currentStep === 2 ? 'Eligiendo método de pago' : 'Confirmando pedido' }}
       </span>
     </div>
   </aside>
