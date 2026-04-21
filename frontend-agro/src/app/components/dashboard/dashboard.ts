@@ -34,9 +34,15 @@ export class Dashboard implements OnInit {
   isLoading = false;
   isBuyer = false;
 
+  // Filtros dinámicos
+  productosFiltroMaestro: any[] = [];
+  categoriasDisponibles: string[] = [];
+  rangoMinPrecio = 0;
+  rangoMaxPrecio = 1000;
+
   minPrice = 0;
   maxPrice = 100;
-  categoriasRapidas = ['Todas', 'Frutas', 'Verduras', 'Granos', 'Lácteos', 'Especias'];
+  categoriasRapidas = ['Todas'];
   filtros = { categoria: 'todas', orden: 'novedad' };
 
   constructor(
@@ -48,7 +54,74 @@ export class Dashboard implements OnInit {
 
   ngOnInit(): void {
     this.verificarUsuario();
+    this.cargarOpcionesFiltros();
     Promise.resolve().then(() => this.cargarProductos(1));
+  }
+
+  cargarOpcionesFiltros(): void {
+    // Obtenemos una lista para extraer filtros dinámicos (usamos getCatalogo en vez de destacados para mas precisión o una cantidad alta)
+    this.productoService.getCatalogo({ per_page: 500 }).subscribe({
+      next: (res: any) => {
+        this.productosFiltroMaestro = res.data ?? [];
+        this.recalcularFiltrosDinamicos(true);
+      },
+      error: (err: any) => console.error('Error cargando filtros dinámicos', err)
+    });
+  }
+
+  recalcularFiltrosDinamicos(isInitial: boolean = false): void {
+    if (!this.productosFiltroMaestro || this.productosFiltroMaestro.length === 0) return;
+
+    let productosBuscados = this.productosFiltroMaestro;
+    const selectedCat = this.filtros.categoria !== 'todas' ? this.filtros.categoria : '';
+    
+    const catMatch = (p: any, cat: string) => !cat || (p.category?.name?.toLowerCase() === cat);
+
+    // Extraer Categorías Dinámicas
+    const cats = new Set<string>();
+    productosBuscados.forEach((p: any) => {
+      if (p.category?.name) cats.add(p.category.name);
+    });
+    this.categoriasDisponibles = Array.from(cats).sort();
+    
+    // Actualizar botones de categoría rápida (máx 5 + Todas)
+    this.categoriasRapidas = ['Todas', ...this.categoriasDisponibles.slice(0, 5)];
+
+    // Extraer Precios Mínimos y Máximos cruzados (se filtran por categoría elegida)
+    const priceProducts = productosBuscados.filter(p => catMatch(p, selectedCat));
+    if (priceProducts.length > 0) {
+      const prices = priceProducts.map(p => Number(p.price) || 0);
+      let minGlobal = Math.floor(Math.min(...prices));
+      let maxGlobal = Math.ceil(Math.max(...prices));
+      
+      if (minGlobal === maxGlobal) {
+        maxGlobal = minGlobal + 1;
+      }
+      
+      const wasFullyOpen = (this.minPrice <= this.rangoMinPrecio && this.maxPrice >= this.rangoMaxPrecio);
+
+      this.rangoMinPrecio = minGlobal;
+      this.rangoMaxPrecio = maxGlobal;
+
+      if (isInitial || wasFullyOpen) {
+        this.minPrice = minGlobal;
+        this.maxPrice = maxGlobal;
+      } else {
+        if (this.minPrice < minGlobal) this.minPrice = minGlobal;
+        if (this.minPrice > maxGlobal) this.minPrice = maxGlobal;
+        if (this.maxPrice > maxGlobal) this.maxPrice = maxGlobal;
+        if (this.maxPrice < minGlobal) this.maxPrice = minGlobal;
+        if (this.minPrice > this.maxPrice) {
+          this.minPrice = minGlobal;
+          this.maxPrice = maxGlobal;
+        }
+      }
+    } else {
+      this.rangoMinPrecio = 0;
+      this.rangoMaxPrecio = 100;
+      this.minPrice = 0;
+      this.maxPrice = 100;
+    }
   }
 
   verificarUsuario(): void {
@@ -77,6 +150,10 @@ export class Dashboard implements OnInit {
   }
 
   cargarProductos(page: number): void {
+    if (this.productosFiltroMaestro.length > 0) {
+      this.recalcularFiltrosDinamicos(false);
+    }
+    
     this.isLoading = true;
     this.paginaActual = page;
 
@@ -114,8 +191,8 @@ export class Dashboard implements OnInit {
 
   limpiarFiltros(): void {
     this.filtros = { categoria: 'todas', orden: 'novedad' };
-    this.minPrice = 0;
-    this.maxPrice = 100;
+    this.minPrice = this.rangoMinPrecio;
+    this.maxPrice = this.rangoMaxPrecio;
     this.cargarProductos(1);
   }
 

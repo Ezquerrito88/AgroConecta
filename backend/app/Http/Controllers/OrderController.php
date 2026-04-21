@@ -157,18 +157,28 @@ class OrderController extends Controller
             }
 
             // CARGA DE RELACIONES PARA EL CORREO
-            $newOrder->load('buyer', 'items.product');
+            $newOrder->load('buyer', 'farmer', 'items.product');
 
             return $newOrder;
         });
 
-        // ENVÍO DE CORREO CON RESEND
+        // ENVÃO DE CORREO AL COMPRADOR CON RESEND
         if ($order->buyer && $order->buyer->email) {
             try {
                 Mail::to($order->buyer->email)->send(new ReciboCompra($order));
                 Log::info("Recibo enviado correctamente al pedido #{$order->id}");
             } catch (\Exception $e) {
                 Log::error("Error enviando correo en OrderController: " . $e->getMessage());
+            }
+        }
+
+        // ENVÍO DE CORREO AL AGRICULTOR
+        if ($order->farmer && $order->farmer->email) {
+            try {
+                Mail::to($order->farmer->email)->send(new \App\Mail\NuevaVenta($order));
+                Log::info("Notificación de venta enviada al agricultor del pedido #{$order->id}");
+            } catch (\Exception $e) {
+                Log::error("Error enviando correo a agricultor en OrderController: " . $e->getMessage());
             }
         }
 

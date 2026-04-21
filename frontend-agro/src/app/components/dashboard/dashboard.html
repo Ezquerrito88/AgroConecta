@@ -53,11 +53,7 @@
         <mat-form-field appearance="outline" class="full-width theme-green" subscriptSizing="dynamic">
           <mat-select panelClass="panel-green" [(ngModel)]="filtros.categoria" (ngModelChange)="onFiltroChange()">
             <mat-option value="todas">Todas</mat-option>
-            <mat-option value="frutas">Frutas</mat-option>
-            <mat-option value="verduras">Verduras</mat-option>
-            <mat-option value="granos">Granos</mat-option>
-            <mat-option value="lácteos">Lácteos</mat-option>
-            <mat-option value="especias">Especias</mat-option>
+            <mat-option *ngFor="let cat of categoriasDisponibles" [value]="cat.toLowerCase()">{{ cat }}</mat-option>
           </mat-select>
         </mat-form-field>
       </div>
@@ -66,7 +62,7 @@
       <div class="filter-group filter-orange">
         <label><span class="dot-orange"></span> Rango de Precio</label>
         <div class="slider-container">
-          <mat-slider min="0" max="100" step="1">
+          <mat-slider [min]="rangoMinPrecio" [max]="rangoMaxPrecio" step="1">
             <input matSliderStartThumb [(ngModel)]="minPrice" (dragEnd)="filtrarPorPrecio()">
             <input matSliderEndThumb [(ngModel)]="maxPrice" (dragEnd)="filtrarPorPrecio()">
           </mat-slider>

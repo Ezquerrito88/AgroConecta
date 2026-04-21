@@ -6,7 +6,7 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
 
-class ReciboCompra extends Mailable
+class NuevaVenta extends Mailable
 {
     use Queueable, SerializesModels;
 
@@ -30,7 +30,6 @@ class ReciboCompra extends Mailable
             return "https://{$account}.blob.core.windows.net/{$container}/{$path}";
         }
 
-        // Entorno local: incrustar imagen para ser visible en todos los clientes
         $localPath = storage_path('app/public/' . ltrim($path, '/'));
         if (file_exists($localPath)) {
             try {
@@ -45,7 +44,7 @@ class ReciboCompra extends Mailable
 
     public function build()
     {
-        return $this->subject('Â¡Recibo de tu compra en AgroConecta!')
-                    ->view('emails.orders.confirmation');
+        return $this->subject('¡Enhorabuena, tienes un nuevo pedido en AgroConecta!')
+                    ->view('emails.orders.nueva_venta');
     }
 }
