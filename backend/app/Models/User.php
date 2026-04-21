@@ -63,4 +63,10 @@ class User extends Authenticatable
     {
         return $this->belongsToMany(Product::class, 'favorites', 'user_id', 'product_id')->withTimestamps();
     }
+
+    public function getPrefixedIdAttribute()
+    {
+        $prefix = $this->role_id == 2 ? 'AGRO-' : 'BUY-';
+        return $prefix . str_pad($this->id, 3, '0', STR_PAD_LEFT);
+    }
 }

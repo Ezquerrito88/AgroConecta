@@ -88,7 +88,7 @@ export class CarritoService {
       return parsed.map((item: any) => ({
         id: Number(item.id),
         name: item.name,
-        farmer: item.farmer ?? item?.farmer?.full_name ?? item?.farmer?.name ?? 'Agricultor local',
+        farmer: item.farmer ?? item?.farmer?.user?.name ?? item?.farmer?.full_name ?? item?.farmer?.name ?? 'Agricultor local',
         farmerId: Number(item.farmerId ?? item?.farmer?.user_id ?? item?.farmer?.id ?? 0),
         price: Number(item.price),
         unit: item.unit ?? 'ud',

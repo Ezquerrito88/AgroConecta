@@ -160,11 +160,11 @@
 
           <div class="seller-box" *ngIf="prod.farmer">
             <span class="seller-name">
-              {{ prod.farmer.full_name || prod.farmer.name || 'Agricultor Local' }}
+              {{ prod.farmer.user?.name || prod.farmer.full_name || prod.farmer.name || 'Agricultor Local' }}
             </span>
             <span class="seller-location">
               <i class="fa-solid fa-location-dot"></i>
-              {{ prod.farmer.city || prod.farmer.location || 'Logroño' }}
+              {{ prod.farmer.city || prod.farmer.location || 'España' }}
             </span>
           </div>
 

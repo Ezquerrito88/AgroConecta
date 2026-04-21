@@ -31,7 +31,7 @@ class ProductController extends Controller
     {
         $perPage = $request->query('per_page', 12);
 
-        $query = Product::with(['category', 'images', 'farmer'])
+        $query = Product::with(['category', 'images', 'farmer.user'])
             ->where('moderation_status', 'approved');
 
         if ($request->filled('search')) {
@@ -77,7 +77,7 @@ class ProductController extends Controller
         $precioMin = $request->query('precio_min');
         $precioMax = $request->query('precio_max');
 
-        $query = Product::with(['images', 'farmer', 'category'])
+        $query = Product::with(['images', 'farmer.user', 'category'])
             ->where('moderation_status', 'approved');
 
         if ($categoria && $categoria !== 'todas') {

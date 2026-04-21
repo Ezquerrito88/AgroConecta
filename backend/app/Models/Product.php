@@ -77,4 +77,9 @@ class Product extends Model
     {
         return $this->hasOne(ProductImage::class)->orderBy('order')->oldest('order')->limit(1);
     }
+
+    public function getPrefixedIdAttribute()
+    {
+        return 'PROD-' . str_pad($this->id, 5, '0', STR_PAD_LEFT);
+    }
 }

@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Mail;
 use App\Models\Order;
+use App\Mail\ReciboCompra;
 use Stripe\Stripe;
 use Stripe\Webhook;
 use Stripe\Exception\SignatureVerificationException;
@@ -73,17 +75,35 @@ class WebhookController extends Controller
             'amount' => $paymentIntent->amount / 100,
         ]);
 
-        // Update orders (optimized with single query)
-        $updated = Order::where('payment_intent_id', $paymentIntentId)
-            ->update([
-                'payment_status' => 'completed',
-                'payment_completed_at' => now(),
-            ]);
+        // Buscamos el pedido junto con el usuario para poder enviarle el correo
+        $orders = Order::with('user')->where('payment_intent_id', $paymentIntentId)->get();
 
-        if ($updated > 0) {
-            Log::info("Updated {$updated} order(s)", ['payment_intent_id' => $paymentIntentId]);
-        } else {
+        if ($orders->isEmpty()) {
             Log::warning('No orders found', ['payment_intent_id' => $paymentIntentId]);
+            return;
+        }
+
+        foreach ($orders as $order) {
+            // Verificamos que no se haya procesado ya para evitar correos duplicados
+            if ($order->payment_status !== 'completed') {
+                
+                $order->update([
+                    'payment_status' => 'completed',
+                    'payment_completed_at' => now(),
+                ]);
+
+                Log::info("Updated order ID: {$order->id}", ['payment_intent_id' => $paymentIntentId]);
+
+                // Enviamos el correo de Resend
+                if ($order->user && $order->user->email) {
+                    try {
+                        Mail::to($order->user->email)->send(new ReciboCompra($order));
+                        Log::info("Correo de Stripe enviado a: {$order->user->email}");
+                    } catch (\Exception $e) {
+                        Log::error("Error enviando correo de Stripe: " . $e->getMessage());
+                    }
+                }
+            }
         }
     }
 
@@ -172,17 +192,35 @@ class WebhookController extends Controller
             'amount' => $resource['amount']['value'] ?? null,
         ]);
 
-        // Update orders (optimized with single query)
-        $updated = Order::where('payment_transaction_id', $captureId)
-            ->update([
-                'payment_status' => 'completed',
-                'payment_completed_at' => now(),
-            ]);
+        // Buscamos el pedido junto con el usuario para PayPal
+        $orders = Order::with('user')->where('payment_transaction_id', $captureId)->get();
 
-        if ($updated > 0) {
-            Log::info("Updated {$updated} order(s)", ['capture_id' => $captureId]);
-        } else {
+        if ($orders->isEmpty()) {
             Log::warning('No orders found', ['capture_id' => $captureId]);
+            return;
+        }
+
+        foreach ($orders as $order) {
+            // Verificamos que no se haya procesado ya
+            if ($order->payment_status !== 'completed') {
+                
+                $order->update([
+                    'payment_status' => 'completed',
+                    'payment_completed_at' => now(),
+                ]);
+
+                Log::info("Updated order ID: {$order->id}", ['capture_id' => $captureId]);
+
+                // Enviamos el correo de Resend
+                if ($order->user && $order->user->email) {
+                    try {
+                        Mail::to($order->user->email)->send(new ReciboCompra($order));
+                        Log::info("Correo de PayPal enviado a: {$order->user->email}");
+                    } catch (\Exception $e) {
+                        Log::error("Error enviando correo de PayPal: " . $e->getMessage());
+                    }
+                }
+            }
         }
     }
 

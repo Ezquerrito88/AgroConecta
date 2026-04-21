@@ -47,6 +47,10 @@ export interface Producto {
     city?: string;
     email: string;
     role: string;
+    user?: {
+      name: string;
+      email?: string;
+    };
     farmer?: {
         city?: string;
         farm_name?: string;

@@ -6,12 +6,15 @@ use App\Models\Order;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use App\Mail\OrderConfirmationMail;
+use App\Mail\ReciboCompra;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
 
 class OrderController extends Controller
 {
-    // Pedidos que ha recibido el agricultor
+    /**
+     * Pedidos que ha recibido el agricultor
+     */
     public function farmerOrders(Request $request)
     {
         $orders = Order::with(['buyer', 'items.product'])
@@ -22,6 +25,9 @@ class OrderController extends Controller
         return response()->json($orders);
     }
 
+    /**
+     * Ver un pedido específico (Agricultor)
+     */
     public function show(Request $request, $id)
     {
         $order = Order::with(['buyer', 'items.product'])
@@ -31,6 +37,9 @@ class OrderController extends Controller
         return response()->json($order);
     }
 
+    /**
+     * Actualizar el estado del pedido (Agricultor)
+     */
     public function updateStatus(Request $request, $id)
     {
         $request->validate([
@@ -43,26 +52,28 @@ class OrderController extends Controller
         return response()->json($order);
     }
 
-    // El comprador crea un pedido
+    /**
+     * El comprador crea un pedido
+     */
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'items'           => 'required|array|min:1',
+            'items'              => 'required|array|min:1',
             'items.*.product_id' => 'required|exists:products,id',
             'items.*.quantity'   => 'required|integer|min:1',
-            'farmer_id'       => 'nullable|exists:users,id',
-            'shipping_address'=> 'nullable|string',
-            'discount_code'   => 'nullable|string|max:40',
-            'discount_pct'    => 'nullable|numeric|min:0|max:100',
-            'payment_method'  => 'nullable|in:card,paypal,bizum,cash_on_delivery',
-            'payment_intent_id' => 'nullable|string|max:255',
+            'farmer_id'          => 'nullable|exists:users,id',
+            'shipping_address'   => 'nullable|string',
+            'discount_code'      => 'nullable|string|max:40',
+            'discount_pct'       => 'nullable|numeric|min:0|max:100',
+            'payment_method'     => 'nullable|in:card,paypal,bizum,cash_on_delivery',
+            'payment_intent_id'  => 'nullable|string|max:255',
             'payment_transaction_id' => 'nullable|string|max:255',
         ]);
 
         $items = collect($validated['items']);
         $productIds = $items->pluck('product_id')->unique();
 
-        // Single query with eager loading
+        // Carga de productos y agricultores vinculados
         $products = Product::with('farmer:id,user_id')
             ->whereIn('id', $productIds)
             ->get()
@@ -72,7 +83,7 @@ class OrderController extends Controller
             return response()->json(['message' => 'Uno o más productos no existen.'], 422);
         }
 
-        // Check all products belong to same farmer
+        // Validar que todos los productos sean del mismo agricultor
         $farmerUserIds = $products->pluck('farmer.user_id')->filter()->unique();
 
         if ($farmerUserIds->count() !== 1) {
@@ -85,7 +96,7 @@ class OrderController extends Controller
             return response()->json(['message' => 'El agricultor no coincide con los productos.'], 422);
         }
 
-        // Validate stock and calculate totals
+        // Validar stock y calcular totales
         $lineItems = [];
         $total = 0;
 
@@ -110,13 +121,13 @@ class OrderController extends Controller
             $total += $subtotal;
         }
 
-        // Apply discount
+        // Calcular descuento
         $discountPct = min(100, max(0, (float) ($validated['discount_pct'] ?? 0)));
         $discountAmount = round($total * ($discountPct / 100), 2);
         $finalTotal = $total - $discountAmount;
 
-        // Create order and items in transaction
-        $order = DB::transaction(function () use ($validated, $lineItems, $finalTotal, $farmerUserId, $products, $discountPct, $discountAmount, $request) {
+        // Crear pedido dentro de una transacción
+        $order = DB::transaction(function () use ($validated, $lineItems, $finalTotal, $farmerUserId, $discountPct, $discountAmount, $request) {
             $shippingAddress = $validated['shipping_address'] ?? '';
 
             if ($discountPct > 0 && !empty($validated['discount_code'])) {
@@ -127,7 +138,7 @@ class OrderController extends Controller
             $paymentMethod = $validated['payment_method'] ?? 'cash_on_delivery';
             $paymentStatus = in_array($paymentMethod, ['cash_on_delivery', 'bizum']) ? 'processing' : 'pending';
 
-            $order = Order::create([
+            $newOrder = Order::create([
                 'buyer_id' => $request->user()->id,
                 'farmer_id' => $farmerUserId,
                 'total' => $finalTotal,
@@ -138,25 +149,35 @@ class OrderController extends Controller
                 'payment_transaction_id' => $validated['payment_transaction_id'] ?? null,
             ]);
 
-            // Bulk insert items and update stock
-            $order->items()->createMany($lineItems);
+            // Insertar items y decrementar stock
+            $newOrder->items()->createMany($lineItems);
             
             foreach ($lineItems as $item) {
                 Product::where('id', $item['product_id'])->decrement('stock_quantity', $item['quantity']);
             }
 
-            $order->load('buyer', 'items.product');
-           
+            // CARGA DE RELACIONES PARA EL CORREO
+            $newOrder->load('buyer', 'items.product');
 
-
-            return $order;
+            return $newOrder;
         });
 
-         Mail::to($order->buyer->email)->send(new OrderConfirmationMail($order));
+        // ENVÍO DE CORREO CON RESEND
+        if ($order->buyer && $order->buyer->email) {
+            try {
+                Mail::to($order->buyer->email)->send(new ReciboCompra($order));
+                Log::info("Recibo enviado correctamente al pedido #{$order->id}");
+            } catch (\Exception $e) {
+                Log::error("Error enviando correo en OrderController: " . $e->getMessage());
+            }
+        }
 
-        return response()->json($order->load('items.product'), 201);
+        return response()->json($order, 201);
     }
 
+    /**
+     * Pedidos que ha realizado el comprador
+     */
     public function buyerOrders(Request $request)
     {
         $orders = Order::with(['farmer', 'items.product'])

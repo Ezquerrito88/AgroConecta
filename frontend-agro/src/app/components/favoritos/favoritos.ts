@@ -123,7 +123,7 @@ export class Favoritos implements OnInit {
     this.cartService.addToCart({
       id: Number(prod.id),
       name: prod.name,
-      farmer: prod?.farmer?.full_name || prod?.farmer?.name || 'Agricultor local',
+      farmer: prod?.farmer?.user?.name || prod?.farmer?.full_name || prod?.farmer?.name || 'Agricultor local',
       farmerId: Number(prod?.farmer?.user_id ?? prod?.farmer?.id ?? 0),
       price: Number(prod.price),
       unit: prod.unit ?? 'ud',

@@ -44,7 +44,7 @@ export class Dashboard implements OnInit {
     private productoService: ProductoService,
     private cdr: ChangeDetectorRef,
     private cartService: CartService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.verificarUsuario();
@@ -52,20 +52,20 @@ export class Dashboard implements OnInit {
   }
 
   verificarUsuario(): void {
-  if (typeof window !== 'undefined' && window.localStorage) {
-    const userStr = localStorage.getItem('user');
-    if (userStr) {
-      this.currentUser = JSON.parse(userStr);
-      const role = this.currentUser.role?.toLowerCase();
-      
-      this.isFarmer = role === 'agricultor' || role === 'farmer' || this.currentUser.role_id === 2;    
-      this.isBuyer = role === 'comprador' || role === 'buyer' || this.currentUser.role_id === 3;
-      
-    } else {
-      this.isBuyer = true; 
+    if (typeof window !== 'undefined' && window.localStorage) {
+      const userStr = localStorage.getItem('user');
+      if (userStr) {
+        this.currentUser = JSON.parse(userStr);
+        const role = this.currentUser.role?.toLowerCase();
+
+        this.isFarmer = role === 'agricultor' || role === 'farmer' || this.currentUser.role_id === 2;
+        this.isBuyer = role === 'comprador' || role === 'buyer' || this.currentUser.role_id === 3;
+
+      } else {
+        this.isBuyer = true;
+      }
     }
   }
-}
 
   // Usa image_url del backend, fallback a construcción manual
   getImagenUrl(prod: any): string {
@@ -81,10 +81,10 @@ export class Dashboard implements OnInit {
     this.paginaActual = page;
 
     const filtrosActivos: any = {};
-    if (this.filtros.categoria !== 'todas') filtrosActivos.categoria  = this.filtros.categoria;
-    if (this.filtros.orden !== 'novedad')   filtrosActivos.orden      = this.filtros.orden;
-    if (this.minPrice > 0)                  filtrosActivos.precio_min = this.minPrice;
-    if (this.maxPrice < 100)                filtrosActivos.precio_max = this.maxPrice;
+    if (this.filtros.categoria !== 'todas') filtrosActivos.categoria = this.filtros.categoria;
+    if (this.filtros.orden !== 'novedad') filtrosActivos.orden = this.filtros.orden;
+    if (this.minPrice > 0) filtrosActivos.precio_min = this.minPrice;
+    if (this.maxPrice < 100) filtrosActivos.precio_max = this.maxPrice;
 
     this.productoService.getDestacados(page, this.itemsPorPagina, filtrosActivos).subscribe({
       next: (res: any) => {
@@ -109,7 +109,7 @@ export class Dashboard implements OnInit {
     this.cargarProductos(1);
   }
 
-  onFiltroChange(): void   { this.cargarProductos(1); }
+  onFiltroChange(): void { this.cargarProductos(1); }
   filtrarPorPrecio(): void { this.cargarProductos(1); }
 
   limpiarFiltros(): void {
@@ -144,7 +144,7 @@ export class Dashboard implements OnInit {
     this.cartService.addToCart({
       id: Number(producto.id),
       name: producto.name,
-      farmer: producto?.farmer?.full_name || producto?.farmer?.name || 'Agricultor local',
+      farmer: producto?.farmer?.user?.name || producto?.farmer?.full_name || producto?.farmer?.name || 'Agricultor local',
       farmerId: Number(producto?.farmer?.user_id ?? producto?.farmer?.id ?? 0),
       price: Number(producto.price),
       unit: producto.unit ?? 'ud',
@@ -153,6 +153,6 @@ export class Dashboard implements OnInit {
     });
   }
 
-  irAlCatalogoCompleto(): void       { this.router.navigate(['/productos']); }
+  irAlCatalogoCompleto(): void { this.router.navigate(['/productos']); }
   formatLabel(value: number): string { return `${value}€`; }
 }

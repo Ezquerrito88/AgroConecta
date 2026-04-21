@@ -86,7 +86,7 @@ export class CartService {
       name: product?.name,
       farmer: typeof rawFarmer === 'string'
         ? rawFarmer
-        : rawFarmer?.full_name ?? rawFarmer?.name ?? 'Agricultor local',
+        : rawFarmer?.user?.name ?? rawFarmer?.full_name ?? rawFarmer?.name ?? 'Agricultor local',
       farmerId: Number(product?.farmerId ?? rawFarmer?.user_id ?? rawFarmer?.id ?? 0),
       price: Number(product?.price ?? 0),
       unit: product?.unit ?? 'ud',

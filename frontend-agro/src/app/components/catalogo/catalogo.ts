@@ -41,6 +41,10 @@ export class Catalogo implements OnInit {
   minPrice = 0;
   maxPrice = 100;
 
+  isBuyer = false;
+  isFarmer = false;
+  currentUser: any = null;
+
   constructor(
     private productoService: ProductoService,
     private cartService: CartService,
@@ -50,10 +54,27 @@ export class Catalogo implements OnInit {
   ) { }
 
   ngOnInit(): void {
+    this.verificarUsuario();
     this.route.queryParams.subscribe(params => {
       this.textoBusqueda = params['search'] ?? '';
       this.cargarProductos(1);
     });
+  }
+
+  verificarUsuario(): void {
+    if (typeof window !== 'undefined' && window.localStorage) {
+      const userStr = localStorage.getItem('user');
+      if (userStr) {
+        this.currentUser = JSON.parse(userStr);
+        const role = this.currentUser.role?.toLowerCase();
+
+        this.isFarmer = role === 'agricultor' || role === 'farmer' || this.currentUser.role_id === 2;
+        this.isBuyer = role === 'comprador' || role === 'buyer' || this.currentUser.role_id === 3;
+
+      } else {
+        this.isBuyer = true;
+      }
+    }
   }
 
   getImagenUrl(prod: any): string {
@@ -147,7 +168,7 @@ export class Catalogo implements OnInit {
     this.cartService.addToCart({
       id: prod.id,
       name: prod.name,
-      farmer: prod.farmer?.full_name || prod.farmer?.name || 'Agricultor local',
+      farmer: prod.farmer?.user?.name || prod.farmer?.full_name || prod.farmer?.name || 'Agricultor local',
       farmerId: this.getFarmerUserId(prod) ?? 0,
       price: Number(prod.price),
       unit: prod.unit,

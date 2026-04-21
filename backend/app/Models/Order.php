@@ -7,8 +7,17 @@ use Illuminate\Database\Eloquent\Model;
 class Order extends Model
 {
     protected $fillable = [
-        'buyer_id', 'farmer_id', 'status', 'total', 'shipping_address', 'notes',
-        'payment_status', 'payment_method', 'payment_intent_id', 'payment_transaction_id', 'payment_completed_at'
+        'buyer_id',
+        'farmer_id',
+        'status',
+        'total',
+        'shipping_address',
+        'notes',
+        'payment_status',
+        'payment_method',
+        'payment_intent_id',
+        'payment_transaction_id',
+        'payment_completed_at'
     ];
 
     protected $casts = [
@@ -28,5 +37,10 @@ class Order extends Model
     public function items()
     {
         return $this->hasMany(OrderItem::class);
+    }
+
+    public function getPrefixedIdAttribute()
+    {
+        return 'ORD-' . str_pad($this->id, 5, '0', STR_PAD_LEFT);
     }
 }
