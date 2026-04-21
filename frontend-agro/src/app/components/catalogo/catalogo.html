@@ -27,11 +27,7 @@
       <mat-form-field appearance="outline" class="full-width theme-green" subscriptSizing="dynamic">
         <mat-select panelClass="panel-green" [(ngModel)]="filtroCategoria" (ngModelChange)="cargarProductos(1)">
           <mat-option value="">Todas</mat-option>
-          <mat-option value="Frutas">Frutas</mat-option>
-          <mat-option value="Verduras">Verduras</mat-option>
-          <mat-option value="Granos">Granos</mat-option>
-          <mat-option value="Lácteos">Lácteos</mat-option>
-          <mat-option value="Especias">Especias</mat-option>
+          <mat-option *ngFor="let cat of categoriasDisponibles" [value]="cat">{{ cat }}</mat-option>
         </mat-select>
       </mat-form-field>
     </div>
@@ -39,7 +35,7 @@
     <div class="filter-group filter-orange">
       <label><span class="dot-orange"></span> Rango de Precio</label>
       <div class="slider-container">
-        <mat-slider min="0" max="100" step="1">
+        <mat-slider [min]="rangoMinPrecio" [max]="rangoMaxPrecio" step="1">
           <input matSliderStartThumb [(ngModel)]="minPrice" (dragEnd)="cargarProductos(1)">
           <input matSliderEndThumb [(ngModel)]="maxPrice" (dragEnd)="cargarProductos(1)">
         </mat-slider>
@@ -55,8 +51,7 @@
       <mat-form-field appearance="outline" class="full-width theme-blue" subscriptSizing="dynamic">
         <mat-select panelClass="panel-blue" [(ngModel)]="filtroUbicacion" (ngModelChange)="cargarProductos(1)">
           <mat-option value="">Todas</mat-option>
-          <mat-option value="La Rioja">La Rioja</mat-option>
-          <mat-option value="Madrid">Madrid</mat-option>
+          <mat-option *ngFor="let loc of ubicacionesDisponibles" [value]="loc">{{ loc }}</mat-option>
         </mat-select>
       </mat-form-field>
     </div>

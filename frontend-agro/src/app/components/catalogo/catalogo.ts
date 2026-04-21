@@ -41,6 +41,13 @@ export class Catalogo implements OnInit {
   minPrice = 0;
   maxPrice = 100;
 
+  // Filtros dinámicos
+  productosFiltroMaestro: Producto[] = [];
+  categoriasDisponibles: string[] = [];
+  ubicacionesDisponibles: string[] = [];
+  rangoMinPrecio = 0;
+  rangoMaxPrecio = 1000;
+
   isBuyer = false;
   isFarmer = false;
   currentUser: any = null;
@@ -55,6 +62,7 @@ export class Catalogo implements OnInit {
 
   ngOnInit(): void {
     this.verificarUsuario();
+    this.cargarOpcionesFiltros();
     this.route.queryParams.subscribe(params => {
       this.textoBusqueda = params['search'] ?? '';
       this.cargarProductos(1);
@@ -85,7 +93,96 @@ export class Catalogo implements OnInit {
     return 'assets/placeholder.png';
   }
 
+  cargarOpcionesFiltros(): void {
+    // Obtenemos una lista larga de productos solo para extraer los filtros dinámicos
+    this.productoService.getCatalogo({ per_page: 1000 }).subscribe({
+      next: (res: any) => {
+        this.productosFiltroMaestro = res.data ?? [];
+        this.recalcularFiltrosDinamicos(true);
+      },
+      error: (err) => console.error('Error cargando filtros dinámicos', err)
+    });
+  }
+
+  recalcularFiltrosDinamicos(isInitial: boolean = false): void {
+    if (!this.productosFiltroMaestro || this.productosFiltroMaestro.length === 0) return;
+
+    let productosBuscados = this.productosFiltroMaestro;
+
+    // Filtros seleccionados actualmente
+    const selectedCat = this.filtroCategoria;
+    const selectedLoc = this.filtroUbicacion;
+    const currentMin = this.minPrice;
+    const currentMax = this.maxPrice;
+
+    const locMatch = (p: any, loc: string) => !loc || ((p.farmer?.city || p.farmer?.location) === loc);
+    const catMatch = (p: any, cat: string) => !cat || (p.category?.name === cat);
+    const priceMatch = (p: any, min: number, max: number) => {
+      const price = Number(p.price);
+      return price >= min && price <= max;
+    };
+
+    // Extraer Categorías Dinámicas cruzadas (se filtran por ubicación, no por categoría)
+    const cats = new Set<string>();
+    productosBuscados.filter(p => locMatch(p, selectedLoc)).forEach((p: any) => {
+      if (p.category?.name) cats.add(p.category.name);
+    });
+    this.categoriasDisponibles = Array.from(cats).sort();
+
+    // Extraer Ubicaciones Dinámicas cruzadas (se filtran por categoría, no por ubicación)
+    const locs = new Set<string>();
+    productosBuscados.filter(p => catMatch(p, selectedCat)).forEach((p: any) => {
+      const city = p.farmer?.city || p.farmer?.location;
+      if (city) locs.add(city);
+    });
+    this.ubicacionesDisponibles = Array.from(locs).sort();
+
+    // Extraer Precios Mínimos y Máximos cruzados (se filtran por ubicación y categoría elegidas)
+    const priceProducts = productosBuscados.filter(p => catMatch(p, selectedCat) && locMatch(p, selectedLoc));
+    if (priceProducts.length > 0) {
+      const prices = priceProducts.map(p => Number(p.price) || 0);
+      let minGlobal = Math.floor(Math.min(...prices));
+      let maxGlobal = Math.ceil(Math.max(...prices));
+      
+      // Evitar que miren al mismo punto (rompe el slider)
+      if (minGlobal === maxGlobal) {
+        maxGlobal = minGlobal + 1;
+      }
+      
+      const wasFullyOpen = (this.minPrice <= this.rangoMinPrecio && this.maxPrice >= this.rangoMaxPrecio);
+
+      this.rangoMinPrecio = minGlobal;
+      this.rangoMaxPrecio = maxGlobal;
+
+      if (isInitial || wasFullyOpen) {
+        this.minPrice = minGlobal;
+        this.maxPrice = maxGlobal;
+      } else {
+        // Forzamos a que estén dentro de los nuevos rangos
+        if (this.minPrice < minGlobal) this.minPrice = minGlobal;
+        if (this.minPrice > maxGlobal) this.minPrice = maxGlobal;
+        
+        if (this.maxPrice > maxGlobal) this.maxPrice = maxGlobal;
+        if (this.maxPrice < minGlobal) this.maxPrice = minGlobal;
+        
+        if (this.minPrice > this.maxPrice) {
+          this.minPrice = minGlobal;
+          this.maxPrice = maxGlobal;
+        }
+      }
+    } else {
+      this.rangoMinPrecio = 0;
+      this.rangoMaxPrecio = 100;
+      this.minPrice = 0;
+      this.maxPrice = 100;
+    }
+  }
+
   cargarProductos(page: number): void {
+    if (this.productosFiltroMaestro.length > 0) {
+      this.recalcularFiltrosDinamicos(false);
+    }
+    
     this.isLoading = true;
 
     const filtros = {
@@ -124,8 +221,8 @@ export class Catalogo implements OnInit {
     this.filtroCategoria = '';
     this.filtroUbicacion = '';
     this.filtroOrden = 'novedad';
-    this.minPrice = 0;
-    this.maxPrice = 100;
+    this.minPrice = this.rangoMinPrecio;
+    this.maxPrice = this.rangoMaxPrecio;
     this.cargarProductos(1);
   }
 

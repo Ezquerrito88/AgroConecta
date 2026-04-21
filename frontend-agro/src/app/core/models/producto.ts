@@ -37,6 +37,12 @@ export interface Producto {
   image_url?: string;      
   main_image_url?: string; 
   images: ProductImage[];  
+  
+  // CATEGORÍA
+  category?: {
+    id: number;
+    name: string;
+  };
 
   // AGRICULTOR
   farmer?: {
