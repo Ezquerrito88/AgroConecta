@@ -1,80 +1,141 @@
 <div class="page-wrapper">
 
-  <!-- Topbar -->
-  <div class="page-topbar">
-    <div class="page-topbar-left">
-      <div class="page-icon-wrap orange">
-        <span class="material-symbols-rounded">category</span>
-      </div>
-      <div>
-        <h1 class="page-title">Gestión de Categorías</h1>
-        <p class="page-subtitle">Crea y administra las categorías de productos</p>
-      </div>
+  <!-- ── TOPBAR igual al resto del admin ── -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <h1 class="page-title">Gestión de Categorías</h1>
+      <span class="page-subtitle">Crea y administra las categorías de productos</span>
     </div>
-    <button class="btn-primary" (click)="openCreate()">
-      <span class="material-symbols-rounded">add</span>
-      Nueva categoría
-    </button>
+    <div class="topbar-right">
+      <button class="btn-primary" (click)="openCreate()">
+        <span class="material-symbols-rounded">add</span>
+        Nueva categoría
+      </button>
+    </div>
   </div>
 
-  <!-- Loading -->
-  <div class="loading-state" *ngIf="loading()">
-    <span class="material-symbols-rounded loading-icon">progress_activity</span>
-    <p>Cargando categorías…</p>
-  </div>
+  <div class="page-content">
 
-  <!-- Grid de categorías -->
-  <div class="categories-grid" *ngIf="!loading()">
-
-    <div class="empty-state" *ngIf="categories().length === 0">
-      <span class="material-symbols-rounded empty-icon">category</span>
-      <p class="empty-title">No hay categorías</p>
-      <p class="empty-sub">Crea la primera categoría</p>
-    </div>
-
-    <div class="cat-card" *ngFor="let cat of categories()">
-      <div class="cat-img-box">
-        <img *ngIf="cat.image" [src]="cat.image" [alt]="cat.name" class="cat-img" />
-        <div *ngIf="!cat.image" class="cat-img-placeholder">
-          <span class="material-symbols-rounded">{{ cat.icon || 'category' }}</span>
+    <!-- ── STAT RÁPIDA ── -->
+    <div class="quick-stats" *ngIf="!loading()">
+      <div class="qs-card">
+        <div class="qs-icon orange">
+          <span class="material-symbols-rounded">category</span>
+        </div>
+        <div class="qs-info">
+          <span class="qs-value">{{ categories().length }}</span>
+          <span class="qs-label">Total categorías</span>
         </div>
       </div>
-      <div class="cat-body">
-        <div class="cat-header">
-          <h3 class="cat-name">{{ cat.name }}</h3>
-          <span class="cat-count">{{ cat.products_count }} productos</span>
+      <div class="qs-card">
+        <div class="qs-icon green">
+          <span class="material-symbols-rounded">inventory_2</span>
         </div>
-        <p class="cat-desc" *ngIf="cat.description">{{ cat.description }}</p>
-        <p class="cat-desc empty" *ngIf="!cat.description">Sin descripción</p>
+        <div class="qs-info">
+          <span class="qs-value">{{ getTotalProducts() }}</span>
+          <span class="qs-label">Productos categorizados</span>
+        </div>
       </div>
-      <div class="cat-actions">
-        <button class="action-btn edit"   (click)="openEdit(cat)"   title="Editar">
-          <span class="material-symbols-rounded">edit</span>
-        </button>
-        <button class="action-btn delete" (click)="openDelete(cat)" title="Eliminar">
-          <span class="material-symbols-rounded">delete</span>
-        </button>
+      <!-- Categorías usadas -->
+      <div class="qs-card">
+        <div class="qs-icon blue">
+          <span class="material-symbols-rounded">check_circle</span>
+        </div>
+        <div class="qs-info">
+          <span class="qs-value">{{ getCategoriesUsed() }}</span>
+          <span class="qs-label">Categorías usadas</span>
+        </div>
+      </div>
+
+      <!-- Categorías no usadas -->
+      <div class="qs-card">
+        <div class="qs-icon amber">
+          <span class="material-symbols-rounded">unpublished</span>
+        </div>
+        <div class="qs-info">
+          <span class="qs-value">{{ getCategoriesUnused() }}</span>
+          <span class="qs-label">Sin productos</span>
+        </div>
       </div>
     </div>
 
+    <!-- ── LOADING ── -->
+    <div class="loading-state" *ngIf="loading()">
+      <span class="material-symbols-rounded loading-icon">progress_activity</span>
+      <p>Cargando categorías…</p>
+    </div>
+
+    <!-- ── GRID ── -->
+    <div class="categories-grid" *ngIf="!loading()">
+
+      <div class="empty-state" *ngIf="categories().length === 0">
+        <span class="material-symbols-rounded empty-icon">category</span>
+        <p class="empty-title">No hay categorías</p>
+        <p class="empty-sub">Crea la primera categoría para empezar</p>
+        <button class="btn-primary" style="margin-top:12px" (click)="openCreate()">
+          <span class="material-symbols-rounded">add</span>
+          Nueva categoría
+        </button>
+      </div>
+
+      <div class="cat-card" *ngFor="let cat of categories(); let i = index">
+        <div class="cat-img-box">
+          <img *ngIf="cat.image" [src]="cat.image" [alt]="cat.name" class="cat-img" />
+          <div *ngIf="!cat.image" class="cat-img-placeholder" [style.background]="getPlaceholderGradient(i)">
+            <span class="material-symbols-rounded" [style.color]="getPlaceholderColor(i)">
+              {{ cat.icon || 'category' }}
+            </span>
+          </div>
+        </div>
+        <div class="cat-body">
+          <div class="cat-header">
+            <h3 class="cat-name">{{ cat.name }}</h3>
+            <span class="cat-count">
+              <span class="material-symbols-rounded">inventory_2</span>
+              {{ cat.products_count }}
+            </span>
+          </div>
+          <p class="cat-desc" *ngIf="cat.description">{{ cat.description }}</p>
+          <p class="cat-desc empty" *ngIf="!cat.description">Sin descripción</p>
+        </div>
+        <div class="cat-actions">
+          <button class="action-btn edit" (click)="openEdit(cat)" title="Editar">
+            <span class="material-symbols-rounded">edit</span>
+            Editar
+          </button>
+          <button class="action-btn delete" (click)="openDelete(cat)" title="Eliminar">
+            <span class="material-symbols-rounded">delete</span>
+          </button>
+        </div>
+      </div>
+
+    </div>
   </div>
 </div>
 
 <!-- ── MODAL CREAR / EDITAR ── -->
-<div class="modal-backdrop" *ngIf="modalVisible && (modalType === 'create' || modalType === 'edit')" (click)="closeModal()">
+<div class="modal-backdrop" *ngIf="modalVisible && (modalType === 'create' || modalType === 'edit')"
+  (click)="closeModal()">
   <div class="modal-card modal-form" (click)="$event.stopPropagation()">
 
     <div class="modal-form-header">
       <div class="modal-icon-wrap" [class.green]="modalType === 'create'" [class.blue]="modalType === 'edit'">
-        <span class="material-symbols-rounded">{{ modalType === 'create' ? 'add_circle' : 'edit' }}</span>
+        <span class="material-symbols-rounded">
+          {{ modalType === 'create' ? 'add_circle' : 'edit' }}
+        </span>
       </div>
       <div>
-        <h2 class="modal-title">{{ modalType === 'create' ? 'Nueva categoría' : 'Editar categoría' }}</h2>
-        <p class="modal-sub">{{ modalType === 'create' ? 'Rellena los datos de la nueva categoría' : 'Modifica los datos de la categoría' }}</p>
+        <h2 class="modal-title">
+          {{ modalType === 'create' ? 'Nueva categoría' : 'Editar categoría' }}
+        </h2>
+        <p class="modal-sub">
+          {{ modalType === 'create'
+          ? 'Rellena los datos de la nueva categoría'
+          : 'Modifica los datos de la categoría' }}
+        </p>
       </div>
     </div>
 
-    <!-- Preview imagen -->
     <div class="img-upload-area" (click)="fileInput.click()">
       <img *ngIf="imagePreview" [src]="imagePreview" alt="Preview" class="img-preview" />
       <div *ngIf="!imagePreview" class="img-placeholder">
@@ -91,17 +152,22 @@
 
     <div class="form-group">
       <label>Descripción</label>
-      <textarea class="form-input form-textarea" [(ngModel)]="form.description" placeholder="Descripción breve…"></textarea>
+      <textarea class="form-input form-textarea" [(ngModel)]="form.description"
+        placeholder="Descripción breve…"></textarea>
     </div>
 
     <div class="form-group">
-      <label>Icono <span class="label-hint">(nombre de Material Symbol)</span></label>
+      <label>
+        Icono
+        <span class="label-hint">(nombre de Material Symbol)</span>
+      </label>
       <input type="text" class="form-input" [(ngModel)]="form.icon" placeholder="Ej: eco, grass, spa…" />
     </div>
 
     <div class="modal-actions">
       <button class="modal-btn-cancel" (click)="closeModal()">Cancelar</button>
-      <button class="modal-btn-confirm" [class.green]="modalType === 'create'" [class.blue]="modalType === 'edit'" (click)="saveCategory()" [disabled]="actionLoading || !form.name">
+      <button class="modal-btn-confirm" [class.green]="modalType === 'create'" [class.blue]="modalType === 'edit'"
+        (click)="saveCategory()" [disabled]="actionLoading || !form.name">
         <span class="material-symbols-rounded">save</span>
         {{ actionLoading ? 'Guardando…' : 'Guardar' }}
       </button>

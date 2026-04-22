@@ -168,16 +168,26 @@
 
     <!-- Paginación -->
     <div class="pagination-wrapper" *ngIf="!isLoading && totalPaginas > 1">
-      <button class="pag-arrow" (click)="cambiarPagina(paginaActual - 1)" [disabled]="paginaActual === 1">
-        <i class="fa-solid fa-chevron-left"></i>
-      </button>
-      <button *ngFor="let p of numeracionPaginas" class="pag-num" [class.active]="paginaActual === p"
-        (click)="cambiarPagina(p)">
-        {{ p }}
-      </button>
-      <button class="pag-arrow" (click)="cambiarPagina(paginaActual + 1)" [disabled]="paginaActual === totalPaginas">
-        <i class="fa-solid fa-chevron-right"></i>
-      </button>
+
+      <div class="pagination-controls">
+        <button class="pag-arrow" (click)="cambiarPagina(paginaActual - 1)" [disabled]="paginaActual === 1">
+          <i class="fa-solid fa-chevron-left"></i>
+        </button>
+
+        <button *ngFor="let p of numeracionPaginas" class="pag-num" [class.active]="paginaActual === p"
+          (click)="cambiarPagina(p)">
+          {{ p }}
+        </button>
+
+        <button class="pag-arrow" (click)="cambiarPagina(paginaActual + 1)" [disabled]="paginaActual === totalPaginas">
+          <i class="fa-solid fa-chevron-right"></i>
+        </button>
+      </div>
+
+      <div class="pagination-status">
+        Página <strong>{{ paginaActual }}</strong> de <strong>{{ totalPaginas }}</strong>
+      </div>
+
     </div>
 
   </main>

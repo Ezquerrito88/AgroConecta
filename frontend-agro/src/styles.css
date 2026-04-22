@@ -495,6 +495,30 @@ html, body {
 .dashboard-layout .empty-title { font-size: 1rem; font-weight: 700; color: #374151; margin: 8px 0 0; }
 .dashboard-layout .empty-sub   { font-size: .875rem; color: #9ca3af; margin: 0; }
 
+/* ── ADMIN DASHBOARD — estilos globales ── */
+.page-wrapper .kpi-card.kpi-featured {
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%) !important;
+  border: none !important;
+  box-shadow: 0 4px 20px rgba(37, 99, 235, .3) !important;
+}
+.page-wrapper .kpi-card.kpi-featured .kpi-value,
+.page-wrapper .kpi-card.kpi-featured .kpi-label,
+.page-wrapper .kpi-card.kpi-featured .kpi-meta {
+  color: #fff !important;
+}
+
+.page-wrapper .welcome-banner {
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%) !important;
+  color: #fff !important;
+}
+.page-wrapper .welcome-title,
+.page-wrapper .welcome-sub {
+  color: #fff !important;
+}
+.page-wrapper .btn-primary-white {
+  color: #2563eb !important;
+}
+
 /* ══════════════════════════════════════════════
    RESPONSIVE
 ══════════════════════════════════════════════ */

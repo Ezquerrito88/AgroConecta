@@ -1,12 +1,13 @@
-import { Component, inject, signal, OnInit, computed } from '@angular/core';
+import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { RouterModule } from '@angular/router';
 import { AdminService } from '../../services/admin';
 
 @Component({
   selector: 'app-gestion-usuarios',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterModule],
   templateUrl: './gestion-usuarios.html',
   styleUrl: './gestion-usuarios.css'
 })
@@ -17,8 +18,11 @@ export class GestionUsuarios implements OnInit {
   loading    = signal(true);
   pagination = signal<any>(null);
 
+  // Contadores por rol (se acumulan de todas las páginas)
+  private roleCounts: Record<string, number> = { farmer: 0, buyer: 0, admin: 0 };
+
   search      = '';
-  roleFilter  = '';   // '' | 'admin' | 'farmer' | 'buyer'
+  roleFilter  = '';
   currentPage = 1;
 
   modalVisible  = false;
@@ -27,14 +31,39 @@ export class GestionUsuarios implements OnInit {
   actionLoading = false;
   showPassword  = false;
 
-  // Vista activa: qué columnas mostrar
   get viewMode(): 'all' | 'farmer' | 'buyer' | 'admin' {
     return (this.roleFilter as any) || 'all';
   }
 
   editForm: any = {};
 
-  ngOnInit(): void { this.load(); }
+  ngOnInit(): void {
+    this.loadCounts();
+    this.load();
+  }
+
+  // Carga los contadores globales (sin filtro de rol)
+  loadCounts(): void {
+    this.adminService.getUsers({ page: 1, per_page: 1 }).subscribe({
+      next: (res) => {
+        // Si el backend devuelve totales por rol úsalos,
+        // si no hacemos 3 llamadas ligeras
+        if (res.counts) {
+          this.roleCounts = res.counts;
+        } else {
+          (['farmer', 'buyer', 'admin'] as const).forEach(role => {
+            this.adminService.getUsers({ page: 1, per_page: 1, role }).subscribe({
+              next: (r) => { this.roleCounts[role] = r.total ?? 0; }
+            });
+          });
+        }
+      }
+    });
+  }
+
+  countByRole(role: string): number {
+    return this.roleCounts[role] ?? 0;
+  }
 
   load(): void {
     this.loading.set(true);
@@ -52,26 +81,25 @@ export class GestionUsuarios implements OnInit {
     });
   }
 
-  onSearch():                  void { this.currentPage = 1; this.load(); }
-  onRoleFilter(role: string):  void { this.roleFilter = role; this.currentPage = 1; this.load(); }
-  goToPage(p: number):         void { this.currentPage = p; this.load(); }
+  onSearch():                 void { this.currentPage = 1; this.load(); }
+  onRoleFilter(role: string): void { this.roleFilter = role; this.currentPage = 1; this.load(); }
+  goToPage(p: number):        void { this.currentPage = p; this.load(); }
 
   // ── Modales ──
   openEdit(u: any): void {
     this.selected.set(u);
     this.editForm = {
-      name:        u.name        ?? '',
-      email:       u.email       ?? '',
-      phone:       u.phone       ?? '',
-      address:     u.address     ?? '',
-      role:        u.role        ?? 'buyer',
-      is_active:   u.is_active   ?? true,
+      name:        u.name               ?? '',
+      email:       u.email              ?? '',
+      phone:       u.phone              ?? '',
+      address:     u.address            ?? '',
+      role:        u.role               ?? 'buyer',
+      is_active:   u.is_active          ?? true,
       password:    '',
-      // farmer
-      farm_name:   u.farmer?.farm_name   ?? '',
-      city:        u.farmer?.city        ?? '',
+      farm_name:   u.farmer?.farm_name  ?? '',
+      city:        u.farmer?.city       ?? '',
       is_verified: u.farmer?.is_verified ?? false,
-      bio:         u.farmer?.bio         ?? '',
+      bio:         u.farmer?.bio        ?? '',
     };
     this.showPassword = false;
     this.modalType    = 'edit';
@@ -94,14 +122,14 @@ export class GestionUsuarios implements OnInit {
 
     if (this.modalType === 'delete') {
       this.adminService.deleteUser(u.id).subscribe({
-        next: () => { this.closeModal(); this.load(); },
+        next:  () => { this.closeModal(); this.load(); this.loadCounts(); },
         error: () => { this.actionLoading = false; }
       });
     }
 
     if (this.modalType === 'toggle') {
       this.adminService.toggleActive(u.id).subscribe({
-        next: () => { this.closeModal(); this.load(); },
+        next:  () => { this.closeModal(); this.load(); },
         error: () => { this.actionLoading = false; }
       });
     }
@@ -110,7 +138,7 @@ export class GestionUsuarios implements OnInit {
       const payload: any = { ...this.editForm };
       if (!payload.password?.trim()) delete payload.password;
       this.adminService.updateUser(u.id, payload).subscribe({
-        next: () => { this.closeModal(); this.load(); },
+        next:  () => { this.closeModal(); this.load(); this.loadCounts(); },
         error: () => { this.actionLoading = false; }
       });
     }
@@ -119,13 +147,13 @@ export class GestionUsuarios implements OnInit {
   isEmailVerified(u: any): boolean { return !!u.email_verified_at; }
 
   getRoleBadgeClass(role: string): string {
-    return { admin: 'badge-admin', farmer: 'badge-farmer', buyer: 'badge-buyer' }[role] || '';
+    return ({ admin: 'badge-admin', farmer: 'badge-farmer', buyer: 'badge-buyer' } as any)[role] ?? '';
   }
   getRoleLabel(role: string): string {
-    return { admin: 'Admin', farmer: 'Agricultor', buyer: 'Comprador' }[role] || role;
+    return ({ admin: 'Admin', farmer: 'Agricultor', buyer: 'Comprador' } as any)[role] ?? role;
   }
   getRoleIcon(role: string): string {
-    return { admin: 'shield_person', farmer: 'agriculture', buyer: 'shopping_bag' }[role] || 'person';
+    return ({ admin: 'shield_person', farmer: 'agriculture', buyer: 'shopping_bag' } as any)[role] ?? 'person';
   }
 
   getPages(): number[] {

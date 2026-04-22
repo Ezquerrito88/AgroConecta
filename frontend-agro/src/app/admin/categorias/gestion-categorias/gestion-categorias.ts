@@ -17,12 +17,10 @@ export class GestionCategorias implements OnInit {
   loading       = signal(true);
   actionLoading = false;
 
-  // Modal
   modalVisible = false;
-  modalType    = ''; // 'create' | 'edit' | 'delete'
+  modalType    = '';
   selectedCat  = signal<any>(null);
 
-  // Formulario
   form = { name: '', description: '', icon: '' };
   imageFile: File | null = null;
   imagePreview = '';
@@ -70,9 +68,9 @@ export class GestionCategorias implements OnInit {
   onImageChange(event: any): void {
     const file = event.target.files[0];
     if (!file) return;
-    this.imageFile = file;
-    const reader   = new FileReader();
-    reader.onload  = (e: any) => this.imagePreview = e.target.result;
+    this.imageFile    = file;
+    const reader      = new FileReader();
+    reader.onload     = (e: any) => this.imagePreview = e.target.result;
     reader.readAsDataURL(file);
   }
 
@@ -89,7 +87,7 @@ export class GestionCategorias implements OnInit {
       : this.adminService.updateCategory(this.selectedCat().id, fd);
 
     action$.subscribe({
-      next: () => { this.closeModal(); this.loadCategories(); },
+      next:  () => { this.closeModal(); this.loadCategories(); },
       error: () => { this.actionLoading = false; }
     });
   }
@@ -97,8 +95,39 @@ export class GestionCategorias implements OnInit {
   deleteCategory(): void {
     this.actionLoading = true;
     this.adminService.deleteCategory(this.selectedCat().id).subscribe({
-      next: () => { this.closeModal(); this.loadCategories(); },
+      next:  () => { this.closeModal(); this.loadCategories(); },
       error: () => { this.actionLoading = false; }
     });
+  }
+
+  // ── Quick stats ──────────────────────────────────
+  getTotalProducts(): number {
+    return this.categories().reduce((sum, c) => sum + (c.products_count ?? 0), 0);
+  }
+
+  getCategoriesUsed(): number {
+    return this.categories().filter(c => (c.products_count ?? 0) > 0).length;
+  }
+
+  getCategoriesUnused(): number {
+    return this.categories().filter(c => (c.products_count ?? 0) === 0).length;
+  }
+
+  // ── Placeholders de color ────────────────────────
+  getPlaceholderGradient(index: number): string {
+    const gradients = [
+      'linear-gradient(135deg, #f0fdf4, #dcfce7)',
+      'linear-gradient(135deg, #eff6ff, #dbeafe)',
+      'linear-gradient(135deg, #fefce8, #fef9c3)',
+      'linear-gradient(135deg, #fdf4ff, #f3e8ff)',
+      'linear-gradient(135deg, #fff7ed, #ffedd5)',
+      'linear-gradient(135deg, #f0fdfa, #ccfbf1)',
+    ];
+    return gradients[index % gradients.length];
+  }
+
+  getPlaceholderColor(index: number): string {
+    const colors = ['#86efac', '#93c5fd', '#fde047', '#d8b4fe', '#fdba74', '#5eead4'];
+    return colors[index % colors.length];
   }
 }

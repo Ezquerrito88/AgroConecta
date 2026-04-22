@@ -52,60 +52,73 @@
     <!-- ── KPIs — 2 filas de 4 ── -->
     <div class="kpi-grid">
 
-      <!-- Fila 1 -->
+      <!-- Usuarios totales -->
       <div class="kpi-card kpi-featured">
         <div class="kpi-header">
           <div class="kpi-icon-wrap white-icon">
             <span class="material-symbols-rounded">group</span>
           </div>
-          <span class="kpi-badge kpi-badge-white">+{{ stats()?.users?.new_month || 0 }} este mes</span>
         </div>
         <span class="kpi-value" *ngIf="!isLoading">{{ stats()?.users?.total || 0 }}</span>
         <div class="sk-line medium sk-shimmer-bg" *ngIf="isLoading"></div>
-        <span class="kpi-label">👥 Usuarios totales</span>
+        <div class="kpi-meta" *ngIf="!isLoading">
+          <span class="material-symbols-rounded kpi-meta-icon">trending_up</span>
+          +{{ stats()?.users?.new_month || 0 }} este mes
+        </div>
+        <span class="kpi-label">Usuarios totales</span>
       </div>
 
+      <!-- Productos totales -->
       <div class="kpi-card">
         <div class="kpi-header">
           <div class="kpi-icon-wrap green">
             <span class="material-symbols-rounded">inventory_2</span>
           </div>
-          <span class="kpi-badge positive">{{ stats()?.products?.approved || 0 }} aprobados</span>
         </div>
         <span class="kpi-value" *ngIf="!isLoading">{{ stats()?.products?.total || 0 }}</span>
         <div class="sk-line short sk-shimmer-bg" *ngIf="isLoading"></div>
-        <span class="kpi-label">📦 Productos totales</span>
+        <div class="kpi-meta" *ngIf="!isLoading">
+          <span class="material-symbols-rounded kpi-meta-icon">check_circle</span>
+          {{ stats()?.products?.approved || 0 }} aprobados
+        </div>
+        <span class="kpi-label">Productos totales</span>
       </div>
 
+      <!-- Pedidos totales -->
       <div class="kpi-card">
         <div class="kpi-header">
           <div class="kpi-icon-wrap purple">
             <span class="material-symbols-rounded">receipt_long</span>
           </div>
-          <span class="kpi-badge">{{ stats()?.orders?.month || 0 }} este mes</span>
         </div>
         <span class="kpi-value" *ngIf="!isLoading">{{ stats()?.orders?.total || 0 }}</span>
         <div class="sk-line short sk-shimmer-bg" *ngIf="isLoading"></div>
-        <span class="kpi-label">🛒 Pedidos totales</span>
+        <div class="kpi-meta" *ngIf="!isLoading">
+          <span class="material-symbols-rounded kpi-meta-icon">calendar_month</span>
+          {{ stats()?.orders?.month || 0 }} este mes
+        </div>
+        <span class="kpi-label">Pedidos totales</span>
       </div>
 
+      <!-- Ingresos totales -->
       <div class="kpi-card">
         <div class="kpi-header">
           <div class="kpi-icon-wrap blue">
             <span class="material-symbols-rounded">euro</span>
           </div>
-          <span class="kpi-badge">
-            {{ stats()?.orders?.revenue_month || 0 | currency:'EUR':'symbol':'1.0-0' }} este mes
-          </span>
         </div>
         <span class="kpi-value" *ngIf="!isLoading">
           {{ stats()?.orders?.revenue_total || 0 | currency:'EUR':'symbol':'1.0-0' }}
         </span>
         <div class="sk-line medium sk-shimmer-bg" *ngIf="isLoading"></div>
-        <span class="kpi-label">💰 Ingresos totales</span>
+        <div class="kpi-meta" *ngIf="!isLoading">
+          <span class="material-symbols-rounded kpi-meta-icon">trending_up</span>
+          {{ stats()?.orders?.revenue_month || 0 | currency:'EUR':'symbol':'1.0-0' }} este mes
+        </div>
+        <span class="kpi-label">Ingresos totales</span>
       </div>
 
-      <!-- Fila 2 -->
+      <!-- Agricultores -->
       <div class="kpi-card">
         <div class="kpi-header">
           <div class="kpi-icon-wrap orange">
@@ -114,9 +127,10 @@
         </div>
         <span class="kpi-value" *ngIf="!isLoading">{{ stats()?.users?.farmers || 0 }}</span>
         <div class="sk-line short sk-shimmer-bg" *ngIf="isLoading"></div>
-        <span class="kpi-label">🌱 Agricultores</span>
+        <span class="kpi-label">Agricultores</span>
       </div>
 
+      <!-- Compradores -->
       <div class="kpi-card">
         <div class="kpi-header">
           <div class="kpi-icon-wrap yellow">
@@ -125,9 +139,10 @@
         </div>
         <span class="kpi-value" *ngIf="!isLoading">{{ stats()?.users?.buyers || 0 }}</span>
         <div class="sk-line short sk-shimmer-bg" *ngIf="isLoading"></div>
-        <span class="kpi-label">🛍️ Compradores</span>
+        <span class="kpi-label">Compradores</span>
       </div>
 
+      <!-- Categorías -->
       <div class="kpi-card">
         <div class="kpi-header">
           <div class="kpi-icon-wrap teal">
@@ -136,27 +151,30 @@
         </div>
         <span class="kpi-value" *ngIf="!isLoading">{{ stats()?.categories?.total || 0 }}</span>
         <div class="sk-line short sk-shimmer-bg" *ngIf="isLoading"></div>
-        <span class="kpi-label">🏷️ Categorías</span>
+        <span class="kpi-label">Categorías</span>
       </div>
 
-      <div
-        class="kpi-card"
-        [class.kpi-danger]="stats()?.products?.pending > 0"
-      >
+      <!-- Pendientes moderación -->
+      <div class="kpi-card" [class.kpi-danger]="(stats()?.products?.pending || 0) > 0">
         <div class="kpi-header">
-          <div
-            class="kpi-icon-wrap"
-            [class.red]="stats()?.products?.pending > 0"
-            [class.green]="!stats()?.products?.pending || stats()?.products?.pending === 0"
-          >
+          <div class="kpi-icon-wrap"
+            [class.red]="(stats()?.products?.pending || 0) > 0"
+            [class.green]="!stats()?.products?.pending || stats()?.products?.pending === 0">
             <span class="material-symbols-rounded">
-              {{ stats()?.products?.pending > 0 ? 'schedule' : 'check_circle' }}
+              {{ (stats()?.products?.pending || 0) > 0 ? 'schedule' : 'check_circle' }}
             </span>
           </div>
         </div>
         <span class="kpi-value" *ngIf="!isLoading">{{ stats()?.products?.pending || 0 }}</span>
         <div class="sk-line short sk-shimmer-bg" *ngIf="isLoading"></div>
-        <span class="kpi-label">⏳ Pendientes moderación</span>
+        <div class="kpi-meta" *ngIf="!isLoading"
+          [class.kpi-meta-danger]="(stats()?.products?.pending || 0) > 0">
+          <span class="material-symbols-rounded kpi-meta-icon">
+            {{ (stats()?.products?.pending || 0) > 0 ? 'warning' : 'check' }}
+          </span>
+          {{ (stats()?.products?.pending || 0) > 0 ? 'Requieren revisión' : 'Todo al día' }}
+        </div>
+        <span class="kpi-label">Pendientes moderación</span>
       </div>
 
     </div>
@@ -248,5 +266,5 @@
       </div>
 
     </div>
-  </div><!-- /page-content -->
-</div><!-- /page-wrapper -->
+  </div>
+</div>

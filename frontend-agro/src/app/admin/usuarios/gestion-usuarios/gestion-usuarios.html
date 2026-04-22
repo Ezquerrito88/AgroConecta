@@ -1,20 +1,54 @@
 <div class="page-wrapper">
 
-  <div class="page-topbar">
-    <div class="page-topbar-left">
-      <div class="page-icon-wrap">
-        <span class="material-symbols-rounded">group</span>
-      </div>
-      <div>
-        <h1 class="page-title">Gestión de Usuarios</h1>
-        <p class="page-subtitle">Administra los usuarios de la plataforma</p>
+  <!-- ── TOPBAR (igual que dashboard admin) ── -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <h1 class="page-title">Gestión de Productos</h1>
+      <span class="page-subtitle">Modera y administra los productos de la plataforma</span>
+    </div>
+    <div class="topbar-right">
+      <div class="user-chip">
+        <div class="user-avatar">A</div>
+        <span class="user-name">Admin</span>
       </div>
     </div>
   </div>
 
   <div class="page-content">
 
-    <!-- Filtros -->
+    <!-- ── STATS RÁPIDAS ── -->
+    <div class="quick-stats">
+      <div class="qs-card">
+        <div class="qs-icon blue"><span class="material-symbols-rounded">group</span></div>
+        <div class="qs-info">
+          <span class="qs-value">{{ pagination()?.total || 0 }}</span>
+          <span class="qs-label">Total usuarios</span>
+        </div>
+      </div>
+      <div class="qs-card">
+        <div class="qs-icon green"><span class="material-symbols-rounded">agriculture</span></div>
+        <div class="qs-info">
+          <span class="qs-value">{{ countByRole('farmer') }}</span>
+          <span class="qs-label">Agricultores</span>
+        </div>
+      </div>
+      <div class="qs-card">
+        <div class="qs-icon yellow"><span class="material-symbols-rounded">shopping_bag</span></div>
+        <div class="qs-info">
+          <span class="qs-value">{{ countByRole('buyer') }}</span>
+          <span class="qs-label">Compradores</span>
+        </div>
+      </div>
+      <div class="qs-card">
+        <div class="qs-icon purple"><span class="material-symbols-rounded">admin_panel_settings</span></div>
+        <div class="qs-info">
+          <span class="qs-value">{{ countByRole('admin') }}</span>
+          <span class="qs-label">Admins</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── FILTROS ── -->
     <div class="filters-card">
       <div class="filters-left">
         <div class="search-box">
@@ -24,24 +58,32 @@
         </div>
       </div>
       <div class="filters-right">
-        <button class="filter-chip"        [class.active]="roleFilter === ''"       (click)="onRoleFilter('')">Todos</button>
-        <button class="filter-chip farmer" [class.active]="roleFilter === 'farmer'" (click)="onRoleFilter('farmer')">Agricultores</button>
-        <button class="filter-chip buyer"  [class.active]="roleFilter === 'buyer'"  (click)="onRoleFilter('buyer')">Compradores</button>
-        <button class="filter-chip admin"  [class.active]="roleFilter === 'admin'"  (click)="onRoleFilter('admin')">Admins</button>
+        <button class="filter-chip"        [class.active]="roleFilter === ''"       (click)="onRoleFilter('')">
+          <span class="material-symbols-rounded">people</span> Todos
+        </button>
+        <button class="filter-chip farmer" [class.active]="roleFilter === 'farmer'" (click)="onRoleFilter('farmer')">
+          <span class="material-symbols-rounded">agriculture</span> Agricultores
+        </button>
+        <button class="filter-chip buyer"  [class.active]="roleFilter === 'buyer'"  (click)="onRoleFilter('buyer')">
+          <span class="material-symbols-rounded">shopping_bag</span> Compradores
+        </button>
+        <button class="filter-chip admin"  [class.active]="roleFilter === 'admin'"  (click)="onRoleFilter('admin')">
+          <span class="material-symbols-rounded">admin_panel_settings</span> Admins
+        </button>
       </div>
     </div>
 
     <!-- Hint dinámico -->
     <div class="view-hint farmer-hint" *ngIf="roleFilter === 'farmer'">
       <span class="material-symbols-rounded">info</span>
-      Vista de Agricultor — explotación, verificación y ubicación
+      Vista Agricultor — explotación, verificación y ubicación
     </div>
     <div class="view-hint buyer-hint" *ngIf="roleFilter === 'buyer'">
       <span class="material-symbols-rounded">info</span>
-      Vista de Comprador — datos de envío y estado de cuenta
+      Vista Comprador — datos de envío y estado de cuenta
     </div>
 
-    <!-- Tabla -->
+    <!-- ── TABLA ── -->
     <div class="table-card">
 
       <div class="loading-state" *ngIf="loading()">
@@ -104,13 +146,19 @@
               <ng-container *ngIf="viewMode === 'all' || viewMode === 'admin'">
                 <td>
                   <div class="user-cell">
-                    <div class="user-avatar" [ngClass]="'avatar-' + u.role">{{ u.name?.charAt(0)?.toUpperCase() }}</div>
-                    <span class="user-name">{{ u.name }}</span>
+                    <div class="user-avatar" [ngClass]="'avatar-' + u.role">
+                      {{ u.name?.charAt(0)?.toUpperCase() }}
+                    </div>
+                    <div>
+                      <span class="user-name">{{ u.name }}</span>
+                      <span class="user-sub">{{ u.email }}</span>
+                    </div>
                   </div>
                 </td>
                 <td class="text-muted">{{ u.email }}</td>
                 <td>
                   <span class="role-badge" [ngClass]="getRoleBadgeClass(u.role)">
+                    <span class="material-symbols-rounded">{{ getRoleIcon(u.role) }}</span>
                     {{ getRoleLabel(u.role) }}
                   </span>
                 </td>
@@ -123,11 +171,16 @@
                 <td class="text-muted text-sm">{{ u.created_at | date:'dd/MM/yyyy' }}</td>
                 <td>
                   <div class="actions-row">
-                    <button class="action-btn edit"   (click)="openEdit(u)"   title="Editar"><span class="material-symbols-rounded">edit</span></button>
-                    <button class="action-btn toggle" (click)="openToggle(u)" [title]="u.is_active ? 'Desactivar' : 'Activar'">
+                    <button class="action-btn edit"   (click)="openEdit(u)"   title="Editar">
+                      <span class="material-symbols-rounded">edit</span>
+                    </button>
+                    <button class="action-btn toggle" (click)="openToggle(u)"
+                      [title]="u.is_active ? 'Desactivar' : 'Activar'">
                       <span class="material-symbols-rounded">{{ u.is_active ? 'block' : 'check_circle' }}</span>
                     </button>
-                    <button class="action-btn delete" (click)="openDelete(u)" title="Eliminar"><span class="material-symbols-rounded">delete</span></button>
+                    <button class="action-btn delete" (click)="openDelete(u)" title="Eliminar">
+                      <span class="material-symbols-rounded">delete</span>
+                    </button>
                   </div>
                 </td>
               </ng-container>
@@ -155,8 +208,12 @@
                   <span class="text-muted text-sm" *ngIf="!u.farmer?.city">—</span>
                 </td>
                 <td>
-                  <span class="verified-badge" [class.verified]="u.farmer?.is_verified" [class.pending]="!u.farmer?.is_verified">
-                    <span class="material-symbols-rounded">{{ u.farmer?.is_verified ? 'verified' : 'schedule' }}</span>
+                  <span class="verified-badge"
+                    [class.verified]="u.farmer?.is_verified"
+                    [class.pending]="!u.farmer?.is_verified">
+                    <span class="material-symbols-rounded">
+                      {{ u.farmer?.is_verified ? 'verified' : 'schedule' }}
+                    </span>
                     {{ u.farmer?.is_verified ? 'Verificado' : 'Pendiente' }}
                   </span>
                 </td>
@@ -175,11 +232,16 @@
                 </td>
                 <td>
                   <div class="actions-row">
-                    <button class="action-btn edit"   (click)="openEdit(u)"   title="Editar"><span class="material-symbols-rounded">edit</span></button>
-                    <button class="action-btn toggle" (click)="openToggle(u)" [title]="u.is_active ? 'Desactivar' : 'Activar'">
+                    <button class="action-btn edit"   (click)="openEdit(u)"   title="Editar">
+                      <span class="material-symbols-rounded">edit</span>
+                    </button>
+                    <button class="action-btn toggle" (click)="openToggle(u)"
+                      [title]="u.is_active ? 'Desactivar' : 'Activar'">
                       <span class="material-symbols-rounded">{{ u.is_active ? 'block' : 'check_circle' }}</span>
                     </button>
-                    <button class="action-btn delete" (click)="openDelete(u)" title="Eliminar"><span class="material-symbols-rounded">delete</span></button>
+                    <button class="action-btn delete" (click)="openDelete(u)" title="Eliminar">
+                      <span class="material-symbols-rounded">delete</span>
+                    </button>
                   </div>
                 </td>
               </ng-container>
@@ -204,8 +266,12 @@
                   <span class="text-muted text-sm" *ngIf="!u.address">—</span>
                 </td>
                 <td>
-                  <span class="verified-badge" [class.verified]="isEmailVerified(u)" [class.pending]="!isEmailVerified(u)">
-                    <span class="material-symbols-rounded">{{ isEmailVerified(u) ? 'mark_email_read' : 'mail_off' }}</span>
+                  <span class="verified-badge"
+                    [class.verified]="isEmailVerified(u)"
+                    [class.pending]="!isEmailVerified(u)">
+                    <span class="material-symbols-rounded">
+                      {{ isEmailVerified(u) ? 'mark_email_read' : 'mail_off' }}
+                    </span>
                     {{ isEmailVerified(u) ? 'Verificado' : 'Sin verificar' }}
                   </span>
                 </td>
@@ -218,11 +284,16 @@
                 <td class="text-muted text-sm">{{ u.created_at | date:'dd/MM/yyyy' }}</td>
                 <td>
                   <div class="actions-row">
-                    <button class="action-btn edit"   (click)="openEdit(u)"   title="Editar"><span class="material-symbols-rounded">edit</span></button>
-                    <button class="action-btn toggle" (click)="openToggle(u)" [title]="u.is_active ? 'Desactivar' : 'Activar'">
+                    <button class="action-btn edit"   (click)="openEdit(u)"   title="Editar">
+                      <span class="material-symbols-rounded">edit</span>
+                    </button>
+                    <button class="action-btn toggle" (click)="openToggle(u)"
+                      [title]="u.is_active ? 'Desactivar' : 'Activar'">
                       <span class="material-symbols-rounded">{{ u.is_active ? 'block' : 'check_circle' }}</span>
                     </button>
-                    <button class="action-btn delete" (click)="openDelete(u)" title="Eliminar"><span class="material-symbols-rounded">delete</span></button>
+                    <button class="action-btn delete" (click)="openDelete(u)" title="Eliminar">
+                      <span class="material-symbols-rounded">delete</span>
+                    </button>
                   </div>
                 </td>
               </ng-container>
@@ -239,7 +310,8 @@
         </button>
         <button *ngFor="let page of getPages()" class="page-btn"
           [class.active]="page === currentPage" (click)="goToPage(page)">{{ page }}</button>
-        <button class="page-btn" [disabled]="currentPage === pagination().last_page" (click)="goToPage(currentPage + 1)">
+        <button class="page-btn" [disabled]="currentPage === pagination().last_page"
+          (click)="goToPage(currentPage + 1)">
           <span class="material-symbols-rounded">chevron_right</span>
         </button>
       </div>
@@ -247,7 +319,6 @@
     </div>
   </div>
 </div>
-
 
 <!-- ══════════════════════════════
      MODALES
@@ -257,7 +328,7 @@
     [class.modal-card--wide]="modalType === 'edit'"
     (click)="$event.stopPropagation()">
 
-    <!-- ── ELIMINAR ── -->
+    <!-- ELIMINAR -->
     <ng-container *ngIf="modalType === 'delete'">
       <div class="modal-icon-wrap danger">
         <span class="material-symbols-rounded">delete</span>
@@ -276,7 +347,7 @@
       </div>
     </ng-container>
 
-    <!-- ── TOGGLE ── -->
+    <!-- TOGGLE -->
     <ng-container *ngIf="modalType === 'toggle'">
       <div class="modal-icon-wrap"
         [class.warning]="selected()?.is_active"
@@ -301,9 +372,8 @@
       </div>
     </ng-container>
 
-    <!-- ── EDITAR ── -->
+    <!-- EDITAR -->
     <ng-container *ngIf="modalType === 'edit'">
-
       <div class="modal-icon-wrap"
         [class.blue]="selected()?.role === 'admin' || selected()?.role === 'buyer'"
         [class.green-wrap]="selected()?.role === 'farmer'">
@@ -314,7 +384,6 @@
 
       <form class="edit-form" (ngSubmit)="confirmAction()">
 
-        <!-- Solo farmer: datos explotación -->
         <ng-container *ngIf="selected()?.role === 'farmer'">
           <div class="form-section-title">
             <span class="material-symbols-rounded">storefront</span>
@@ -330,18 +399,18 @@
           </div>
           <div class="form-group full">
             <label class="form-label">Bio</label>
-            <textarea class="form-input form-textarea" [(ngModel)]="editForm.bio" name="bio" placeholder="Breve descripción del productor…" rows="2"></textarea>
+            <textarea class="form-input form-textarea" [(ngModel)]="editForm.bio" name="bio" rows="2"></textarea>
           </div>
           <div class="form-group full">
             <label class="form-label">Verificación</label>
-            <button type="button" class="toggle-status-btn" [class.is-active]="editForm.is_verified" (click)="editForm.is_verified = !editForm.is_verified">
+            <button type="button" class="toggle-status-btn" [class.is-active]="editForm.is_verified"
+              (click)="editForm.is_verified = !editForm.is_verified">
               <span class="toggle-track"><span class="toggle-thumb"></span></span>
               <span>{{ editForm.is_verified ? '✅ Verificado' : '🟡 Pendiente de verificación' }}</span>
             </button>
           </div>
         </ng-container>
 
-        <!-- Solo buyer: dirección -->
         <ng-container *ngIf="selected()?.role === 'buyer'">
           <div class="form-section-title">
             <span class="material-symbols-rounded">local_shipping</span>
@@ -353,7 +422,6 @@
           </div>
         </ng-container>
 
-        <!-- Todos: datos cuenta -->
         <div class="form-section-title">
           <span class="material-symbols-rounded">person</span>
           Datos de la cuenta
@@ -365,14 +433,12 @@
         </div>
         <div class="form-group">
           <label class="form-label">Teléfono</label>
-          <input class="form-input" type="tel" [(ngModel)]="editForm.phone" name="phone" placeholder="Ej: 644 974 258" />
+          <input class="form-input" type="tel" [(ngModel)]="editForm.phone" name="phone" />
         </div>
-
         <div class="form-group full">
           <label class="form-label">Email</label>
           <input class="form-input" type="email" [(ngModel)]="editForm.email" name="email" required />
         </div>
-
         <div class="form-group">
           <label class="form-label">Rol</label>
           <div class="form-select-wrap" [attr.data-role]="editForm.role">
@@ -386,12 +452,12 @@
         </div>
         <div class="form-group">
           <label class="form-label">Estado</label>
-          <button type="button" class="toggle-status-btn" [class.is-active]="editForm.is_active" (click)="editForm.is_active = !editForm.is_active">
+          <button type="button" class="toggle-status-btn" [class.is-active]="editForm.is_active"
+            (click)="editForm.is_active = !editForm.is_active">
             <span class="toggle-track"><span class="toggle-thumb"></span></span>
             <span>{{ editForm.is_active ? 'Activo' : 'Inactivo' }}</span>
           </button>
         </div>
-
         <div class="form-group full">
           <label class="form-label">
             Nueva contraseña
@@ -418,7 +484,7 @@
           {{ actionLoading ? 'Guardando…' : 'Guardar cambios' }}
         </button>
       </div>
-
     </ng-container>
+
   </div>
 </div>

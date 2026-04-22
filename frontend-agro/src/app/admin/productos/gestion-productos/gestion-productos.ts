@@ -15,10 +15,13 @@ export class GestionProductos implements OnInit {
   private adminService = inject(AdminService);
   private router       = inject(Router);
 
-  products     = signal<any[]>([]);
-  loading      = signal(true);
-  pagination   = signal<any>(null);
-  pendingCount = signal(0);
+  products      = signal<any[]>([]);
+  loading       = signal(true);
+  pagination    = signal<any>(null);
+
+  pendingCount  = signal(0);
+  approvedCount = signal(0);
+  rejectedCount = signal(0);
 
   search       = '';
   statusFilter = '';
@@ -31,7 +34,7 @@ export class GestionProductos implements OnInit {
 
   ngOnInit(): void {
     this.loadProducts();
-    this.loadPendingCount();
+    this.loadCounts();
   }
 
   loadProducts(): void {
@@ -44,15 +47,28 @@ export class GestionProductos implements OnInit {
       next: (res) => {
         this.products.set(res.data);
         this.pagination.set(res);
+        if (res.status_counts) {
+          this.pendingCount.set(res.status_counts.pending   ?? 0);
+          this.approvedCount.set(res.status_counts.approved ?? 0);
+          this.rejectedCount.set(res.status_counts.rejected ?? 0);
+        }
         this.loading.set(false);
       },
       error: () => this.loading.set(false)
     });
   }
 
-  loadPendingCount(): void {
-    this.adminService.getProducts({ status: 'pending', per_page: 1 }).subscribe({
-      next: (res) => this.pendingCount.set(res.total ?? 0)
+  loadCounts(): void {
+    const statuses = ['pending', 'approved', 'rejected'] as const;
+    const signals  = {
+      pending:  this.pendingCount,
+      approved: this.approvedCount,
+      rejected: this.rejectedCount,
+    };
+    statuses.forEach(status => {
+      this.adminService.getProducts({ status, per_page: 1 }).subscribe({
+        next: (res) => signals[status].set(res.total ?? 0)
+      });
     });
   }
 
@@ -60,7 +76,6 @@ export class GestionProductos implements OnInit {
   onStatusFilter(s: string): void { this.statusFilter = s; this.currentPage = 1; this.loadProducts(); }
   goToPage(p: number):       void { this.currentPage = p; this.loadProducts(); }
 
-  // Navega a editar al hacer click en la fila
   navigateToEdit(product: any): void {
     this.router.navigate(['/admin/productos', product.id, 'editar']);
   }
@@ -91,30 +106,47 @@ export class GestionProductos implements OnInit {
       next: () => {
         this.closeModal();
         this.loadProducts();
-        this.loadPendingCount();
+        this.loadCounts();
       },
       error: () => { this.actionLoading = false; }
     });
   }
 
   getStatusClass(s: string): string {
-    return { approved: 'status-approved', pending: 'status-pending', rejected: 'status-rejected' }[s] || '';
+    return ({ approved: 'status-approved', pending: 'status-pending', rejected: 'status-rejected' } as any)[s] ?? '';
   }
   getStatusLabel(s: string): string {
-    return { approved: 'Aprobado', pending: 'Pendiente', rejected: 'Rechazado' }[s] || s;
+    return ({ approved: 'Aprobado', pending: 'Pendiente', rejected: 'Rechazado' } as any)[s] ?? s;
   }
   getStatusIcon(s: string): string {
-    return { approved: 'check_circle', pending: 'schedule', rejected: 'cancel' }[s] || 'help';
+    return ({ approved: 'check_circle', pending: 'schedule', rejected: 'cancel' } as any)[s] ?? 'help';
   }
 
-  getPages(): number[] {
+  getPages(): (number | string)[] {
     const p = this.pagination();
-    return p ? Array.from({ length: p.last_page }, (_, i) => i + 1) : [];
+    if (!p) return [];
+
+    const total   = p.last_page;
+    const current = this.currentPage;
+    const pages: (number | string)[] = [];
+
+    if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
+
+    pages.push(1);
+    if (current > 3)          pages.push('...');
+
+    const start = Math.max(2, current - 1);
+    const end   = Math.min(total - 1, current + 1);
+    for (let i = start; i <= end; i++) pages.push(i);
+
+    if (current < total - 2)  pages.push('...');
+    pages.push(total);
+
+    return pages;
   }
 
   getImageUrl(product: any): string {
-    const img = product.images?.[0];
-    return img?.url ?? '';
+    return product.images?.[0]?.url ?? '';
   }
 
   getInitials(name: string): string {

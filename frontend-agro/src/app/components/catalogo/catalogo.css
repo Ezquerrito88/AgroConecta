@@ -473,12 +473,17 @@ mat-slider { width: 100% !important; min-width: 100%; margin: 0; }
    PAGINACIÓN
    ===================== */
 .pagination-wrapper {
-  margin-top: 60px;
-  margin-bottom: 20px;
   display: flex;
-  justify-content: center;
+  flex-direction: column; /* Esto manda el texto abajo */
   align-items: center;
-  gap: 12px;
+  gap: 15px; /* Espacio entre botones y texto */
+  margin-top: 40px;
+}
+
+.pagination-controls {
+  display: flex;
+  gap: 10px; /* Espacio horizontal entre botones */
+  align-items: center;
 }
 
 .pag-num, .pag-arrow {
