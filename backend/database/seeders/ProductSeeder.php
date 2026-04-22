@@ -33,7 +33,6 @@ class ProductSeeder extends Seeder
                 'farmer_id'         => $farmer->id,
                 'category_id'       => $cat->id,
                 'name'              => $productName,
-                'slug'              => Str::slug($productName) . '-' . $i,
                 'description'       => "Este producto de la categoría {$cat->name} ha sido cultivado siguiendo métodos tradicionales en {$farmer->city}. Garantizamos frescura máxima desde la cosecha hasta su mesa.",
                 'short_description' => "Calidad superior directamente desde {$farmer->city}.",
                 'price'             => rand(15, 300) / 10,
