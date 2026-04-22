@@ -20,7 +20,7 @@
 <section class="products-section" id="inicio-lista">
   <div class="category-pills">
     <button *ngFor="let cat of categoriasRapidas" class="cat-btn"
-      [class.active]="filtros.categoria === cat.toLowerCase()"
+      [class.active]="filtros.categoria.toLowerCase() === cat.toLowerCase()"
       (click)="$event.stopPropagation(); seleccionarCategoriaRapida(cat)">
       {{ cat }}
     </button>
@@ -51,9 +51,14 @@
       <div class="filter-group filter-green">
         <label><span class="dot-green"></span> Categoría</label>
         <mat-form-field appearance="outline" class="full-width theme-green" subscriptSizing="dynamic">
-          <mat-select panelClass="panel-green" [(ngModel)]="filtros.categoria" (ngModelChange)="onFiltroChange()">
+          <mat-select panelClass="panel-green" [(ngModel)]="filtros.categoria"
+            (ngModelChange)="seleccionarCategoriaRapida(filtros.categoria)">
             <mat-option value="todas">Todas</mat-option>
-            <mat-option *ngFor="let cat of categoriasDisponibles" [value]="cat.toLowerCase()">{{ cat }}</mat-option>
+            <ng-container *ngFor="let cat of categoriasRapidas">
+              <mat-option *ngIf="cat.toLowerCase() !== 'todas'" [value]="cat">
+                {{ cat }}
+              </mat-option>
+            </ng-container>
           </mat-select>
         </mat-form-field>
       </div>

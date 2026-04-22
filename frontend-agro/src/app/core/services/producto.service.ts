@@ -32,6 +32,16 @@ export class ProductoService {
     return this.http.get<Producto>(`${this.apiUrl}/${id}`);
   }
 
+  getCategoriasPopulares(): Observable<any> {
+    return this.http.get(`${environment.apiUrl}/categories/populares`);
+  }
+
+  getFiltrosStats(categoria: string = 'todas'): Observable<any> {
+    return this.http.get(`${environment.apiUrl}/products-stats`, {
+      params: { categoria }
+    });
+  }
+
   // ─── AGRICULTOR ─────────────────────────────────────────────
 
   getMisProductos(page: number = 1, perPage: number = 12, sort: string = 'recent'): Observable<any> {

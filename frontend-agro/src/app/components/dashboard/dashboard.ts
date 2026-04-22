@@ -34,15 +34,13 @@ export class Dashboard implements OnInit {
   isLoading = false;
   isBuyer = false;
 
-  // Filtros dinámicos
-  productosFiltroMaestro: any[] = [];
-  categoriasDisponibles: string[] = [];
+  // Filtros dinámicos (Backend Driven)
   rangoMinPrecio = 0;
   rangoMaxPrecio = 1000;
-
   minPrice = 0;
-  maxPrice = 100;
-  categoriasRapidas = ['Todas'];
+  maxPrice = 1000;
+
+  categoriasRapidas = ['Todas', 'Frutas', 'Hortalizas', 'Lácteos', 'Verduras'];
   filtros = { categoria: 'todas', orden: 'novedad' };
 
   constructor(
@@ -55,73 +53,44 @@ export class Dashboard implements OnInit {
   ngOnInit(): void {
     this.verificarUsuario();
     this.cargarOpcionesFiltros();
+    this.cargarConfiguracionFiltros();
     Promise.resolve().then(() => this.cargarProductos(1));
   }
 
-  cargarOpcionesFiltros(): void {
-    // Obtenemos una lista para extraer filtros dinámicos (usamos getCatalogo en vez de destacados para mas precisión o una cantidad alta)
-    this.productoService.getCatalogo({ per_page: 500 }).subscribe({
-      next: (res: any) => {
-        this.productosFiltroMaestro = res.data ?? [];
-        this.recalcularFiltrosDinamicos(true);
+  // Carga los límites de precio y categorías desde el backend
+  cargarConfiguracionFiltros(categoria: string = 'todas'): void {
+    this.productoService.getFiltrosStats(categoria).subscribe({
+      next: (res) => {
+        // Seteamos los precios reales calculados por el servidor
+        this.rangoMinPrecio = res.min_price;
+        this.rangoMaxPrecio = res.max_price;
+
+        // Ajustamos el selector del usuario solo si es carga inicial o cambio de categoría
+        this.minPrice = res.min_price;
+        this.maxPrice = res.max_price;
+
+        this.cdr.detectChanges();
       },
-      error: (err: any) => console.error('Error cargando filtros dinámicos', err)
+      error: (err) => console.error('Error al cargar stats de filtros:', err)
     });
   }
 
-  recalcularFiltrosDinamicos(isInitial: boolean = false): void {
-    if (!this.productosFiltroMaestro || this.productosFiltroMaestro.length === 0) return;
-
-    let productosBuscados = this.productosFiltroMaestro;
-    const selectedCat = this.filtros.categoria !== 'todas' ? this.filtros.categoria : '';
-    
-    const catMatch = (p: any, cat: string) => !cat || (p.category?.name?.toLowerCase() === cat);
-
-    // Extraer Categorías Dinámicas
-    const cats = new Set<string>();
-    productosBuscados.forEach((p: any) => {
-      if (p.category?.name) cats.add(p.category.name);
-    });
-    this.categoriasDisponibles = Array.from(cats).sort();
-    
-    // Actualizar botones de categoría rápida (máx 5 + Todas)
-    this.categoriasRapidas = ['Todas', ...this.categoriasDisponibles.slice(0, 5)];
-
-    // Extraer Precios Mínimos y Máximos cruzados (se filtran por categoría elegida)
-    const priceProducts = productosBuscados.filter(p => catMatch(p, selectedCat));
-    if (priceProducts.length > 0) {
-      const prices = priceProducts.map(p => Number(p.price) || 0);
-      let minGlobal = Math.floor(Math.min(...prices));
-      let maxGlobal = Math.ceil(Math.max(...prices));
-      
-      if (minGlobal === maxGlobal) {
-        maxGlobal = minGlobal + 1;
-      }
-      
-      const wasFullyOpen = (this.minPrice <= this.rangoMinPrecio && this.maxPrice >= this.rangoMaxPrecio);
-
-      this.rangoMinPrecio = minGlobal;
-      this.rangoMaxPrecio = maxGlobal;
-
-      if (isInitial || wasFullyOpen) {
-        this.minPrice = minGlobal;
-        this.maxPrice = maxGlobal;
-      } else {
-        if (this.minPrice < minGlobal) this.minPrice = minGlobal;
-        if (this.minPrice > maxGlobal) this.minPrice = maxGlobal;
-        if (this.maxPrice > maxGlobal) this.maxPrice = maxGlobal;
-        if (this.maxPrice < minGlobal) this.maxPrice = minGlobal;
-        if (this.minPrice > this.maxPrice) {
-          this.minPrice = minGlobal;
-          this.maxPrice = maxGlobal;
+  // Carga las categorías más usadas para los botones superiores
+  cargarOpcionesFiltros(): void {
+    this.productoService.getCategoriasPopulares().subscribe({
+      next: (res: any) => {
+        if (res && Array.isArray(res)) {
+          const nombres = res.map((cat: any) => cat.name);
+          this.categoriasRapidas = ['Todas', ...nombres];
         }
+        this.cdr.detectChanges();
+      },
+      error: (err: any) => {
+        console.error('Error cargando categorías populares', err);
+        // Fallback en caso de error
+        this.categoriasRapidas = ['Todas', 'Frutas', 'Hortalizas', 'Lácteos', 'Verduras'];
       }
-    } else {
-      this.rangoMinPrecio = 0;
-      this.rangoMaxPrecio = 100;
-      this.minPrice = 0;
-      this.maxPrice = 100;
-    }
+    });
   }
 
   verificarUsuario(): void {
@@ -130,51 +99,41 @@ export class Dashboard implements OnInit {
       if (userStr) {
         this.currentUser = JSON.parse(userStr);
         const role = this.currentUser.role?.toLowerCase();
-
         this.isFarmer = role === 'agricultor' || role === 'farmer' || this.currentUser.role_id === 2;
         this.isBuyer = role === 'comprador' || role === 'buyer' || this.currentUser.role_id === 3;
-
       } else {
         this.isBuyer = true;
       }
     }
   }
 
-  // Usa image_url del backend, fallback a construcción manual
-  getImagenUrl(prod: any): string {
-    if (prod?.images?.length > 0) {
-      return prod.images[0].image_url
-        ?? `${environment.storageUrl}/${prod.images[0].image_path}`;
-    }
-    return 'assets/placeholder.png';
-  }
-
   cargarProductos(page: number): void {
-    if (this.productosFiltroMaestro.length > 0) {
-      this.recalcularFiltrosDinamicos(false);
-    }
-    
     this.isLoading = true;
     this.paginaActual = page;
 
+    // Construcción de filtros para la API
     const filtrosActivos: any = {};
     if (this.filtros.categoria !== 'todas') filtrosActivos.categoria = this.filtros.categoria;
     if (this.filtros.orden !== 'novedad') filtrosActivos.orden = this.filtros.orden;
-    if (this.minPrice > 0) filtrosActivos.precio_min = this.minPrice;
-    if (this.maxPrice < 100) filtrosActivos.precio_max = this.maxPrice;
+    
+    // Enviamos siempre los valores actuales del slider
+    filtrosActivos.precio_min = this.minPrice;
+    filtrosActivos.precio_max = this.maxPrice;
 
     this.productoService.getDestacados(page, this.itemsPorPagina, filtrosActivos).subscribe({
       next: (res: any) => {
         this.productos = Array.isArray(res.data) ? res.data : [];
         this.totalProductos = res.total || 0;
         const paginasServer = res.last_page || 1;
+        
         this.totalPaginas = paginasServer > 2 ? 2 : paginasServer;
         this.paginasArray = Array.from({ length: this.totalPaginas }, (_, i) => i + 1);
+        
         this.isLoading = false;
         this.cdr.detectChanges();
       },
       error: (err: any) => {
-        console.error('Error:', err);
+        console.error('Error cargando productos:', err);
         this.isLoading = false;
         this.cdr.detectChanges();
       }
@@ -182,18 +141,44 @@ export class Dashboard implements OnInit {
   }
 
   seleccionarCategoriaRapida(cat: string): void {
-    this.filtros.categoria = cat.toLowerCase();
+    // Seteamos la categoría
+    this.filtros.categoria = cat.toLowerCase() === 'todas' ? 'todas' : cat;
+    
+    // 1. Recalculamos los rangos de precio para esa categoría específica
+    this.cargarConfiguracionFiltros(this.filtros.categoria);
+
+    // 2. Cargamos los productos filtrados
     this.cargarProductos(1);
   }
 
-  onFiltroChange(): void { this.cargarProductos(1); }
-  filtrarPorPrecio(): void { this.cargarProductos(1); }
+  onFiltroChange(): void { 
+    this.cargarProductos(1); 
+  }
+
+  filtrarPorPrecio(): void { 
+    this.cargarProductos(1); 
+  }
 
   limpiarFiltros(): void {
     this.filtros = { categoria: 'todas', orden: 'novedad' };
-    this.minPrice = this.rangoMinPrecio;
-    this.maxPrice = this.rangoMaxPrecio;
-    this.cargarProductos(1);
+    // Al limpiar, pedimos los stats globales de nuevo
+    this.productoService.getFiltrosStats('todas').subscribe({
+      next: (res) => {
+        this.rangoMinPrecio = res.min_price;
+        this.rangoMaxPrecio = res.max_price;
+        this.minPrice = res.min_price;
+        this.maxPrice = res.max_price;
+        this.cargarProductos(1);
+      }
+    });
+  }
+
+  getImagenUrl(prod: any): string {
+    if (prod?.images?.length > 0) {
+      return prod.images[0].image_url
+        ?? `${environment.storageUrl}/${prod.images[0].image_path}`;
+    }
+    return 'assets/placeholder.png';
   }
 
   cambiarPagina(nuevaPagina: number): void {
@@ -230,6 +215,11 @@ export class Dashboard implements OnInit {
     });
   }
 
-  irAlCatalogoCompleto(): void { this.router.navigate(['/productos']); }
-  formatLabel(value: number): string { return `${value}€`; }
+  irAlCatalogoCompleto(): void { 
+    this.router.navigate(['/productos']); 
+  }
+
+  formatLabel(value: number): string { 
+    return `${value}€`; 
+  }
 }

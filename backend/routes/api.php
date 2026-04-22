@@ -44,8 +44,10 @@ Route::prefix('products')->group(function () {
 });
 
 // Categorías públicas
-Route::get('/categories',      [CategoryController::class, 'index']);
-Route::get('/categories/{id}', [CategoryController::class, 'show']);
+Route::get('/categories',           [CategoryController::class, 'index']);
+Route::get('/categories/populares', [CategoryController::class, 'getPopulares']);
+Route::get('/products-stats',       [CategoryController::class, 'getFiltrosStats']);
+Route::get('/categories/{id}',      [CategoryController::class, 'show']);
 
 // Webhooks
 Route::post('/webhooks/stripe', [WebhookController::class, 'handleStripe']);

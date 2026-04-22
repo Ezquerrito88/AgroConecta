@@ -42,7 +42,7 @@ class CategoryController extends Controller
         return response()->json($category, 201);
     }
 
-   //Mostrar categoria
+    //Mostrar categoria
     public function show($id)
     {
         $category = Category::find($id);
@@ -121,5 +121,41 @@ class CategoryController extends Controller
 
         return response()->json(['message' => 'Categoría eliminada']);
     }
-}
 
+    // Obtener las 4 categorías con más productos
+    public function getPopulares()
+    {
+        $categories = Category::withCount('products')
+            ->having('products_count', '>', 0)
+            ->orderBy('products_count', 'desc')
+            ->take(4)
+            ->get(['id', 'name']);
+
+        return response()->json($categories);
+    }
+
+    public function getFiltrosStats(Request $request)
+    {
+        $query = \App\Models\Product::query();
+
+        // Si el usuario filtró por categoría, ajustamos el cálculo del precio a esa categoría
+        if ($request->has('categoria') && $request->categoria !== 'todas') {
+            $query->whereHas('category', function ($q) use ($request) {
+                $q->where('name', $request->categoria);
+            });
+        }
+
+        $min = $query->min('price') ?? 0;
+        $max = $query->max('price') ?? 0;
+
+        // Si el min y max son iguales, damos un pequeño margen para que el slider no se rompa
+        if ($min == $max) {
+            $max = $min + 1;
+        }
+
+        return response()->json([
+            'min_price' => floor($min),
+            'max_price' => ceil($max),
+        ]);
+    }
+}
