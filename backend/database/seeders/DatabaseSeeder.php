@@ -31,24 +31,21 @@ class DatabaseSeeder extends Seeder
             ]);
         }
 
-        // 2. 10 Agricultores con Ciudades Distintas
+        // 2. 5 Agricultores con nombre@campo.com
         $datosHuertas = [
-            ['finca' => 'Huerta de Manolo', 'ciudad' => 'Logroño'],
-            ['finca' => 'Finca El Olivo', 'ciudad' => 'Calahorra'],
-            ['finca' => 'EcoCultivos Rioja', 'ciudad' => 'Arnedo'],
-            ['finca' => 'Ares de Campo', 'ciudad' => 'Haro'],
-            ['finca' => 'La Huerta de Ana', 'ciudad' => 'Alfaro'],
-            ['finca' => 'Raíces Vivas', 'ciudad' => 'Nájera'],
-            ['finca' => 'Sabor de Tierra', 'ciudad' => 'Lardero'],
-            ['finca' => 'El Rincón Verde', 'ciudad' => 'Villamediana de Iregua'],
-            ['finca' => 'Cultivos del Valle', 'ciudad' => 'Santo Domingo de la Calzada'],
-            ['finca' => 'Granja El Sol', 'ciudad' => 'Autol'],
+            ['nombre' => 'Manolo', 'finca' => 'Huerta de Manolo', 'ciudad' => 'Logroño'],
+            ['nombre' => 'Paco', 'finca' => 'Finca El Olivo', 'ciudad' => 'Sevilla'],
+            ['nombre' => 'Ramona', 'finca' => 'EcoCultivos Rioja', 'ciudad' => 'Arnedo'],
+            ['nombre' => 'Vicente', 'finca' => 'Ares de Campo', 'ciudad' => 'Almeria'],
+            ['nombre' => 'Santiago', 'finca' => 'La Huerta de Santi', 'ciudad' => 'Vigo'],
         ];
         
-        foreach ($datosHuertas as $i => $datos) {
+        foreach ($datosHuertas as $datos) {
+            $email = Str::lower(Str::ascii($datos['nombre'])) . '@campo.com';
+
             $user = User::create([
-                'name'     => "Productor " . ($i + 1),
-                'email'    => "agricultor{$i}@campo.com",
+                'name'     => $datos['nombre'],
+                'email'    => $email,
                 'password' => Hash::make('password'),
                 'role'     => 'farmer'
             ]);
@@ -62,7 +59,24 @@ class DatabaseSeeder extends Seeder
             ]);
         }
 
-        // 3. Admin
+        // 3. 10 Compradores con nombre@gmail.com
+        $nombresCompradores = [
+            'Elena', 'Roberto', 'Marta', 'Diego', 'Sofia', 
+            'Ignacio', 'Laura', 'Andres', 'Beatriz', 'Oscar'
+        ];
+
+        foreach ($nombresCompradores as $nombre) {
+            $email = Str::lower(Str::ascii($nombre)) . '@gmail.com';
+
+            User::create([
+                'name'     => $nombre,
+                'email'    => $email,
+                'password' => Hash::make('password'),
+                'role'     => 'buyer'
+            ]);
+        }
+
+        // 4. Admin
         User::create([
             'name'     => 'Admin AgroConecta',
             'email'    => 'admin@admin.com',
@@ -75,6 +89,6 @@ class DatabaseSeeder extends Seeder
             OrderSeeder::class,
         ]);
 
-        $this->command->info('✅ Seed completo: 10 agricultores en 10 ciudades diferentes.');
+        $this->command->info('✅ Seed completo: Correos personalizados generados con éxito.');
     }
 }
