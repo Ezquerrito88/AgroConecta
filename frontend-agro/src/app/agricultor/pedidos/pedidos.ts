@@ -21,6 +21,12 @@ type OrderStatus = 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancell
 })
 export class Pedidos implements OnInit, OnDestroy {
 
+  sidebarOpen: boolean = false;
+
+  toggleSidebar(): void {
+    this.sidebarOpen = !this.sidebarOpen;
+  }
+
   user: any = null;
   orders: Order[] = [];
   filteredOrders: Order[] = [];
