@@ -1,11 +1,15 @@
 <div class="dashboard-layout">
-  <app-sidebar-comprador />
+  <div class="sidebar-overlay" [class.active]="sidebarOpen" (click)="sidebarOpen = false"></div>
+  <app-sidebar-comprador [(isOpen)]="sidebarOpen" />
 
   <main class="main-content">
 
     <!-- Topbar -->
     <div class="topbar">
       <div class="topbar-left">
+        <button class="topbar-hamburger" (click)="toggleSidebar()" aria-label="Abrir menú">
+          <span class="material-symbols-rounded">menu</span>
+        </button>
         <h1 class="page-title">Mis Favoritos</h1>
         <p class="page-subtitle">Productos que te han gustado</p>
       </div>

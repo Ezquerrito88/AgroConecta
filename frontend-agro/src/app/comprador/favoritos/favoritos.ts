@@ -14,6 +14,8 @@ import { environment } from '../../../environments/environment';
   styleUrl: './favoritos.css'
 })
 export class Favoritos implements OnInit {
+  sidebarOpen = false;
+  toggleSidebar() { this.sidebarOpen = !this.sidebarOpen; }
 
   user: any = {};
   products:         any[] = [];

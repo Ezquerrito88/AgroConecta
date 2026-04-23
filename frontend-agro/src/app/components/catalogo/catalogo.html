@@ -14,7 +14,20 @@
 
 <div class="catalog-layout container">
 
-  <aside class="filter-card">
+  <!-- Botón filtros móvil -->
+  <div class="filters-mobile-bar">
+    <button class="btn-filtros-mobile" (click)="toggleFiltros()">
+      <i class="fa-solid fa-sliders"></i>
+      Filtros
+      <span class="filtros-badge" *ngIf="filtroCategoria || filtroUbicacion || filtroOrden !== 'novedad'">!</span>
+    </button>
+    <span class="results-count" *ngIf="!isLoading && totalProductos > 0">{{ totalProductos }} productos</span>
+  </div>
+
+  <!-- Overlay filtros móvil -->
+  <div class="filtros-overlay" [class.active]="filtrosAbiertos" (click)="filtrosAbiertos = false"></div>
+
+  <aside class="filter-card" [class.filter-card-open]="filtrosAbiertos">
     <div class="filter-header">
       <h3>Filtros</h3>
       <button class="clear-filters-btn" (click)="limpiarFiltros()">

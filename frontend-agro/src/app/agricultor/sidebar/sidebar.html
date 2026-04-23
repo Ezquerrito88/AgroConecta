@@ -1,4 +1,9 @@
-<aside class="sidebar">
+<aside class="sidebar" [class.sidebar-open]="isOpen">
+
+  <!-- Botón cerrar en móvil -->
+  <button class="sidebar-close-btn" (click)="close()" aria-label="Cerrar menú">
+    <span class="material-symbols-rounded">close</span>
+  </button>
 
   <div class="sidebar-header">
     <img src="img/logo/logo.png" alt="AgroConecta" class="logo-img">
@@ -24,37 +29,37 @@
   <nav class="sidebar-nav">
     <ul>
       <li>
-        <a routerLink="/agricultor/dashboard" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}">
+        <a routerLink="/agricultor/dashboard" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}" (click)="close()">
           <span class="material-symbols-rounded">Home</span>
           <span>Inicio</span>
         </a>
       </li>
       <li>
-        <a routerLink="/agricultor/mis-productos" routerLinkActive="active">
+        <a routerLink="/agricultor/mis-productos" routerLinkActive="active" (click)="close()">
           <span class="material-symbols-rounded">storefront</span>
           <span>Mis Productos</span>
         </a>
       </li>
       <li>
-        <a routerLink="/agricultor/pedidos" routerLinkActive="active">
+        <a routerLink="/agricultor/pedidos" routerLinkActive="active" (click)="close()">
           <span class="material-symbols-rounded">receipt_long</span>
           <span>Pedidos</span>
         </a>
       </li>
       <li>
-        <a routerLink="/agricultor/estadisticas" routerLinkActive="active">
+        <a routerLink="/agricultor/estadisticas" routerLinkActive="active" (click)="close()">
           <span class="material-symbols-rounded">bar_chart</span>
           <span>Estadísticas</span>
         </a>
       </li>
       <li>
-        <a routerLink="/agricultor/mensajes" routerLinkActive="active">
+        <a routerLink="/agricultor/mensajes" routerLinkActive="active" (click)="close()">
           <span class="material-symbols-rounded">chat_bubble</span>
           <span>Mensajes</span>
         </a>
       </li>
       <li>
-        <a routerLink="/agricultor/configuracion" routerLinkActive="active">
+        <a routerLink="/agricultor/configuracion" routerLinkActive="active" (click)="close()">
           <span class="material-symbols-rounded">settings</span>
           <span>Configuración</span>
         </a>
@@ -65,7 +70,7 @@
   <div class="sidebar-footer">
     <hr class="divider">
 
-    <a routerLink="/" class="btn-web">
+    <a routerLink="/" class="btn-web" (click)="close()">
       <span class="material-symbols-rounded">open_in_new</span>
       <span>Ir a la web</span>
     </a>

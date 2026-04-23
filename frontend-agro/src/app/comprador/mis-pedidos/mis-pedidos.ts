@@ -13,6 +13,8 @@ import { environment } from '../../../environments/environment';
   styleUrl: './mis-pedidos.css'
 })
 export class MisPedidos implements OnInit {
+  sidebarOpen = false;
+  toggleSidebar() { this.sidebarOpen = !this.sidebarOpen; }
 
   user: any = {};
   orders:         any[] = [];

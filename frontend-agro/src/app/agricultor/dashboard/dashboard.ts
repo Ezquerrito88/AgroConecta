@@ -19,6 +19,9 @@ export class Dashboard implements OnInit {
   today = new Date();
   isLoading = true;
   hasError = false;
+  sidebarOpen = false;
+
+  toggleSidebar() { this.sidebarOpen = !this.sidebarOpen; }
 
   kpis: DashboardKpis = {
     pedidos: 0,

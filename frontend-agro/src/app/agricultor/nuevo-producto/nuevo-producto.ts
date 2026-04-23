@@ -17,6 +17,8 @@ import { AuthService } from '../../core/services/auth';
   styleUrls: ['./nuevo-producto.css']
 })
 export class NuevoProducto implements OnInit {
+  sidebarOpen = false;
+  toggleSidebar() { this.sidebarOpen = !this.sidebarOpen; }
 
   saving = false;
   user: any = null;

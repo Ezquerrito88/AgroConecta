@@ -19,6 +19,8 @@ import { RouterModule } from '@angular/router';
   styleUrls: ['./mensajes.css']
 })
 export class Mensajes implements OnInit {
+  sidebarOpen = false;
+  toggleSidebar() { this.sidebarOpen = !this.sidebarOpen; }
 
   user: any = {};
   

@@ -167,3 +167,52 @@
   color: var(--red-dark);
 }
 .logout-btn:hover .material-symbols-rounded { color: var(--red-dark); }
+
+/* ═══════════════════════════════════════════
+   SIDEBAR CLOSE BTN (solo móvil)
+═══════════════════════════════════════════ */
+.sidebar-close-btn {
+  display: none;
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 32px; height: 32px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: #f3f4f6;
+  color: var(--text-mid);
+  cursor: pointer;
+  align-items: center; justify-content: center;
+  transition: background .15s;
+  z-index: 1;
+}
+.sidebar-close-btn .material-symbols-rounded { font-size: 1.2rem; }
+.sidebar-close-btn:hover { background: #e5e7eb; }
+
+/* ═══════════════════════════════════════════
+   RESPONSIVE — DRAWER
+═══════════════════════════════════════════ */
+@media (max-width: 768px) {
+  :host {
+    position: static;
+    display: block;
+  }
+
+  .sidebar {
+    position: fixed;
+    left: -280px;
+    top: 0;
+    height: 100vh;
+    z-index: 250;
+    transition: left .28s cubic-bezier(.4,0,.2,1);
+    box-shadow: none;
+  }
+
+  .sidebar.sidebar-open {
+    left: 0;
+    box-shadow: 4px 0 24px rgba(0,0,0,.15);
+  }
+
+  .sidebar-close-btn { display: flex; }
+  .sidebar-header { padding-top: 52px; }
+}

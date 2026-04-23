@@ -30,6 +30,8 @@ interface Toast { message: string; type: ToastType; }
   styleUrls: ['./configuracion.css']
 })
 export class Configuracion implements OnInit {
+  sidebarOpen = false;
+  toggleSidebar() { this.sidebarOpen = !this.sidebarOpen; }
   section = 'perfil';
   loading = false;
   toast: Toast | null = null;

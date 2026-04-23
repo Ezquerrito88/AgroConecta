@@ -22,7 +22,7 @@
       <ng-container *ngIf="!isLoggedIn">
         <button class="btn-login-header" routerLink="/login">
           <span class="material-symbols-rounded">login</span>
-          Iniciar Sesión
+          <span class="btn-login-text">Iniciar Sesión</span>
         </button>
       </ng-container>
 
@@ -71,6 +71,15 @@
       </ng-container>
     </div>
 
+  </div>
+
+  <!-- Buscador móvil separado -->
+  <div class="mobile-search-bar">
+    <div class="search-pill">
+      <i class="fas fa-search"></i>
+      <input type="text" placeholder="¿Qué cosecha buscas hoy?" [(ngModel)]="textoBusquedaGlobal"
+        (keyup.enter)="buscarDesdeHeader()" />
+    </div>
   </div>
 </header>
 

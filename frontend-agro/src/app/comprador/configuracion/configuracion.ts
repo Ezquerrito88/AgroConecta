@@ -19,6 +19,8 @@ interface Toast { message: string; type: ToastType; }
   styleUrl: './configuracion.css'
 })
 export class Configuracion implements OnInit {
+  sidebarOpen = false;
+  toggleSidebar() { this.sidebarOpen = !this.sidebarOpen; }
 
   section    = 'perfil';
   loading    = false;

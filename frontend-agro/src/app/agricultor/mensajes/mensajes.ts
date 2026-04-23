@@ -16,6 +16,8 @@ import { AuthService } from '../../core/services/auth';
   styleUrls: ['./mensajes.css']
 })
 export class Mensajes implements OnInit {
+  sidebarOpen = false;
+  toggleSidebar() { this.sidebarOpen = !this.sidebarOpen; }
 
   user: any = null;
 

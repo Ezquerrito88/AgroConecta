@@ -19,6 +19,8 @@ import { AuthService } from '../../core/services/auth';
   encapsulation: ViewEncapsulation.None
 })
 export class EditarProducto implements OnInit {
+  sidebarOpen = false;
+  toggleSidebar() { this.sidebarOpen = !this.sidebarOpen; }
 
   user: any = null;
   producto: any = {};

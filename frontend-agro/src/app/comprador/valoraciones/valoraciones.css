@@ -484,3 +484,51 @@
 }
 .btn-submit:hover:not(:disabled) { background: #c94e22; }
 .btn-submit:disabled { background: #ddd; cursor: not-allowed; }
+
+/* ── Responsive ────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .dashboard-layout .topbar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+  .dashboard-layout .topbar-right {
+    width: 100%;
+    justify-content: space-between;
+  }
+  .val-grid {
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  }
+  .empty-state {
+    padding: 40px 16px;
+  }
+  .modal-box {
+    width: calc(100% - 32px);
+    padding: 20px;
+  }
+  .val-tabs {
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 480px) {
+  .val-grid {
+    grid-template-columns: 1fr;
+  }
+  .val-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .val-card-img {
+    width: 100%;
+    height: 140px;
+  }
+  .btn-valorar {
+    width: 100%;
+    margin-top: 8px;
+    text-align: center;
+  }
+  .star-btn {
+    font-size: 30px;
+  }
+}

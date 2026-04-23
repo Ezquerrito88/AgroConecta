@@ -1,11 +1,15 @@
 <div class="dashboard-layout">
-  <app-sidebar></app-sidebar>
+  <div class="sidebar-overlay" [class.active]="sidebarOpen" (click)="sidebarOpen = false"></div>
+  <app-sidebar [(isOpen)]="sidebarOpen"></app-sidebar>
 
   <main class="main-content">
 
     <!-- Topbar -->
     <div class="topbar">
       <div class="topbar-left">
+        <button class="topbar-hamburger" (click)="toggleSidebar()" aria-label="Abrir menú">
+          <span class="material-symbols-rounded">menu</span>
+        </button>
         <h1 class="page-title">Mensajes</h1>
         <span class="page-subtitle">Mira tus mensajes</span>
       </div>

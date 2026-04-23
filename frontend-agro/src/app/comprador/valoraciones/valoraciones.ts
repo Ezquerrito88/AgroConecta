@@ -17,6 +17,8 @@ import { forkJoin } from 'rxjs';
   styleUrls: ['./valoraciones.css']
 })
 export class Valoraciones implements OnInit {
+  sidebarOpen = false;
+  toggleSidebar() { this.sidebarOpen = !this.sidebarOpen; }
   pendientes: ReviewPendiente[] = [];
   misReviews: Review[] = [];
   loading = true;

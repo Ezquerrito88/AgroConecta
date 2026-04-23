@@ -30,6 +30,7 @@ export class Favoritos implements OnInit {
   filtros = { categoria: 'todas', orden: 'novedad' };
   minPrice = 0;
   maxPrice = 100;
+  filtrosAbiertos = false;
 
   constructor(
     private productoService: ProductoService,

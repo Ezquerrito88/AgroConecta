@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter, HostListener } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../core/services/auth';
@@ -11,6 +11,9 @@ import { AuthService } from '../../core/services/auth';
   styleUrls: ['./sidebar.css']
 })
 export class Sidebar implements OnInit {
+  @Input() isOpen = false;
+  @Output() isOpenChange = new EventEmitter<boolean>();
+
   user: any = null;
   initials = '';
 
@@ -22,6 +25,15 @@ export class Sidebar implements OnInit {
       const parts = this.user.name.trim().split(' ');
       this.initials = (parts[0][0] + (parts[1]?.[0] ?? '')).toUpperCase();
     }
+  }
+
+  close() {
+    this.isOpenChange.emit(false);
+  }
+
+  @HostListener('document:keydown.escape')
+  onEscape() {
+    if (this.isOpen) this.close();
   }
 
   logout() {

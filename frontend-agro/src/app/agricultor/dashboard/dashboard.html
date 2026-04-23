@@ -1,10 +1,16 @@
 <div class="dashboard-layout">
-  <app-sidebar></app-sidebar>
+  <!-- Overlay para cerrar sidebar en móvil -->
+  <div class="sidebar-overlay" [class.active]="sidebarOpen" (click)="sidebarOpen = false"></div>
+
+  <app-sidebar [(isOpen)]="sidebarOpen"></app-sidebar>
 
   <main class="main-content">
 
     <div class="topbar">
       <div class="topbar-left">
+        <button class="topbar-hamburger" (click)="toggleSidebar()" aria-label="Abrir menú">
+          <span class="material-symbols-rounded">menu</span>
+        </button>
         <h1 class="page-title">Mi Panel</h1>
         <span class="page-subtitle">{{ today | date:"EEEE, d 'de' MMMM" : undefined : 'es' }}</span>
       </div>

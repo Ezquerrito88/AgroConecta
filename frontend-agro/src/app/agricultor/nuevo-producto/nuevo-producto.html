@@ -1,5 +1,6 @@
 <div class="dashboard-layout">
-  <app-sidebar></app-sidebar>
+  <div class="sidebar-overlay" [class.active]="sidebarOpen" (click)="sidebarOpen = false"></div>
+  <app-sidebar [(isOpen)]="sidebarOpen"></app-sidebar>
 
   <main class="main-content">
 

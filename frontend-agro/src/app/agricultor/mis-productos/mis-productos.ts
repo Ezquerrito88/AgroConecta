@@ -19,6 +19,9 @@ export class MisProductos implements OnInit {
   user: any = null;
   productos: any[] = [];
   loading = true;
+  sidebarOpen = false;
+
+  toggleSidebar() { this.sidebarOpen = !this.sidebarOpen; }
 
   // KPIs
   totalProductos = 0;

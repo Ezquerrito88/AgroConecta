@@ -19,9 +19,12 @@ export class BuyerDashboard implements OnInit {
   favProducts: any[] = [];
   loadingOrders = true;
   loadingFavoritos = true;
+  sidebarOpen = false;
 
   user: any = {};
   skeletons = [1, 2, 3, 4, 5];
+
+  toggleSidebar() { this.sidebarOpen = !this.sidebarOpen; }
 
   statusLabels: Record<string, string> = {
     pending: 'Pendiente',

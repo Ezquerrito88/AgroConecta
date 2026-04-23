@@ -51,6 +51,9 @@ export class Catalogo implements OnInit {
   isBuyer = false;
   isFarmer = false;
   currentUser: any = null;
+  filtrosAbiertos = false;
+
+  toggleFiltros() { this.filtrosAbiertos = !this.filtrosAbiertos; }
 
   constructor(
     private productoService: ProductoService,

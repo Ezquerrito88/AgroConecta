@@ -17,6 +17,8 @@ import { environment } from '../../../environments/environment';
   styleUrls: ['./estadisticas.css'],
 })
 export class Estadisticas implements OnInit {
+  sidebarOpen = false;
+  toggleSidebar() { this.sidebarOpen = !this.sidebarOpen; }
   user: any = null;
   dashboard: any = null;
   loading = true;

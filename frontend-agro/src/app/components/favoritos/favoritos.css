@@ -220,3 +220,64 @@ mat-slider { width: 100% !important; min-width: 100%; margin: 0; }
 @keyframes shimmer    { 0%   { background-position: 200% 0;  } 100% { background-position: -200% 0; } }
 @keyframes wave-slide { 0%   { transform: translateX(0);     } 100% { transform: translateX(-50%); } }
 @keyframes pulse-icon { 0%,100% { opacity: .4; transform: scale(1); } 50% { opacity: .8; transform: scale(1.12); } }
+
+/* =====================
+   BOTÓN FILTROS MÓVIL (oculto en desktop)
+   ===================== */
+.filters-mobile-bar {
+  display: none;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 12px;
+  margin-bottom: 4px;
+  width: 100%;
+}
+.btn-filtros-mobile {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  background: linear-gradient(to right, #11C267, #02BA7A);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+  box-shadow: 0 4px 12px rgba(17,194,103,.3);
+}
+.btn-filtros-mobile:hover { transform: translateY(-1px); }
+.filtros-badge {
+  position: absolute; top: -4px; right: -4px;
+  width: 16px; height: 16px;
+  background: #f97316; border-radius: 50%;
+  font-size: 0.6rem; font-weight: 900;
+  display: flex; align-items: center; justify-content: center; color: white;
+}
+/* Overlay filtros */
+.filtros-overlay {
+  display: none;
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,.45);
+  z-index: 400; backdrop-filter: blur(2px);
+}
+.filtros-overlay.active { display: block; }
+
+/* Responsive Dashboard Drawer */
+@media (max-width: 850px) {
+  .catalog-layout { display: block; padding-top: 10px; }
+  .filters-mobile-bar { display: flex; margin-bottom: 15px; }
+  .filter-card {
+    position: fixed !important; left: -320px; top: 0;
+    height: 100vh; width: 300px; min-width: 300px;
+    border-radius: 0; z-index: 410;
+    overflow-y: auto;
+    transition: left .28s cubic-bezier(.4,0,.2,1);
+    margin: 0 !important;
+  }
+  .filter-card.filter-card-open {
+    left: 0; box-shadow: 4px 0 24px rgba(0,0,0,.15);
+  }
+}

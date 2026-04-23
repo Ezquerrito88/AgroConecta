@@ -42,6 +42,7 @@ export class Dashboard implements OnInit {
 
   categoriasRapidas = ['Todas', 'Frutas', 'Hortalizas', 'Lácteos', 'Verduras'];
   filtros = { categoria: 'todas', orden: 'novedad' };
+  filtrosAbiertos = false;
 
   constructor(
     private router: Router,

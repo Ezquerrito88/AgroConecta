@@ -520,30 +520,127 @@ html, body {
 }
 
 /* ══════════════════════════════════════════════
+   SIDEBAR DRAWER — ESTILOS GLOBALES
+══════════════════════════════════════════════ */
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.45);
+  z-index: 200;
+  backdrop-filter: blur(2px);
+  animation: fadeOverlay .2s ease;
+}
+@keyframes fadeOverlay { from { opacity: 0; } to { opacity: 1; } }
+.sidebar-overlay.active { display: block; }
+
+/* Botón hamburguesa del dashboard */
+.topbar-hamburger {
+  display: none;
+  width: 38px; height: 38px;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  cursor: pointer;
+  align-items: center; justify-content: center;
+  color: #374151;
+  transition: background .15s;
+  flex-shrink: 0;
+}
+.topbar-hamburger:hover { background: #f3f4f6; }
+.topbar-hamburger .material-symbols-rounded { font-size: 1.4rem; }
+
+/* ══════════════════════════════════════════════
    RESPONSIVE
 ══════════════════════════════════════════════ */
+
+/* ── 1280px: skeleton layout ── */
+@media (max-width: 1280px) {
+  .skeleton-layout { padding: 0 16px; gap: 40px; }
+}
+
+/* ── 1100px: KPI 2 cols ── */
 @media (max-width: 1100px) {
   .dashboard-layout .kpi-grid { grid-template-columns: repeat(2,1fr); }
 }
+
+/* ── 900px: reajustes generales ── */
 @media (max-width: 900px) {
-  .dashboard-layout .welcome-banner { flex-direction: column; align-items: flex-start; gap: 16px; }
+  .dashboard-layout .welcome-banner { flex-direction: column; align-items: flex-start; gap: 14px; padding: 18px 20px; }
+  .dashboard-layout .welcome-actions { flex-wrap: wrap; }
   .dashboard-layout .top-products-grid { grid-template-columns: 1fr 1fr; }
   .dashboard-layout .orders-list .orders-list-header,
   .dashboard-layout .orders-list .order-row { grid-template-columns: 2fr 1fr 1fr; }
   .dashboard-layout .order-ref { display: none; }
+  .dashboard-layout .section-card { padding: 16px; margin: 16px; }
+  .dashboard-layout .kpi-grid { gap: 12px; margin: 16px 16px 0; }
+  .dashboard-layout .welcome-banner { margin: 16px 16px 0; }
+  .dashboard-layout .alert-banner { margin: 12px 16px 0; }
 }
+
+/* ── 768px: sidebar drawer + layout columna ── */
 @media (max-width: 768px) {
-  .dashboard-layout { flex-direction: column; }
+  /* Drawer behavior para sidebars dentro de dashboard-layout */
+  .dashboard-layout { flex-direction: row; overflow: hidden; }
+
+  /* Todos los sidebars hijos del dashboard se convierten en drawer */
+  .dashboard-layout > aside,
+  .dashboard-layout app-sidebar > .sidebar,
+  .dashboard-layout app-sidebar-comprador > .sidebar,
+  .dashboard-layout app-admin-sidebar > .sidebar {
+    position: fixed !important;
+    left: -280px !important;
+    top: 0 !important;
+    height: 100vh !important;
+    z-index: 250 !important;
+    transition: left .28s cubic-bezier(.4,0,.2,1) !important;
+    box-shadow: none !important;
+  }
+
+  .dashboard-layout > aside.sidebar-open,
+  .dashboard-layout app-sidebar > .sidebar.sidebar-open,
+  .dashboard-layout app-sidebar-comprador > .sidebar.sidebar-open,
+  .dashboard-layout app-admin-sidebar > .sidebar.sidebar-open {
+    left: 0 !important;
+    box-shadow: 4px 0 24px rgba(0,0,0,.15) !important;
+  }
+
+  .dashboard-layout .main-content { width: 100% !important; }
+
+  /* Topbar hamburger visible */
+  .topbar-hamburger { display: flex; }
+
   .dashboard-layout .top-products-grid { grid-template-columns: 1fr; }
+  .dashboard-layout .products-grid { grid-template-columns: repeat(auto-fill, minmax(240px,1fr)); padding: 0 16px 16px; }
+  .dashboard-layout .filters-bar { flex-direction: column; align-items: flex-start; gap: 10px; padding: 12px 16px; }
+  .dashboard-layout .tabs-bar { margin: 0 16px 12px; }
 }
+
+/* ── 640px: KPI 1 col ── */
 @media (max-width: 640px) {
+  .dashboard-layout .kpi-grid { grid-template-columns: repeat(2,1fr); gap: 10px; }
   .dashboard-layout .user-name { display: none; }
-  .dashboard-layout .search-box input { width: 100px; }
+  .dashboard-layout .search-box input { width: 90px; }
   .dashboard-layout .orders-list .orders-list-header,
   .dashboard-layout .orders-list .order-row { grid-template-columns: 1fr 1fr; }
   .dashboard-layout .order-client-info .order-date { display: none; }
+  .dashboard-layout .topbar { padding: 0 16px; height: 56px; }
+  .dashboard-layout .welcome-title { font-size: 1.15rem; }
+  .dashboard-layout .welcome-sub { font-size: .8rem; }
+  .skeleton-layout { grid-template-columns: 1fr; gap: 24px; }
 }
+
+/* ── 480px: móvil pequeño ── */
 @media (max-width: 480px) {
+  .dashboard-layout .kpi-grid { grid-template-columns: 1fr 1fr; gap: 8px; margin: 12px 12px 0; }
+  .dashboard-layout .kpi-card { padding: 14px; }
+  .dashboard-layout .kpi-value { font-size: 1.45rem; }
   .dashboard-layout .search-box { display: none; }
-  .dashboard-layout .user-chip  { padding: 5px; border-radius: 50%; }
+  .dashboard-layout .user-chip { padding: 5px; border-radius: 50%; }
+  .dashboard-layout .section-card { margin: 12px; padding: 14px; }
+  .dashboard-layout .welcome-banner { margin: 12px 12px 0; padding: 16px; border-radius: 14px; }
+  .dashboard-layout .alert-banner { margin: 10px 12px 0; }
+  .dashboard-layout .products-grid { grid-template-columns: 1fr; }
+  .dashboard-layout .orders-list .orders-list-header { display: none; }
+  .dashboard-layout .orders-list .order-row { grid-template-columns: 1fr auto; }
 }

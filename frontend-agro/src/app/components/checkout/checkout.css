@@ -982,17 +982,26 @@ textarea {
   }
 }
 
-@media (max-width: 700px) {
-  .checkout-hero { padding: 56px 18px 24px; }
-  .checkout-layout { padding: 16px 12px 80px; gap: 16px; }
-  .checkout-form-card { padding: 22px 18px 20px; }
-  .form-grid, .payment-grid { grid-template-columns: 1fr; }
+@media (max-width: 768px) {
+  .checkout-hero { padding: 40px 20px 20px; }
+  .checkout-layout { padding: 16px 16px 80px; gap: 16px; }
+  .checkout-form-card { padding: 24px 20px 20px; }
+  .form-grid { grid-template-columns: 1fr; }
+  .payment-grid { grid-template-columns: 1fr; }
   .checkout-steps { gap: 0; }
   .step { min-width: 50px; }
   .step-bubble { width: 32px; height: 32px; font-size: 0.85rem; }
   .step-text { font-size: 0.72rem; }
   .step-connector { min-width: 16px; }
   .checkout-form-card h2 { font-size: 1.45rem; }
+  .section-header p { font-size: 0.9rem; }
+}
+
+@media (max-width: 700px) {
+  .checkout-hero { padding: 56px 18px 24px; }
+  .checkout-layout { padding: 16px 12px 80px; gap: 16px; }
+  .checkout-form-card { padding: 22px 18px 20px; }
+  .checkout-form-card h2 { font-size: 1.35rem; }
 
   /* Sticky CTA en móvil */
   .form-actions {
@@ -1012,3 +1021,21 @@ textarea {
   .btn-secondary { min-width: auto; flex: 0 0 auto; }
   .btn-primary   { flex: 1; }
 }
+
+@media (max-width: 480px) {
+  .checkout-hero { padding: 52px 14px 18px; }
+  .checkout-layout { padding: 12px 10px 80px; gap: 12px; }
+  .checkout-form-card { padding: 16px 14px 16px; border-radius: 14px; }
+  .checkout-summary  { padding: 16px; border-radius: 14px; }
+  .checkout-form-card h2 { font-size: 1.2rem; }
+  .section-header { margin-bottom: 1.2rem; }
+  .checkout-steps { flex-wrap: nowrap; overflow-x: auto; padding-bottom: 2px; }
+  .step-text { display: none; }
+  .progress-hint { display: none; }
+  .payment-option { padding: 0.75rem 0.65rem; }
+  .payment-icon-wrap { width: 36px; height: 36px; font-size: 1.1rem; }
+  .payment-text span { font-size: 0.88rem; }
+  .form-actions { flex-direction: column-reverse; gap: 0.5rem; }
+  .btn-secondary { min-width: 100%; }
+  .btn-primary   { min-width: 100%; }
+}

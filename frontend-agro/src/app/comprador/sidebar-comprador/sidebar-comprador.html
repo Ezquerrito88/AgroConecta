@@ -1,4 +1,9 @@
-<aside class="sidebar">
+<aside class="sidebar" [class.sidebar-open]="isOpen">
+
+  <!-- Botón cerrar en móvil -->
+  <button class="sidebar-close-btn" (click)="close()" aria-label="Cerrar menú">
+    <span class="material-symbols-rounded">close</span>
+  </button>
 
   <div class="sidebar-header">
     <img src="img/logo/logo.png" alt="AgroConecta" class="logo-img">
@@ -24,37 +29,38 @@
   <nav class="sidebar-nav">
     <ul>
       <li>
-        <a routerLink="/comprador/dashboard" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}">
+        <a routerLink="/comprador/dashboard" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}" (click)="close()">
           <span class="material-symbols-rounded">home</span>
           <span>Inicio</span>
         </a>
       </li>
       <li>
-        <a routerLink="/comprador/mis-pedidos" routerLinkActive="active">
+        <a routerLink="/comprador/mis-pedidos" routerLinkActive="active" (click)="close()">
           <span class="material-symbols-rounded">receipt_long</span>
           <span>Mis Pedidos</span>
         </a>
       </li>
       <li>
-        <a routerLink="/comprador/favoritos" routerLinkActive="active">
+        <a routerLink="/comprador/favoritos" routerLinkActive="active" (click)="close()">
           <span class="material-symbols-rounded">favorite</span>
           <span>Favoritos</span>
         </a>
       </li>
       <li>
-        <a routerLink="/comprador/mensajes" routerLinkActive="active">
+        <a routerLink="/comprador/mensajes" routerLinkActive="active" (click)="close()">
           <span class="material-symbols-rounded">chat_bubble</span>
           <span>Mensajes</span>
+          <span class="badge-new">Nuevo</span>
         </a>
       </li>
       <li>
-        <a routerLink="/comprador/valoraciones" routerLinkActive="active">
+        <a routerLink="/comprador/valoraciones" routerLinkActive="active" (click)="close()">
           <span class="material-symbols-rounded">star</span>
           <span>Valoraciones</span>
         </a>
       </li>
       <li>
-        <a routerLink="/comprador/configuracion" routerLinkActive="active">
+        <a routerLink="/comprador/configuracion" routerLinkActive="active" (click)="close()">
           <span class="material-symbols-rounded">settings</span>
           <span>Configuración</span>
         </a>
@@ -65,7 +71,7 @@
   <div class="sidebar-footer">
     <hr class="divider">
 
-    <a routerLink="/" class="btn-web">
+    <a routerLink="/" class="btn-web" (click)="close()">
       <span class="material-symbols-rounded">open_in_new</span>
       <span>Ir a la web</span>
     </a>
