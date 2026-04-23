@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
@@ -37,69 +37,73 @@ export class Valoraciones implements OnInit {
 
   constructor(
     private reviewService: ReviewService,
-    private authService: AuthService
-  ) {}
+    private authService: AuthService,
+    private cdr: ChangeDetectorRef
+  ) { }
 
   ngOnInit(): void {
     const user = this.authService.getCurrentUser();
     this.userInitial = user?.name?.charAt(0).toUpperCase() ?? 'U';
-    this.firstName   = user?.name?.split(' ')[0] ?? '';
+    this.firstName = user?.name?.split(' ')[0] ?? '';
     this.cargarDatos();
   }
 
   cargarDatos(): void {
-  this.loading = true;
+    this.loading = true;
 
-  forkJoin({
-    pendientes: this.reviewService.getPendientes(),
-    reviews:    this.reviewService.getMisReviews()
-  }).subscribe({
-    next: ({ pendientes, reviews }) => {
-      this.pendientes = pendientes;
-      this.misReviews = reviews;
-      this.loading    = false;
-    },
-    error: (err) => {
-      console.error('❌ Error cargando valoraciones:', err);
-      this.loading = false;
-    }
-  });
-}
+    forkJoin({
+      pendientes: this.reviewService.getPendientes(),
+      reviews: this.reviewService.getMisReviews()
+    }).subscribe({
+      next: ({ pendientes, reviews }) => {
+        this.pendientes = pendientes;
+        this.misReviews = reviews;
+        this.loading = false;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('❌ Error:', err);
+        this.loading = false;
+        this.cdr.detectChanges();
+      }
+    });
+
+  }
 
   abrirModal(item: ReviewPendiente): void {
     this.selectedProduct = item;
-    this.rating      = 0;
+    this.rating = 0;
     this.hoverRating = 0;
-    this.comment     = '';
-    this.errorMsg    = '';
-    this.modalOpen   = true;
+    this.comment = '';
+    this.errorMsg = '';
+    this.modalOpen = true;
   }
 
   cerrarModal(): void {
-    this.modalOpen      = false;
+    this.modalOpen = false;
     this.selectedProduct = null;
   }
 
-  setRating(r: number): void  { this.rating = r; }
-  setHover(r: number): void   { this.hoverRating = r; }
-  clearHover(): void          { this.hoverRating = 0; }
-  activeRating(): number      { return this.hoverRating || this.rating; }
+  setRating(r: number): void { this.rating = r; }
+  setHover(r: number): void { this.hoverRating = r; }
+  clearHover(): void { this.hoverRating = 0; }
+  activeRating(): number { return this.hoverRating || this.rating; }
 
   enviarReview(): void {
     if (!this.rating || !this.selectedProduct || this.sending) return;
 
-    this.sending  = true;
+    this.sending = true;
     this.errorMsg = '';
 
     this.reviewService.store({
       product_id: this.selectedProduct.product_id,
-      rating:     this.rating,
-      comment:    this.comment
+      rating: this.rating,
+      comment: this.comment
     }).subscribe({
       next: (review) => {
         console.log('Review creada:', review);
-        this.misReviews  = [review, ...this.misReviews];
-        this.pendientes  = this.pendientes.filter(
+        this.misReviews = [review, ...this.misReviews];
+        this.pendientes = this.pendientes.filter(
           p => p.product_id !== this.selectedProduct!.product_id
         );
         this.sending = false;
@@ -107,7 +111,7 @@ export class Valoraciones implements OnInit {
       },
       error: (err) => {
         this.errorMsg = err.error?.message ?? 'Error al enviar la valoración';
-        this.sending  = false;
+        this.sending = false;
       }
     });
   }

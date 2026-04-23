@@ -29,11 +29,13 @@
 
     <!-- Banner bienvenida -->
     <div class="welcome-banner">
-      <div>
-        <p class="welcome-title">
-          {{ greeting }}<span *ngIf="firstName">, {{ firstName }}!</span>
-        </p>
-        <p class="welcome-sub">Aquí tienes el resumen de tu actividad. ¿Qué quieres hacer hoy?</p>
+      <div class="welcome-left">
+        <div>
+          <p class="welcome-title">
+            {{ greeting }}<span *ngIf="firstName">, {{ firstName }}!</span>
+          </p>
+          <p class="welcome-sub">Aquí tienes el resumen de tu actividad. ¿Qué quieres hacer hoy?</p>
+        </div>
       </div>
       <div class="welcome-actions">
         <a routerLink="/productos" class="btn-primary-white">
@@ -52,58 +54,70 @@
 
       <!-- Skeleton -->
       <ng-container *ngIf="loadingOrders || loadingFavoritos">
-        <div class="kpi-card sk-kpi" *ngFor="let s of [1,2,3,4]">
-          <div class="sk-kpi-icon"></div>
-          <div class="sk-kpi-value"></div>
-          <div class="sk-kpi-label"></div>
-        </div>
+        <div class="qs-card skel-block" *ngFor="let s of [1,2,3,4]"></div>
       </ng-container>
 
       <!-- KPIs reales -->
       <ng-container *ngIf="!loadingOrders && !loadingFavoritos">
 
-        <div class="kpi-card kpi-featured">
-          <div class="kpi-header">
-            <div class="kpi-icon-wrap white-icon">
-              <span class="material-symbols-rounded">payments</span>
-            </div>
-            <span class="kpi-badge-white">acumulado</span>
+        <!-- Total gastado — featured naranja -->
+        <div class="qs-card qs-featured">
+          <div class="qs-icon white-icon">
+            <span class="material-symbols-rounded">payments</span>
           </div>
-          <span class="kpi-value">{{ kpis.gastado | currency:'EUR':'symbol':'1.2-2' }}</span>
-          <span class="kpi-label">Total gastado</span>
+          <div class="qs-info">
+            <span class="qs-value">{{ kpis.gastado | currency:'EUR':'symbol':'1.2-2' }}</span>
+            <span class="qs-label">Total gastado</span>
+            <span class="qs-sub white-sub">
+              <span class="material-symbols-rounded">history</span>
+              acumulado
+            </span>
+          </div>
         </div>
 
-        <div class="kpi-card">
-          <div class="kpi-header">
-            <div class="kpi-icon-wrap orange">
-              <span class="material-symbols-rounded">receipt_long</span>
-            </div>
-            <span class="kpi-badge positive">+{{ kpis.pedidos }}</span>
+        <!-- Pedidos totales -->
+        <div class="qs-card">
+          <div class="qs-icon orange">
+            <span class="material-symbols-rounded">receipt_long</span>
           </div>
-          <span class="kpi-value">{{ kpis.pedidos }}</span>
-          <span class="kpi-label">Pedidos totales</span>
+          <div class="qs-info">
+            <span class="qs-value">{{ kpis.pedidos }}</span>
+            <span class="qs-label">Pedidos totales</span>
+            <span class="qs-sub orange">
+              <span class="material-symbols-rounded">arrow_upward</span>
+              +{{ kpis.pedidos }} realizados
+            </span>
+          </div>
         </div>
 
-        <div class="kpi-card">
-          <div class="kpi-header">
-            <div class="kpi-icon-wrap blue">
+        <!-- En camino -->
+        <div class="qs-card">
+          <div class="qs-icon blue">
+            <span class="material-symbols-rounded">local_shipping</span>
+          </div>
+          <div class="qs-info">
+            <span class="qs-value">{{ kpis.enCamino }}</span>
+            <span class="qs-label">En camino</span>
+            <span class="qs-sub blue">
               <span class="material-symbols-rounded">local_shipping</span>
-            </div>
-            <span class="kpi-badge neutral">en tránsito</span>
+              en tránsito
+            </span>
           </div>
-          <span class="kpi-value">{{ kpis.enCamino }}</span>
-          <span class="kpi-label">En camino</span>
         </div>
 
-        <div class="kpi-card">
-          <div class="kpi-header">
-            <div class="kpi-icon-wrap purple">
-              <span class="material-symbols-rounded">favorite</span>
-            </div>
-            <span class="kpi-badge positive">guardados</span>
+        <!-- Favoritos -->
+        <div class="qs-card">
+          <div class="qs-icon purple">
+            <span class="material-symbols-rounded">favorite</span>
           </div>
-          <span class="kpi-value">{{ kpis.favoritos }}</span>
-          <span class="kpi-label">Favoritos</span>
+          <div class="qs-info">
+            <span class="qs-value">{{ kpis.favoritos }}</span>
+            <span class="qs-label">Favoritos</span>
+            <span class="qs-sub purple">
+              <span class="material-symbols-rounded">bookmark</span>
+              guardados
+            </span>
+          </div>
         </div>
 
       </ng-container>
@@ -221,10 +235,9 @@
 
       <!-- Grid -->
       <div class="buyer-favorites-grid" *ngIf="!loadingFavoritos && favProducts.length > 0">
-        <div class="product-card" *ngFor="let p of favProducts"
-             [routerLink]="['/producto', p.id]" style="cursor:pointer;">
-          <img [src]="getImagen(p)" [alt]="p.name" class="product-img"
-               onerror="this.src='img/logo/logo.png'" />
+        <div class="product-card" *ngFor="let p of favProducts" [routerLink]="['/producto', p.id]"
+          style="cursor:pointer;">
+          <img [src]="getImagen(p)" [alt]="p.name" class="product-img" onerror="this.src='img/logo/logo.png'" />
           <div class="product-info">
             <p class="product-name">{{ p.name }}</p>
             <p class="product-price">

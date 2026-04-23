@@ -121,10 +121,12 @@
             {{ prod.stock_quantity === 0 ? 'Agotado' : '¡Casi agotado!' }}
           </div>
 
+          @if (isBuyer) {
           <button class="wishlist-btn" [class.active]="prod.is_favorite"
             (click)="$event.stopPropagation(); toggleFavorite(prod)">
             <i [class]="prod.is_favorite ? 'fa-solid fa-heart' : 'fa-regular fa-heart'"></i>
           </button>
+          }
 
           <img *ngIf="prod.images && prod.images.length > 0" [src]="getImagenUrl(prod)" [alt]="prod.name">
 

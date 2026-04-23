@@ -14,6 +14,7 @@ import { environment } from '../../../environments/environment';
 })
 export class Register implements OnInit {
   private readonly PENDING_CHECKOUT_KEY = 'pending_checkout';
+  private apiUrl = environment.apiUrl;
 
   userData = {
     name: '',
@@ -27,9 +28,9 @@ export class Register implements OnInit {
   errorMessage = '';
 
   constructor(
-    private authService: AuthService, 
+    private authService: AuthService,
     private router: Router,
-    private route: ActivatedRoute 
+    private route: ActivatedRoute
   ) {}
 
   ngOnInit() {
@@ -41,7 +42,6 @@ export class Register implements OnInit {
   }
 
   onRegister() {
-    // ... tu código de registro ...
     this.authService.register(this.userData).subscribe({
       next: (res: any) => {
         localStorage.setItem('token', res.token);
@@ -52,7 +52,7 @@ export class Register implements OnInit {
           this.router.navigate(['/checkout']);
           return;
         }
-        
+
         if (res.user.role === 'farmer') {
           this.router.navigate(['/agricultor/dashboard']);
         } else {
@@ -66,7 +66,8 @@ export class Register implements OnInit {
   }
 
   registerWithGoogle() {
-    sessionStorage.setItem('google_role_intent', this.userData.role);
-    window.location.href = `${environment.apiUrl}/auth/google`;
+    // Lee el rol directamente de la URL (?role=farmer o ?role=buyer)
+    const role = this.route.snapshot.queryParamMap.get('role') || 'buyer';
+    window.location.href = `${this.apiUrl}/auth/google?role=${role}`;
   }
 }

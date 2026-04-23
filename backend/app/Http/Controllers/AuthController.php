@@ -18,17 +18,17 @@ class AuthController extends Controller
     public function register(Request $request)
     {
         $fields = $request->validate([
-            'name' => 'required|string',
-            'email' => 'required|string|unique:users,email',
+            'name'     => 'required|string',
+            'email'    => 'required|string|unique:users,email',
             'password' => 'required|string|confirmed',
-            'role' => 'required|in:buyer,farmer',
+            'role'     => 'required|in:buyer,farmer',
         ]);
 
         $user = User::create([
-            'name' => $fields['name'],
-            'email' => $fields['email'],
+            'name'     => $fields['name'],
+            'email'    => $fields['email'],
             'password' => Hash::make($fields['password']),
-            'role' => $fields['role'],
+            'role'     => $fields['role'],
         ]);
 
         if ($fields['role'] === 'farmer') {
@@ -38,8 +38,8 @@ class AuthController extends Controller
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
-            'user' => $user,
-            'token' => $token,
+            'user'    => $user,
+            'token'   => $token,
             'message' => 'Usuario registrado correctamente'
         ], 201);
     }
@@ -50,7 +50,7 @@ class AuthController extends Controller
     public function login(Request $request)
     {
         $request->validate([
-            'email' => 'required|email',
+            'email'    => 'required|email',
             'password' => 'required',
         ]);
 
@@ -58,14 +58,14 @@ class AuthController extends Controller
             return response()->json(['message' => 'Credenciales incorrectas'], 401);
         }
 
-        $user = User::where('email', $request->email)->firstOrFail();
+        $user  = User::where('email', $request->email)->firstOrFail();
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
-            'message' => 'Login correcto',
+            'message'      => 'Login correcto',
             'access_token' => $token,
-            'token_type' => 'Bearer',
-            'user' => $user
+            'token_type'   => 'Bearer',
+            'user'         => $user
         ]);
     }
 
@@ -84,11 +84,11 @@ class AuthController extends Controller
     public function redirectToGoogle(Request $request)
     {
         $role = $request->query('role', 'buyer');
-        
-        // Pasamos el rol en el parámetro 'state'
-        return Socialite::driver('google')
-            ->with(['state' => 'role=' . $role])
-            ->redirect();
+
+        // Guardamos el rol en sesión antes de ir a Google
+        session(['google_intended_role' => $role]);
+
+        return Socialite::driver('google')->redirect();
     }
 
     /**
@@ -97,59 +97,60 @@ class AuthController extends Controller
     public function handleGoogleCallback(Request $request)
     {
         try {
-            $googleUser = Socialite::driver('google')->stateless()->user();
-            
-            // Recuperar el rol desde el state
-            $state = $request->input('state');
-            parse_str($state, $result);
-            $intendedRole = $result['role'] ?? 'buyer';
+            $googleUser = Socialite::driver('google')->user();
 
-            // Buscar por email o por ID de Google
+            // Recuperamos el rol de la sesión y limpiamos
+            $intendedRole = session('google_intended_role', 'buyer');
+            session()->forget('google_intended_role');
+
+            // Buscar usuario existente por email o google_id
             $user = User::where('email', $googleUser->getEmail())
                         ->orWhere('google_id', $googleUser->getId())
                         ->first();
 
             if (!$user) {
+                // Usuario nuevo: crear con el rol elegido
                 $user = User::create([
-                    'name' => $googleUser->getName(),
-                    'email' => $googleUser->getEmail(),
+                    'name'      => $googleUser->getName(),
+                    'email'     => $googleUser->getEmail(),
                     'google_id' => $googleUser->getId(),
-                    'role' => $intendedRole,
-                    'password' => Hash::make(Str::random(24)), 
+                    'role'      => $intendedRole,
+                    'password'  => Hash::make(Str::random(24)),
                 ]);
 
                 if ($intendedRole === 'farmer') {
                     $this->createFarmerProfile($user->id);
                 }
             } else {
-                // Actualizar ID de Google por si acaso
+                // Usuario existente: solo actualizamos google_id, NUNCA el rol
                 $user->update(['google_id' => $googleUser->getId()]);
             }
 
-            // Sanctum Token
+            // Renovar token Sanctum
             $user->tokens()->delete();
             $token = $user->createToken('Google Token')->plainTextToken;
 
-            // Datos Base64 para Angular
+            // Datos del usuario en Base64 para Angular
             $userData = base64_encode(json_encode([
-                'id' => $user->id,
-                'name' => $user->name,
+                'id'    => $user->id,
+                'name'  => $user->name,
                 'email' => $user->email,
-                'role' => $user->role
+                'role'  => $user->role,
             ]));
 
-            // Redirección dinámica según el .env
             $frontendUrl = env('FRONTEND_URL', 'https://agroconecta.store');
-            
-            return redirect("{$frontendUrl}/login-success?token={$token}&data={$userData}");
+
+            return redirect("{$frontendUrl}/login?token={$token}&data={$userData}");
 
         } catch (\Exception $e) {
-            dd($e->getMessage());
             \Log::error("Error Auth Google: " . $e->getMessage());
             return redirect(env('FRONTEND_URL') . '/login?error=auth_failed');
         }
     }
 
+    /**
+     * Crear perfil de agricultor
+     */
     private function createFarmerProfile($userId)
     {
         Farmer::updateOrCreate(
