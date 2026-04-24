@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { filter } from 'rxjs/operators';
 import { CartService } from './core/services/cart.service';
 import { CartDrawer } from './components/cart-drawer/cart-drawer';
+import { injectSpeedInsights } from '@vercel/speed-insights';
 
 @Component({
   selector: 'app-root',
@@ -23,7 +24,6 @@ export class App implements OnInit {
   isAdmin = false;
   textoBusquedaGlobal = '';
 
-  // ✅ Rutas donde NO se muestra header/footer
   private readonly rutasOcultas = [
     '/login',
     '/registro',
@@ -32,13 +32,15 @@ export class App implements OnInit {
     '/admin',
   ];
 
-  constructor(private router: Router, public cartService: CartService) {}
+  constructor(private router: Router, public cartService: CartService) {
+    injectSpeedInsights();
+  }
 
   ngOnInit(): void {
     this.router.events.pipe(
       filter(event => event instanceof NavigationEnd)
     ).subscribe((event: NavigationEnd) => {
-      const url = event.urlAfterRedirects.split('?')[0]; // ignora query params
+      const url = event.urlAfterRedirects.split('?')[0];
       this.mostrarLayout = !this.rutasOcultas.some(ruta => url.startsWith(ruta));
       this.isUserMenuOpen = false;
       this.checkLoginStatus();
