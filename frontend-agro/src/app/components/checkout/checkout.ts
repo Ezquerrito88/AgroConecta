@@ -1,10 +1,4 @@
-import {
-  Component,
-  OnInit,
-  AfterViewChecked,
-  DestroyRef,
-  inject,
-} from '@angular/core';
+import { Component, OnInit, AfterViewChecked, DestroyRef, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule, CurrencyPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -77,37 +71,37 @@ interface ZippopotamResponse {
 export class Checkout implements OnInit, AfterViewChecked {
 
   // ── Storage keys ──────────────────────────
-  private readonly PENDING_CHECKOUT_KEY        = 'pending_checkout';
-  private readonly CART_DISCOUNT_KEY           = 'cart_discount';
+  private readonly PENDING_CHECKOUT_KEY = 'pending_checkout';
+  private readonly CART_DISCOUNT_KEY = 'cart_discount';
   private readonly LAST_ORDER_CONFIRMATION_KEY = 'last_order_confirmation';
-  private readonly SAVED_USER_DATA_KEY         = 'checkout_saved_data';
+  private readonly SAVED_USER_DATA_KEY = 'checkout_saved_data';
 
   // ── DI ────────────────────────────────────
   private readonly destroyRef = inject(DestroyRef);
 
   // ── Public state ──────────────────────────
-  items          = [] as ReturnType<CarritoService['getItems']>;
-  loading        = false;
-  errorMessage   = '';
-  discountCode   = '';
-  discountPct    = 0;
-  currentStep    = 1;
+  items = [] as ReturnType<CarritoService['getItems']>;
+  loading = false;
+  errorMessage = '';
+  discountCode = '';
+  discountPct = 0;
+  currentStep = 1;
   paypalApproved = false;
 
   // ── Postal code autocomplete state ────────
-  postalCodeLoading  = false;
-  postalCodeError    = false;
+  postalCodeLoading = false;
+  postalCodeError = false;
   postalCodeResolved = false;
 
   // ── Postal code Subject (debounce) ────────  ← NUEVO
   private postalCodeSubject = new Subject<string>();
 
   // ── Private Stripe/PayPal state ───────────
-  private stripe: Stripe | null                 = null;
+  private stripe: Stripe | null = null;
   private stripeElements: StripeElements | null = null;
-  private stripeElementMounted  = false;
+  private stripeElementMounted = false;
   private paypalButtonsRendered = false;
-  private step3InitPending      = false;
+  private step3InitPending = false;
   private paymentIntentId: string | null = null;
   private paypalCaptureId: string | null = null;
 
@@ -116,22 +110,22 @@ export class Checkout implements OnInit, AfterViewChecked {
 
   // ── Form model ────────────────────────────
   form: CheckoutForm = {
-    fullName:      '',
-    email:         '',
-    phone:         '',
-    address:       '',
-    city:          '',
-    postalCode:    '',
-    notes:         '',
+    fullName: '',
+    email: '',
+    phone: '',
+    address: '',
+    city: '',
+    postalCode: '',
+    notes: '',
     paymentMethod: 'card',
-    saveData:      true,
-    acceptTerms:   false,
-    cardNumber:    '',
-    cardHolder:    '',
-    cardExpiry:    '',
-    cardCVV:       '',
-    bizumPhone:    '',
-    paypalEmail:   '',
+    saveData: true,
+    acceptTerms: false,
+    cardNumber: '',
+    cardHolder: '',
+    cardExpiry: '',
+    cardCVV: '',
+    bizumPhone: '',
+    paypalEmail: '',
   };
 
   constructor(
@@ -140,7 +134,7 @@ export class Checkout implements OnInit, AfterViewChecked {
     private paymentService: PaymentService,
     private router: Router,
     private http: HttpClient,
-  ) {}
+  ) { }
 
 
   // ════════════════════════════════════════════
@@ -176,15 +170,15 @@ export class Checkout implements OnInit, AfterViewChecked {
       distinctUntilChanged(),
       switchMap(code => {
         if (code.length !== 5) {
-          this.postalCodeLoading  = false;
-          this.postalCodeError    = false;
+          this.postalCodeLoading = false;
+          this.postalCodeError = false;
           this.postalCodeResolved = false;
-          this.form.city          = '';
+          this.form.city = '';
           return of(null);
         }
         this.postalCodeLoading = true;
-        this.postalCodeError   = false;
-        this.form.city         = '';
+        this.postalCodeError = false;
+        this.form.city = '';
         return this.http
           .get<ZippopotamResponse>(`https://api.zippopotam.us/es/${code}`)
           .pipe(catchError(() => of(null)));
@@ -194,20 +188,33 @@ export class Checkout implements OnInit, AfterViewChecked {
       this.postalCodeLoading = false;
       if (!data) {
         if (this.form.postalCode.length === 5) {
-          this.postalCodeError    = true;
+          this.postalCodeError = true;
           this.postalCodeResolved = false;
         }
         return;
       }
       if (data.places?.length > 0) {
-        this.form.city          = data.places[0]['place name'];
-        this.postalCodeError    = false;
+        this.form.city = data.places[0]['place name'];
+        this.postalCodeError = false;
         this.postalCodeResolved = true;
       } else {
-        this.postalCodeError    = true;
+        this.postalCodeError = true;
         this.postalCodeResolved = false;
       }
     });
+    this.preloadPaypal();
+  }
+
+  private preloadPaypal(): void {
+    const clientId = environment.paypalClientId;
+    if (!clientId || clientId.includes('replace_me')) return;
+    if (!document.querySelector('script[src*="paypal.com/sdk"]')) {
+      const script = document.createElement('script');
+      script.src = `https://www.paypal.com/sdk/js?client-id=${clientId}&currency=EUR&intent=capture`;
+      script.async = true;
+      script.defer = true;
+      document.body.appendChild(script);
+    }
   }
 
   ngAfterViewChecked(): void {
@@ -265,11 +272,11 @@ export class Checkout implements OnInit, AfterViewChecked {
     }
 
     if (this.currentStep === 2) {
-      this.currentStep           = 3;
-      this.paypalApproved        = false;
-      this.stripeElementMounted  = false;
+      this.currentStep = 3;
+      this.paypalApproved = false;
+      this.stripeElementMounted = false;
       this.paypalButtonsRendered = false;
-      this.step3InitPending      = true;
+      this.step3InitPending = true;
     }
   }
 
@@ -281,7 +288,7 @@ export class Checkout implements OnInit, AfterViewChecked {
   }
 
   onPaymentMethodChanged(): void {
-    this.errorMessage   = '';
+    this.errorMessage = '';
     this.paypalApproved = false;
   }
 
@@ -303,12 +310,12 @@ export class Checkout implements OnInit, AfterViewChecked {
 
   private getStep1ValidationError(): string | null {
     const f = this.form;
-    if (!f.fullName.trim())                   return 'El nombre completo es obligatorio.';
-    if (!this.isValidEmail(f.email))          return 'Introduce un email válido.';
-    if (!this.isValidSpanishPhone(f.phone))   return 'Introduce un teléfono válido (9 dígitos).';
-    if (!f.address.trim())                    return 'La dirección es obligatoria.';
+    if (!f.fullName.trim()) return 'El nombre completo es obligatorio.';
+    if (!this.isValidEmail(f.email)) return 'Introduce un email válido.';
+    if (!this.isValidSpanishPhone(f.phone)) return 'Introduce un teléfono válido (9 dígitos).';
+    if (!f.address.trim()) return 'La dirección es obligatoria.';
     if (!/^\d{5}$/.test(f.postalCode.trim())) return 'El código postal debe tener 5 dígitos.';
-    if (!f.city.trim())                       return 'La ciudad es obligatoria.';
+    if (!f.city.trim()) return 'La ciudad es obligatoria.';
     return null;
   }
 
@@ -322,11 +329,11 @@ export class Checkout implements OnInit, AfterViewChecked {
 
   private isPaymentDataValid(): boolean {
     switch (this.form.paymentMethod) {
-      case 'card':             return this.stripeElementMounted;
-      case 'bizum':            return /^\d{9}$/.test(this.form.bizumPhone.replace(/\s/g, ''));
-      case 'paypal':           return this.paypalApproved;
+      case 'card': return this.stripeElementMounted;
+      case 'bizum': return /^\d{9}$/.test(this.form.bizumPhone.replace(/\s/g, ''));
+      case 'paypal': return this.paypalApproved;
       case 'cash_on_delivery': return true;
-      default:                 return false;
+      default: return false;
     }
   }
 
@@ -386,7 +393,7 @@ export class Checkout implements OnInit, AfterViewChecked {
     if (key && !key.includes('replace_me')) {
       loadStripe(key)
         .then(s => { this.stripe = s; })
-        .catch(() => {});
+        .catch(() => { });
     }
   }
 
@@ -452,7 +459,7 @@ export class Checkout implements OnInit, AfterViewChecked {
         confirmParams: {
           payment_method_data: {
             billing_details: {
-              name:  this.form.fullName,
+              name: this.form.fullName,
               email: this.form.email,
               phone: this.form.phone,
             },
@@ -481,26 +488,26 @@ export class Checkout implements OnInit, AfterViewChecked {
     if (error.code === 'card_declined') {
       const hint = this.isTestMode() ? ' En modo TEST usa: 4242 4242 4242 4242' : '';
       const reasons: Record<string, string> = {
-        fraudulent:         `Tarjeta rechazada por sospecha de fraude.${hint}`,
+        fraudulent: `Tarjeta rechazada por sospecha de fraude.${hint}`,
         insufficient_funds: `Fondos insuficientes.${hint}`,
-        lost_card:          `Tarjeta reportada como perdida.${hint}`,
-        stolen_card:        `Tarjeta reportada como robada.${hint}`,
-        generic_decline:    `Tarjeta rechazada.${hint}`,
+        lost_card: `Tarjeta reportada como perdida.${hint}`,
+        stolen_card: `Tarjeta reportada como robada.${hint}`,
+        generic_decline: `Tarjeta rechazada.${hint}`,
       };
       return `❌ ${reasons[decline ?? ''] ?? `Tarjeta rechazada (${decline}).${hint}`}`;
     }
 
     const messages: Record<string, string> = {
-      incomplete_number:    '❌ Número de tarjeta incompleto.',
-      invalid_number:       '❌ Número de tarjeta inválido.',
-      incomplete_expiry:    '❌ Fecha de expiración incompleta.',
+      incomplete_number: '❌ Número de tarjeta incompleto.',
+      invalid_number: '❌ Número de tarjeta inválido.',
+      incomplete_expiry: '❌ Fecha de expiración incompleta.',
       invalid_expiry_month: '❌ Mes de expiración inválido.',
-      invalid_expiry_year:  '❌ Año de expiración inválido.',
-      expired_card:         '❌ La tarjeta está caducada.',
-      incomplete_cvc:       '❌ CVC incompleto.',
-      invalid_cvc:          '❌ CVC inválido.',
-      processing_error:     '❌ Error al procesar. Inténtalo de nuevo.',
-      incorrect_zip:        '❌ Código postal incorrecto.',
+      invalid_expiry_year: '❌ Año de expiración inválido.',
+      expired_card: '❌ La tarjeta está caducada.',
+      incomplete_cvc: '❌ CVC incompleto.',
+      invalid_cvc: '❌ CVC inválido.',
+      processing_error: '❌ Error al procesar. Inténtalo de nuevo.',
+      incorrect_zip: '❌ Código postal incorrecto.',
     };
 
     return messages[error.code] ??
@@ -534,7 +541,7 @@ export class Checkout implements OnInit, AfterViewChecked {
       const paypal = await loadScript({
         clientId,
         currency: 'EUR',
-        intent:   'capture',
+        intent: 'capture',
       });
 
       if (!paypal?.Buttons) {
@@ -559,16 +566,16 @@ export class Checkout implements OnInit, AfterViewChecked {
               this.paymentService.capturePaypalOrder(data.orderID),
             );
             this.paypalCaptureId = capture.paypal_capture_id ?? null;
-            this.paypalApproved  = true;
+            this.paypalApproved = true;
             this.createOrders();
           } catch {
-            this.loading      = false;
+            this.loading = false;
             this.errorMessage = 'Error al capturar el pago de PayPal.';
           }
         },
 
         onError: (err: any) => {
-          this.loading      = false;
+          this.loading = false;
           this.errorMessage = 'No se pudo completar el pago con PayPal.';
           console.error('PayPal error:', err);
         },
@@ -602,29 +609,29 @@ export class Checkout implements OnInit, AfterViewChecked {
 
       if (!ordersByFarmer.has(item.farmerId)) {
         ordersByFarmer.set(item.farmerId, {
-          farmer_id:              item.farmerId,
-          items:                  [],
-          shipping_address:       this.composeShippingAddress(),
-          discount_code:          this.discountCode    || undefined,
-          discount_pct:           this.discountPct     || undefined,
-          payment_method:         this.form.paymentMethod,
-          payment_intent_id:      this.paymentIntentId || undefined,
+          farmer_id: item.farmerId,
+          items: [],
+          shipping_address: this.composeShippingAddress(),
+          discount_code: this.discountCode || undefined,
+          discount_pct: this.discountPct || undefined,
+          payment_method: this.form.paymentMethod,
+          payment_intent_id: this.paymentIntentId || undefined,
           payment_transaction_id: this.paypalCaptureId || undefined,
         });
       }
 
       ordersByFarmer.get(item.farmerId)!.items.push({
         product_id: item.id,
-        quantity:   item.quantity,
+        quantity: item.quantity,
       });
     }
 
-    this.loading      = true;
+    this.loading = true;
     this.errorMessage = '';
 
-    const snapshotTotal       = this.total;
-    const snapshotTotalItems  = this.totalItems;
-    const snapshotDiscount    = this.discountCode;
+    const snapshotTotal = this.total;
+    const snapshotTotalItems = this.totalItems;
+    const snapshotDiscount = this.discountCode;
     const snapshotDiscountPct = this.discountPct;
 
     forkJoin(
@@ -634,13 +641,13 @@ export class Checkout implements OnInit, AfterViewChecked {
         localStorage.setItem(
           this.LAST_ORDER_CONFIRMATION_KEY,
           JSON.stringify({
-            orderIds:      orders.map(o => o.id),
-            total:         snapshotTotal,
-            totalItems:    snapshotTotalItems,
+            orderIds: orders.map(o => o.id),
+            total: snapshotTotal,
+            totalItems: snapshotTotalItems,
             paymentMethod: this.getPaymentLabel(this.form.paymentMethod),
-            discountCode:  snapshotDiscount,
-            discountPct:   snapshotDiscountPct,
-            createdAt:     new Date().toISOString(),
+            discountCode: snapshotDiscount,
+            discountPct: snapshotDiscountPct,
+            createdAt: new Date().toISOString(),
           }),
         );
 
@@ -652,7 +659,7 @@ export class Checkout implements OnInit, AfterViewChecked {
         this.router.navigate(['/checkout/confirmacion']);
       },
       error: err => {
-        this.loading      = false;
+        this.loading = false;
         this.errorMessage = err?.error?.message ?? 'No se pudo tramitar el pedido. Inténtalo de nuevo.';
       },
     });
@@ -680,8 +687,8 @@ export class Checkout implements OnInit, AfterViewChecked {
     try {
       const user = JSON.parse(localStorage.getItem('user') ?? 'null');
       if (user) {
-        this.form.fullName = user.name  ?? '';
-        this.form.email    = user.email ?? '';
+        this.form.fullName = user.name ?? '';
+        this.form.email = user.email ?? '';
       }
     } catch { /* no-op */ }
 
@@ -690,11 +697,11 @@ export class Checkout implements OnInit, AfterViewChecked {
         localStorage.getItem(this.SAVED_USER_DATA_KEY) ?? 'null',
       );
       if (saved) {
-        if (saved.fullName)   this.form.fullName   = saved.fullName;
-        if (saved.email)      this.form.email      = saved.email;
-        if (saved.phone)      this.form.phone      = saved.phone;
-        if (saved.address)    this.form.address    = saved.address;
-        if (saved.city)       this.form.city       = saved.city;
+        if (saved.fullName) this.form.fullName = saved.fullName;
+        if (saved.email) this.form.email = saved.email;
+        if (saved.phone) this.form.phone = saved.phone;
+        if (saved.address) this.form.address = saved.address;
+        if (saved.city) this.form.city = saved.city;
         if (saved.postalCode) this.form.postalCode = saved.postalCode;
       }
     } catch { /* no-op */ }
@@ -702,11 +709,11 @@ export class Checkout implements OnInit, AfterViewChecked {
 
   private persistUserData(): void {
     const data: SavedUserData = {
-      fullName:   this.form.fullName,
-      email:      this.form.email,
-      phone:      this.form.phone,
-      address:    this.form.address,
-      city:       this.form.city,
+      fullName: this.form.fullName,
+      email: this.form.email,
+      phone: this.form.phone,
+      address: this.form.address,
+      city: this.form.city,
       postalCode: this.form.postalCode,
     };
     localStorage.setItem(this.SAVED_USER_DATA_KEY, JSON.stringify(data));
@@ -715,15 +722,15 @@ export class Checkout implements OnInit, AfterViewChecked {
   private loadDiscountFromStorage(): void {
     try {
       const saved = JSON.parse(localStorage.getItem(this.CART_DISCOUNT_KEY) ?? 'null');
-      const code  = String(saved?.code ?? '').toUpperCase();
-      const pct   = Number(saved?.pct ?? 0);
+      const code = String(saved?.code ?? '').toUpperCase();
+      const pct = Number(saved?.pct ?? 0);
       if (code && pct > 0) {
         this.discountCode = code;
-        this.discountPct  = pct;
+        this.discountPct = pct;
       }
     } catch {
       this.discountCode = '';
-      this.discountPct  = 0;
+      this.discountPct = 0;
     }
   }
 
@@ -755,9 +762,9 @@ export class Checkout implements OnInit, AfterViewChecked {
 
   getPaymentLabel(method: CheckoutForm['paymentMethod']): string {
     const labels: Record<CheckoutForm['paymentMethod'], string> = {
-      card:             'Tarjeta',
-      paypal:           'PayPal',
-      bizum:            'Bizum',
+      card: 'Tarjeta',
+      paypal: 'PayPal',
+      bizum: 'Bizum',
       cash_on_delivery: 'Contra reembolso',
     };
     return labels[method] ?? 'Tarjeta';
@@ -765,9 +772,9 @@ export class Checkout implements OnInit, AfterViewChecked {
 
   getPaymentHint(method: CheckoutForm['paymentMethod']): string {
     const hints: Record<CheckoutForm['paymentMethod'], string> = {
-      card:             'Introducirás los datos de tu tarjeta en el paso seguro de Stripe.',
-      paypal:           'Se abrirá el popup oficial de PayPal para completar el pago.',
-      bizum:            'Recibirás la solicitud de pago en tu móvil.',
+      card: 'Introducirás los datos de tu tarjeta en el paso seguro de Stripe.',
+      paypal: 'Se abrirá el popup oficial de PayPal para completar el pago.',
+      bizum: 'Recibirás la solicitud de pago en tu móvil.',
       cash_on_delivery: 'Pagarás en efectivo cuando recibas el pedido en tu domicilio.',
     };
     return hints[method] ?? '';

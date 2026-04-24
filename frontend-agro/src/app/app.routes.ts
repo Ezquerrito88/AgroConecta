@@ -1,32 +1,57 @@
 import { Routes } from '@angular/router';
-import { Login } from './components/login/login';
-import { Register } from './components/register/register';
-import { Dashboard } from './components/dashboard/dashboard';
-import { Catalogo } from './components/catalogo/catalogo';
-import { Favoritos } from './components/favoritos/favoritos';
-import { DetalleProducto } from './components/detalle-producto/detalle-producto';
-import { LoginSuccess } from './components/login-success/login-success';
-import { Cesta } from './components/cesta/cesta';
-import { Checkout } from './components/checkout/checkout';
-import { CheckoutConfirmation } from './components/checkout-confirmation/checkout-confirmation';
 import { authGuard } from './core/guards/auth-guard';
 import { farmerGuard } from './core/guards/farmer-guard';
 import { buyerGuard } from './core/guards/buyer-guard-guard';
 import { adminGuard } from './admin/guards/admin-guard';
 
 export const routes: Routes = [
-  { path: '', component: Dashboard },
-  { path: 'login', component: Login },
-  { path: 'registro', component: Register },
-  { path: 'login-success', component: LoginSuccess },
-  { path: 'productos', component: Catalogo },
-  { path: 'producto/:id', component: DetalleProducto },
+  // Rutas públicas con lazy loading
+  {
+    path: '',
+    loadComponent: () => import('./components/dashboard/dashboard').then(m => m.Dashboard)
+  },
+  {
+    path: 'login',
+    loadComponent: () => import('./components/login/login').then(m => m.Login)
+  },
+  {
+    path: 'registro',
+    loadComponent: () => import('./components/register/register').then(m => m.Register)
+  },
+  {
+    path: 'login-success',
+    loadComponent: () => import('./components/login-success/login-success').then(m => m.LoginSuccess)
+  },
+  {
+    path: 'productos',
+    loadComponent: () => import('./components/catalogo/catalogo').then(m => m.Catalogo)
+  },
+  {
+    path: 'producto/:id',
+    loadComponent: () => import('./components/detalle-producto/detalle-producto').then(m => m.DetalleProducto)
+  },
 
   // Solo usuarios logueados
-  { path: 'productos/favoritos', component: Favoritos, canActivate: [authGuard] },
-  { path: 'cesta', component: Cesta, canActivate: [authGuard] },
-  { path: 'checkout', component: Checkout, canActivate: [authGuard] },
-  { path: 'checkout/confirmacion', component: CheckoutConfirmation, canActivate: [authGuard] },
+  {
+    path: 'productos/favoritos',
+    loadComponent: () => import('./components/favoritos/favoritos').then(m => m.Favoritos),
+    canActivate: [authGuard]
+  },
+  {
+    path: 'cesta',
+    loadComponent: () => import('./components/cesta/cesta').then(m => m.Cesta),
+    canActivate: [authGuard]
+  },
+  {
+    path: 'checkout',
+    loadComponent: () => import('./components/checkout/checkout').then(m => m.Checkout),
+    canActivate: [authGuard]
+  },
+  {
+    path: 'checkout/confirmacion',
+    loadComponent: () => import('./components/checkout-confirmation/checkout-confirmation').then(m => m.CheckoutConfirmation),
+    canActivate: [authGuard]
+  },
 
   // Solo agricultores
   {
@@ -64,8 +89,7 @@ export const routes: Routes = [
   {
     path: 'admin',
     canActivate: [adminGuard],
-    loadChildren: () =>
-      import('./admin/admin.routes').then(m => m.ADMIN_ROUTES)
+    loadChildren: () => import('./admin/admin.routes').then(m => m.ADMIN_ROUTES)
   },
 
   { path: '**', redirectTo: '' }
