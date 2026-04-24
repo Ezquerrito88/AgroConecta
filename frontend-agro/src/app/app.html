@@ -1,4 +1,4 @@
-<header class="agro-header" [class.hidden]="!mostrarLayout">
+<header class="agro-header" *ngIf="mostrarLayout">
   <div class="header-container">
 
     <div class="logo-box" routerLink="/">
@@ -88,7 +88,7 @@
   <router-outlet></router-outlet>
 </main>
 
-<footer class="agro-footer" [class.hidden]="!mostrarLayout">
+<footer class="agro-footer" *ngIf="mostrarLayout">
   <div class="footer-container">
     <div class="footer-grid">
 

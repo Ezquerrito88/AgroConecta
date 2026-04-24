@@ -23,16 +23,23 @@ export class App implements OnInit {
   isAdmin = false;
   textoBusquedaGlobal = '';
 
+  // ✅ Rutas donde NO se muestra header/footer
+  private readonly rutasOcultas = [
+    '/login',
+    '/registro',
+    '/agricultor',
+    '/comprador',
+    '/admin',
+  ];
+
   constructor(private router: Router, public cartService: CartService) {}
 
   ngOnInit(): void {
     this.router.events.pipe(
       filter(event => event instanceof NavigationEnd)
     ).subscribe((event: NavigationEnd) => {
-      const rutasOcultas = ['/login', '/registro', '/agricultor', '/comprador', '/admin'];
-      // ✅ CAMBIADO: en vez de cambiar mostrarLayout (que elimina del DOM),
-      // ahora siempre está en true — el header/footer se ocultan con [class.hidden]
-      this.mostrarLayout = !rutasOcultas.some(ruta => event.urlAfterRedirects.startsWith(ruta));
+      const url = event.urlAfterRedirects.split('?')[0]; // ignora query params
+      this.mostrarLayout = !this.rutasOcultas.some(ruta => url.startsWith(ruta));
       this.isUserMenuOpen = false;
       this.checkLoginStatus();
 
