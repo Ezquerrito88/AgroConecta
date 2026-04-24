@@ -1,4 +1,4 @@
-<!-- HEADER -->
+<!-- BREADCRUMB -->
 <header class="catalog-hero" *ngIf="product">
   <div class="hero-container">
     <nav class="breadcrumb" aria-label="Ruta de navegación">
@@ -12,8 +12,6 @@
       <span class="separator" aria-hidden="true">›</span>
       <span class="current">{{ product.name }}</span>
     </nav>
-    <h1 class="hero-title">{{ product.name }}</h1>
-    <p class="hero-subtitle">{{ product.short_description || product.description }}</p>
   </div>
 </header>
 
@@ -34,7 +32,6 @@
 
     <!-- ====== COLUMNA IMAGEN ====== -->
     <div class="image-column">
-
       <div class="gallery-wrap">
         <div class="vinted-gallery" [ngClass]="'count-' + (product.images?.length > 2 ? '3plus' : (product.images?.length || 1))">
 
@@ -73,8 +70,14 @@
         </div>
 
         <!-- Botón favorito -->
-        <button *ngIf="!isFarmer" class="fav-btn" aria-label="Guardar en favoritos" (click)="$event.stopPropagation()">
-          <i class="fa-regular fa-heart"></i>
+        <button
+          *ngIf="!isFarmer"
+          class="fav-btn"
+          [class.active]="isFavorite"
+          [attr.aria-label]="isFavorite ? 'Quitar de favoritos' : 'Guardar en favoritos'"
+          (click)="toggleFavorite($event)"
+        >
+          <i [class]="isFavorite ? 'fa-solid fa-heart' : 'fa-regular fa-heart'"></i>
         </button>
 
         <!-- Flechas carrusel móvil -->
@@ -118,7 +121,6 @@
         </button>
         <div class="lb-counter">{{ lightboxIndex + 1 }} / {{ product.images.length }}</div>
       </div>
-
     </div>
 
     <!-- ====== COLUMNA INFO ====== -->
@@ -128,17 +130,27 @@
       <h2 class="product-name-title">{{ product.name }}</h2>
       <p class="product-short-desc">{{ product.short_description || product.description }}</p>
 
-      <!-- Rating -->
-      <div class="rating-box" aria-label="4.9 de 5 estrellas, 32 valoraciones">
+      <!-- Rating dinámico -->
+      <div class="rating-box" *ngIf="ratingCount > 0" [attr.aria-label]="ratingAverage + ' de 5 estrellas, ' + ratingCount + ' valoraciones'">
         <div class="stars" aria-hidden="true">
-          <i class="fa-solid fa-star"></i>
-          <i class="fa-solid fa-star"></i>
-          <i class="fa-solid fa-star"></i>
-          <i class="fa-solid fa-star"></i>
-          <i class="fa-solid fa-star-half-stroke"></i>
+          <ng-container *ngFor="let type of starTypes">
+            <i *ngIf="type === 'full'"  class="fa-solid fa-star"></i>
+            <i *ngIf="type === 'half'"  class="fa-solid fa-star-half-stroke"></i>
+            <i *ngIf="type === 'empty'" class="fa-regular fa-star"></i>
+          </ng-container>
         </div>
-        <strong class="rating-num">4.9</strong>
-        <span class="rating-text">(32 valoraciones)</span>
+        <strong class="rating-num">{{ ratingAverage }}</strong>
+        <span class="rating-text">({{ ratingCount }} valoracion{{ ratingCount === 1 ? '' : 'es' }})</span>
+      </div>
+      <div class="rating-box no-reviews-yet" *ngIf="ratingCount === 0">
+        <div class="stars empty-stars" aria-hidden="true">
+          <i class="fa-regular fa-star"></i>
+          <i class="fa-regular fa-star"></i>
+          <i class="fa-regular fa-star"></i>
+          <i class="fa-regular fa-star"></i>
+          <i class="fa-regular fa-star"></i>
+        </div>
+        <span class="rating-text">Sin valoraciones aún</span>
       </div>
 
       <!-- Farmer card -->
@@ -156,7 +168,6 @@
         </div>
         <div class="farmer-actions">
           <span class="eco-badge"><i class="fa-solid fa-leaf"></i> Eco</span>
-          <!-- Botón contactar farmer -->
           <button
             class="contact-farmer-btn"
             (click)="contactarFarmer()"
@@ -178,7 +189,7 @@
         </span>
       </div>
 
-      <!-- Cantidad + CTA — solo para no agricultores -->
+      <!-- Cantidad + CTA -->
       <div class="actions-row" *ngIf="!isFarmer">
         <div class="qty-selector" role="group" aria-label="Seleccionar cantidad">
           <button (click)="cambiarCantidad(-1)" [disabled]="cantidad <= 1" aria-label="Reducir cantidad">−</button>
@@ -199,7 +210,7 @@
         </button>
       </div>
 
-      <!-- Trust row — solo para no agricultores -->
+      <!-- Trust row -->
       <div class="trust-row" *ngIf="!isFarmer">
         <div class="trust-item"><i class="fa-solid fa-truck-fast"></i><span>Envío 24–48h</span></div>
         <div class="trust-item"><i class="fa-solid fa-rotate-left"></i><span>Devolución fácil</span></div>
@@ -220,7 +231,7 @@
       </button>
       <button role="tab" [attr.aria-selected]="activeTab === 'valoraciones'" [class.active]="activeTab === 'valoraciones'" (click)="setTab('valoraciones')">
         <i class="fa-regular fa-star"></i> Valoraciones
-        <span class="tab-count" *ngIf="product.reviews?.length">{{ product.reviews.length }}</span>
+        <span class="tab-count" *ngIf="ratingCount > 0">{{ ratingCount }}</span>
       </button>
       <span class="tab-indicator"></span>
     </div>
@@ -258,15 +269,30 @@
 
       <!-- VALORACIONES -->
       <div *ngIf="activeTab === 'valoraciones'" class="text-content reviews-tab" role="tabpanel">
-        <div class="no-reviews" *ngIf="!product.reviews?.length">
+        <div class="no-reviews" *ngIf="ratingCount === 0">
           <div class="no-reviews-icon"><i class="fa-regular fa-comment-dots"></i></div>
           <p>Este producto aún no tiene valoraciones.</p>
           <button class="btn-write-review">
             <i class="fa-solid fa-pen-to-square"></i> Sé el primero en opinar
           </button>
         </div>
-        <div *ngIf="product.reviews?.length > 0">
-          <h3 class="reviews-title">Opiniones de clientes ({{ product.reviews.length }})</h3>
+        <div *ngIf="ratingCount > 0">
+          <!-- Resumen rating -->
+          <div class="reviews-summary">
+            <div class="reviews-avg">
+              <span class="avg-num">{{ ratingAverage }}</span>
+              <div class="avg-stars">
+                <ng-container *ngFor="let type of starTypes">
+                  <i *ngIf="type === 'full'"  class="fa-solid fa-star"></i>
+                  <i *ngIf="type === 'half'"  class="fa-solid fa-star-half-stroke"></i>
+                  <i *ngIf="type === 'empty'" class="fa-regular fa-star"></i>
+                </ng-container>
+              </div>
+              <span class="avg-label">{{ ratingCount }} valoracion{{ ratingCount === 1 ? '' : 'es' }}</span>
+            </div>
+          </div>
+
+          <h3 class="reviews-title">Opiniones de clientes ({{ ratingCount }})</h3>
           <div class="review-card" *ngFor="let review of product.reviews">
             <div class="review-header">
               <div class="reviewer-avatar">{{ review.user?.name?.charAt(0) || 'U' }}</div>

@@ -5,6 +5,7 @@ import { HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { environment } from '../../../environments/environment';
 import { CartService } from '../../core/services/cart.service';
+import { ProductoService } from '../../core/services/producto.service'; // ajusta el path si es necesario
 
 @Component({
   selector: 'app-detalle-producto',
@@ -27,12 +28,15 @@ export class DetalleProducto implements OnInit, AfterViewInit {
   lightboxOpen: boolean = false;
   lightboxIndex: number = 0;
 
+  isFavorite: boolean = false;
+
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private http: HttpClient,
     private cd: ChangeDetectorRef,
-    private cartService: CartService
+    private cartService: CartService,
+    private productoService: ProductoService
   ) { }
 
   ngOnInit(): void {
@@ -63,6 +67,51 @@ export class DetalleProducto implements OnInit, AfterViewInit {
     }
   }
 
+  // ===== FAVORITOS =====
+  private loadFavoriteState(): void {
+    this.isFavorite = !!this.product?.is_favorite;
+  }
+
+  toggleFavorite(event: Event): void {
+    event.stopPropagation();
+    if (!localStorage.getItem('token')) {
+      this.router.navigate(['/login']);
+      return;
+    }
+    if (!this.product) return;
+
+    this.isFavorite = !this.isFavorite;
+    this.product.is_favorite = this.isFavorite;
+
+    this.productoService.toggleFavorite(this.product.id).subscribe({
+      error: () => {
+        this.isFavorite = !this.isFavorite;
+        this.product.is_favorite = this.isFavorite;
+      }
+    });
+  }
+
+  // ===== RATING =====
+  get ratingAverage(): number {
+    if (!this.product?.reviews?.length) return 0;
+    const sum = this.product.reviews.reduce((acc: number, r: any) => acc + (r.rating || 0), 0);
+    return Math.round((sum / this.product.reviews.length) * 10) / 10;
+  }
+
+  get ratingCount(): number {
+    return this.product?.reviews?.length || 0;
+  }
+
+  get starTypes(): string[] {
+    const avg = this.ratingAverage;
+    return [1, 2, 3, 4, 5].map(i => {
+      if (avg >= i) return 'full';
+      if (avg >= i - 0.5) return 'half';
+      return 'empty';
+    });
+  }
+
+  // ===== TABS =====
   setTab(tab: string): void {
     this.activeTab = tab;
     setTimeout(() => this.moveIndicator(), 0);
@@ -76,6 +125,7 @@ export class DetalleProducto implements OnInit, AfterViewInit {
     indicator.style.left = `${activeBtn.offsetLeft}px`;
   }
 
+  // ===== LIGHTBOX =====
   openLightbox(index: number): void {
     this.lightboxIndex = index;
     this.lightboxOpen = true;
@@ -88,6 +138,7 @@ export class DetalleProducto implements OnInit, AfterViewInit {
     document.body.style.overflow = '';
   }
 
+  // ===== IMÁGENES =====
   getImagenUrl(product: any): string {
     if (product?.images?.length > 0) {
       const img = product.images[this.selectedImageIndex] ?? product.images[0];
@@ -110,12 +161,14 @@ export class DetalleProducto implements OnInit, AfterViewInit {
     return 'assets/placeholder.png';
   }
 
+  // ===== PRODUCTO =====
   cargarProducto(id: string): void {
     this.isLoading = true;
     this.http.get(`${this.API_URL}/products/${id}`).subscribe({
       next: (data: any) => {
         this.product = data;
         this.isLoading = false;
+        this.loadFavoriteState();
         this.cd.detectChanges();
         setTimeout(() => this.moveIndicator(), 0);
       },
@@ -126,6 +179,7 @@ export class DetalleProducto implements OnInit, AfterViewInit {
     });
   }
 
+  // ===== CANTIDAD =====
   cambiarCantidad(valor: number): void {
     const nueva = this.cantidad + valor;
     const max = this.product?.stock_quantity || 100;
@@ -141,10 +195,10 @@ export class DetalleProducto implements OnInit, AfterViewInit {
     this.cantidad = Math.floor(this.cantidad);
   }
 
+  // ===== CONTACTAR =====
   contactarFarmer(): void {
     const farmerId = this.product?.farmer?.user_id ?? this.product?.farmer?.id;
     if (!farmerId) return;
-
     this.router.navigate(['/comprador/mensajes'], {
       queryParams: {
         farmerId,
@@ -157,18 +211,16 @@ export class DetalleProducto implements OnInit, AfterViewInit {
     });
   }
 
+  // ===== CARRITO =====
   agregarAlCarrito(): void {
     if (!this.product || this.isFarmer) return;
-
     const rawFarmerUserId = this.product?.farmer?.user_id;
     const rawFarmerId = this.product?.farmer?.id;
     const farmerId = Number(rawFarmerUserId ?? rawFarmerId);
-
     if (!Number.isFinite(farmerId) || farmerId <= 0) {
       console.error('No se pudo determinar el agricultor del producto', this.product);
       return;
     }
-
     this.cartService.addToCart({
       id: this.product.id,
       name: this.product.name,
