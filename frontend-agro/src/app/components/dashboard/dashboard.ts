@@ -1,5 +1,5 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, NgOptimizedImage } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { MatSliderModule } from '@angular/material/slider';
@@ -14,8 +14,14 @@ import { environment } from '../../../environments/environment';
   selector: 'app-dashboard',
   standalone: true,
   imports: [
-    CommonModule, RouterModule, FormsModule,
-    MatSliderModule, MatSelectModule, MatFormFieldModule, MatProgressSpinnerModule
+    CommonModule,
+    NgOptimizedImage, // ✅ AÑADIDO
+    RouterModule,
+    FormsModule,
+    MatSliderModule,
+    MatSelectModule,
+    MatFormFieldModule,
+    MatProgressSpinnerModule
   ],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css'
@@ -34,7 +40,6 @@ export class Dashboard implements OnInit {
   isLoading = false;
   isBuyer = false;
 
-  // Filtros dinámicos (Backend Driven)
   rangoMinPrecio = 0;
   rangoMaxPrecio = 1000;
   minPrice = 0;
@@ -49,7 +54,7 @@ export class Dashboard implements OnInit {
     private productoService: ProductoService,
     private cdr: ChangeDetectorRef,
     private cartService: CartService
-  ) { }
+  ) {}
 
   ngOnInit(): void {
     this.verificarUsuario();
@@ -58,25 +63,19 @@ export class Dashboard implements OnInit {
     Promise.resolve().then(() => this.cargarProductos(1));
   }
 
-  // Carga los límites de precio y categorías desde el backend
   cargarConfiguracionFiltros(categoria: string = 'todas'): void {
     this.productoService.getFiltrosStats(categoria).subscribe({
       next: (res) => {
-        // Seteamos los precios reales calculados por el servidor
         this.rangoMinPrecio = res.min_price;
         this.rangoMaxPrecio = res.max_price;
-
-        // Ajustamos el selector del usuario solo si es carga inicial o cambio de categoría
         this.minPrice = res.min_price;
         this.maxPrice = res.max_price;
-
         this.cdr.detectChanges();
       },
       error: (err) => console.error('Error al cargar stats de filtros:', err)
     });
   }
 
-  // Carga las categorías más usadas para los botones superiores
   cargarOpcionesFiltros(): void {
     this.productoService.getCategoriasPopulares().subscribe({
       next: (res: any) => {
@@ -86,9 +85,7 @@ export class Dashboard implements OnInit {
         }
         this.cdr.detectChanges();
       },
-      error: (err: any) => {
-        console.error('Error cargando categorías populares', err);
-        // Fallback en caso de error
+      error: () => {
         this.categoriasRapidas = ['Todas', 'Frutas', 'Hortalizas', 'Lácteos', 'Verduras'];
       }
     });
@@ -112,12 +109,9 @@ export class Dashboard implements OnInit {
     this.isLoading = true;
     this.paginaActual = page;
 
-    // Construcción de filtros para la API
     const filtrosActivos: any = {};
     if (this.filtros.categoria !== 'todas') filtrosActivos.categoria = this.filtros.categoria;
     if (this.filtros.orden !== 'novedad') filtrosActivos.orden = this.filtros.orden;
-    
-    // Enviamos siempre los valores actuales del slider
     filtrosActivos.precio_min = this.minPrice;
     filtrosActivos.precio_max = this.maxPrice;
 
@@ -126,15 +120,12 @@ export class Dashboard implements OnInit {
         this.productos = Array.isArray(res.data) ? res.data : [];
         this.totalProductos = res.total || 0;
         const paginasServer = res.last_page || 1;
-        
         this.totalPaginas = paginasServer > 2 ? 2 : paginasServer;
         this.paginasArray = Array.from({ length: this.totalPaginas }, (_, i) => i + 1);
-        
         this.isLoading = false;
         this.cdr.detectChanges();
       },
-      error: (err: any) => {
-        console.error('Error cargando productos:', err);
+      error: () => {
         this.isLoading = false;
         this.cdr.detectChanges();
       }
@@ -142,27 +133,16 @@ export class Dashboard implements OnInit {
   }
 
   seleccionarCategoriaRapida(cat: string): void {
-    // Seteamos la categoría
     this.filtros.categoria = cat.toLowerCase() === 'todas' ? 'todas' : cat;
-    
-    // 1. Recalculamos los rangos de precio para esa categoría específica
     this.cargarConfiguracionFiltros(this.filtros.categoria);
-
-    // 2. Cargamos los productos filtrados
     this.cargarProductos(1);
   }
 
-  onFiltroChange(): void { 
-    this.cargarProductos(1); 
-  }
-
-  filtrarPorPrecio(): void { 
-    this.cargarProductos(1); 
-  }
+  onFiltroChange(): void { this.cargarProductos(1); }
+  filtrarPorPrecio(): void { this.cargarProductos(1); }
 
   limpiarFiltros(): void {
     this.filtros = { categoria: 'todas', orden: 'novedad' };
-    // Al limpiar, pedimos los stats globales de nuevo
     this.productoService.getFiltrosStats('todas').subscribe({
       next: (res) => {
         this.rangoMinPrecio = res.min_price;
@@ -174,12 +154,15 @@ export class Dashboard implements OnInit {
     });
   }
 
+  // ✅ CAMBIADO: ahora devuelve siempre URL absoluta para NgOptimizedImage
   getImagenUrl(prod: any): string {
     if (prod?.images?.length > 0) {
-      return prod.images[0].image_url
+      const url = prod.images[0].image_url
         ?? `${environment.storageUrl}/${prod.images[0].image_path}`;
+      // NgOptimizedImage requiere URL absoluta o que empiece por /
+      return url.startsWith('http') ? url : `/${url}`;
     }
-    return 'assets/placeholder.png';
+    return '/assets/placeholder.png';
   }
 
   cambiarPagina(nuevaPagina: number): void {
@@ -216,11 +199,6 @@ export class Dashboard implements OnInit {
     });
   }
 
-  irAlCatalogoCompleto(): void { 
-    this.router.navigate(['/productos']); 
-  }
-
-  formatLabel(value: number): string { 
-    return `${value}€`; 
-  }
+  irAlCatalogoCompleto(): void { this.router.navigate(['/productos']); }
+  formatLabel(value: number): string { return `${value}€`; }
 }

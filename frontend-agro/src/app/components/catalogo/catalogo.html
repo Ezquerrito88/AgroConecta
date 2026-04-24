@@ -10,11 +10,8 @@
   </div>
 </header>
 
-
-
 <div class="catalog-layout container">
 
-  <!-- Botón filtros móvil -->
   <div class="filters-mobile-bar">
     <button class="btn-filtros-mobile" (click)="toggleFiltros()">
       <i class="fa-solid fa-sliders"></i>
@@ -24,7 +21,6 @@
     <span class="results-count" *ngIf="!isLoading && totalProductos > 0">{{ totalProductos }} productos</span>
   </div>
 
-  <!-- Overlay filtros móvil -->
   <div class="filtros-overlay" [class.active]="filtrosAbiertos" (click)="filtrosAbiertos = false"></div>
 
   <aside class="filter-card" [class.filter-card-open]="filtrosAbiertos">
@@ -126,7 +122,7 @@
 
     <!-- Grid -->
     <div class="products-grid" *ngIf="!isLoading && totalProductos > 0">
-      <div class="product-card" *ngFor="let prod of productos" [routerLink]="['/producto', prod.id]"
+      <div class="product-card" *ngFor="let prod of productos; let i = index" [routerLink]="['/producto', prod.id]"
         style="cursor: pointer;">
 
         <div class="card-image">
@@ -141,7 +137,10 @@
           </button>
           }
 
-          <img *ngIf="prod.images && prod.images.length > 0" [src]="getImagenUrl(prod)" [alt]="prod.name">
+          @if (prod.images && prod.images.length > 0) {
+          <img [ngSrc]="getImagenUrl(prod)" [alt]="prod.name" width="800" height="479" [priority]="i < 3"
+            [attr.loading]="i < 3 ? null : 'lazy'" style="object-fit: cover; width: 100%; height: 100%;">
+          }
 
           <div *ngIf="!prod.images || prod.images.length === 0" class="placeholder-img">
             <i class="fa-solid fa-image"></i>
@@ -183,26 +182,21 @@
 
     <!-- Paginación -->
     <div class="pagination-wrapper" *ngIf="!isLoading && totalPaginas > 1">
-
       <div class="pagination-controls">
         <button class="pag-arrow" (click)="cambiarPagina(paginaActual - 1)" [disabled]="paginaActual === 1">
           <i class="fa-solid fa-chevron-left"></i>
         </button>
-
         <button *ngFor="let p of numeracionPaginas" class="pag-num" [class.active]="paginaActual === p"
           (click)="cambiarPagina(p)">
           {{ p }}
         </button>
-
         <button class="pag-arrow" (click)="cambiarPagina(paginaActual + 1)" [disabled]="paginaActual === totalPaginas">
           <i class="fa-solid fa-chevron-right"></i>
         </button>
       </div>
-
       <div class="pagination-status">
         Página <strong>{{ paginaActual }}</strong> de <strong>{{ totalPaginas }}</strong>
       </div>
-
     </div>
 
   </main>

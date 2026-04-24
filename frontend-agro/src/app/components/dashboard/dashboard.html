@@ -26,7 +26,6 @@
     </button>
   </div>
 
-  <!-- Botón filtros móvil -->
   <div class="filters-mobile-bar" style="max-width: 1400px; margin: 0 auto 15px;">
     <button class="btn-filtros-mobile" (click)="filtrosAbiertos = !filtrosAbiertos">
       <i class="fa-solid fa-sliders"></i>
@@ -35,7 +34,6 @@
     </button>
   </div>
 
-  <!-- Overlay filtros móvil -->
   <div class="filtros-overlay" [class.active]="filtrosAbiertos" (click)="filtrosAbiertos = false"></div>
 
   <div class="main-layout">
@@ -47,7 +45,6 @@
         </button>
       </div>
 
-      <!-- Ordenar por -->
       <div class="filter-group filter-blue">
         <label><span class="dot-blue"></span> Ordenar por</label>
         <mat-form-field appearance="outline" class="full-width theme-blue" subscriptSizing="dynamic">
@@ -59,7 +56,6 @@
         </mat-form-field>
       </div>
 
-      <!-- Categoría -->
       <div class="filter-group filter-green">
         <label><span class="dot-green"></span> Categoría</label>
         <mat-form-field appearance="outline" class="full-width theme-green" subscriptSizing="dynamic">
@@ -75,7 +71,6 @@
         </mat-form-field>
       </div>
 
-      <!-- Precio -->
       <div class="filter-group filter-orange">
         <label><span class="dot-orange"></span> Rango de Precio</label>
         <div class="slider-container">
@@ -94,138 +89,146 @@
     <main class="products-grid-container">
 
       @if (isLoading) {
-      <div class="grid-header">
-        <h2>Selección fresca del día</h2>
-        <span class="results-count skeleton-count"></span>
-      </div>
-      <div class="products-grid">
-        <div class="skeleton-card" *ngFor="let i of [1,2,3,4,5,6]">
-          <div class="skeleton-img">
-            <div class="skeleton-field-icon">
-              <i class="fa-solid fa-seedling"></i>
+        <div class="grid-header">
+          <h2>Selección fresca del día</h2>
+          <span class="results-count skeleton-count"></span>
+        </div>
+        <div class="products-grid">
+          <div class="skeleton-card" *ngFor="let i of [1,2,3,4,5,6]">
+            <div class="skeleton-img">
+              <div class="skeleton-field-icon">
+                <i class="fa-solid fa-seedling"></i>
+              </div>
+              <div class="skeleton-wave"></div>
             </div>
-            <div class="skeleton-wave"></div>
-          </div>
-          <div class="skeleton-content">
-            <div class="skeleton-line long"></div>
-            <div class="skeleton-line short"></div>
-            <div class="skeleton-farmer">
-              <div class="skeleton-avatar"></div>
-              <div class="skeleton-line medium"></div>
-            </div>
-            <div class="skeleton-footer">
-              <div class="skeleton-price"></div>
-              <div class="skeleton-btn"></div>
+            <div class="skeleton-content">
+              <div class="skeleton-line long"></div>
+              <div class="skeleton-line short"></div>
+              <div class="skeleton-farmer">
+                <div class="skeleton-avatar"></div>
+                <div class="skeleton-line medium"></div>
+              </div>
+              <div class="skeleton-footer">
+                <div class="skeleton-price"></div>
+                <div class="skeleton-btn"></div>
+              </div>
             </div>
           </div>
         </div>
-      </div>
       }
 
       @else {
-      <div class="grid-header">
-        <h2>Selección fresca del día</h2>
-        <span class="results-count">Página {{ paginaActual }} de {{ totalPaginas }}</span>
-      </div>
-
-      @if (productos.length === 0) {
-      <div class="empty-state">
-        <div class="empty-icon">
-          <i class="fa-solid fa-wheat-awn"></i>
-        </div>
-        <h3 class="empty-title">Sin cosecha por aquí</h3>
-        <p class="empty-subtitle">
-          No encontramos productos con los filtros aplicados.<br>
-          Prueba a ampliar la búsqueda o limpia los filtros.
-        </p>
-        <button class="empty-btn" (click)="limpiarFiltros()">
-          <i class="fa-solid fa-arrows-rotate"></i> Limpiar filtros
-        </button>
-      </div>
-      }
-
-      @if (productos.length > 0) {
-      <div class="products-grid">
-        <div class="product-card" *ngFor="let prod of productos" [routerLink]="['/producto', prod.id]"
-          style="cursor: pointer;">
-
-          <div class="card-image">
-            @if (prod.stock_quantity <= 5) { <div class="stock-badge" [class.no-stock]="prod.stock_quantity === 0">
-              {{ prod.stock_quantity === 0 ? 'Agotado' : '¡Casi agotado!' }}
-          </div>
-          }
-
-          @if (isBuyer) {
-          <button class="wishlist-btn" [class.active]="prod.is_favorite"
-            (click)="$event.stopPropagation(); toggleFavorite(prod)">
-            <i [class]="prod.is_favorite ? 'fa-solid fa-heart' : 'fa-regular fa-heart'"></i>
-          </button>
-          }
-
-          <img *ngIf="prod.images && prod.images.length > 0" [src]="getImagenUrl(prod)" alt="{{ prod.name }}">
+        <div class="grid-header">
+          <h2>Selección fresca del día</h2>
+          <span class="results-count">Página {{ paginaActual }} de {{ totalPaginas }}</span>
         </div>
 
-        <div class="card-content">
-          <h4 class="product-title">{{ prod.name }}</h4>
-          <p class="product-desc" *ngIf="prod.short_description || prod.description">
-            {{ prod.short_description || prod.description }}
-          </p>
+        @if (productos.length === 0) {
+          <div class="empty-state">
+            <div class="empty-icon">
+              <i class="fa-solid fa-wheat-awn"></i>
+            </div>
+            <h3 class="empty-title">Sin cosecha por aquí</h3>
+            <p class="empty-subtitle">
+              No encontramos productos con los filtros aplicados.<br>
+              Prueba a ampliar la búsqueda o limpia los filtros.
+            </p>
+            <button class="empty-btn" (click)="limpiarFiltros()">
+              <i class="fa-solid fa-arrows-rotate"></i> Limpiar filtros
+            </button>
+          </div>
+        }
 
-          <div class="seller-box" *ngIf="prod.farmer">
-            <span class="seller-name">
-              {{ prod.farmer.user?.name || prod.farmer.full_name || prod.farmer.name || 'Agricultor Local' }}
-            </span>
-            <span class="seller-location">
-              <i class="fa-solid fa-location-dot"></i>
-              {{ prod.farmer.city || prod.farmer.location || 'España' }}
-            </span>
+        @if (productos.length > 0) {
+          <div class="products-grid">
+            <div class="product-card" *ngFor="let prod of productos"
+              [routerLink]="['/producto', prod.id]" style="cursor: pointer;">
+
+              <div class="card-image">
+                @if (prod.stock_quantity <= 5) {
+                  <div class="stock-badge" [class.no-stock]="prod.stock_quantity === 0">
+                    {{ prod.stock_quantity === 0 ? 'Agotado' : '¡Casi agotado!' }}
+                  </div>
+                }
+
+                @if (isBuyer) {
+                  <button class="wishlist-btn" [class.active]="prod.is_favorite"
+                    (click)="$event.stopPropagation(); toggleFavorite(prod)">
+                    <i [class]="prod.is_favorite ? 'fa-solid fa-heart' : 'fa-regular fa-heart'"></i>
+                  </button>
+                }
+
+                @if (prod.images && prod.images.length > 0) {
+                  <img
+                    [ngSrc]="getImagenUrl(prod)"
+                    [alt]="prod.name"
+                    width="800"
+                    height="479"
+                    loading="lazy"
+                    style="object-fit: cover; width: 100%; height: 100%;">
+                }
+              </div>
+
+              <div class="card-content">
+                <h4 class="product-title">{{ prod.name }}</h4>
+                <p class="product-desc" *ngIf="prod.short_description || prod.description">
+                  {{ prod.short_description || prod.description }}
+                </p>
+
+                <div class="seller-box" *ngIf="prod.farmer">
+                  <span class="seller-name">
+                    {{ prod.farmer.user?.name || prod.farmer.full_name || prod.farmer.name || 'Agricultor Local' }}
+                  </span>
+                  <span class="seller-location">
+                    <i class="fa-solid fa-location-dot"></i>
+                    {{ prod.farmer.city || prod.farmer.location || 'España' }}
+                  </span>
+                </div>
+
+                <div class="card-footer">
+                  <div class="price-box">
+                    <span class="price-main">{{ prod.price }}€</span>
+                    <span class="price-unit">/{{ prod.unit }}</span>
+                  </div>
+
+                  @if (isBuyer) {
+                    <button class="add-button" [disabled]="prod.stock_quantity === 0"
+                      (click)="$event.stopPropagation(); addToCart(prod)">
+                      <i class="fa-solid fa-plus"></i>
+                    </button>
+                  }
+                </div>
+              </div>
+            </div>
           </div>
 
-          <div class="card-footer">
-            <div class="price-box">
-              <span class="price-main">{{ prod.price }}€</span>
-              <span class="price-unit">/{{ prod.unit }}</span>
+          <div class="pagination-container" *ngIf="totalPaginas > 1">
+            <div class="pagination-controls">
+              <button class="pag-btn nav-btn" [disabled]="paginaActual === 1" (click)="cambiarPagina(paginaActual - 1)">
+                <i class="fa-solid fa-chevron-left"></i>
+              </button>
+              <button class="pag-btn num-btn" [class.active]="paginaActual === 1" (click)="cambiarPagina(1)">1</button>
+              <button *ngIf="totalPaginas >= 2" class="pag-btn num-btn" [class.active]="paginaActual === 2"
+                (click)="cambiarPagina(2)">2</button>
+              <button class="pag-btn nav-btn" [disabled]="paginaActual >= totalPaginas"
+                (click)="cambiarPagina(paginaActual + 1)">
+                <i class="fa-solid fa-chevron-right"></i>
+              </button>
             </div>
 
-            @if (isBuyer) {
-            <button class="add-button" [disabled]="prod.stock_quantity === 0"
-              (click)="$event.stopPropagation(); addToCart(prod)">
-              <i class="fa-solid fa-plus"></i>
+            <div class="pagination-info">
+              Mostrando <strong>{{ (paginaActual - 1) * itemsPorPagina + 1 }}</strong> –
+              <strong>{{ (paginaActual - 1) * itemsPorPagina + productos.length }}</strong>
+              de <strong>12</strong> destacados
+            </div>
+
+            <button class="btn-full-catalog" (click)="irAlCatalogoCompleto()">
+              Ver Catálogo Completo
             </button>
-            }
           </div>
-        </div>
-      </div>
-  </div>
+        }
+      }
 
-  <div class="pagination-container" *ngIf="totalPaginas > 1">
-    <div class="pagination-controls">
-      <button class="pag-btn nav-btn" [disabled]="paginaActual === 1" (click)="cambiarPagina(paginaActual - 1)">
-        <i class="fa-solid fa-chevron-left"></i>
-      </button>
-      <button class="pag-btn num-btn" [class.active]="paginaActual === 1" (click)="cambiarPagina(1)">1</button>
-      <button *ngIf="totalPaginas >= 2" class="pag-btn num-btn" [class.active]="paginaActual === 2"
-        (click)="cambiarPagina(2)">2</button>
-      <button class="pag-btn nav-btn" [disabled]="paginaActual >= totalPaginas"
-        (click)="cambiarPagina(paginaActual + 1)">
-        <i class="fa-solid fa-chevron-right"></i>
-      </button>
-    </div>
-
-    <div class="pagination-info">
-      Mostrando <strong>{{ (paginaActual - 1) * itemsPorPagina + 1 }}</strong> –
-      <strong>{{ (paginaActual - 1) * itemsPorPagina + productos.length }}</strong>
-      de <strong>12</strong> destacados
-    </div>
-
-
-    <button class="btn-full-catalog" (click)="irAlCatalogoCompleto()">
-      Ver Catálogo Completo
-    </button>
-  </div>
-  }
-  }
-
-  </main>
+    </main>
   </div>
 </section>

@@ -6,17 +6,19 @@ use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Cache;
 
 class CategoryController extends Controller
 {
-    //Listar todas las categorias
     public function index()
     {
-        $categories = Category::withCount('products')->orderBy('name', 'asc')->get();
+        $categories = Cache::remember('categories_all', 600, function () {
+            return Category::withCount('products')->orderBy('name', 'asc')->get();
+        });
+
         return response()->json($categories);
     }
 
-    //Crear categorias solo admin
     public function store(Request $request)
     {
         if ($request->user()->role !== 'admin') {
@@ -29,8 +31,7 @@ class CategoryController extends Controller
             'description' => 'nullable|string|max:255',
         ]);
 
-        $data = $request->all();
-
+        $data         = $request->all();
         $data['slug'] = Str::slug($request->name);
 
         if ($request->hasFile('icon')) {
@@ -39,13 +40,16 @@ class CategoryController extends Controller
 
         $category = Category::create($data);
 
+        $this->invalidarCacheCategorias();
+
         return response()->json($category, 201);
     }
 
-    //Mostrar categoria
     public function show($id)
     {
-        $category = Category::find($id);
+        $category = Cache::remember("category_{$id}", 600, function () use ($id) {
+            return Category::find($id);
+        });
 
         if (!$category) {
             return response()->json(['message' => 'Categoria no encontrada'], 404);
@@ -54,7 +58,6 @@ class CategoryController extends Controller
         return response()->json($category);
     }
 
-    //Actualizar categoria solo admin
     public function update(Request $request, $id)
     {
         $category = Category::find($id);
@@ -91,10 +94,12 @@ class CategoryController extends Controller
 
         $category->save();
 
+        $this->invalidarCacheCategorias();
+        Cache::forget("category_{$id}");
+
         return response()->json(['message' => 'Categoría actualizada', 'category' => $category]);
     }
 
-    //Borrar categoria solo admin
     public function destroy(Request $request, $id)
     {
         $category = Category::find($id);
@@ -119,43 +124,68 @@ class CategoryController extends Controller
 
         $category->delete();
 
+        $this->invalidarCacheCategorias();
+        Cache::forget("category_{$id}");
+
         return response()->json(['message' => 'Categoría eliminada']);
     }
 
-    // Obtener las 4 categorías con más productos
     public function getPopulares()
     {
-        $categories = Category::withCount('products')
-            ->having('products_count', '>', 0)
-            ->orderBy('products_count', 'desc')
-            ->take(4)
-            ->get(['id', 'name']);
+        $categories = Cache::remember('categories_populares', 600, function () {
+            return Category::withCount('products')
+                ->having('products_count', '>', 0)
+                ->orderBy('products_count', 'desc')
+                ->take(4)
+                ->get(['id', 'name']);
+        });
 
         return response()->json($categories);
     }
 
     public function getFiltrosStats(Request $request)
     {
-        $query = \App\Models\Product::query();
+        $categoria = $request->get('categoria', 'todas');
 
-        // Si el usuario filtró por categoría, ajustamos el cálculo del precio a esa categoría
-        if ($request->has('categoria') && $request->categoria !== 'todas') {
-            $query->whereHas('category', function ($q) use ($request) {
-                $q->where('name', $request->categoria);
-            });
+        // Clave única por categoría para no mezclar rangos de precio
+        $cacheKey = "filtros_stats_{$categoria}";
+
+        $stats = Cache::remember($cacheKey, 300, function () use ($request, $categoria) {
+            $query = \App\Models\Product::query()
+                ->where('moderation_status', 'approved');
+
+            if ($categoria && $categoria !== 'todas') {
+                $query->whereHas('category', function ($q) use ($categoria) {
+                    $q->where('name', $categoria);
+                });
+            }
+
+            $min = $query->min('price') ?? 0;
+            $max = $query->max('price') ?? 0;
+
+            if ($min == $max) {
+                $max = $min + 1;
+            }
+
+            return [
+                'min_price' => floor($min),
+                'max_price' => ceil($max),
+            ];
+        });
+
+        return response()->json($stats);
+    }
+
+    private function invalidarCacheCategorias(): void
+    {
+        Cache::forget('categories_all');
+        Cache::forget('categories_populares');
+
+        // Limpiar stats de precios por categoría
+        $categorias = Category::pluck('name');
+        foreach ($categorias as $nombre) {
+            Cache::forget("filtros_stats_{$nombre}");
         }
-
-        $min = $query->min('price') ?? 0;
-        $max = $query->max('price') ?? 0;
-
-        // Si el min y max son iguales, damos un pequeño margen para que el slider no se rompa
-        if ($min == $max) {
-            $max = $min + 1;
-        }
-
-        return response()->json([
-            'min_price' => floor($min),
-            'max_price' => ceil($max),
-        ]);
+        Cache::forget('filtros_stats_todas');
     }
 }

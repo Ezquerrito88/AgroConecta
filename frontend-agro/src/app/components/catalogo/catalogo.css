@@ -752,3 +752,30 @@ mat-slider { width: 100% !important; min-width: 100%; margin: 0; }
   .catalog-layout { padding: 10px 10px 32px; }
   .products-grid { gap: 14px; }
 }
+
+/* =====================
+   FIXES PAGESPEED
+   ===================== */
+
+/* Reservar espacio del hero para evitar CLS */
+.catalog-hero {
+  min-height: 130px;
+  contain: layout style;
+}
+
+/* Reservar espacio de la imagen para evitar CLS */
+.card-image {
+  contain: layout style;
+}
+
+/* NgOptimizedImage: llenar el contenedor correctamente */
+.card-image img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover;
+}
+
+/* Skeleton igual de alto que card real para no causar CLS al cargar */
+.skeleton-card {
+  min-height: 380px;
+}

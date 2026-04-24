@@ -7,6 +7,7 @@ use App\Models\ProductImage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Cache;
 use Intervention\Image\Laravel\Facades\Image;
 
 class ProductController extends Controller
@@ -77,6 +78,37 @@ class ProductController extends Controller
         $precioMin = $request->query('precio_min');
         $precioMax = $request->query('precio_max');
 
+        $hayFiltros = $categoria || $precioMin || $precioMax || $orden !== 'novedad';
+
+        $cacheKey = "products_latest_p{$page}_pp{$perPage}";
+
+        if (!$hayFiltros) {
+            $result = Cache::remember($cacheKey, 300, function () use ($perPage, $page) {
+                $products = Product::with(['images', 'farmer.user', 'category'])
+                    ->where('moderation_status', 'approved')
+                    ->orderBy('created_at', 'desc')
+                    ->paginate($perPage, ['*'], 'page', $page);
+
+                $products->through(function ($product) {
+                    $product->image_url = $this->getImageUrl($product->images->first()?->image_path);
+                    return $product;
+                });
+
+                $data = $products->getCollection()->take(12 - (($page - 1) * $perPage));
+
+                return [
+                    'data'         => $data->values(),
+                    'total'        => min($products->total(), 12),
+                    'per_page'     => (int) $perPage,
+                    'current_page' => (int) $page,
+                    'last_page'    => min($products->lastPage(), 2),
+                ];
+            });
+
+            return response()->json($result);
+        }
+
+        // Con filtros activos → sin caché (resultados dinámicos)
         $query = Product::with(['images', 'farmer.user', 'category'])
             ->where('moderation_status', 'approved');
 
@@ -95,24 +127,12 @@ class ProductController extends Controller
             default       => $query->orderBy('created_at', 'desc'),
         };
 
-        $products   = $query->paginate($perPage, ['*'], 'page', $page);
-        $hayFiltros = $categoria || $precioMin || $precioMax || $orden !== 'novedad';
+        $products = $query->paginate($perPage, ['*'], 'page', $page);
 
         $products->through(function ($product) {
             $product->image_url = $this->getImageUrl($product->images->first()?->image_path);
             return $product;
         });
-
-        if (!$hayFiltros) {
-            $data = $products->getCollection()->take(12 - (($page - 1) * $perPage));
-            return response()->json([
-                'data'         => $data->values(),
-                'total'        => min($products->total(), 12),
-                'per_page'     => (int) $perPage,
-                'current_page' => (int) $page,
-                'last_page'    => min($products->lastPage(), 2),
-            ]);
-        }
 
         return response()->json([
             'data'         => $products->getCollection()->values(),
@@ -125,7 +145,9 @@ class ProductController extends Controller
 
     public function show($id)
     {
-        $product = Product::with(['category', 'images', 'farmer.user', 'reviews.user'])->find($id);
+        $product = Cache::remember("product_{$id}", 300, function () use ($id) {
+            return Product::with(['category', 'images', 'farmer.user', 'reviews.user'])->find($id);
+        });
 
         if (!$product) return response()->json(['message' => 'Producto no encontrado'], 404);
 
@@ -227,6 +249,8 @@ class ProductController extends Controller
                 }
             }
 
+            $this->invalidarCacheProductos();
+
             return response()->json($product->load('images'), 201);
         });
     }
@@ -277,6 +301,9 @@ class ProductController extends Controller
             }
         }
 
+        $this->invalidarCacheProductos();
+        Cache::forget("product_{$id}");
+
         return response()->json([
             'message' => 'Producto actualizado correctamente',
             'product' => $product->load('images'),
@@ -296,6 +323,10 @@ class ProductController extends Controller
         }
 
         $product->delete();
+
+        $this->invalidarCacheProductos();
+        Cache::forget("product_{$id}");
+
         return response()->json(['message' => 'Producto eliminado correctamente']);
     }
 
@@ -316,5 +347,11 @@ class ProductController extends Controller
 
         $image->delete();
         return response()->json(['message' => 'Imagen eliminada correctamente']);
+    }
+
+    private function invalidarCacheProductos(): void
+    {
+        Cache::forget('products_latest_p1_pp6');
+        Cache::forget('products_latest_p2_pp6');
     }
 }

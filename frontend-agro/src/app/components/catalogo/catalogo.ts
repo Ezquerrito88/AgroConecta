@@ -1,5 +1,5 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, ChangeDetectorRef, NgZone } from '@angular/core';
+import { CommonModule, NgOptimizedImage } from '@angular/common';
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { MatSliderModule } from '@angular/material/slider';
@@ -16,9 +16,15 @@ import { CartService } from '../../core/services/cart.service';
   selector: 'app-catalogo',
   standalone: true,
   imports: [
-    CommonModule, RouterModule, FormsModule,
-    MatSliderModule, MatSelectModule,
-    MatFormFieldModule, MatInputModule, MatIconModule
+    CommonModule,
+    NgOptimizedImage,
+    RouterModule,
+    FormsModule,
+    MatSliderModule,
+    MatSelectModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatIconModule
   ],
   templateUrl: './catalogo.html',
   styleUrl: './catalogo.css'
@@ -41,7 +47,6 @@ export class Catalogo implements OnInit {
   minPrice = 0;
   maxPrice = 100;
 
-  // Filtros dinámicos
   productosFiltroMaestro: Producto[] = [];
   categoriasDisponibles: string[] = [];
   ubicacionesDisponibles: string[] = [];
@@ -59,9 +64,10 @@ export class Catalogo implements OnInit {
     private productoService: ProductoService,
     private cartService: CartService,
     private cdr: ChangeDetectorRef,
+    private ngZone: NgZone,
     private route: ActivatedRoute,
     private router: Router
-  ) { }
+  ) {}
 
   ngOnInit(): void {
     this.verificarUsuario();
@@ -78,10 +84,8 @@ export class Catalogo implements OnInit {
       if (userStr) {
         this.currentUser = JSON.parse(userStr);
         const role = this.currentUser.role?.toLowerCase();
-
         this.isFarmer = role === 'agricultor' || role === 'farmer' || this.currentUser.role_id === 2;
         this.isBuyer = role === 'comprador' || role === 'buyer' || this.currentUser.role_id === 3;
-
       } else {
         this.isBuyer = true;
       }
@@ -90,14 +94,22 @@ export class Catalogo implements OnInit {
 
   getImagenUrl(prod: any): string {
     if (prod?.images?.length > 0) {
-      return prod.images[0].image_url
-        ?? `${environment.storageUrl}/${prod.images[0].image_path}`;
+      const img = prod.images[0];
+      if (img.image_url) {
+        return img.image_url.startsWith('http')
+          ? img.image_url
+          : `${environment.storageUrl}/${img.image_url}`;
+      }
+      if (img.image_path) {
+        return img.image_path.startsWith('http')
+          ? img.image_path
+          : `${environment.storageUrl}/${img.image_path}`;
+      }
     }
-    return 'assets/placeholder.png';
+    return '/assets/placeholder.png';
   }
 
   cargarOpcionesFiltros(): void {
-    // Obtenemos una lista larga de productos solo para extraer los filtros dinámicos
     this.productoService.getCatalogo({ per_page: 1000 }).subscribe({
       next: (res: any) => {
         this.productosFiltroMaestro = res.data ?? [];
@@ -110,48 +122,35 @@ export class Catalogo implements OnInit {
   recalcularFiltrosDinamicos(isInitial: boolean = false): void {
     if (!this.productosFiltroMaestro || this.productosFiltroMaestro.length === 0) return;
 
-    let productosBuscados = this.productosFiltroMaestro;
-
-    // Filtros seleccionados actualmente
     const selectedCat = this.filtroCategoria;
     const selectedLoc = this.filtroUbicacion;
-    const currentMin = this.minPrice;
-    const currentMax = this.maxPrice;
 
     const locMatch = (p: any, loc: string) => !loc || ((p.farmer?.city || p.farmer?.location) === loc);
     const catMatch = (p: any, cat: string) => !cat || (p.category?.name === cat);
-    const priceMatch = (p: any, min: number, max: number) => {
-      const price = Number(p.price);
-      return price >= min && price <= max;
-    };
 
-    // Extraer Categorías Dinámicas cruzadas (se filtran por ubicación, no por categoría)
     const cats = new Set<string>();
-    productosBuscados.filter(p => locMatch(p, selectedLoc)).forEach((p: any) => {
+    this.productosFiltroMaestro.filter(p => locMatch(p, selectedLoc)).forEach((p: any) => {
       if (p.category?.name) cats.add(p.category.name);
     });
     this.categoriasDisponibles = Array.from(cats).sort();
 
-    // Extraer Ubicaciones Dinámicas cruzadas (se filtran por categoría, no por ubicación)
     const locs = new Set<string>();
-    productosBuscados.filter(p => catMatch(p, selectedCat)).forEach((p: any) => {
+    this.productosFiltroMaestro.filter(p => catMatch(p, selectedCat)).forEach((p: any) => {
       const city = p.farmer?.city || p.farmer?.location;
       if (city) locs.add(city);
     });
     this.ubicacionesDisponibles = Array.from(locs).sort();
 
-    // Extraer Precios Mínimos y Máximos cruzados (se filtran por ubicación y categoría elegidas)
-    const priceProducts = productosBuscados.filter(p => catMatch(p, selectedCat) && locMatch(p, selectedLoc));
+    const priceProducts = this.productosFiltroMaestro.filter(p =>
+      catMatch(p, selectedCat) && locMatch(p, selectedLoc)
+    );
+
     if (priceProducts.length > 0) {
       const prices = priceProducts.map(p => Number(p.price) || 0);
       let minGlobal = Math.floor(Math.min(...prices));
       let maxGlobal = Math.ceil(Math.max(...prices));
-      
-      // Evitar que miren al mismo punto (rompe el slider)
-      if (minGlobal === maxGlobal) {
-        maxGlobal = minGlobal + 1;
-      }
-      
+      if (minGlobal === maxGlobal) maxGlobal = minGlobal + 1;
+
       const wasFullyOpen = (this.minPrice <= this.rangoMinPrecio && this.maxPrice >= this.rangoMaxPrecio);
 
       this.rangoMinPrecio = minGlobal;
@@ -161,13 +160,10 @@ export class Catalogo implements OnInit {
         this.minPrice = minGlobal;
         this.maxPrice = maxGlobal;
       } else {
-        // Forzamos a que estén dentro de los nuevos rangos
         if (this.minPrice < minGlobal) this.minPrice = minGlobal;
         if (this.minPrice > maxGlobal) this.minPrice = maxGlobal;
-        
         if (this.maxPrice > maxGlobal) this.maxPrice = maxGlobal;
         if (this.maxPrice < minGlobal) this.maxPrice = minGlobal;
-        
         if (this.minPrice > this.maxPrice) {
           this.minPrice = minGlobal;
           this.maxPrice = maxGlobal;
@@ -185,7 +181,7 @@ export class Catalogo implements OnInit {
     if (this.productosFiltroMaestro.length > 0) {
       this.recalcularFiltrosDinamicos(false);
     }
-    
+
     this.isLoading = true;
 
     const filtros = {
@@ -208,13 +204,16 @@ export class Catalogo implements OnInit {
         this.desde = res.from;
         this.hasta = res.to;
         this.isLoading = false;
-        this.cdr.detectChanges();
+
+        setTimeout(() => {
+          this.cdr.detectChanges();
+        });
+
         window.scrollTo({ top: 0, behavior: 'smooth' });
       },
-      error: (err) => {
-        console.error('Error loading products:', err);
+      error: () => {
         this.isLoading = false;
-        this.cdr.detectChanges();
+        setTimeout(() => this.cdr.detectChanges());
       }
     });
   }

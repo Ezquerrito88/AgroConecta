@@ -953,3 +953,30 @@ mat-slider { width: 100% !important; }
     left: 0; box-shadow: 4px 0 24px rgba(0,0,0,.15);
   }
 }
+
+/* =====================
+   FIXES PAGESPEED
+   ===================== */
+
+/* Reservar espacio del hero para evitar CLS */
+.hero-banner {
+  min-height: 380px;
+  contain: layout style;
+}
+
+/* Reservar espacio de la imagen de producto para evitar CLS */
+.card-image {
+  contain: layout style;
+}
+
+/* NgOptimizedImage: la imagen llena el contenedor correctamente */
+.card-image img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover;
+}
+
+/* Skeleton igual de alto que la card real */
+.skeleton-card {
+  min-height: 380px;
+}

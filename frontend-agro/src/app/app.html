@@ -1,8 +1,9 @@
-<header class="agro-header" *ngIf="mostrarLayout">
+<header class="agro-header" [class.hidden]="!mostrarLayout">
   <div class="header-container">
 
     <div class="logo-box" routerLink="/">
-      <img src="img/logo/logo.png" alt="AgroConecta" class="logo-img">
+      <img src="img/logo/logo.png" alt="AgroConecta" class="logo-img"
+           width="44" height="44">
       <div class="logo-text">
         <span class="brand-title">AgroConecta</span>
         <span class="brand-subtitle">Sabores del Campo</span>
@@ -87,7 +88,7 @@
   <router-outlet></router-outlet>
 </main>
 
-<footer class="agro-footer" *ngIf="mostrarLayout">
+<footer class="agro-footer" [class.hidden]="!mostrarLayout">
   <div class="footer-container">
     <div class="footer-grid">
 

@@ -304,6 +304,8 @@
   padding: 40px 0 20px 0;
   color: white;
   font-family: 'Geist', sans-serif;
+  min-height: 320px;
+  contain: layout style;
 }
 
 .footer-container {
