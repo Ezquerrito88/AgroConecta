@@ -3,8 +3,10 @@
   <!-- ── TOPBAR ── -->
   <div class="topbar">
     <div class="topbar-left">
+      <button class="topbar-hamburger" (click)="openSidebar()" aria-label="Abrir menú">
+        <span class="material-symbols-rounded">menu</span>
+      </button>
       <h1 class="page-title">Estadísticas</h1>
-      <span class="page-subtitle">{{ mesActualLabel }}</span>
     </div>
     <div class="topbar-right">
       <div class="search-box">

@@ -152,4 +152,8 @@ export class GestionProductos implements OnInit {
   getInitials(name: string): string {
     return name?.charAt(0)?.toUpperCase() ?? '?';
   }
+
+  openSidebar(): void {
+    document.dispatchEvent(new CustomEvent('open-admin-sidebar'));
+  }
 }

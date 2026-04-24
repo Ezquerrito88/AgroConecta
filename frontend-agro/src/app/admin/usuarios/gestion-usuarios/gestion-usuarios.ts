@@ -160,4 +160,8 @@ export class GestionUsuarios implements OnInit {
     const p = this.pagination();
     return p ? Array.from({ length: p.last_page }, (_, i) => i + 1) : [];
   }
+
+  openSidebar(): void {
+    document.dispatchEvent(new CustomEvent('open-admin-sidebar'));
+  }
 }

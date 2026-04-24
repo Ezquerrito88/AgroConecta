@@ -81,3 +81,10 @@
 .icon-btn {
   text-decoration: none;
 }
+
+/* ── Responsive móvil ── */
+@media (max-width: 640px) {
+  .dashboard-layout .page-subtitle { display: none; }
+  .dashboard-layout .search-box    { display: none; }
+  .dashboard-layout .icon-btn      { display: none; }
+}

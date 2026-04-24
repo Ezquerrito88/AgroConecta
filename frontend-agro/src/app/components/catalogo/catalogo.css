@@ -32,10 +32,14 @@
   align-items: center;
   gap: 6px;
   margin-bottom: 0;
+  flex-wrap: nowrap;
+  overflow: hidden;
+  white-space: nowrap;
 }
 
+.breadcrumb > * { flex-shrink: 0; }
 .separator { font-size: 0.8rem; color: #9ca3af; margin: 0 2px; }
-.current   { color: #374151; font-weight: 700; }
+.current   { color: #374151; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex-shrink: 1; min-width: 0; }
 
 .link-inicio {
   text-decoration: none;

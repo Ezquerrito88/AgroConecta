@@ -107,6 +107,11 @@ export class ChatComponent implements OnInit, OnDestroy {
     this.startPolling(conv.id);
   }
 
+  goBack(): void {
+    this.selectedConversation = null;
+    this.stopPolling();
+  }
+
   loadMessages(convId: number): void {
     this.chatService.getMessages(convId).subscribe({
       next: (data) => {

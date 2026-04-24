@@ -1,6 +1,6 @@
-<div class="chat-layout">
+<div class="chat-layout" [class.chat-open]="selectedConversation">
 
-  <!-- Panel izquierdo -->
+  <!-- Panel izquierdo — Lista de conversaciones -->
   <div class="conversations-panel">
     <div class="conversations-header">
       <span>AgroChat</span>
@@ -33,7 +33,7 @@
     </div>
   </div>
 
-  <!-- Panel derecho -->
+  <!-- Panel derecho — Chat -->
   <div class="chat-panel">
 
     <div *ngIf="!selectedConversation" class="empty-chat">
@@ -45,6 +45,10 @@
 
       <!-- Cabecera -->
       <div class="chat-header">
+        <!-- Botón volver (solo móvil) -->
+        <button class="btn-back-mobile" (click)="goBack()" aria-label="Volver a conversaciones">
+          <mat-icon>arrow_back</mat-icon>
+        </button>
         <div class="conv-avatar">{{ getContactInitial(selectedConversation) }}</div>
         <div class="chat-header-info">
           <span class="chat-header-name">{{ getContactName(selectedConversation) }}</span>
@@ -112,4 +116,5 @@
 
     </ng-container>
   </div>
+
 </div>

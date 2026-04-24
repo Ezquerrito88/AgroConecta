@@ -31,8 +31,11 @@
   font-size: 0.82rem;
   color: #6b7280;
   margin-bottom: 0.85rem;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+  overflow: hidden;
+  white-space: nowrap;
 }
+.breadcrumb > * { flex-shrink: 0; }
 .breadcrumb a {
   color: #16a34a;
   text-decoration: none;
@@ -41,7 +44,7 @@
 }
 .breadcrumb a:hover { color: #15803d; text-decoration: underline; }
 .breadcrumb .separator { color: #d1d5db; }
-.breadcrumb span:last-child { color: #374151; font-weight: 700; }
+.breadcrumb span:last-child { color: #374151; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex-shrink: 1; min-width: 0; }
 
 
 /* ═══════════════════════════════════════════════

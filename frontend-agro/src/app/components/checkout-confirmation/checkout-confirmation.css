@@ -42,6 +42,20 @@
   font-weight: 600;
   color: #6b7280;
   margin-bottom: 0.75rem;
+  flex-wrap: nowrap;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.breadcrumb > * { flex-shrink: 0; }
+.breadcrumb .current {
+  color: #374151;
+  font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex-shrink: 1;
+  min-width: 0;
 }
 
 .breadcrumb a {

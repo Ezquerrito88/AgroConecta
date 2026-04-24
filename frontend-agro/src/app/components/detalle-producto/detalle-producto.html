@@ -40,10 +40,10 @@
 
           <div
             class="vgal-main"
-            (click)="openLightbox(0)"
+            (click)="openLightbox(selectedImageIndex)"
             role="button"
             tabindex="0"
-            [attr.aria-label]="'Ver imagen principal de ' + product.name"
+            [attr.aria-label]="'Ver imagen de ' + product.name"
           >
             <span class="stock-badge" *ngIf="product.stock_quantity > 0">
               <i class="fa-solid fa-circle-check"></i> En stock
@@ -51,7 +51,7 @@
             <span class="stock-badge out" *ngIf="product.stock_quantity <= 0">
               <i class="fa-solid fa-circle-xmark"></i> Agotado
             </span>
-            <img *ngIf="product.images?.length > 0" [src]="getImagenUrlByIndex(0)" [alt]="product.name" class="vgal-img"/>
+            <img *ngIf="product.images?.length > 0" [src]="getImagenUrlByIndex(selectedImageIndex)" [alt]="product.name" class="vgal-img"/>
             <div *ngIf="!product.images?.length" class="image-empty">
               <i class="fa-regular fa-image"></i>
               <span>Sin imagen</span>
@@ -76,6 +76,20 @@
         <button *ngIf="!isFarmer" class="fav-btn" aria-label="Guardar en favoritos" (click)="$event.stopPropagation()">
           <i class="fa-regular fa-heart"></i>
         </button>
+
+        <!-- Flechas carrusel móvil -->
+        <ng-container *ngIf="product.images?.length > 1">
+          <button class="carousel-arrow prev"
+            (click)="$event.stopPropagation(); selectedImageIndex = (selectedImageIndex - 1 + product.images.length) % product.images.length"
+            aria-label="Imagen anterior">
+            <i class="fa-solid fa-chevron-left"></i>
+          </button>
+          <button class="carousel-arrow next"
+            (click)="$event.stopPropagation(); selectedImageIndex = (selectedImageIndex + 1) % product.images.length"
+            aria-label="Imagen siguiente">
+            <i class="fa-solid fa-chevron-right"></i>
+          </button>
+        </ng-container>
       </div>
 
       <!-- Dots móvil -->

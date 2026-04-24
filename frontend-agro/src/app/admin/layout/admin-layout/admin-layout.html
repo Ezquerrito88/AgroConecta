@@ -1,7 +1,10 @@
 <div class="admin-shell">
 
+  <!-- Overlay para cerrar sidebar en móvil -->
+  <div class="sidebar-overlay" [class.active]="sidebarOpen()" (click)="sidebarOpen.set(false)"></div>
+
   <!-- ── SIDEBAR ── -->
-  <aside class="sidebar">
+  <aside class="sidebar" [class.active]="sidebarOpen()">
 
     <!-- Header -->
     <div class="sidebar-header">
@@ -30,7 +33,7 @@
     <nav class="sidebar-nav">
       <ul>
         <li *ngFor="let item of navItems">
-          <a [routerLink]="item.route" routerLinkActive="active">
+          <a [routerLink]="item.route" routerLinkActive="active" (click)="sidebarOpen.set(false)">
             <span class="material-symbols-rounded">{{ item.icon }}</span>
             <span>{{ item.label }}</span>
           </a>

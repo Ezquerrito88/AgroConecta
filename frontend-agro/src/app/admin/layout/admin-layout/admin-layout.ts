@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, HostListener } from '@angular/core';
 import { Router, RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../../core/services/auth';
@@ -16,6 +16,7 @@ export class AdminLayout {
 
   user = this.auth.getCurrentUser();
   sidebarCollapsed = signal(false);
+  sidebarOpen = signal(false);
 
   navItems = [
     { label: 'Inicio',           icon: 'home',          route: '/admin/dashboard'    },
@@ -25,6 +26,11 @@ export class AdminLayout {
     { label: 'Estadísticas',     icon: 'bar_chart',     route: '/admin/estadisticas'},
     
   ];
+
+  @HostListener('document:open-admin-sidebar')
+  onOpenSidebar() {
+    this.sidebarOpen.set(true);
+  }
 
   toggleSidebar(): void {
     this.sidebarCollapsed.update(v => !v);

@@ -34,9 +34,9 @@
   padding: 0 28px; height: 64px;
   position: sticky; top: 0; z-index: 10; flex-shrink: 0;
 }
-.topbar-left   { display: flex; flex-direction: column; justify-content: center; }
+.topbar-left   { display: flex; align-items: center; gap: 12px; }
 .page-title    { font-size: 1.1rem; font-weight: 800; color: var(--text-dark); margin: 0; letter-spacing: -.03em; }
-.page-subtitle { font-size: .72rem; color: #9ca3af; margin-top: 2px; text-transform: capitalize; }
+
 .topbar-right  { display: flex; align-items: center; gap: 10px; }
 
 .search-box {
@@ -400,6 +400,7 @@
 @media (max-width: 600px) {
   .topbar       { padding: 0 16px; }
   .page-content { padding: 16px; }
+  .user-chip    { display: none; }
 }
 @media (max-width: 480px) {
   .kpi-grid   { grid-template-columns: 1fr; }

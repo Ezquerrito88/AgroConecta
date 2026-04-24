@@ -211,4 +211,8 @@ export class AdminEstadisticas implements OnInit {
       this.cdr.detectChanges();
     }
   }
+
+  openSidebar(): void {
+    document.dispatchEvent(new CustomEvent('open-admin-sidebar'));
+  }
 }

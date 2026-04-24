@@ -127,7 +127,11 @@ export class GestionCategorias implements OnInit {
   }
 
   getPlaceholderColor(index: number): string {
-    const colors = ['#86efac', '#93c5fd', '#fde047', '#d8b4fe', '#fdba74', '#5eead4'];
+    const colors = ['#f59e0b', '#10b981', '#3b82f6', '#8b5cf6', '#ec4899', '#f43f5e'];
     return colors[index % colors.length];
+  }
+
+  openSidebar(): void {
+    document.dispatchEvent(new CustomEvent('open-admin-sidebar'));
   }
 }

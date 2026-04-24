@@ -17,22 +17,24 @@
 .main-content { max-width: 1400px; margin: 40px auto; padding: 0 20px; }
 .product-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; margin-bottom: 60px; align-items: start; }
 
-/* GALERÍA */
+/* GALERÍA PC */
 .image-column { display: flex; flex-direction: column; gap: 10px; }
 .gallery-wrap { position: relative; display: block; width: 100%; isolation: isolate; }
 
 .vinted-gallery { display: grid; grid-template-columns: 3fr 2fr; gap: 6px; width: 100%; }
 .vinted-gallery.count-1 { grid-template-columns: 1fr; }
 
-.vgal-main { position: relative; overflow: hidden; background: #f3f4f6; cursor: pointer; aspect-ratio: 3/4; border-radius: 14px 0 0 14px; }
+/* La imagen principal: ratio cuadrado para verse bien */
+.vgal-main { position: relative; overflow: hidden; background: #f3f4f6; cursor: pointer; aspect-ratio: 1/1; border-radius: 14px 0 0 14px; }
 .vinted-gallery.count-1 .vgal-main { border-radius: 14px; }
 
-.vgal-thumbs { display: grid; grid-template-rows: 1fr 1fr; gap: 6px; min-height: 0; }
+/* Thumbnails: se estiran para llenar el espacio junto a la imagen principal */
+.vgal-thumbs { display: grid; grid-template-rows: 1fr 1fr; gap: 6px; }
 .vinted-gallery.count-2 .vgal-thumbs { grid-template-rows: 1fr; }
-.vgal-thumb { position: relative; overflow: hidden; background: #f3f4f6; cursor: pointer; min-height: 0; }
+.vgal-thumb { position: relative; overflow: hidden; background: #f3f4f6; cursor: pointer; aspect-ratio: 3/4; }
 .vgal-thumb:first-child { border-radius: 0 14px 0 0; }
 .vgal-thumb:last-child  { border-radius: 0 0 14px 0; }
-.vinted-gallery.count-2 .vgal-thumb { border-radius: 0 14px 14px 0; }
+.vinted-gallery.count-2 .vgal-thumb { border-radius: 0 14px 14px 0; aspect-ratio: 1/1; }
 
 .vgal-img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.4s cubic-bezier(0.25,0.46,0.45,0.94); }
 .vgal-main:hover .vgal-img, .vgal-thumb:hover .vgal-img { transform: scale(1.04); }
@@ -51,6 +53,7 @@
 .image-empty { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: #cbd5e1; font-size: 0.9rem; gap: 10px; background: linear-gradient(135deg,#f8fafc,#f1f5f9); }
 .image-empty i { font-size: 4rem; color: #e2e8f0; }
 
+/* DOTS MÓVIL */
 .dots-row { display: none; justify-content: center; gap: 6px; padding: 4px 0; }
 .dot { width: 7px; height: 7px; border-radius: 50%; background: #d1d5db; cursor: pointer; transition: background 0.2s, transform 0.2s; }
 .dot.active { background: #07A350; transform: scale(1.3); }
@@ -89,8 +92,8 @@
 .farmer-info .name     { font-size: 1rem; color: #1f2937; font-weight: 700; }
 .farmer-info .location { font-size: 0.85rem; color: #6b7280; display: flex; align-items: center; gap: 4px; }
 
-/* Farmer actions (eco badge + contactar) */
-.farmer-actions { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; flex-shrink: 0; }
+/* Farmer actions (eco badge + contactar) — en fila, alineado con el contenido del agricultor */
+.farmer-actions { display: flex; flex-direction: row; align-items: center; gap: 8px; flex-shrink: 0; flex-wrap: wrap; justify-content: flex-end; }
 
 .eco-badge { background: #dcfce7; border: 1px solid #86efac; color: #065f46; border-radius: 20px; font-size: 0.73rem; font-weight: 700; padding: 4px 10px; display: flex; align-items: center; gap: 4px; white-space: nowrap; }
 
@@ -220,13 +223,49 @@
   .product-grid      { grid-template-columns: 1fr; gap: 32px; }
   .skeleton-layout   { grid-template-columns: 1fr; }
   .product-name-title { white-space: normal; }
-  .vinted-gallery    { grid-template-columns: 1fr !important; border-radius: 14px; }
-  .vgal-thumbs       { display: none; }
-  .vgal-main         { aspect-ratio: 4/3; border-radius: 14px !important; }
+
+  /* CARRUSEL MÓVIL */
+  .vinted-gallery    { display: block !important; position: relative; overflow: hidden; border-radius: 14px; }
+  .vgal-main         {
+    aspect-ratio: 4/3;
+    border-radius: 14px !important;
+    display: block;
+  }
+  .vgal-thumbs       { display: none !important; }
   .dots-row          { display: flex; }
+  .gallery-wrap      { position: relative; }
+
+  /* Flechas del carrusel en móvil */
+  .carousel-arrow {
+    display: flex;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(255,255,255,.85);
+    color: #374151;
+    font-size: 1.1rem;
+    align-items: center; justify-content: center;
+    cursor: pointer;
+    z-index: 10;
+    box-shadow: 0 2px 8px rgba(0,0,0,.15);
+    backdrop-filter: blur(4px);
+    transition: background .2s;
+  }
+  .carousel-arrow:hover { background: #fff; }
+  .carousel-arrow.prev  { left: 10px; }
+  .carousel-arrow.next  { right: 10px; }
+
   .lb-arrow          { width: 38px; height: 38px; }
   .lb-arrow.prev     { left: 10px; }
   .lb-arrow.next     { right: 10px; }
+}
+
+/* Las flechas de carrusel se ocultan en PC */
+@media (min-width: 901px) {
+  .carousel-arrow { display: none; }
 }
 
 @media (max-width: 600px) {
@@ -237,6 +276,6 @@
   .origin-impact      { flex-direction: column; }
   .hero-subtitle      { white-space: normal; }
   .farmer-card        { flex-wrap: wrap; }
-  .farmer-actions     { flex-direction: row; width: 100%; justify-content: flex-end; }
+  .farmer-actions     { flex-direction: row; width: 100%; justify-content: flex-start; }
   .contact-farmer-btn { font-size: 0.75rem; padding: 6px 12px; }
 }

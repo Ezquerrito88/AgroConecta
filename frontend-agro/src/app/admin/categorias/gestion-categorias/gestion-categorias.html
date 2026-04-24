@@ -3,8 +3,10 @@
   <!-- ── TOPBAR igual al resto del admin ── -->
   <div class="topbar">
     <div class="topbar-left">
+      <button class="topbar-hamburger" (click)="openSidebar()" aria-label="Abrir menú">
+        <span class="material-symbols-rounded">menu</span>
+      </button>
       <h1 class="page-title">Gestión de Categorías</h1>
-      <span class="page-subtitle">Crea y administra las categorías de productos</span>
     </div>
     <div class="topbar-right">
       <button class="btn-primary" (click)="openCreate()">

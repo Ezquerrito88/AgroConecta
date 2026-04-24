@@ -60,4 +60,8 @@ export class AdminDashboard implements OnInit {
     const img = p.images?.[0];
     return img?.url ?? img?.image_url ?? img?.path ?? null;
   }
+
+  openSidebar(): void {
+    document.dispatchEvent(new CustomEvent('open-admin-sidebar'));
+  }
 }
