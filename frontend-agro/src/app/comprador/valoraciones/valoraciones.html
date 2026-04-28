@@ -9,8 +9,10 @@
         <button class="topbar-hamburger" (click)="toggleSidebar()" aria-label="Abrir menú">
           <span class="material-symbols-rounded">menu</span>
         </button>
-        <h1 class="page-title">Valoraciones</h1>
-        <p class="page-subtitle">Valora los productos que has recibido</p>
+        <div>
+          <h1 class="page-title">Valoraciones</h1>
+          <span class="page-subtitle">Valora los productos que has recibido</span>
+        </div>
       </div>
       <div class="topbar-right">
         <a class="icon-btn" routerLink="/comprador/favoritos" title="Favoritos">
@@ -18,6 +20,7 @@
         </a>
         <button class="icon-btn notif-btn" title="Notificaciones">
           <span class="material-symbols-rounded">notifications</span>
+          <span class="notif-dot"></span>
         </button>
         <div class="user-chip">
           <div class="user-avatar">{{ userInitial }}</div>
@@ -78,7 +81,7 @@
 
         <div class="val-grid" *ngIf="pendientes.length > 0">
           <div class="val-card" *ngFor="let item of pendientes">
-            <img [src]="getImageUrl(item.product)" [alt]="item.product.name" class="val-card-img"/>
+            <img [src]="getImageUrl(item.product)" [alt]="item.product.name" class="val-card-img" />
             <div class="val-card-info">
               <span class="val-card-name">{{ item.product.name }}</span>
               <span class="val-card-price">{{ item.product.price }}€/{{ item.product.unit }}</span>
@@ -113,7 +116,7 @@
 
         <div class="val-grid" *ngIf="misReviews.length > 0">
           <div class="val-card done" *ngFor="let r of misReviews">
-            <img [src]="getImageUrl(r.product)" [alt]="r.product?.name" class="val-card-img"/>
+            <img [src]="getImageUrl(r.product)" [alt]="r.product?.name" class="val-card-img" />
             <div class="val-card-info">
               <span class="val-card-name">{{ r.product?.name }}</span>
               <div class="stars-display">
@@ -138,7 +141,7 @@
     <button class="modal-close" (click)="cerrarModal()">✕</button>
 
     <div class="modal-product" *ngIf="selectedProduct">
-      <img [src]="getImageUrl(selectedProduct.product)" class="modal-product-img"/>
+      <img [src]="getImageUrl(selectedProduct.product)" class="modal-product-img" />
       <div>
         <strong>{{ selectedProduct.product.name }}</strong>
         <span>{{ selectedProduct.product.price }}€/{{ selectedProduct.product.unit }}</span>

@@ -4,7 +4,7 @@
 
   <main class="main-content">
 
-    <!-- Topbar -->
+    <!-- TOPBAR -->
     <div class="topbar">
       <div class="topbar-left">
         <button class="topbar-hamburger" (click)="toggleSidebar()" aria-label="Abrir menú">
@@ -13,15 +13,16 @@
         <h1 class="page-title">Mensajes</h1>
         <span class="page-subtitle">Mira tus mensajes</span>
       </div>
+
       <div class="topbar-right">
         <div class="search-box">
           <span class="material-symbols-rounded">search</span>
           <input type="text" placeholder="Buscar productos, pedidos…" />
         </div>
-        <button class="icon-btn notif-btn">
+        <button class="icon-btn notif-btn" aria-label="Notificaciones">
           <span class="material-symbols-rounded">notifications</span>
         </button>
-        <button class="icon-btn">
+        <button class="icon-btn help-btn" aria-label="Ayuda">
           <span class="material-symbols-rounded">help</span>
         </button>
         <div class="user-chip">

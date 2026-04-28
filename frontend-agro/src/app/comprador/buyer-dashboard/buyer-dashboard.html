@@ -1,5 +1,4 @@
 <div class="dashboard-layout">
-  <!-- Overlay para cerrar sidebar en móvil -->
   <div class="sidebar-overlay" [class.active]="sidebarOpen" (click)="sidebarOpen = false"></div>
 
   <app-sidebar-comprador [(isOpen)]="sidebarOpen" />
@@ -12,7 +11,10 @@
         <button class="topbar-hamburger" (click)="toggleSidebar()" aria-label="Abrir menú">
           <span class="material-symbols-rounded">menu</span>
         </button>
-        <h1 class="page-title">Mi Panel</h1>
+        <div>
+          <h1 class="page-title">Mi Panel</h1>
+          <span class="page-subtitle">Resumen de tu actividad</span>
+        </div>
       </div>
       <div class="topbar-right">
         <div class="search-box">
@@ -24,6 +26,7 @@
         </a>
         <button class="icon-btn notif-btn" title="Notificaciones">
           <span class="material-symbols-rounded">notifications</span>
+          <span class="notif-dot"></span>
         </button>
         <div class="user-chip">
           <div class="user-avatar">{{ firstName.charAt(0).toUpperCase() }}</div>
@@ -32,231 +35,238 @@
       </div>
     </div>
 
-    <!-- Banner bienvenida -->
-    <div class="welcome-banner">
-      <div class="welcome-left">
-        <div>
-          <p class="welcome-title">
-            {{ greeting }}<span *ngIf="firstName">, {{ firstName }}!</span>
-          </p>
-          <p class="welcome-sub">Aquí tienes el resumen de tu actividad. ¿Qué quieres hacer hoy?</p>
-        </div>
-      </div>
-      <div class="welcome-actions">
-        <a routerLink="/productos" class="btn-primary-white">
-          <span class="material-symbols-rounded">storefront</span>
-          Explorar Productos
-        </a>
-        <a routerLink="/comprador/mis-pedidos" class="btn-ghost-white">
-          <span class="material-symbols-rounded">receipt_long</span>
-          Ver Pedidos
-        </a>
-      </div>
-    </div>
+    <!-- Contenido -->
+    <div class="page-content">
 
-    <!-- KPIs -->
-    <div class="kpi-grid">
-
-      <!-- Skeleton -->
-      <ng-container *ngIf="loadingOrders || loadingFavoritos">
-        <div class="qs-card skel-block" *ngFor="let s of [1,2,3,4]"></div>
-      </ng-container>
-
-      <!-- KPIs reales -->
-      <ng-container *ngIf="!loadingOrders && !loadingFavoritos">
-
-        <!-- Total gastado — featured naranja -->
-        <div class="qs-card qs-featured">
-          <div class="qs-icon white-icon">
-            <span class="material-symbols-rounded">payments</span>
+      <!-- Banner bienvenida -->
+      <div class="welcome-banner">
+        <div class="welcome-left">
+          <div class="welcome-icon-wrap">
+            <span class="material-symbols-rounded">waving_hand</span>
           </div>
-          <div class="qs-info">
-            <span class="qs-value">{{ kpis.gastado | currency:'EUR':'symbol':'1.2-2' }}</span>
-            <span class="qs-label">Total gastado</span>
-            <span class="qs-sub white-sub">
-              <span class="material-symbols-rounded">history</span>
-              acumulado
-            </span>
-          </div>
-        </div>
-
-        <!-- Pedidos totales -->
-        <div class="qs-card">
-          <div class="qs-icon orange">
-            <span class="material-symbols-rounded">receipt_long</span>
-          </div>
-          <div class="qs-info">
-            <span class="qs-value">{{ kpis.pedidos }}</span>
-            <span class="qs-label">Pedidos totales</span>
-            <span class="qs-sub orange">
-              <span class="material-symbols-rounded">arrow_upward</span>
-              +{{ kpis.pedidos }} realizados
-            </span>
-          </div>
-        </div>
-
-        <!-- En camino -->
-        <div class="qs-card">
-          <div class="qs-icon blue">
-            <span class="material-symbols-rounded">local_shipping</span>
-          </div>
-          <div class="qs-info">
-            <span class="qs-value">{{ kpis.enCamino }}</span>
-            <span class="qs-label">En camino</span>
-            <span class="qs-sub blue">
-              <span class="material-symbols-rounded">local_shipping</span>
-              en tránsito
-            </span>
-          </div>
-        </div>
-
-        <!-- Favoritos -->
-        <div class="qs-card">
-          <div class="qs-icon purple">
-            <span class="material-symbols-rounded">favorite</span>
-          </div>
-          <div class="qs-info">
-            <span class="qs-value">{{ kpis.favoritos }}</span>
-            <span class="qs-label">Favoritos</span>
-            <span class="qs-sub purple">
-              <span class="material-symbols-rounded">bookmark</span>
-              guardados
-            </span>
-          </div>
-        </div>
-
-      </ng-container>
-    </div>
-
-    <!-- Accesos Rápidos -->
-    <div class="section-card">
-      <div class="section-header">
-        <div class="section-title-group">
-          <span class="material-symbols-rounded section-icon">bolt</span>
-          <h2>Accesos Rápidos</h2>
-        </div>
-      </div>
-      <div class="quick-actions-grid">
-        <a *ngFor="let a of quickActions" [routerLink]="a.route" class="quick-action-btn">
-          <span class="material-symbols-rounded">{{ a.icon }}</span>
-          {{ a.label }}
-        </a>
-      </div>
-    </div>
-
-    <!-- Últimos Pedidos -->
-    <div class="section-card">
-      <div class="section-header">
-        <div class="section-title-group">
-          <span class="material-symbols-rounded section-icon">receipt_long</span>
-          <h2>Últimos Pedidos</h2>
-        </div>
-        <a routerLink="/comprador/mis-pedidos" class="ver-todos">Ver todos →</a>
-      </div>
-
-      <!-- Skeleton -->
-      <div *ngIf="loadingOrders" class="skeleton-list">
-        <div class="skeleton-row" *ngFor="let s of skeletons">
-          <div class="skeleton-cell" style="width:32px;height:32px;border-radius:50%;"></div>
-          <div class="skeleton-cell medium"></div>
-          <div class="skeleton-cell long"></div>
-          <div class="skeleton-cell short"></div>
-          <div class="skeleton-cell medium"></div>
-        </div>
-      </div>
-
-      <!-- Empty state -->
-      <div *ngIf="!loadingOrders && recentOrders.length === 0" class="empty-state-cta">
-        <span class="material-symbols-rounded">receipt_long</span>
-        <p>Aún no has realizado ningún pedido.</p>
-        <a routerLink="/productos" class="btn-cta-sm">Explorar productos</a>
-      </div>
-
-      <!-- Tabla -->
-      <table class="orders-table" *ngIf="!loadingOrders && recentOrders.length > 0">
-        <thead>
-          <tr>
-            <th>AGRICULTOR</th>
-            <th>Nº PEDIDO</th>
-            <th>PRODUCTOS</th>
-            <th>TOTAL</th>
-            <th>ESTADO</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let order of recentOrders">
-            <td>
-              <div class="client-cell">
-                <div class="client-avatar-initial">
-                  {{ getFarmerName(order).charAt(0).toUpperCase() }}
-                </div>
-                <div class="client-cell-info">
-                  <span class="client-name">{{ getFarmerName(order) }}</span>
-                  <span class="client-date">{{ order.created_at | date:'dd/MM/yyyy' }}</span>
-                </div>
-              </div>
-            </td>
-            <td><strong>#{{ order.id }}</strong></td>
-            <td class="td-products">{{ getProductosLabel(order) }}</td>
-            <td><strong>{{ order.total | currency:'EUR':'symbol':'1.2-2' }}</strong></td>
-            <td>
-              <span class="status-badge" [ngClass]="statusClasses[order.status]">
-                <span class="material-symbols-rounded status-icon">{{ statusIcons[order.status] }}</span>
-                {{ statusLabels[order.status] }}
-              </span>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <!-- Mis Favoritos -->
-    <div class="section-card">
-      <div class="section-header">
-        <div class="section-title-group">
-          <span class="material-symbols-rounded section-icon">favorite</span>
-          <h2>Mis Favoritos</h2>
-        </div>
-        <a routerLink="/comprador/favoritos" class="ver-todos">Ver todos →</a>
-      </div>
-
-      <!-- Skeleton -->
-      <div class="buyer-favorites-grid" *ngIf="loadingFavoritos">
-        <div class="product-card sk-product" *ngFor="let s of [1,2,3,4]">
-          <div class="sk-prod-img"></div>
-          <div class="sk-prod-body">
-            <div class="sk-prod-line long"></div>
-            <div class="sk-prod-line short"></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Empty state -->
-      <div *ngIf="!loadingFavoritos && favProducts.length === 0" class="empty-state-cta">
-        <span class="material-symbols-rounded">favorite_border</span>
-        <p>No tienes productos en favoritos todavía.</p>
-        <a routerLink="/productos" class="btn-cta-sm">Descubrir productos</a>
-      </div>
-
-      <!-- Grid -->
-      <div class="buyer-favorites-grid" *ngIf="!loadingFavoritos && favProducts.length > 0">
-        <div class="product-card" *ngFor="let p of favProducts" [routerLink]="['/producto', p.id]"
-          style="cursor:pointer;">
-          <img [src]="getImagen(p)" [alt]="p.name" class="product-img" onerror="this.src='img/logo/logo.png'" />
-          <div class="product-info">
-            <p class="product-name">{{ p.name }}</p>
-            <p class="product-price">
-              {{ p.price | currency:'EUR':'symbol':'1.2-2' }}<span>/{{ p.unit }}</span>
+          <div>
+            <p class="welcome-title">
+              {{ greeting }}<span *ngIf="firstName">, {{ firstName }}!</span>
             </p>
-            <div class="product-meta">
-              <span class="material-symbols-rounded">storefront</span>
-              {{ p.farmer?.name ?? 'Agricultor' }}
+            <p class="welcome-sub">Aquí tienes el resumen de tu actividad. ¿Qué quieres hacer hoy?</p>
+          </div>
+        </div>
+        <div class="welcome-actions">
+          <a routerLink="/productos" class="btn-primary-white">
+            <span class="material-symbols-rounded">storefront</span>
+            Explorar Productos
+          </a>
+          <a routerLink="/comprador/mis-pedidos" class="btn-ghost-white">
+            <span class="material-symbols-rounded">receipt_long</span>
+            Ver Pedidos
+          </a>
+        </div>
+      </div>
+
+      <!-- KPIs -->
+      <div class="kpi-grid">
+
+        <!-- Skeleton -->
+        <ng-container *ngIf="loadingOrders || loadingFavoritos">
+          <div class="qs-card skel-block" *ngFor="let s of [1,2,3,4]"></div>
+        </ng-container>
+
+        <!-- KPIs reales -->
+        <ng-container *ngIf="!loadingOrders && !loadingFavoritos">
+
+          <div class="qs-card qs-featured">
+            <div class="qs-icon white-icon">
+              <span class="material-symbols-rounded">payments</span>
+            </div>
+            <div class="qs-info">
+              <span class="qs-value">{{ kpis.gastado | currency:'EUR':'symbol':'1.2-2' }}</span>
+              <span class="qs-label">Total gastado</span>
+              <span class="qs-sub white-sub">
+                <span class="material-symbols-rounded">history</span>
+                acumulado
+              </span>
+            </div>
+          </div>
+
+          <div class="qs-card">
+            <div class="qs-icon orange">
+              <span class="material-symbols-rounded">receipt_long</span>
+            </div>
+            <div class="qs-info">
+              <span class="qs-value">{{ kpis.pedidos }}</span>
+              <span class="qs-label">Pedidos totales</span>
+              <span class="qs-sub orange">
+                <span class="material-symbols-rounded">arrow_upward</span>
+                +{{ kpis.pedidos }} realizados
+              </span>
+            </div>
+          </div>
+
+          <div class="qs-card">
+            <div class="qs-icon blue">
+              <span class="material-symbols-rounded">local_shipping</span>
+            </div>
+            <div class="qs-info">
+              <span class="qs-value">{{ kpis.enCamino }}</span>
+              <span class="qs-label">En camino</span>
+              <span class="qs-sub blue">
+                <span class="material-symbols-rounded">local_shipping</span>
+                en tránsito
+              </span>
+            </div>
+          </div>
+
+          <div class="qs-card">
+            <div class="qs-icon purple">
+              <span class="material-symbols-rounded">favorite</span>
+            </div>
+            <div class="qs-info">
+              <span class="qs-value">{{ kpis.favoritos }}</span>
+              <span class="qs-label">Favoritos</span>
+              <span class="qs-sub purple">
+                <span class="material-symbols-rounded">bookmark</span>
+                guardados
+              </span>
+            </div>
+          </div>
+
+        </ng-container>
+      </div>
+
+      <!-- Accesos Rápidos -->
+      <div class="section-card">
+        <div class="section-header">
+          <div class="section-title-group">
+            <span class="material-symbols-rounded section-icon">bolt</span>
+            <h2>Accesos Rápidos</h2>
+          </div>
+        </div>
+        <div class="quick-actions-grid">
+          <a *ngFor="let a of quickActions" [routerLink]="a.route" class="quick-action-btn">
+            <span class="material-symbols-rounded">{{ a.icon }}</span>
+            {{ a.label }}
+          </a>
+        </div>
+      </div>
+
+      <!-- Últimos Pedidos -->
+      <div class="section-card">
+        <div class="section-header">
+          <div class="section-title-group">
+            <span class="material-symbols-rounded section-icon">receipt_long</span>
+            <h2>Últimos Pedidos</h2>
+          </div>
+          <a routerLink="/comprador/mis-pedidos" class="ver-todos">Ver todos →</a>
+        </div>
+
+        <!-- Skeleton -->
+        <div *ngIf="loadingOrders" class="skeleton-list">
+          <div class="skeleton-row" *ngFor="let s of skeletons">
+            <div class="skeleton-cell" style="width:32px;height:32px;border-radius:50%;"></div>
+            <div class="skeleton-cell medium"></div>
+            <div class="skeleton-cell long"></div>
+            <div class="skeleton-cell short"></div>
+            <div class="skeleton-cell medium"></div>
+          </div>
+        </div>
+
+        <!-- Empty state -->
+        <div *ngIf="!loadingOrders && recentOrders.length === 0" class="empty-state-cta">
+          <span class="material-symbols-rounded">receipt_long</span>
+          <p>Aún no has realizado ningún pedido.</p>
+          <a routerLink="/productos" class="btn-cta-sm">Explorar productos</a>
+        </div>
+
+        <!-- Tabla con wrapper scroll en móvil -->
+        <div class="table-scroll-wrap" *ngIf="!loadingOrders && recentOrders.length > 0">
+          <table class="orders-table">
+            <thead>
+              <tr>
+                <th>AGRICULTOR</th>
+                <th>Nº PEDIDO</th>
+                <th class="col-products">PRODUCTOS</th>
+                <th>TOTAL</th>
+                <th>ESTADO</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let order of recentOrders">
+                <td>
+                  <div class="client-cell">
+                    <div class="client-avatar-initial">
+                      {{ getFarmerName(order).charAt(0).toUpperCase() }}
+                    </div>
+                    <div class="client-cell-info">
+                      <span class="client-name">{{ getFarmerName(order) }}</span>
+                      <span class="client-date">{{ order.created_at | date:'dd/MM/yyyy' }}</span>
+                    </div>
+                  </div>
+                </td>
+                <td><strong>#{{ order.id }}</strong></td>
+                <td class="td-products col-products">{{ getProductosLabel(order) }}</td>
+                <td><strong>{{ order.total | currency:'EUR':'symbol':'1.2-2' }}</strong></td>
+                <td>
+                  <span class="status-badge" [ngClass]="statusClasses[order.status]">
+                    <span class="material-symbols-rounded status-icon">{{ statusIcons[order.status] }}</span>
+                    {{ statusLabels[order.status] }}
+                  </span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Mis Favoritos -->
+      <div class="section-card">
+        <div class="section-header">
+          <div class="section-title-group">
+            <span class="material-symbols-rounded section-icon">favorite</span>
+            <h2>Mis Favoritos</h2>
+          </div>
+          <a routerLink="/comprador/favoritos" class="ver-todos">Ver todos →</a>
+        </div>
+
+        <!-- Skeleton -->
+        <div class="buyer-favorites-grid" *ngIf="loadingFavoritos">
+          <div class="product-card sk-product" *ngFor="let s of [1,2,3,4]">
+            <div class="sk-prod-img"></div>
+            <div class="sk-prod-body">
+              <div class="sk-prod-line long"></div>
+              <div class="sk-prod-line short"></div>
             </div>
           </div>
         </div>
+
+        <!-- Empty state -->
+        <div *ngIf="!loadingFavoritos && favProducts.length === 0" class="empty-state-cta">
+          <span class="material-symbols-rounded">favorite_border</span>
+          <p>No tienes productos en favoritos todavía.</p>
+          <a routerLink="/productos" class="btn-cta-sm">Descubrir productos</a>
+        </div>
+
+        <!-- Grid -->
+        <div class="buyer-favorites-grid" *ngIf="!loadingFavoritos && favProducts.length > 0">
+          <div class="product-card" *ngFor="let p of favProducts"
+            [routerLink]="['/producto', p.id]" style="cursor:pointer;">
+            <img [src]="getImagen(p)" [alt]="p.name" class="product-img"
+              onerror="this.src='img/logo/logo.png'" />
+            <div class="product-info">
+              <p class="product-name">{{ p.name }}</p>
+              <p class="product-price">
+                {{ p.price | currency:'EUR':'symbol':'1.2-2' }}<span>/{{ p.unit }}</span>
+              </p>
+              <div class="product-meta">
+                <span class="material-symbols-rounded">storefront</span>
+                {{ p.farmer?.name ?? 'Agricultor' }}
+              </div>
+            </div>
+          </div>
+        </div>
+
       </div>
 
-    </div>
+    </div><!-- /page-content -->
 
   </main>
 </div>

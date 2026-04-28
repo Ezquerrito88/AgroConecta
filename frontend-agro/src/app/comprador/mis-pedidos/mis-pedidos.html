@@ -9,8 +9,10 @@
         <button class="topbar-hamburger" (click)="toggleSidebar()" aria-label="Abrir menú">
           <span class="material-symbols-rounded">menu</span>
         </button>
-        <h1 class="page-title">Mis Pedidos</h1>
-        <p class="page-subtitle">Consulta y gestiona todos tus pedidos</p>
+        <div>
+          <h1 class="page-title">Mis Pedidos</h1>
+          <span class="page-subtitle">Consulta y gestiona todos tus pedidos</span>
+        </div>
       </div>
       <div class="topbar-right">
         <div class="search-box">
@@ -22,6 +24,7 @@
         </a>
         <button class="icon-btn notif-btn" title="Notificaciones">
           <span class="material-symbols-rounded">notifications</span>
+          <span class="notif-dot"></span>
         </button>
         <div class="user-chip">
           <div class="user-avatar">{{ userInitial }}</div>
@@ -34,8 +37,8 @@
 
       <!-- Filtros -->
       <div class="filter-tabs">
-        <button *ngFor="let f of filtros" class="filter-tab" [class.active]="filtroActivo === f.id"
-          (click)="setFiltro(f.id)">
+        <button *ngFor="let f of filtros" class="filter-tab"
+          [class.active]="filtroActivo === f.id" (click)="setFiltro(f.id)">
           {{ f.label }}
           <span class="filter-count">{{ getCount(f.id) }}</span>
         </button>
@@ -66,8 +69,8 @@
           <tr>
             <th style="min-width:80px">PEDIDO</th>
             <th style="min-width:180px">AGRICULTOR</th>
-            <th style="min-width:160px; max-width:400px; width:40%">PRODUCTOS</th>
-            <th style="min-width:110px">FECHA</th>
+            <th class="col-products" style="min-width:160px;max-width:400px;width:40%">PRODUCTOS</th>
+            <th class="col-date" style="min-width:110px">FECHA</th>
             <th style="min-width:90px">TOTAL</th>
             <th style="min-width:130px">ESTADO</th>
             <th style="min-width:40px"></th>
@@ -75,7 +78,8 @@
         </thead>
         <tbody>
           <ng-container *ngFor="let order of pagedOrders">
-            <tr class="order-row" [class.expanded]="expandedId === order.id" (click)="toggleExpand(order.id)">
+            <tr class="order-row" [class.expanded]="expandedId === order.id"
+              (click)="toggleExpand(order.id)">
               <td><strong>#{{ order.id }}</strong></td>
               <td>
                 <div class="client-cell">
@@ -88,8 +92,8 @@
                   </div>
                 </div>
               </td>
-              <td class="td-products">{{ getProductosLabel(order) }}</td>
-              <td class="td-date">{{ order.created_at | date:'dd MMM yyyy' }}</td>
+              <td class="td-products col-products">{{ getProductosLabel(order) }}</td>
+              <td class="td-date col-date">{{ order.created_at | date:'dd MMM yyyy' }}</td>
               <td><strong>{{ order.total | currency:'EUR':'symbol':'1.2-2' }}</strong></td>
               <td>
                 <span class="status-badge" [ngClass]="statusClasses[order.status]">

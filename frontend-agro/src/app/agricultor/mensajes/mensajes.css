@@ -1,3 +1,32 @@
+/* ══════════════════════════════════════════════
+   VARIABLES  (si no las tienes ya globales)
+══════════════════════════════════════════════ */
+:root {
+  --green: #11C267;
+  --green-dark: #0ea858;
+  --green-soft: #02BA7A;
+  --green-gradient: linear-gradient(135deg, #11C267 0%, #049a56 100%);
+  --green-bg: #f0fdf4;
+  --border: #f3f4f6;
+  --border-mid: #e5e7eb;
+  --text-muted: #6b7280;
+  --text-dark: #111827;
+  --text-mid: #374151;
+  --radius-card: 20px;
+  --radius-btn: 12px;
+  --transition-fast: .2s;
+  --transition-mid: .3s;
+}
+
+/* ══════════════════════════════════════════════
+   TOPBAR — Mensajes
+══════════════════════════════════════════════ */
+
+/* Hamburguesa oculta en desktop */
+.dashboard-layout .topbar-hamburger {
+  display: none;
+}
+
 .dashboard-layout .topbar-left {
   display: flex;
   flex-direction: column;
@@ -18,15 +47,76 @@
 .dashboard-layout .page-subtitle {
   font-size: .75rem;
   color: #9ca3af;
-  text-transform: capitalize;
   margin: 0;
   line-height: 1.2;
   display: block;
 }
 
-/* ── Responsive móvil ── */
-@media (max-width: 640px) {
-  .dashboard-layout .page-subtitle { display: none; }
-  .dashboard-layout .search-box    { display: none; }
-  .dashboard-layout .icon-btn      { display: none; }
+/* ══════════════════════════════════════════════
+   RESPONSIVE
+══════════════════════════════════════════════ */
+
+/* ── 768px ── */
+@media (max-width: 768px) {
+
+  /* Hamburguesa visible */
+  .dashboard-layout .topbar-hamburger {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  /* Topbar-left en fila */
+  .dashboard-layout .topbar-left {
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 8px;
+  }
+
+  /* Ocultar subtítulo */
+  .dashboard-layout .page-subtitle {
+    display: none;
+  }
+}
+
+/* ── 600px ── */
+@media (max-width: 600px) {
+
+  /* Topbar */
+  .dashboard-layout .topbar {
+    padding: 0 16px;
+    gap: 8px;
+  }
+
+  /* Ocultar buscador */
+  .dashboard-layout .search-box {
+    display: none;
+  }
+
+  /* Ocultar botones icon-btn secundarios (ayuda) */
+  .dashboard-layout .help-btn {
+    display: none;
+  }
+
+  /* Solo avatar, ocultar nombre */
+  .dashboard-layout .user-name {
+    display: none;
+  }
+
+  .dashboard-layout .user-chip {
+    padding: 4px;
+  }
+}
+
+/* ── 420px ── */
+@media (max-width: 420px) {
+
+  .dashboard-layout .topbar {
+    padding: 0 12px;
+  }
+
+  .dashboard-layout .page-title {
+    font-size: .95rem;
+  }
 }
