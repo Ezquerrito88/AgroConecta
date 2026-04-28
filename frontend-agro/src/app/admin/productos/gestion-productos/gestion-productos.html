@@ -6,9 +6,8 @@
       <button class="topbar-hamburger" (click)="openSidebar()" aria-label="Abrir menú">
         <span class="material-symbols-rounded">menu</span>
       </button>
-      <h1 class="page-title">Gestión de Usuarios</h1>
+      <h1 class="page-title">Gestión de Productos</h1>
     </div>
-  
     <div class="topbar-right">
       <div class="user-chip">
         <div class="user-avatar">A</div>
@@ -17,53 +16,61 @@
     </div>
   </div>
 
-
   <div class="page-content">
 
-    <!-- ── QUICK STATS ── -->
-    <div class="quick-stats">
-      <div class="qs-card">
-        <div class="qs-icon gray">
-          <span class="material-symbols-rounded">inventory_2</span>
+    <!-- ── KPIs ── -->
+    <div class="kpi-grid">
+
+      <!-- Total productos — featured -->
+      <div class="kpi-card kpi-featured">
+        <div class="kpi-header">
+          <div class="kpi-icon-wrap white-icon">
+            <span class="material-symbols-rounded">inventory_2</span>
+          </div>
         </div>
-        <div class="qs-info">
-          <span class="qs-value">{{ pagination()?.total || 0 }}</span>
-          <span class="qs-label">Total productos</span>
-        </div>
+        <span class="kpi-value">{{ pagination()?.total || 0 }}</span>
+        <span class="kpi-label">Total productos</span>
       </div>
-      <div class="qs-card qs-clickable"
+
+      <!-- Pendientes — clickable -->
+      <div class="kpi-card kpi-clickable"
         (click)="onStatusFilter('pending')"
-        [class.qs-active]="statusFilter === 'pending'">
-        <div class="qs-icon yellow">
-          <span class="material-symbols-rounded">schedule</span>
+        [class.kpi-active]="statusFilter === 'pending'">
+        <div class="kpi-header">
+          <div class="kpi-icon-wrap yellow">
+            <span class="material-symbols-rounded">schedule</span>
+          </div>
         </div>
-        <div class="qs-info">
-          <span class="qs-value">{{ pendingCount() }}</span>
-          <span class="qs-label">Pendientes</span>
-        </div>
+        <span class="kpi-value">{{ pendingCount() }}</span>
+        <span class="kpi-label">Pendientes</span>
       </div>
-      <div class="qs-card qs-clickable"
+
+      <!-- Aprobados — clickable -->
+      <div class="kpi-card kpi-clickable"
         (click)="onStatusFilter('approved')"
-        [class.qs-active]="statusFilter === 'approved'">
-        <div class="qs-icon green">
-          <span class="material-symbols-rounded">check_circle</span>
+        [class.kpi-active]="statusFilter === 'approved'">
+        <div class="kpi-header">
+          <div class="kpi-icon-wrap green">
+            <span class="material-symbols-rounded">check_circle</span>
+          </div>
         </div>
-        <div class="qs-info">
-          <span class="qs-value">{{ approvedCount() }}</span>
-          <span class="qs-label">Aprobados</span>
-        </div>
+        <span class="kpi-value">{{ approvedCount() }}</span>
+        <span class="kpi-label">Aprobados</span>
       </div>
-      <div class="qs-card qs-clickable"
+
+      <!-- Rechazados — clickable -->
+      <div class="kpi-card kpi-clickable"
         (click)="onStatusFilter('rejected')"
-        [class.qs-active]="statusFilter === 'rejected'">
-        <div class="qs-icon red">
-          <span class="material-symbols-rounded">cancel</span>
+        [class.kpi-active]="statusFilter === 'rejected'">
+        <div class="kpi-header">
+          <div class="kpi-icon-wrap red">
+            <span class="material-symbols-rounded">cancel</span>
+          </div>
         </div>
-        <div class="qs-info">
-          <span class="qs-value">{{ rejectedCount() }}</span>
-          <span class="qs-label">Rechazados</span>
-        </div>
+        <span class="kpi-value">{{ rejectedCount() }}</span>
+        <span class="kpi-label">Rechazados</span>
       </div>
+
     </div>
 
     <!-- ── FILTROS ── -->
@@ -118,10 +125,10 @@
           <thead>
             <tr>
               <th>Producto</th>
-              <th>Agricultor</th>
-              <th>Categoría</th>
+              <th class="col-hide-mobile">Agricultor</th>
+              <th class="col-hide-tablet">Categoría</th>
               <th>Precio</th>
-              <th>Stock</th>
+              <th class="col-hide-tablet">Stock</th>
               <th>Estado</th>
               <th>Acciones</th>
             </tr>
@@ -136,11 +143,12 @@
                   <img *ngIf="getImageUrl(product)"
                     [src]="getImageUrl(product)"
                     [alt]="product.name"
-                    class="product-thumb" />
+                    class="product-thumb"
+                    loading="lazy" />
                   <div *ngIf="!getImageUrl(product)" class="product-thumb-placeholder">
                     <span class="material-symbols-rounded">image_not_supported</span>
                   </div>
-                  <div>
+                  <div class="product-cell-info">
                     <span class="product-name">{{ product.name }}</span>
                     <span class="product-sub" *ngIf="product.description">
                       {{ product.description | slice:0:40 }}{{ product.description?.length > 40 ? '…' : '' }}
@@ -149,10 +157,10 @@
                 </div>
               </td>
 
-              <td>
+              <td class="col-hide-mobile">
                 <div class="farmer-cell" *ngIf="product.farmer?.user">
                   <div class="farmer-avatar">{{ getInitials(product.farmer.user.name) }}</div>
-                  <div>
+                  <div class="farmer-cell-info">
                     <span class="farmer-name">{{ product.farmer.user.name }}</span>
                     <span class="farmer-farm" *ngIf="product.farmer.farm_name">
                       {{ product.farmer.farm_name }}
@@ -162,7 +170,7 @@
                 <span class="text-muted" *ngIf="!product.farmer?.user">—</span>
               </td>
 
-              <td>
+              <td class="col-hide-tablet">
                 <span class="category-chip">{{ product.category?.name || '—' }}</span>
               </td>
 
@@ -170,7 +178,7 @@
                 {{ product.price | currency:'EUR':'symbol':'1.2-2' }}
               </td>
 
-              <td>
+              <td class="col-hide-tablet">
                 <div class="stock-cell">
                   <span class="stock-qty" [class.low-stock]="product.stock_quantity < 5">
                     {{ product.stock_quantity }}
@@ -180,8 +188,7 @@
               </td>
 
               <td>
-                <span class="status-badge"
-                  [ngClass]="getStatusClass(product.moderation_status)">
+                <span class="status-badge" [ngClass]="getStatusClass(product.moderation_status)">
                   <span class="material-symbols-rounded">
                     {{ getStatusIcon(product.moderation_status) }}
                   </span>
@@ -221,21 +228,19 @@
         </table>
       </div>
 
-      <!-- ── PAGINACIÓN INTELIGENTE ── -->
+      <!-- ── PAGINACIÓN ── -->
       <div class="pagination" *ngIf="pagination() && pagination().last_page > 1">
         <button class="page-btn page-nav"
           [disabled]="currentPage === 1"
           (click)="goToPage(currentPage - 1)">
           <span class="material-symbols-rounded">chevron_left</span>
         </button>
-
         <ng-container *ngFor="let page of getPages()">
           <span *ngIf="page === '...'" class="page-dots">···</span>
           <button *ngIf="page !== '...'" class="page-btn"
             [class.active]="page === currentPage"
             (click)="goToPage(+page)">{{ page }}</button>
         </ng-container>
-
         <button class="page-btn page-nav"
           [disabled]="currentPage === pagination().last_page"
           (click)="goToPage(currentPage + 1)">
@@ -246,6 +251,7 @@
     </div>
   </div>
 </div>
+
 
 <!-- ══════════════════════════════
      MODALES

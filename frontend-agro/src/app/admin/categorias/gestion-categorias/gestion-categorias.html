@@ -1,6 +1,6 @@
 <div class="page-wrapper">
 
-  <!-- ── TOPBAR igual al resto del admin ── -->
+  <!-- ── TOPBAR ── -->
   <div class="topbar">
     <div class="topbar-left">
       <button class="topbar-hamburger" (click)="openSidebar()" aria-label="Abrir menú">
@@ -11,54 +11,60 @@
     <div class="topbar-right">
       <button class="btn-primary" (click)="openCreate()">
         <span class="material-symbols-rounded">add</span>
-        Nueva categoría
+        <span class="btn-label">Nueva categoría</span>
       </button>
     </div>
   </div>
 
   <div class="page-content">
 
-    <!-- ── STAT RÁPIDA ── -->
-    <div class="quick-stats" *ngIf="!loading()">
-      <div class="qs-card">
-        <div class="qs-icon orange">
-          <span class="material-symbols-rounded">category</span>
+    <!-- ── KPIs ── -->
+    <div class="kpi-grid" *ngIf="!loading()">
+
+      <!-- Featured — Total -->
+      <div class="kpi-card kpi-featured">
+        <div class="kpi-header">
+          <div class="kpi-icon-wrap white-icon">
+            <span class="material-symbols-rounded">category</span>
+          </div>
         </div>
-        <div class="qs-info">
-          <span class="qs-value">{{ categories().length }}</span>
-          <span class="qs-label">Total categorías</span>
-        </div>
-      </div>
-      <div class="qs-card">
-        <div class="qs-icon green">
-          <span class="material-symbols-rounded">inventory_2</span>
-        </div>
-        <div class="qs-info">
-          <span class="qs-value">{{ getTotalProducts() }}</span>
-          <span class="qs-label">Productos categorizados</span>
-        </div>
-      </div>
-      <!-- Categorías usadas -->
-      <div class="qs-card">
-        <div class="qs-icon blue">
-          <span class="material-symbols-rounded">check_circle</span>
-        </div>
-        <div class="qs-info">
-          <span class="qs-value">{{ getCategoriesUsed() }}</span>
-          <span class="qs-label">Categorías usadas</span>
-        </div>
+        <span class="kpi-value">{{ categories().length }}</span>
+        <span class="kpi-label">Total categorías</span>
       </div>
 
-      <!-- Categorías no usadas -->
-      <div class="qs-card">
-        <div class="qs-icon amber">
-          <span class="material-symbols-rounded">unpublished</span>
+      <!-- Productos -->
+      <div class="kpi-card">
+        <div class="kpi-header">
+          <div class="kpi-icon-wrap green">
+            <span class="material-symbols-rounded">inventory_2</span>
+          </div>
         </div>
-        <div class="qs-info">
-          <span class="qs-value">{{ getCategoriesUnused() }}</span>
-          <span class="qs-label">Sin productos</span>
-        </div>
+        <span class="kpi-value">{{ getTotalProducts() }}</span>
+        <span class="kpi-label">Productos categorizados</span>
       </div>
+
+      <!-- Categorías usadas -->
+      <div class="kpi-card">
+        <div class="kpi-header">
+          <div class="kpi-icon-wrap blue">
+            <span class="material-symbols-rounded">check_circle</span>
+          </div>
+        </div>
+        <span class="kpi-value">{{ getCategoriesUsed() }}</span>
+        <span class="kpi-label">Categorías usadas</span>
+      </div>
+
+      <!-- Categorías sin productos -->
+      <div class="kpi-card">
+        <div class="kpi-header">
+          <div class="kpi-icon-wrap amber">
+            <span class="material-symbols-rounded">unpublished</span>
+          </div>
+        </div>
+        <span class="kpi-value">{{ getCategoriesUnused() }}</span>
+        <span class="kpi-label">Sin productos</span>
+      </div>
+
     </div>
 
     <!-- ── LOADING ── -->
@@ -70,25 +76,34 @@
     <!-- ── GRID ── -->
     <div class="categories-grid" *ngIf="!loading()">
 
-      <div class="empty-state" *ngIf="categories().length === 0">
+      <!-- Empty state -->
+      <div class="empty-state" *ngIf="categories().length === 0"
+        style="grid-column: 1 / -1;">
         <span class="material-symbols-rounded empty-icon">category</span>
         <p class="empty-title">No hay categorías</p>
         <p class="empty-sub">Crea la primera categoría para empezar</p>
         <button class="btn-primary" style="margin-top:12px" (click)="openCreate()">
           <span class="material-symbols-rounded">add</span>
-          Nueva categoría
+          <span class="btn-label">Nueva categoría</span>
         </button>
       </div>
 
+      <!-- Category cards -->
       <div class="cat-card" *ngFor="let cat of categories(); let i = index">
+
         <div class="cat-img-box">
-          <img *ngIf="cat.image" [src]="cat.image" [alt]="cat.name" class="cat-img" />
-          <div *ngIf="!cat.image" class="cat-img-placeholder" [style.background]="getPlaceholderGradient(i)">
+          <img *ngIf="cat.image"
+            [src]="cat.image" [alt]="cat.name"
+            class="cat-img" loading="lazy" />
+          <div *ngIf="!cat.image"
+            class="cat-img-placeholder"
+            [style.background]="getPlaceholderGradient(i)">
             <span class="material-symbols-rounded" [style.color]="getPlaceholderColor(i)">
               {{ cat.icon || 'category' }}
             </span>
           </div>
         </div>
+
         <div class="cat-body">
           <div class="cat-header">
             <h3 class="cat-name">{{ cat.name }}</h3>
@@ -100,6 +115,7 @@
           <p class="cat-desc" *ngIf="cat.description">{{ cat.description }}</p>
           <p class="cat-desc empty" *ngIf="!cat.description">Sin descripción</p>
         </div>
+
         <div class="cat-actions">
           <button class="action-btn edit" (click)="openEdit(cat)" title="Editar">
             <span class="material-symbols-rounded">edit</span>
@@ -109,19 +125,26 @@
             <span class="material-symbols-rounded">delete</span>
           </button>
         </div>
-      </div>
 
+      </div>
     </div>
+
   </div>
 </div>
 
-<!-- ── MODAL CREAR / EDITAR ── -->
-<div class="modal-backdrop" *ngIf="modalVisible && (modalType === 'create' || modalType === 'edit')"
+
+<!-- ══════════════════════════════
+     MODAL CREAR / EDITAR
+══════════════════════════════ -->
+<div class="modal-backdrop"
+  *ngIf="modalVisible && (modalType === 'create' || modalType === 'edit')"
   (click)="closeModal()">
   <div class="modal-card modal-form" (click)="$event.stopPropagation()">
 
     <div class="modal-form-header">
-      <div class="modal-icon-wrap" [class.green]="modalType === 'create'" [class.blue]="modalType === 'edit'">
+      <div class="modal-icon-wrap"
+        [class.green]="modalType === 'create'"
+        [class.blue]="modalType === 'edit'">
         <span class="material-symbols-rounded">
           {{ modalType === 'create' ? 'add_circle' : 'edit' }}
         </span>
@@ -132,8 +155,8 @@
         </h2>
         <p class="modal-sub">
           {{ modalType === 'create'
-          ? 'Rellena los datos de la nueva categoría'
-          : 'Modifica los datos de la categoría' }}
+            ? 'Rellena los datos de la nueva categoría'
+            : 'Modifica los datos de la categoría' }}
         </p>
       </div>
     </div>
@@ -149,12 +172,15 @@
 
     <div class="form-group">
       <label>Nombre *</label>
-      <input type="text" class="form-input" [(ngModel)]="form.name" placeholder="Ej: Frutas y verduras" />
+      <input type="text" class="form-input"
+        [(ngModel)]="form.name"
+        placeholder="Ej: Frutas y verduras" />
     </div>
 
     <div class="form-group">
       <label>Descripción</label>
-      <textarea class="form-input form-textarea" [(ngModel)]="form.description"
+      <textarea class="form-input form-textarea"
+        [(ngModel)]="form.description"
         placeholder="Descripción breve…"></textarea>
     </div>
 
@@ -163,13 +189,18 @@
         Icono
         <span class="label-hint">(nombre de Material Symbol)</span>
       </label>
-      <input type="text" class="form-input" [(ngModel)]="form.icon" placeholder="Ej: eco, grass, spa…" />
+      <input type="text" class="form-input"
+        [(ngModel)]="form.icon"
+        placeholder="Ej: eco, grass, spa…" />
     </div>
 
     <div class="modal-actions">
       <button class="modal-btn-cancel" (click)="closeModal()">Cancelar</button>
-      <button class="modal-btn-confirm" [class.green]="modalType === 'create'" [class.blue]="modalType === 'edit'"
-        (click)="saveCategory()" [disabled]="actionLoading || !form.name">
+      <button class="modal-btn-confirm"
+        [class.green]="modalType === 'create'"
+        [class.blue]="modalType === 'edit'"
+        (click)="saveCategory()"
+        [disabled]="actionLoading || !form.name">
         <span class="material-symbols-rounded">save</span>
         {{ actionLoading ? 'Guardando…' : 'Guardar' }}
       </button>
@@ -178,9 +209,15 @@
   </div>
 </div>
 
-<!-- ── MODAL ELIMINAR ── -->
-<div class="modal-backdrop" *ngIf="modalVisible && modalType === 'delete'" (click)="closeModal()">
+
+<!-- ══════════════════════════════
+     MODAL ELIMINAR
+══════════════════════════════ -->
+<div class="modal-backdrop"
+  *ngIf="modalVisible && modalType === 'delete'"
+  (click)="closeModal()">
   <div class="modal-card" (click)="$event.stopPropagation()">
+
     <div class="modal-icon-wrap danger">
       <span class="material-symbols-rounded">delete</span>
     </div>
@@ -192,10 +229,13 @@
     </p>
     <div class="modal-actions">
       <button class="modal-btn-cancel" (click)="closeModal()">Cancelar</button>
-      <button class="modal-btn-confirm danger" (click)="deleteCategory()" [disabled]="actionLoading">
+      <button class="modal-btn-confirm danger"
+        (click)="deleteCategory()"
+        [disabled]="actionLoading">
         <span class="material-symbols-rounded">delete</span>
         {{ actionLoading ? 'Eliminando…' : 'Eliminar' }}
       </button>
     </div>
+
   </div>
 </div>

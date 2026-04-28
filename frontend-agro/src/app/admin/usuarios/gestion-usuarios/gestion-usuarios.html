@@ -1,12 +1,12 @@
 <div class="page-wrapper">
 
-  <!-- ── TOPBAR (igual que dashboard admin) ── -->
+  <!-- ── TOPBAR ── -->
   <div class="topbar">
     <div class="topbar-left">
       <button class="topbar-hamburger" (click)="openSidebar()" aria-label="Abrir menú">
         <span class="material-symbols-rounded">menu</span>
       </button>
-      <h1 class="page-title">Gestión de Productos</h1>
+      <h1 class="page-title">Gestión de Usuarios</h1>
     </div>
     <div class="topbar-right">
       <div class="user-chip">
@@ -18,36 +18,49 @@
 
   <div class="page-content">
 
-    <!-- ── STATS RÁPIDAS ── -->
-    <div class="quick-stats">
-      <div class="qs-card">
-        <div class="qs-icon blue"><span class="material-symbols-rounded">group</span></div>
-        <div class="qs-info">
-          <span class="qs-value">{{ pagination()?.total || 0 }}</span>
-          <span class="qs-label">Total usuarios</span>
+    <!-- ── KPIs ── -->
+    <div class="kpi-grid">
+
+      <div class="kpi-card kpi-featured">
+        <div class="kpi-header">
+          <div class="kpi-icon-wrap white-icon">
+            <span class="material-symbols-rounded">group</span>
+          </div>
         </div>
+        <span class="kpi-value">{{ pagination()?.total || 0 }}</span>
+        <span class="kpi-label">Total usuarios</span>
       </div>
-      <div class="qs-card">
-        <div class="qs-icon green"><span class="material-symbols-rounded">agriculture</span></div>
-        <div class="qs-info">
-          <span class="qs-value">{{ countByRole('farmer') }}</span>
-          <span class="qs-label">Agricultores</span>
+
+      <div class="kpi-card">
+        <div class="kpi-header">
+          <div class="kpi-icon-wrap green">
+            <span class="material-symbols-rounded">agriculture</span>
+          </div>
         </div>
+        <span class="kpi-value">{{ countByRole('farmer') }}</span>
+        <span class="kpi-label">Agricultores</span>
       </div>
-      <div class="qs-card">
-        <div class="qs-icon yellow"><span class="material-symbols-rounded">shopping_bag</span></div>
-        <div class="qs-info">
-          <span class="qs-value">{{ countByRole('buyer') }}</span>
-          <span class="qs-label">Compradores</span>
+
+      <div class="kpi-card">
+        <div class="kpi-header">
+          <div class="kpi-icon-wrap yellow">
+            <span class="material-symbols-rounded">shopping_bag</span>
+          </div>
         </div>
+        <span class="kpi-value">{{ countByRole('buyer') }}</span>
+        <span class="kpi-label">Compradores</span>
       </div>
-      <div class="qs-card">
-        <div class="qs-icon purple"><span class="material-symbols-rounded">admin_panel_settings</span></div>
-        <div class="qs-info">
-          <span class="qs-value">{{ countByRole('admin') }}</span>
-          <span class="qs-label">Admins</span>
+
+      <div class="kpi-card">
+        <div class="kpi-header">
+          <div class="kpi-icon-wrap purple">
+            <span class="material-symbols-rounded">admin_panel_settings</span>
+          </div>
         </div>
+        <span class="kpi-value">{{ countByRole('admin') }}</span>
+        <span class="kpi-label">Admins</span>
       </div>
+
     </div>
 
     <!-- ── FILTROS ── -->
@@ -75,7 +88,7 @@
       </div>
     </div>
 
-    <!-- Hint dinámico -->
+    <!-- ── HINTS ── -->
     <div class="view-hint farmer-hint" *ngIf="roleFilter === 'farmer'">
       <span class="material-symbols-rounded">info</span>
       Vista Agricultor — explotación, verificación y ubicación
@@ -106,10 +119,10 @@
           <thead *ngIf="viewMode === 'all' || viewMode === 'admin'">
             <tr>
               <th>Usuario</th>
-              <th>Email</th>
+              <th class="col-hide-mobile">Email</th>
               <th>Rol</th>
               <th>Estado</th>
-              <th>Registro</th>
+              <th class="col-hide-mobile">Registro</th>
               <th>Acciones</th>
             </tr>
           </thead>
@@ -118,11 +131,11 @@
           <thead *ngIf="viewMode === 'farmer'">
             <tr>
               <th>Agricultor</th>
-              <th>Explotación</th>
-              <th>Ciudad</th>
+              <th class="col-hide-mobile">Explotación</th>
+              <th class="col-hide-tablet">Ciudad</th>
               <th>Verificación</th>
-              <th>Teléfono</th>
-              <th>Bio</th>
+              <th class="col-hide-tablet">Teléfono</th>
+              <th class="col-hide-mobile">Bio</th>
               <th>Estado</th>
               <th>Acciones</th>
             </tr>
@@ -132,11 +145,11 @@
           <thead *ngIf="viewMode === 'buyer'">
             <tr>
               <th>Comprador</th>
-              <th>Teléfono</th>
-              <th>Dirección</th>
-              <th>Email verificado</th>
+              <th class="col-hide-tablet">Teléfono</th>
+              <th class="col-hide-mobile">Dirección</th>
+              <th class="col-hide-tablet">Email verificado</th>
               <th>Estado</th>
-              <th>Registro</th>
+              <th class="col-hide-mobile">Registro</th>
               <th>Acciones</th>
             </tr>
           </thead>
@@ -151,13 +164,13 @@
                     <div class="user-avatar" [ngClass]="'avatar-' + u.role">
                       {{ u.name?.charAt(0)?.toUpperCase() }}
                     </div>
-                    <div>
+                    <div class="user-cell-info">
                       <span class="user-name">{{ u.name }}</span>
                       <span class="user-sub">{{ u.email }}</span>
                     </div>
                   </div>
                 </td>
-                <td class="text-muted">{{ u.email }}</td>
+                <td class="text-muted col-hide-mobile">{{ u.email }}</td>
                 <td>
                   <span class="role-badge" [ngClass]="getRoleBadgeClass(u.role)">
                     <span class="material-symbols-rounded">{{ getRoleIcon(u.role) }}</span>
@@ -170,7 +183,7 @@
                     {{ u.is_active ? 'Activo' : 'Inactivo' }}
                   </span>
                 </td>
-                <td class="text-muted text-sm">{{ u.created_at | date:'dd/MM/yyyy' }}</td>
+                <td class="text-muted text-sm col-hide-mobile">{{ u.created_at | date:'dd/MM/yyyy' }}</td>
                 <td>
                   <div class="actions-row">
                     <button class="action-btn edit"   (click)="openEdit(u)"   title="Editar">
@@ -192,17 +205,17 @@
                 <td>
                   <div class="user-cell">
                     <div class="user-avatar avatar-farmer">{{ u.name?.charAt(0)?.toUpperCase() }}</div>
-                    <div>
+                    <div class="user-cell-info">
                       <span class="user-name">{{ u.name }}</span>
                       <span class="user-sub">{{ u.email }}</span>
                     </div>
                   </div>
                 </td>
-                <td>
+                <td class="col-hide-mobile">
                   <span class="farm-name" *ngIf="u.farmer?.farm_name">{{ u.farmer.farm_name }}</span>
                   <span class="text-muted text-sm" *ngIf="!u.farmer?.farm_name">—</span>
                 </td>
-                <td>
+                <td class="col-hide-tablet">
                   <div class="location-cell" *ngIf="u.farmer?.city">
                     <span class="material-symbols-rounded location-icon">location_on</span>
                     {{ u.farmer.city }}
@@ -219,8 +232,8 @@
                     {{ u.farmer?.is_verified ? 'Verificado' : 'Pendiente' }}
                   </span>
                 </td>
-                <td class="text-muted text-sm">{{ u.phone || '—' }}</td>
-                <td>
+                <td class="text-muted text-sm col-hide-tablet">{{ u.phone || '—' }}</td>
+                <td class="col-hide-mobile">
                   <span class="bio-text" *ngIf="u.farmer?.bio" [title]="u.farmer.bio">
                     {{ u.farmer.bio | slice:0:50 }}{{ u.farmer.bio.length > 50 ? '…' : '' }}
                   </span>
@@ -253,21 +266,21 @@
                 <td>
                   <div class="user-cell">
                     <div class="user-avatar avatar-buyer">{{ u.name?.charAt(0)?.toUpperCase() }}</div>
-                    <div>
+                    <div class="user-cell-info">
                       <span class="user-name">{{ u.name }}</span>
                       <span class="user-sub">{{ u.email }}</span>
                     </div>
                   </div>
                 </td>
-                <td class="text-muted text-sm">{{ u.phone || '—' }}</td>
-                <td>
+                <td class="text-muted text-sm col-hide-tablet">{{ u.phone || '—' }}</td>
+                <td class="col-hide-mobile">
                   <div class="location-cell" *ngIf="u.address">
                     <span class="material-symbols-rounded location-icon">home</span>
                     {{ u.address }}
                   </div>
                   <span class="text-muted text-sm" *ngIf="!u.address">—</span>
                 </td>
-                <td>
+                <td class="col-hide-tablet">
                   <span class="verified-badge"
                     [class.verified]="isEmailVerified(u)"
                     [class.pending]="!isEmailVerified(u)">
@@ -283,7 +296,7 @@
                     {{ u.is_active ? 'Activo' : 'Inactivo' }}
                   </span>
                 </td>
-                <td class="text-muted text-sm">{{ u.created_at | date:'dd/MM/yyyy' }}</td>
+                <td class="text-muted text-sm col-hide-mobile">{{ u.created_at | date:'dd/MM/yyyy' }}</td>
                 <td>
                   <div class="actions-row">
                     <button class="action-btn edit"   (click)="openEdit(u)"   title="Editar">
@@ -305,7 +318,7 @@
         </table>
       </div>
 
-      <!-- Paginación -->
+      <!-- ── PAGINACIÓN ── -->
       <div class="pagination" *ngIf="pagination() && pagination().last_page > 1">
         <button class="page-btn" [disabled]="currentPage === 1" (click)="goToPage(currentPage - 1)">
           <span class="material-symbols-rounded">chevron_left</span>
@@ -321,6 +334,7 @@
     </div>
   </div>
 </div>
+
 
 <!-- ══════════════════════════════
      MODALES

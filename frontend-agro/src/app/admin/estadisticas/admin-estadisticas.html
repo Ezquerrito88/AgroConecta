@@ -13,7 +13,7 @@
         <span class="material-symbols-rounded">search</span>
         <input type="text" placeholder="Buscar…" />
       </div>
-      <button class="icon-btn">
+      <button class="icon-btn" aria-label="Notificaciones">
         <span class="material-symbols-rounded">notifications</span>
       </button>
       <div class="user-chip">
@@ -29,7 +29,9 @@
     <ng-container *ngIf="loading">
       <div class="skel-banner"></div>
       <div class="kpi-grid">
-        <div class="kpi-card skel-block" *ngFor="let i of [1,2,3]" style="min-height:130px"></div>
+        <div class="skel-block" style="min-height:130px; border-radius:18px;"
+          *ngFor="let i of [1,2,3]">
+        </div>
       </div>
       <div class="charts-row">
         <div class="section-card skel-block" style="height:300px"></div>
@@ -42,7 +44,8 @@
       <span class="material-symbols-rounded empty-icon">error_outline</span>
       <p class="empty-title">No se pudieron cargar las estadísticas</p>
       <button class="btn-retry" (click)="loadStats()">
-        <span class="material-symbols-rounded">refresh</span> Reintentar
+        <span class="material-symbols-rounded">refresh</span>
+        Reintentar
       </button>
     </div>
 
@@ -61,62 +64,66 @@
           </div>
         </div>
         <button class="btn-export" (click)="exportPDF()" [disabled]="exporting">
-          <span class="material-symbols-rounded">{{ exporting ? 'hourglass_empty' : 'download' }}</span>
-          {{ exporting ? 'Generando…' : 'Exportar PDF' }}
+          <span class="material-symbols-rounded">
+            {{ exporting ? 'hourglass_empty' : 'download' }}
+          </span>
+          <span class="btn-export-label">
+            {{ exporting ? 'Generando…' : 'Exportar PDF' }}
+          </span>
         </button>
       </div>
 
-      <!-- ── KPIs — mismo estilo qs-card del resto del admin ── -->
+      <!-- ── KPIs ── -->
       <div class="kpi-grid">
 
-        <!-- Ingresos -->
+        <!-- Ingresos — featured -->
         <div class="qs-card qs-featured">
-          <div class="qs-icon white-icon">
-            <span class="material-symbols-rounded">euro</span>
+          <div class="kpi-header">
+            <div class="qs-icon white-icon">
+              <span class="material-symbols-rounded">euro</span>
+            </div>
           </div>
-          <div class="qs-info">
-            <span class="qs-value">
-              {{ dashboard?.orders?.revenue_total | currency:'EUR':'symbol':'1.0-0' }}
-            </span>
-            <span class="qs-label">Ingresos totales</span>
-            <span class="qs-sub white-sub">
-              <span class="material-symbols-rounded">schedule</span>
-              {{ dashboard?.orders?.revenue_month | currency:'EUR':'symbol':'1.0-0' }} este mes
-            </span>
-          </div>
+          <span class="qs-value">
+            {{ dashboard?.orders?.revenue_total | currency:'EUR':'symbol':'1.0-0' }}
+          </span>
+          <span class="qs-label">Ingresos totales</span>
+          <span class="qs-sub white-sub">
+            <span class="material-symbols-rounded">schedule</span>
+            {{ dashboard?.orders?.revenue_month | currency:'EUR':'symbol':'1.0-0' }} este mes
+          </span>
         </div>
 
         <!-- Pedidos -->
         <div class="qs-card">
-          <div class="qs-icon teal">
-            <span class="material-symbols-rounded">shopping_basket</span>
+          <div class="kpi-header">
+            <div class="qs-icon teal">
+              <span class="material-symbols-rounded">shopping_basket</span>
+            </div>
           </div>
-          <div class="qs-info">
-            <span class="qs-value">{{ dashboard?.orders?.total }}</span>
-            <span class="qs-label">Pedidos totales</span>
-            <span class="qs-sub teal">
-              <span class="material-symbols-rounded">arrow_upward</span>
-              {{ dashboard?.orders?.month }} este mes
-            </span>
-          </div>
+          <span class="qs-value">{{ dashboard?.orders?.total }}</span>
+          <span class="qs-label">Pedidos totales</span>
+          <span class="qs-sub teal">
+            <span class="material-symbols-rounded">arrow_upward</span>
+            {{ dashboard?.orders?.month }} este mes
+          </span>
         </div>
 
         <!-- Usuarios -->
         <div class="qs-card">
-          <div class="qs-icon indigo">
-            <span class="material-symbols-rounded">group</span>
+          <div class="kpi-header">
+            <div class="qs-icon indigo">
+              <span class="material-symbols-rounded">group</span>
+            </div>
           </div>
-          <div class="qs-info">
-            <span class="qs-value">{{ dashboard?.users?.total }}</span>
-            <span class="qs-label">Usuarios registrados</span>
-            <span class="qs-sub indigo">
-              <span class="material-symbols-rounded">agriculture</span>
-              {{ dashboard?.users?.farmers }} agric.
-              <span class="qs-dot">·</span>
-              <span class="material-symbols-rounded">shopping_bag</span>
-              {{ dashboard?.users?.buyers }} comprad.
-            </span>
-          </div>
+          <span class="qs-value">{{ dashboard?.users?.total }}</span>
+          <span class="qs-label">Usuarios registrados</span>
+          <span class="qs-sub indigo">
+            <span class="material-symbols-rounded">agriculture</span>
+            {{ dashboard?.users?.farmers }} agric.
+            <span class="qs-dot">·</span>
+            <span class="material-symbols-rounded">shopping_bag</span>
+            {{ dashboard?.users?.buyers }} comprad.
+          </span>
         </div>
 
       </div>
@@ -132,10 +139,10 @@
             </div>
           </div>
           <apx-chart
-            [series]="areaOptions.series"     [chart]="areaOptions.chart"
-            [xaxis]="areaOptions.xaxis"       [stroke]="areaOptions.stroke"
-            [fill]="areaOptions.fill"         [dataLabels]="areaOptions.dataLabels"
-            [grid]="areaOptions.grid"         [tooltip]="areaOptions.tooltip"
+            [series]="areaOptions.series"   [chart]="areaOptions.chart"
+            [xaxis]="areaOptions.xaxis"     [stroke]="areaOptions.stroke"
+            [fill]="areaOptions.fill"       [dataLabels]="areaOptions.dataLabels"
+            [grid]="areaOptions.grid"       [tooltip]="areaOptions.tooltip"
             [colors]="['#3b82f6']">
           </apx-chart>
         </div>
@@ -148,10 +155,10 @@
             </div>
           </div>
           <apx-chart
-            [series]="barOptions.series"           [chart]="barOptions.chart"
-            [xaxis]="barOptions.xaxis"             [plotOptions]="barOptions.plotOptions"
-            [dataLabels]="barOptions.dataLabels"   [grid]="barOptions.grid"
-            [tooltip]="barOptions.tooltip"         [fill]="barOptions.fill"
+            [series]="barOptions.series"         [chart]="barOptions.chart"
+            [xaxis]="barOptions.xaxis"           [plotOptions]="barOptions.plotOptions"
+            [dataLabels]="barOptions.dataLabels" [grid]="barOptions.grid"
+            [tooltip]="barOptions.tooltip"       [fill]="barOptions.fill"
             [colors]="['#6366f1']">
           </apx-chart>
         </div>
@@ -176,11 +183,15 @@
           <ul *ngIf="dashboard?.top_products?.length" class="product-list">
             <li *ngFor="let p of dashboard.top_products; let i = index" class="product-row">
               <span class="rank"
-                [class.gold]="i===0" [class.silver]="i===1" [class.bronze]="i===2">
+                [class.gold]="i===0"
+                [class.silver]="i===1"
+                [class.bronze]="i===2">
                 #{{ i + 1 }}
               </span>
               <img [src]="getProductImage(p)" [alt]="p.name"
-                class="prod-img" width="44" height="44" loading="lazy"
+                class="prod-img"
+                width="44" height="44"
+                loading="lazy"
                 (error)="onImgError($event, p.name)" />
               <div class="prod-info">
                 <span class="prod-name">{{ p.name }}</span>
@@ -193,7 +204,9 @@
                   <span class="prod-sold">{{ p.sold ?? 0 }} uds.</span>
                 </div>
               </div>
-              <span class="prod-price">{{ p.revenue | currency:'EUR':'symbol':'1.0-0' }}</span>
+              <span class="prod-price">
+                {{ p.revenue | currency:'EUR':'symbol':'1.0-0' }}
+              </span>
             </li>
           </ul>
         </div>
@@ -228,7 +241,9 @@
                     [style.width.%]="getBarWidth(f.revenue ?? 0, dashboard.top_farmers, 'revenue')">
                   </div>
                 </div>
-                <span class="order-revenue">{{ f.revenue | currency:'EUR':'symbol':'1.0-0' }}</span>
+                <span class="order-revenue">
+                  {{ f.revenue | currency:'EUR':'symbol':'1.0-0' }}
+                </span>
               </div>
             </li>
           </ul>
@@ -239,6 +254,7 @@
     </ng-container>
   </div>
 </div>
+
 
 <!-- ══════════════════════════════
      SECCIONES OCULTAS PARA PDF

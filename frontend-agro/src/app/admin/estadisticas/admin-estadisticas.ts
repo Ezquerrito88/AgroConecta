@@ -24,14 +24,20 @@ export class AdminEstadisticas implements OnInit {
 
   user: any      = null;
   dashboard: any = null;
-  loading   = true;
-  error     = false;
-  exporting = false;
+  loading        = true;
+  error          = false;
+  exporting      = false;
 
   today          = new Date().toLocaleDateString('es-ES', { day: '2-digit', month: 'long', year: 'numeric' });
   mesActualLabel = new Date().toLocaleDateString('es-ES', { month: 'long', year: 'numeric' });
-  meses = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  meses          = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
 
+  /* ── Paletas de colores para avatares e imágenes fallback ── */
+  private readonly AVATAR_BG_COLORS  = ['#dbeafe','#e0e7ff','#ede9fe','#bfdbfe','#c7d2fe'];
+  private readonly AVATAR_TEXT_COLORS = ['#1d4ed8','#4338ca','#7c3aed','#0369a1','#4f46e5'];
+  private readonly FALLBACK_COLORS    = ['#3b82f6','#6366f1','#8b5cf6','#0ea5e9','#2563eb'];
+
+  /* ── Chart options ── */
   areaOptions: {
     series: ApexAxisChartSeries; chart: ApexChart; xaxis: ApexXAxis;
     stroke: ApexStroke; fill: ApexFill; tooltip: ApexTooltip;
@@ -40,7 +46,9 @@ export class AdminEstadisticas implements OnInit {
     series:     [{ name: 'Ingresos', data: [] }],
     chart: {
       type: 'area', height: 240,
-      toolbar: { show: false }, background: 'transparent',
+      toolbar: { show: false },
+      background: 'transparent',
+      fontFamily: 'Inter, sans-serif',
       animations: { enabled: true, speed: 600, dynamicAnimation: { enabled: true, speed: 350 } },
     },
     stroke:     { curve: 'smooth', width: 2.5 },
@@ -55,9 +63,22 @@ export class AdminEstadisticas implements OnInit {
       }
     },
     dataLabels: { enabled: false },
-    grid:       { borderColor: '#f1f5f9', strokeDashArray: 4, xaxis: { lines: { show: false } } },
-    xaxis:      { categories: [], labels: { style: { colors: '#94a3b8', fontSize: '11px' } }, axisBorder: { show: false }, axisTicks: { show: false } },
-    tooltip:    { theme: 'light', y: { formatter: (v) => v.toFixed(2) + ' €' } },
+    grid:       {
+      borderColor: '#f1f5f9',
+      strokeDashArray: 4,
+      xaxis: { lines: { show: false } },
+      padding: { left: 4, right: 4 }
+    },
+    xaxis: {
+      categories: [],
+      labels: { style: { colors: '#94a3b8', fontSize: '11px', fontFamily: 'Inter, sans-serif' } },
+      axisBorder: { show: false },
+      axisTicks:  { show: false }
+    },
+    tooltip: {
+      theme: 'light',
+      y: { formatter: (v: number) => v.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €' }
+    },
   };
 
   barOptions: {
@@ -68,7 +89,9 @@ export class AdminEstadisticas implements OnInit {
     series:      [{ name: 'Pedidos', data: [] }],
     chart: {
       type: 'bar', height: 240,
-      toolbar: { show: false }, background: 'transparent',
+      toolbar: { show: false },
+      background: 'transparent',
+      fontFamily: 'Inter, sans-serif',
       animations: { enabled: true, speed: 600, dynamicAnimation: { enabled: true, speed: 350 } },
     },
     plotOptions: { bar: { borderRadius: 6, columnWidth: '50%' } },
@@ -84,9 +107,22 @@ export class AdminEstadisticas implements OnInit {
         ]
       }
     },
-    grid:    { borderColor: '#f1f5f9', strokeDashArray: 4, xaxis: { lines: { show: false } } },
-    xaxis:   { categories: [], labels: { style: { colors: '#94a3b8', fontSize: '11px' } }, axisBorder: { show: false }, axisTicks: { show: false } },
-    tooltip: { theme: 'light', y: { formatter: (v) => v + ' pedidos' } },
+    grid: {
+      borderColor: '#f1f5f9',
+      strokeDashArray: 4,
+      xaxis: { lines: { show: false } },
+      padding: { left: 4, right: 4 }
+    },
+    xaxis: {
+      categories: [],
+      labels: { style: { colors: '#94a3b8', fontSize: '11px', fontFamily: 'Inter, sans-serif' } },
+      axisBorder: { show: false },
+      axisTicks:  { show: false }
+    },
+    tooltip: {
+      theme: 'light',
+      y: { formatter: (v: number) => v + ' pedidos' }
+    },
   };
 
   constructor(
@@ -106,11 +142,12 @@ export class AdminEstadisticas implements OnInit {
     this.adminStatsService.getAdminDashboard().subscribe({
       next: (data) => {
         this.dashboard = data;
-        try { this.buildCharts(data); } catch (e) { console.error(e); }
+        try { this.buildCharts(data); } catch (e) { console.error('buildCharts error:', e); }
         this.loading = false;
         this.cdr.detectChanges();
       },
-      error: () => {
+      error: (err) => {
+        console.error('loadStats error:', err);
         this.error   = true;
         this.loading = false;
         this.cdr.detectChanges();
@@ -120,9 +157,11 @@ export class AdminEstadisticas implements OnInit {
 
   private buildCharts(data: any): void {
     const monthly: any[] = data.monthly_revenue ?? [];
-    const labels  = monthly.map((m: any) => this.meses[(m.month ?? 1) - 1]);
-    const revenue = monthly.map((m: any) => parseFloat(m.total        ?? 0));
-    const orders  = monthly.map((m: any) => parseInt(m.orders_count   ?? 0));
+    // Ordenar por mes ascendente por si el backend no los devuelve ordenados
+    const sorted  = [...monthly].sort((a, b) => (a.month ?? 0) - (b.month ?? 0));
+    const labels  = sorted.map((m: any) => this.meses[(m.month ?? 1) - 1]);
+    const revenue = sorted.map((m: any) => parseFloat(m.total ?? 0));
+    const orders  = sorted.map((m: any) => parseInt(m.orders_count ?? 0, 10));
 
     this.areaOptions = {
       ...this.areaOptions,
@@ -136,13 +175,15 @@ export class AdminEstadisticas implements OnInit {
     };
   }
 
+  /* ── Imagen de producto ── */
   getProductImage(p: any): string {
     if (!p) return this.getFallbackSvg('?');
     const fromImages = p.images?.[0]?.url;
     if (fromImages) return fromImages;
     if (p.image) {
-      if (p.image.startsWith('http')) return p.image;
-      return `${environment.apiUrl}/storage/${p.image}`;
+      return p.image.startsWith('http')
+        ? p.image
+        : `${environment.apiUrl}/storage/${p.image}`;
     }
     return this.getFallbackSvg(p.name ?? '?');
   }
@@ -150,31 +191,42 @@ export class AdminEstadisticas implements OnInit {
   onImgError(event: Event, name: string): void {
     const img   = event.target as HTMLImageElement;
     img.src     = this.getFallbackSvg(name);
-    img.onerror = null;
+    img.onerror = null; // evita bucle infinito
   }
 
   getFallbackSvg(name: string): string {
-    const letter = name?.charAt(0)?.toUpperCase() ?? '?';
-    const colors = ['#3b82f6', '#6366f1', '#8b5cf6', '#0ea5e9', '#2563eb'];
-    const color  = colors[(name?.charCodeAt(0) ?? 0) % colors.length];
+    const letter = (name?.charAt(0)?.toUpperCase()) ?? '?';
+    const idx    = (name?.charCodeAt(0) ?? 0) % this.FALLBACK_COLORS.length;
+    const color  = this.FALLBACK_COLORS[idx];
     const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="44" height="44">
       <rect width="44" height="44" rx="10" fill="${color}22"/>
       <text x="50%" y="50%" dominant-baseline="central" text-anchor="middle"
         font-family="sans-serif" font-size="18" font-weight="600" fill="${color}">${letter}</text>
     </svg>`;
-    return 'data:image/svg+xml;base64,' + btoa(svg);
+    return 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svg)));
   }
 
+  /* ── Avatar de agricultor ── */
   getAvatarColor(name: string): string {
-    const colors = ['#dbeafe', '#e0e7ff', '#ede9fe', '#bfdbfe', '#c7d2fe'];
-    return colors[(name?.length || 0) % colors.length];
+    const idx = (name?.length ?? 0) % this.AVATAR_BG_COLORS.length;
+    return this.AVATAR_BG_COLORS[idx];
   }
 
+  // FIX: el original usaba colores muy claros para el texto (mismo que el fondo)
+  // Ahora se expone este método para usar en el template con [style.color]
+  getAvatarTextColor(name: string): string {
+    const idx = (name?.length ?? 0) % this.AVATAR_TEXT_COLORS.length;
+    return this.AVATAR_TEXT_COLORS[idx];
+  }
+
+  /* ── Barra de progreso ── */
   getBarWidth(val: number, list: any[], key: string): number {
-    const max = Math.max(...list.map((p: any) => p[key] ?? 0), 1);
-    return (val / max) * 100;
+    if (!list?.length) return 0;
+    const max = Math.max(...list.map((p: any) => Number(p[key] ?? 0)), 1);
+    return Math.round((val / max) * 100);
   }
 
+  /* ── Export PDF ── */
   async exportPDF(): Promise<void> {
     if (this.exporting) return;
     this.exporting = true;
@@ -188,24 +240,35 @@ export class AdminEstadisticas implements OnInit {
       const usableW = pageW - margin * 2;
       let posY = margin;
 
-      const addElement = async (el: HTMLElement) => {
-        const canvas  = await html2canvas(el, { scale: 2, backgroundColor: '#ffffff', useCORS: true });
+      const addElement = async (el: HTMLElement | null): Promise<void> => {
+        if (!el) return;
+        const canvas  = await html2canvas(el, {
+          scale: 2,
+          backgroundColor: '#ffffff',
+          useCORS: true,
+          logging: false,  // silencia warnings de html2canvas en consola
+        });
         const imgData = canvas.toDataURL('image/png');
         const imgH    = (canvas.height * usableW) / canvas.width;
-        if (posY + imgH > pageH - margin) { pdf.addPage(); posY = margin; }
+        if (posY + imgH > pageH - margin) {
+          pdf.addPage();
+          posY = margin;
+        }
         pdf.addImage(imgData, 'PNG', margin, posY, usableW, imgH);
         posY += imgH + 6;
       };
 
-      await addElement(document.getElementById('pdf-header')!);
-      const chart1 = document.querySelector('.charts-row .section-card:nth-child(1)') as HTMLElement;
-      if (chart1) await addElement(chart1);
-      const chart2 = document.querySelector('.charts-row .section-card:nth-child(2)') as HTMLElement;
-      if (chart2) await addElement(chart2);
-      await addElement(document.getElementById('pdf-top-products')!);
-      await addElement(document.getElementById('pdf-top-farmers')!);
+      await addElement(document.getElementById('pdf-header'));
+      await addElement(document.querySelector<HTMLElement>('.charts-row .section-card:nth-child(1)'));
+      await addElement(document.querySelector<HTMLElement>('.charts-row .section-card:nth-child(2)'));
+      await addElement(document.getElementById('pdf-top-products'));
+      await addElement(document.getElementById('pdf-top-farmers'));
 
-      pdf.save(`agroconecta-stats-${new Date().toISOString().slice(0, 10)}.pdf`);
+      const fecha = new Date().toISOString().slice(0, 10);
+      pdf.save(`agroconecta-stats-${fecha}.pdf`);
+
+    } catch (err) {
+      console.error('exportPDF error:', err);
     } finally {
       this.exporting = false;
       this.cdr.detectChanges();
