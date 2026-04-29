@@ -8,6 +8,7 @@ export interface ProductImage {
   id: number;
   product_id: number;
   image_path: string;
+  image_url: string;
   order: number;
 }
 
@@ -17,7 +18,7 @@ export interface OrderItem {
   quantity: number;
   price: number;
   subtotal: number;
-  product: {
+  product?: {
     id: number;
     name: string;
     unit?: string;
