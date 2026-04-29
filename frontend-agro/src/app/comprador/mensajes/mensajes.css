@@ -48,18 +48,18 @@
   flex-shrink: 0;
 }
 
-.dashboard-layout .topbar-hamburger {
-  display: flex;
+.topbar-hamburger {
+  display: none;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
-  border-radius: 8px;
-  color: #374151;
+  width: 38px;
+  height: 38px;
+  border-radius: 9px;
+  color: var(--text-mid);
   flex-shrink: 0;
   transition: background .15s;
 }
-.dashboard-layout .topbar-hamburger:hover { background: #f3f4f6; }
+.topbar-hamburger:hover { background: var(--hover-bg); }
 
 .dashboard-layout .page-title-block {
   display: flex;

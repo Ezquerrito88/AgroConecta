@@ -21,7 +21,7 @@ type OrderStatus = 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancell
 })
 export class Pedidos implements OnInit, OnDestroy {
 
-  // ── Sidebar ──────────────────────────────────────────────────────────────
+  // ── Sidebar ───────────────────────────────────────────────────────────────
   sidebarOpen = false;
 
   toggleSidebar(): void {
@@ -99,7 +99,6 @@ export class Pedidos implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.document.removeEventListener('click', this.boundCloseMenus);
-    // Garantiza que el overflow se restaura si el componente se destruye con el modal abierto
     this.document.body.style.overflow = '';
   }
 
@@ -109,10 +108,7 @@ export class Pedidos implements OnInit, OnDestroy {
 
   private parseTotal(total: any): number {
     if (total === null || total === undefined || total === '') return 0;
-    const cleaned = String(total)
-      .trim()
-      .replace(/[^\d.,]/g, '')
-      .replace(',', '.');
+    const cleaned = String(total).trim().replace(/[^\d.,]/g, '').replace(',', '.');
     const parts = cleaned.split('.');
     const final = parts.length > 2
       ? parts.slice(0, -1).join('') + '.' + parts[parts.length - 1]
@@ -279,7 +275,6 @@ export class Pedidos implements OnInit, OnDestroy {
         if (this.selectedOrder?.id === orderId) {
           this.selectedOrder = { ...this.selectedOrder, status: updated.status as OrderStatus };
         }
-
         this.applyFilters();
         this.openMenuId = null;
         this.cdr.detectChanges();
@@ -306,7 +301,6 @@ export class Pedidos implements OnInit, OnDestroy {
   // ════════════════════════════════════════════════════════════════════════
 
   openOrderDetail(order: Order): void {
-    console.log('ORDER COMPLETO:', JSON.stringify(order, null, 2));
     this.selectedOrder = order;
     this.openMenuId = null;
     this.document.body.style.overflow = 'hidden';
@@ -333,7 +327,7 @@ export class Pedidos implements OnInit, OnDestroy {
   }
 
   // ════════════════════════════════════════════════════════════════════════
-  // EXPORTAR PDF
+  // EXPORTAR PDF ← CORREGIDO
   // ════════════════════════════════════════════════════════════════════════
 
   async exportPDF(): Promise<void> {
@@ -341,38 +335,118 @@ export class Pedidos implements OnInit, OnDestroy {
     this.exporting = true;
     this.cdr.detectChanges();
 
+    const headerEl = this.document.getElementById('pdf-pedidos-header')!;
+    const tableEl  = this.document.getElementById('pdf-pedidos-table')!;
+
+    // Guardar estilos originales para restaurar después
+    const headerStyleOrig = headerEl.getAttribute('style')!;
+    const tableStyleOrig  = tableEl.getAttribute('style')!;
+
+    // ── CLAVE: cambiar de position:fixed a position:absolute
+    //    para que html2canvas mida la altura real del contenido ──
+    const baseHidden = 'position:absolute;left:-9999px;top:0;background:#fff;font-family:sans-serif;color:#28251d;';
+    headerEl.setAttribute('style', baseHidden + 'width:860px;padding:28px;');
+    tableEl.setAttribute('style',  baseHidden + 'width:860px;padding:20px 28px;');
+
     try {
-      const pdf = new jsPDF('p', 'mm', 'a4');
-      const pageW = pdf.internal.pageSize.getWidth();
-      const pageH = pdf.internal.pageSize.getHeight();
-      const margin = 10;
-      const usableW = pageW - margin * 2;
-      let posY = margin;
-
-      const addElement = async (el: HTMLElement | null) => {
-        if (!el) return;
-        const canvas = await html2canvas(el, {
-          scale: 2, backgroundColor: '#ffffff',
-          useCORS: true, logging: false
-        });
-        const imgData = canvas.toDataURL('image/png');
-        const imgH = (canvas.height * usableW) / canvas.width;
-        if (posY + imgH > pageH - margin) { pdf.addPage(); posY = margin; }
-        pdf.addImage(imgData, 'PNG', margin, posY, usableW, imgH);
-        posY += imgH + 6;
-      };
-
+      // Esperar a que el DOM se estabilice
       await new Promise(r => setTimeout(r, 300));
-      await addElement(this.document.getElementById('pdf-pedidos-header'));
-      await addElement(this.document.getElementById('pdf-pedidos-table'));
+
+      const [canvasHeader, canvasTable] = await Promise.all([
+        html2canvas(headerEl, {
+          scale: 2,
+          backgroundColor: '#ffffff',
+          useCORS: true,
+          logging: false,
+          scrollX: 0,
+          scrollY: 0,
+          windowWidth: 860,
+          windowHeight: headerEl.scrollHeight + 50,
+        }),
+        html2canvas(tableEl, {
+          scale: 2,
+          backgroundColor: '#ffffff',
+          useCORS: true,
+          logging: false,
+          scrollX: 0,
+          scrollY: 0,
+          windowWidth: 860,
+          windowHeight: tableEl.scrollHeight + 50,
+        }),
+      ]);
+
+      const pdf     = new jsPDF('p', 'mm', 'a4');
+      const pageW   = pdf.internal.pageSize.getWidth();   // 210mm
+      const pageH   = pdf.internal.pageSize.getHeight();  // 297mm
+      const margin  = 10;
+      const usableW = pageW - margin * 2;                 // 190mm
+
+      // ── Página 1: header ──────────────────────────────────────────────
+      const headerMmH = (canvasHeader.height * usableW) / canvasHeader.width;
+      pdf.addImage(
+        canvasHeader.toDataURL('image/png'),
+        'PNG', margin, margin, usableW, headerMmH
+      );
+
+      // ── Tabla: calcular espacio restante en pág 1 y paginar si hay overflow ──
+      const tableMmH   = (canvasTable.height  * usableW) / canvasTable.width;
+      const tableStartY = margin + headerMmH + 6;          // 6mm de separación
+      const spaceLeft  = pageH - tableStartY - margin;
+
+      if (tableMmH <= spaceLeft) {
+        // Cabe todo en la primera página
+        pdf.addImage(
+          canvasTable.toDataURL('image/png'),
+          'PNG', margin, tableStartY, usableW, tableMmH
+        );
+      } else {
+        // La tabla no cabe → paginación por slices de canvas
+        let remainingMm = tableMmH;
+        let srcMmOffset = 0;
+        let isFirst     = true;
+
+        while (remainingMm > 0.5) {
+          const availableH = isFirst ? spaceLeft : pageH - margin * 2;
+          const sliceMm    = Math.min(availableH, remainingMm);
+
+          // Calcular el trozo del canvas en píxeles
+          const pxPerMm = canvasTable.height / tableMmH;
+          const srcY    = srcMmOffset * pxPerMm;
+          const srcH    = sliceMm    * pxPerMm;
+
+          const slice      = this.document.createElement('canvas');
+          slice.width      = canvasTable.width;
+          slice.height     = Math.ceil(srcH);
+          slice.getContext('2d')!.drawImage(
+            canvasTable,
+            0, srcY, canvasTable.width, srcH,
+            0, 0,    canvasTable.width, srcH
+          );
+
+          if (!isFirst) pdf.addPage();
+          const destY = isFirst ? tableStartY : margin;
+          pdf.addImage(slice.toDataURL('image/png'), 'PNG', margin, destY, usableW, sliceMm);
+
+          srcMmOffset += sliceMm;
+          remainingMm -= sliceMm;
+          isFirst      = false;
+        }
+      }
 
       pdf.save(`agroconecta-pedidos-${new Date().toISOString().slice(0, 10)}.pdf`);
 
     } finally {
+      // Restaurar estilos originales siempre, incluso si hay error
+      headerEl.setAttribute('style', headerStyleOrig);
+      tableEl.setAttribute('style',  tableStyleOrig);
       this.exporting = false;
       this.cdr.detectChanges();
     }
   }
+
+  // ════════════════════════════════════════════════════════════════════════
+  // HELPERS TEMPLATE
+  // ════════════════════════════════════════════════════════════════════════
 
   onImgError(event: Event): void {
     const img = event.target as HTMLImageElement;
@@ -383,9 +457,8 @@ export class Pedidos implements OnInit, OnDestroy {
 
   getItemPrice(item: any): number {
     const subtotal = parseFloat(String(item.subtotal ?? 0));
-    const price = parseFloat(String(item.price ?? 0));
-    const val = subtotal > 0 ? subtotal : price * (item.quantity || 1);
+    const price    = parseFloat(String(item.price    ?? 0));
+    const val      = subtotal > 0 ? subtotal : price * (item.quantity || 1);
     return isNaN(val) ? 0 : Math.round(val * 100) / 100;
   }
-
 }

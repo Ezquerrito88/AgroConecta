@@ -178,6 +178,7 @@ html, body {
   cursor: pointer; display: flex; align-items: center; justify-content: center;
   transition: background .15s; color: #6b7280;
   position: relative; flex-shrink: 0;
+  text-decoration: none;
 }
 .dashboard-layout .icon-btn .material-symbols-rounded { font-size: 1.2rem; }
 .dashboard-layout .icon-btn:hover { background: #f9fafb; color: #111827; }
