@@ -1,5 +1,5 @@
-import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
-import { CommonModule, CurrencyPipe } from '@angular/common';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef, Inject } from '@angular/core';
+import { CommonModule, CurrencyPipe, DOCUMENT } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { OrderService, Order } from '../../core/services/order';
@@ -21,12 +21,14 @@ type OrderStatus = 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancell
 })
 export class Pedidos implements OnInit, OnDestroy {
 
-  sidebarOpen: boolean = false;
+  // ── Sidebar ──────────────────────────────────────────────────────────────
+  sidebarOpen = false;
 
   toggleSidebar(): void {
     this.sidebarOpen = !this.sidebarOpen;
   }
 
+  // ── Estado general ────────────────────────────────────────────────────────
   user: any = null;
   orders: Order[] = [];
   filteredOrders: Order[] = [];
@@ -35,12 +37,19 @@ export class Pedidos implements OnInit, OnDestroy {
   exporting = false;
   activeTab = 'all';
   selectedStatus = '';
-  openMenuId: number | null = null;
   today = new Date();
 
+  // ── Modal detalle ─────────────────────────────────────────────────────────
+  selectedOrder: Order | null = null;
+
+  // ── Menú dropdown ─────────────────────────────────────────────────────────
+  openMenuId: number | null = null;
+
+  // ── Paginación ────────────────────────────────────────────────────────────
   pageSize = 10;
   currentPage = 1;
 
+  // ── KPIs ──────────────────────────────────────────────────────────────────
   kpisDashboard: DashboardKpis = {
     pedidos: 0,
     ventas: 0,
@@ -48,50 +57,55 @@ export class Pedidos implements OnInit, OnDestroy {
     calificacion: 0
   };
 
+  // ── Labels / iconos ───────────────────────────────────────────────────────
   statusLabels: Record<string, string> = {
-    pending:    'Pendiente',
+    pending: 'Pendiente',
     processing: 'En proceso',
-    shipped:    'En camino',
-    delivered:  'Entregado',
-    cancelled:  'Cancelado',
+    shipped: 'En camino',
+    delivered: 'Entregado',
+    cancelled: 'Cancelado',
   };
 
   statusIcons: Record<string, string> = {
-    pending:    'schedule',
+    pending: 'schedule',
     processing: 'sync',
-    shipped:    'local_shipping',
-    delivered:  'check_circle',
-    cancelled:  'cancel',
+    shipped: 'local_shipping',
+    delivered: 'check_circle',
+    cancelled: 'cancel',
   };
 
+  // ── Listener de cierre de menús ───────────────────────────────────────────
   private boundCloseMenus!: (e: MouseEvent) => void;
 
   constructor(
     private orderService: OrderService,
     private authService: AuthService,
     private dashboardService: DashboardService,
-    private cdr: ChangeDetectorRef
-  ) {}
+    private cdr: ChangeDetectorRef,
+    @Inject(DOCUMENT) private document: Document
+  ) { }
 
-  // ════════════════════════════════════════════════
+  // ════════════════════════════════════════════════════════════════════════
   // LIFECYCLE
-  // ════════════════════════════════════════════════
+  // ════════════════════════════════════════════════════════════════════════
 
   ngOnInit(): void {
     this.user = this.authService.getCurrentUser();
     this.loadOrders();
     this.loadKpis();
     this.boundCloseMenus = this.closeMenus.bind(this);
-    document.addEventListener('click', this.boundCloseMenus);
+    this.document.addEventListener('click', this.boundCloseMenus);
   }
 
   ngOnDestroy(): void {
-    document.removeEventListener('click', this.boundCloseMenus);
+    this.document.removeEventListener('click', this.boundCloseMenus);
+    // Garantiza que el overflow se restaura si el componente se destruye con el modal abierto
+    this.document.body.style.overflow = '';
   }
 
-  // ════════════════════════════════════════════════
+  // ════════════════════════════════════════════════════════════════════════
   // HELPERS PRIVADOS
-  // ════════════════════════════════════════════════
+  // ════════════════════════════════════════════════════════════════════════
 
   private parseTotal(total: any): number {
     if (total === null || total === undefined || total === '') return 0;
@@ -110,13 +124,10 @@ export class Pedidos implements OnInit, OnDestroy {
   private get ordersThisMonth(): Order[] {
     const now = new Date();
     return this.orders.filter(o => {
-      const rawFecha = String(o.created_at ?? '').replace(' ', 'T');
-      const fecha = new Date(rawFecha);
+      const fecha = new Date(String(o.created_at ?? '').replace(' ', 'T'));
       if (isNaN(fecha.getTime())) return false;
-      return (
-        fecha.getFullYear() === now.getFullYear() &&
-        fecha.getMonth()    === now.getMonth()
-      );
+      return fecha.getFullYear() === now.getFullYear() &&
+        fecha.getMonth() === now.getMonth();
     });
   }
 
@@ -124,19 +135,16 @@ export class Pedidos implements OnInit, OnDestroy {
     const now = new Date();
     const firstOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
     return this.orders.filter(o => {
-      const rawFecha = String(o.created_at ?? '').replace(' ', 'T');
-      const fecha = new Date(rawFecha);
+      const fecha = new Date(String(o.created_at ?? '').replace(' ', 'T'));
       if (isNaN(fecha.getTime())) return false;
-      return (
-        fecha.getFullYear() === firstOfLastMonth.getFullYear() &&
-        fecha.getMonth()    === firstOfLastMonth.getMonth()
-      );
+      return fecha.getFullYear() === firstOfLastMonth.getFullYear() &&
+        fecha.getMonth() === firstOfLastMonth.getMonth();
     });
   }
 
-  // ════════════════════════════════════════════════
+  // ════════════════════════════════════════════════════════════════════════
   // KPIs
-  // ════════════════════════════════════════════════
+  // ════════════════════════════════════════════════════════════════════════
 
   loadKpis(): void {
     this.dashboardService.getData().subscribe({
@@ -147,13 +155,11 @@ export class Pedidos implements OnInit, OnDestroy {
     });
   }
 
-  /** Ganancias totales desde el backend (misma fuente que el dashboard) */
   get totalGanancias(): number {
     const num = parseFloat(String(this.kpisDashboard.ventas ?? 0).replace(',', '.'));
     return isNaN(num) ? 0 : Math.round(num * 100) / 100;
   }
 
-  /** Pedidos del mes actual (calculado en frontend) */
   get totalPedidos(): number {
     return this.ordersThisMonth.length;
   }
@@ -170,9 +176,9 @@ export class Pedidos implements OnInit, OnDestroy {
     return this.orders.filter(o => o.status === 'delivered').length;
   }
 
-  // ════════════════════════════════════════════════
+  // ════════════════════════════════════════════════════════════════════════
   // COMPARATIVA VS MES ANTERIOR
-  // ════════════════════════════════════════════════
+  // ════════════════════════════════════════════════════════════════════════
 
   get pedidosVsMesAnterior(): string {
     const anterior = this.ordersLastMonth.length;
@@ -194,9 +200,9 @@ export class Pedidos implements OnInit, OnDestroy {
     return pct.startsWith('-');
   }
 
-  // ════════════════════════════════════════════════
+  // ════════════════════════════════════════════════════════════════════════
   // PAGINACIÓN
-  // ════════════════════════════════════════════════
+  // ════════════════════════════════════════════════════════════════════════
 
   get hasMoreOrders(): boolean {
     return this.displayedOrders.length < this.filteredOrders.length;
@@ -212,9 +218,9 @@ export class Pedidos implements OnInit, OnDestroy {
     this.cdr.detectChanges();
   }
 
-  // ════════════════════════════════════════════════
+  // ════════════════════════════════════════════════════════════════════════
   // CARGA DE DATOS
-  // ════════════════════════════════════════════════
+  // ════════════════════════════════════════════════════════════════════════
 
   loadOrders(): void {
     this.loading = true;
@@ -232,14 +238,14 @@ export class Pedidos implements OnInit, OnDestroy {
     });
   }
 
-  // ════════════════════════════════════════════════
+  // ════════════════════════════════════════════════════════════════════════
   // FILTROS Y BÚSQUEDA
-  // ════════════════════════════════════════════════
+  // ════════════════════════════════════════════════════════════════════════
 
   applyFilters(): void {
     let result = [...this.orders];
     if (this.activeTab !== 'all') result = result.filter(o => o.status === this.activeTab);
-    if (this.selectedStatus)      result = result.filter(o => o.status === this.selectedStatus);
+    if (this.selectedStatus) result = result.filter(o => o.status === this.selectedStatus);
     this.filteredOrders = result;
     this.currentPage = 1;
     this.displayedOrders = this.filteredOrders.slice(0, this.pageSize);
@@ -247,10 +253,7 @@ export class Pedidos implements OnInit, OnDestroy {
 
   onSearch(event: Event): void {
     const term = (event.target as HTMLInputElement).value.toLowerCase().trim();
-    if (!term) {
-      this.applyFilters();
-      return;
-    }
+    if (!term) { this.applyFilters(); return; }
     this.filteredOrders = this.orders.filter(o =>
       o.buyer?.name?.toLowerCase().includes(term) ||
       String(o.id).includes(term)
@@ -264,15 +267,19 @@ export class Pedidos implements OnInit, OnDestroy {
     this.applyFilters();
   }
 
-  // ════════════════════════════════════════════════
+  // ════════════════════════════════════════════════════════════════════════
   // ACCIONES DE PEDIDO
-  // ════════════════════════════════════════════════
+  // ════════════════════════════════════════════════════════════════════════
 
   updateStatus(orderId: number, status: string): void {
     this.orderService.updateOrderStatus(orderId, status).subscribe({
       next: (updated) => {
         const order = this.orders.find(o => o.id === orderId);
         if (order) order.status = updated.status as OrderStatus;
+        if (this.selectedOrder?.id === orderId) {
+          this.selectedOrder = { ...this.selectedOrder, status: updated.status as OrderStatus };
+        }
+
         this.applyFilters();
         this.openMenuId = null;
         this.cdr.detectChanges();
@@ -282,7 +289,8 @@ export class Pedidos implements OnInit, OnDestroy {
 
   toggleMenu(id: number, event: MouseEvent): void {
     event.stopPropagation();
-    this.openMenuId = this.openMenuId === id ? null : id;
+    const wasOpen = this.openMenuId === id;
+    this.openMenuId = wasOpen ? null : id;
   }
 
   closeMenus(event: MouseEvent): void {
@@ -293,9 +301,26 @@ export class Pedidos implements OnInit, OnDestroy {
     }
   }
 
-  // ════════════════════════════════════════════════
+  // ════════════════════════════════════════════════════════════════════════
+  // MODAL DETALLE
+  // ════════════════════════════════════════════════════════════════════════
+
+  openOrderDetail(order: Order): void {
+    console.log('ORDER COMPLETO:', JSON.stringify(order, null, 2));
+    this.selectedOrder = order;
+    this.openMenuId = null;
+    this.document.body.style.overflow = 'hidden';
+  }
+
+  closeOrderDetail(): void {
+    this.selectedOrder = null;
+    this.openMenuId = null;
+    this.document.body.style.overflow = '';
+  }
+
+  // ════════════════════════════════════════════════════════════════════════
   // AVATAR
-  // ════════════════════════════════════════════════
+  // ════════════════════════════════════════════════════════════════════════
 
   getAvatarColor(name: string): string {
     const colors = ['#dcfce7', '#dbeafe', '#fef9c3', '#f3e8ff', '#ffedd5'];
@@ -307,9 +332,9 @@ export class Pedidos implements OnInit, OnDestroy {
     return colors[(name?.length || 0) % colors.length];
   }
 
-  // ════════════════════════════════════════════════
+  // ════════════════════════════════════════════════════════════════════════
   // EXPORTAR PDF
-  // ════════════════════════════════════════════════
+  // ════════════════════════════════════════════════════════════════════════
 
   async exportPDF(): Promise<void> {
     if (this.exporting) return;
@@ -317,10 +342,10 @@ export class Pedidos implements OnInit, OnDestroy {
     this.cdr.detectChanges();
 
     try {
-      const pdf     = new jsPDF('p', 'mm', 'a4');
-      const pageW   = pdf.internal.pageSize.getWidth();
-      const pageH   = pdf.internal.pageSize.getHeight();
-      const margin  = 10;
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const pageW = pdf.internal.pageSize.getWidth();
+      const pageH = pdf.internal.pageSize.getHeight();
+      const margin = 10;
       const usableW = pageW - margin * 2;
       let posY = margin;
 
@@ -331,15 +356,15 @@ export class Pedidos implements OnInit, OnDestroy {
           useCORS: true, logging: false
         });
         const imgData = canvas.toDataURL('image/png');
-        const imgH    = (canvas.height * usableW) / canvas.width;
+        const imgH = (canvas.height * usableW) / canvas.width;
         if (posY + imgH > pageH - margin) { pdf.addPage(); posY = margin; }
         pdf.addImage(imgData, 'PNG', margin, posY, usableW, imgH);
         posY += imgH + 6;
       };
 
       await new Promise(r => setTimeout(r, 300));
-      await addElement(document.getElementById('pdf-pedidos-header'));
-      await addElement(document.getElementById('pdf-pedidos-table'));
+      await addElement(this.document.getElementById('pdf-pedidos-header'));
+      await addElement(this.document.getElementById('pdf-pedidos-table'));
 
       pdf.save(`agroconecta-pedidos-${new Date().toISOString().slice(0, 10)}.pdf`);
 
@@ -348,4 +373,19 @@ export class Pedidos implements OnInit, OnDestroy {
       this.cdr.detectChanges();
     }
   }
+
+  onImgError(event: Event): void {
+    const img = event.target as HTMLImageElement;
+    img.style.display = 'none';
+    const icon = img.nextElementSibling as HTMLElement;
+    if (icon) icon.style.display = 'flex';
+  }
+
+  getItemPrice(item: any): number {
+    const subtotal = parseFloat(String(item.subtotal ?? 0));
+    const price = parseFloat(String(item.price ?? 0));
+    const val = subtotal > 0 ? subtotal : price * (item.quantity || 1);
+    return isNaN(val) ? 0 : Math.round(val * 100) / 100;
+  }
+
 }

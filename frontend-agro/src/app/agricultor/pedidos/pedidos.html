@@ -18,11 +18,11 @@
           <span class="material-symbols-rounded">search</span>
           <input type="text" placeholder="Buscar pedidos, productos…" />
         </div>
-        <button class="icon-btn notif-btn">
+        <button class="icon-btn notif-btn" aria-label="Notificaciones">
           <span class="material-symbols-rounded">notifications</span>
           <span class="notif-dot" *ngIf="pendingCount > 0"></span>
         </button>
-        <button class="icon-btn">
+        <button class="icon-btn" aria-label="Ayuda">
           <span class="material-symbols-rounded">help</span>
         </button>
         <div class="user-chip">
@@ -39,17 +39,17 @@
         <p class="welcome-sub">Revisa, prepara y gestiona el envío de tus ventas de temporada.</p>
       </div>
       <div class="welcome-actions">
-  <button class="btn-primary-white" style="color: var(--green) !important;">
-    <span class="material-symbols-rounded" style="color: var(--green) !important;">add_circle</span>
-    Nuevo pedido manual
-  </button>
-</div>
+        <button class="btn-primary-white" style="color: var(--green) !important;">
+          <span class="material-symbols-rounded" style="color: var(--green) !important;">add_circle</span>
+          Nuevo pedido manual
+        </button>
+      </div>
     </div>
 
     <!-- KPI GRID -->
     <div class="kpi-grid">
 
-      <!-- Ganancias del mes -->
+      <!-- Pedidos del mes -->
       <div class="kpi-card kpi-featured">
         <div class="kpi-header">
           <div class="kpi-icon-wrap white-icon">
@@ -80,7 +80,7 @@
         <span class="kpi-label">Ganancias del mes</span>
       </div>
 
-      <!-- Pendientes (total general) -->
+      <!-- Nuevos / Pendientes -->
       <div class="kpi-card" [class.kpi-danger]="pendingCount > 0">
         <div class="kpi-header">
           <div class="kpi-icon-wrap orange">
@@ -95,7 +95,7 @@
         <span class="kpi-hint" *ngIf="pendingCount === 0">Sin pendientes 🎉</span>
       </div>
 
-      <!-- En preparación (total general) -->
+      <!-- En preparación -->
       <div class="kpi-card">
         <div class="kpi-header">
           <div class="kpi-icon-wrap blue">
@@ -109,6 +109,7 @@
       </div>
 
     </div>
+
     <!-- SECTION CARD — TABLA -->
     <div class="section-card">
       <div class="section-header">
@@ -152,7 +153,8 @@
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let order of displayedOrders">
+            <!-- ✅ Un único *ngFor con click para abrir el modal -->
+            <tr *ngFor="let order of displayedOrders" (click)="openOrderDetail(order)" style="cursor: pointer;">
 
               <!-- Cliente -->
               <td>
@@ -184,10 +186,10 @@
                 </span>
               </td>
 
-              <!-- Acciones -->
-              <td class="text-right">
+              <!-- Acciones — stopPropagation para no abrir el modal al hacer clic en el menú -->
+              <td class="text-right" (click)="$event.stopPropagation()">
                 <div class="actions-menu">
-                  <button class="icon-btn-dots" (click)="toggleMenu(order.id, $event)">
+                  <button class="icon-btn-dots" (click)="toggleMenu(order.id, $event)" aria-label="Más opciones">
                     <span class="material-symbols-rounded">more_vert</span>
                   </button>
                   <div class="dropdown-menu" *ngIf="openMenuId === order.id">
@@ -211,7 +213,6 @@
                   </div>
                 </div>
               </td>
-
             </tr>
           </tbody>
         </table>
@@ -243,7 +244,111 @@
   </main>
 </div>
 
-<!-- ══ SECCIONES OCULTAS PARA PDF ══ -->
+
+<!-- ══════════════════════════════════════════════════════
+     MODAL DETALLE — fuera del dashboard-layout
+     ══════════════════════════════════════════════════════ -->
+<div class="order-modal-overlay" *ngIf="selectedOrder" (click)="closeOrderDetail()" role="dialog" aria-modal="true"
+  aria-label="Detalle del pedido">
+
+  <!-- stopPropagation para que el clic dentro no cierre el modal -->
+  <div class="order-modal" (click)="$event.stopPropagation()">
+
+    <!-- Header -->
+    <div class="order-modal-header">
+      <div>
+        <span class="order-modal-label">Detalle del pedido</span>
+        <h3 class="order-modal-title">#{{ selectedOrder.id }}</h3>
+        <span class="order-modal-meta">
+          {{ selectedOrder.buyer.name }} · {{ selectedOrder.created_at | smartDate }}
+        </span>
+      </div>
+      <div class="order-modal-header-right">
+        <span class="status-badge" [ngClass]="selectedOrder.status">
+          <span class="material-symbols-rounded status-icon">
+            {{ statusIcons[selectedOrder.status] }}
+          </span>
+          {{ statusLabels[selectedOrder.status] }}
+        </span>
+        <button class="order-modal-close" (click)="closeOrderDetail()" aria-label="Cerrar modal">
+          <span class="material-symbols-rounded">close</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Body -->
+    <div class="order-modal-body">
+      <p class="order-modal-section-label">Productos</p>
+
+      <div class="order-modal-items">
+        <div class="order-modal-item" *ngFor="let item of selectedOrder.items">
+          <div class="order-item-icon">
+            <span class="material-symbols-rounded">grocery</span>
+          </div>
+          <div class="order-item-info">
+            <span class="order-item-name">{{ item.product?.name }}</span>
+            <span class="order-item-qty">
+              Cantidad: {{ item.quantity }}
+              <ng-container *ngIf="item.product?.unit">· {{ item.product?.unit }}</ng-container>
+            </span>
+          </div>
+          <span class="order-item-price">
+            {{ getItemPrice(item) | currency:'EUR' }}
+          </span>
+        </div>
+      </div>
+
+      <!-- Totales -->
+      <div class="order-modal-totals">
+        <div class="order-modal-total-row">
+          <span>Subtotal</span>
+          <span>{{ selectedOrder.total | currency:'EUR' }}</span>
+        </div>
+        <div class="order-modal-total-row order-modal-total-final">
+          <span>Total</span>
+          <span>{{ selectedOrder.total | currency:'EUR' }}</span>
+        </div>
+      </div>
+
+      <!-- Acciones del modal -->
+      <div class="order-modal-actions">
+        <button class="btn-filter" (click)="closeOrderDetail()">Cerrar</button>
+
+        <div class="actions-menu">
+          <button class="btn-export" (click)="toggleMenu(selectedOrder.id, $event)">
+            <span class="material-symbols-rounded">sync</span>
+            Cambiar estado
+          </button>
+          <div class="dropdown-menu" *ngIf="openMenuId === selectedOrder.id">
+            <button (click)="updateStatus(selectedOrder.id, 'processing')">
+              <span class="material-symbols-rounded">sync</span>
+              Procesar
+            </button>
+            <button (click)="updateStatus(selectedOrder.id, 'shipped')">
+              <span class="material-symbols-rounded">local_shipping</span>
+              En camino
+            </button>
+            <button (click)="updateStatus(selectedOrder.id, 'delivered')">
+              <span class="material-symbols-rounded">check_circle</span>
+              Entregado
+            </button>
+            <div class="divider"></div>
+            <button class="danger" (click)="updateStatus(selectedOrder.id, 'cancelled')">
+              <span class="material-symbols-rounded">cancel</span>
+              Cancelar
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════
+     SECCIONES OCULTAS PARA PDF
+     ══════════════════════════════════════════════════════ -->
 <div id="pdf-pedidos-header"
   style="position:fixed;left:-9999px;top:0;width:860px;background:#fff;padding:28px;font-family:sans-serif;color:#28251d;">
   <div
