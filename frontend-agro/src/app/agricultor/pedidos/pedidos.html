@@ -283,7 +283,11 @@
       <div class="order-modal-items">
         <div class="order-modal-item" *ngFor="let item of selectedOrder.items">
           <div class="order-item-icon">
-            <span class="material-symbols-rounded">grocery</span>
+            <img *ngIf="item.product?.first_image?.image_path" [src]="item.product!.first_image!.image_path"
+              [alt]="item.product?.name" class="order-item-img" loading="lazy" (error)="onImgError($event)" />
+            <span *ngIf="!item.product?.first_image?.image_path" class="material-symbols-rounded">
+              grocery
+            </span>
           </div>
           <div class="order-item-info">
             <span class="order-item-name">{{ item.product?.name }}</span>

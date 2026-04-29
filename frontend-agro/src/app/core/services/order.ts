@@ -4,6 +4,13 @@ import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
 
+export interface ProductImage {
+  id: number;
+  product_id: number;
+  image_path: string;
+  order: number;
+}
+
 export interface OrderItem {
   id: number;
   product_id: number;
@@ -14,10 +21,12 @@ export interface OrderItem {
     id: number;
     name: string;
     unit?: string;
-    image?: string;
+    category_id?: number;
     price: number;
+    first_image?: ProductImage;
   };
 }
+
 
 export interface Order {
   id: number;

@@ -17,7 +17,7 @@ class OrderController extends Controller
      */
     public function farmerOrders(Request $request)
     {
-        $orders = Order::with(['buyer', 'items.product'])
+        $orders = Order::with(['buyer', 'items.product.firstImage'])
             ->where('farmer_id', $request->user()->id)
             ->orderBy('created_at', 'desc')
             ->get();
@@ -30,7 +30,7 @@ class OrderController extends Controller
      */
     public function show(Request $request, $id)
     {
-        $order = Order::with(['buyer', 'items.product'])
+        $order = Order::with(['buyer', 'items.product.firstImage'])
             ->where('farmer_id', $request->user()->id)
             ->findOrFail($id);
 
