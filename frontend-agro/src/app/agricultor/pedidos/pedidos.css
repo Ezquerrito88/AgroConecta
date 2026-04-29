@@ -474,6 +474,24 @@
 /* ══════════════════════════════════════════════
    MODAL DETALLE PEDIDO
 ══════════════════════════════════════════════ */
+/* ── Imagen dentro del icono del item ─────────────── */
+.order-item-icon {
+  width: 40px; height: 40px;
+  border-radius: 10px;
+  background: #dcfce7;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  color: #16a34a;
+  overflow: hidden;
+}
+
+.order-item-icon .order-item-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  border-radius: 10px;
+}
 .order-modal-overlay {
   position: fixed;
   inset: 0;
